@@ -1,0 +1,5 @@
+export * from './barcoinRepository'
+export * from './baseRepository'
+export * from './competitionRepository'
+export * from './contentRepository'
+export * from './profileRepository'
