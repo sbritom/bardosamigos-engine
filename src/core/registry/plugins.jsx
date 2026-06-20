@@ -11,10 +11,21 @@ import {
   Users,
   Coins,
   CalendarDays,
+  Shield,
+  MessageCircle,
 } from "lucide-react";
 
 import HomePage from "../../apps/portal/pages/HomePage";
 import PluginPage from "../../shared/layout/PluginPage";
+import {
+  ChampionshipsPage,
+  MatchesPage,
+  RoundsPage,
+  SeasonsPage,
+  TeamsPage,
+} from "../../modules/competition/admin";
+
+const FullScreenChat = React.lazy(() => import("../../modules/chat/pages/FullScreenChat"));
 
 export const plugins = [
   {
@@ -159,6 +170,64 @@ export const plugins = [
         description="Calendário oficial do Bar dos Amigos."
       />
     ),
+  },
+
+  {
+    id: "official-chat",
+    title: "Chat",
+    path: "/chat",
+    icon: MessageCircle,
+    menu: true,
+    element: (
+      <React.Suspense fallback={<PluginPage title="Chat" description="Carregando chat oficial..." />}>
+        <FullScreenChat />
+      </React.Suspense>
+    ),
+  },
+
+  {
+    id: "admin-competition",
+    title: "Admin Competition",
+    path: "/admin/competition/campeonatos",
+    icon: Shield,
+    menu: true,
+    element: <ChampionshipsPage />,
+  },
+
+  {
+    id: "admin-competition-seasons",
+    title: "Admin Competition Temporadas",
+    path: "/admin/competition/temporadas",
+    icon: Shield,
+    menu: false,
+    element: <SeasonsPage />,
+  },
+
+  {
+    id: "admin-competition-rounds",
+    title: "Admin Competition Rodadas",
+    path: "/admin/competition/rodadas",
+    icon: Shield,
+    menu: false,
+    element: <RoundsPage />,
+  },
+
+  {
+    id: "admin-competition-teams",
+    title: "Admin Competition Times",
+    path: "/admin/competition/times",
+    icon: Shield,
+    menu: false,
+    element: <TeamsPage />,
+  },
+
+  {
+    id: "admin-competition-matches",
+    title: "Admin Competition Jogos",
+    path: "/admin/competition/jogos",
+    icon: Shield,
+    menu: false,
+    element: <MatchesPage />,
   },
 ];
 

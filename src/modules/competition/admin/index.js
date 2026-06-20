@@ -1,0 +1,5 @@
+export { default as ChampionshipsPage } from './pages/ChampionshipsPage'
+export { default as MatchesPage } from './pages/MatchesPage'
+export { default as RoundsPage } from './pages/RoundsPage'
+export { default as SeasonsPage } from './pages/SeasonsPage'
+export { default as TeamsPage } from './pages/TeamsPage'
