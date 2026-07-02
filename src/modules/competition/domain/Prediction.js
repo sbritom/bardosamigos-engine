@@ -1,5 +1,6 @@
 import { PREDICTION_STATUS } from '../constants'
 import { createCompetitionId } from '../utils/idGenerator'
+import { nowUtcIso } from '../../../core/time'
 
 export function createPrediction(data = {}) {
   return {
@@ -15,7 +16,7 @@ export function createPrediction(data = {}) {
     },
     status: data.status || PREDICTION_STATUS.CONFIRMED,
     points: Number(data.points || 0),
-    createdAt: data.createdAt || new Date().toISOString(),
+    createdAt: data.createdAt || nowUtcIso(),
     metadata: data.metadata || {},
   }
 }

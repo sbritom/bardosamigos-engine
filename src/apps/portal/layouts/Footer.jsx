@@ -3,7 +3,7 @@ import Container from "../../../shared/layout/Container";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] bg-black">
+    <footer className="border-t border-[var(--border)] bg-black" data-designer-id="footer" data-designer-label="Footer">
       <Container className="py-5">
         <div className="flex flex-col items-center justify-between gap-4 text-sm text-[var(--secondary)] md:flex-row">
           <div className="flex items-center gap-3">

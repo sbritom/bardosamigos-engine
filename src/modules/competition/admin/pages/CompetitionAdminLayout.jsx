@@ -1,4 +1,5 @@
 import { CompetitionAdminNav } from '../components/CompetitionAdminNav'
+import { IntegrationsPanel } from '../components/IntegrationsPanel'
 
 export function CompetitionAdminLayout({ children }) {
   return (
@@ -10,6 +11,7 @@ export function CompetitionAdminLayout({ children }) {
           Painel administrativo para campeonatos, temporadas, rodadas, times e jogos.
         </p>
       </div>
+      <IntegrationsPanel />
       <CompetitionAdminNav />
       {children}
     </div>

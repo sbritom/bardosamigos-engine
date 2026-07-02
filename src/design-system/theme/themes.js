@@ -1,4 +1,4 @@
-import { animations, borders, colors, radius, shadows, spacing, typography } from '../tokens'
+import { animations, borders, colors, opacity, radius, shadows, spacing, transitions, typography, zIndex } from '../tokens/index.js'
 
 export const darkTheme = Object.freeze({
   name: 'dark',
@@ -8,6 +8,9 @@ export const darkTheme = Object.freeze({
   borders,
   shadows,
   animations,
+  transitions,
+  opacity,
+  zIndex,
   radius,
 })
 
@@ -19,6 +22,9 @@ export const lightTheme = Object.freeze({
   borders,
   shadows,
   animations,
+  transitions,
+  opacity,
+  zIndex,
   radius,
 })
 

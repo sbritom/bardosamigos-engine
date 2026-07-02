@@ -6,6 +6,7 @@ const items = [
   ['Rodadas', '/admin/competition/rodadas'],
   ['Times', '/admin/competition/times'],
   ['Jogos', '/admin/competition/jogos'],
+  ['Resultados', '/admin/competition/resultados'],
 ]
 
 export function CompetitionAdminNav() {

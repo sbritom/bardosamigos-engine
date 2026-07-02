@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
-import Sidebar from "../../shared/layout/Sidebar";
 
 export default function AppShell() {
   return (
@@ -10,14 +9,10 @@ export default function AppShell() {
 
       <Header />
 
-      <div className="mx-auto flex max-w-[1700px] gap-5 p-5">
-
-        <Sidebar />
-
-        <main className="flex-1">
+      <div className="w-full py-5">
+        <main>
           <Outlet />
         </main>
-
       </div>
 
       <Footer />

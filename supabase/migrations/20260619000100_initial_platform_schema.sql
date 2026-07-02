@@ -916,7 +916,10 @@ select public.enable_rls_if_exists('public.barai_messages'::regclass);
 select public.enable_rls_if_exists('public.barai_memory'::regclass);
 select public.enable_rls_if_exists('public.barai_feedback'::regclass);
 select public.enable_rls_if_exists('public.competitions'::regclass);
+select public.enable_rls_if_exists('public.competition_matches'::regclass);
 select public.enable_rls_if_exists('public.competition_predictions'::regclass);
+select public.enable_rls_if_exists('public.competition_rankings'::regclass);
+select public.enable_rls_if_exists('public.competition_ranking_items'::regclass);
 select public.enable_rls_if_exists('public.barcoin_wallets'::regclass);
 select public.enable_rls_if_exists('public.barcoin_transactions'::regclass);
 select public.enable_rls_if_exists('public.store_products'::regclass);
@@ -954,6 +957,30 @@ begin
   end if;
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_predictions' and policyname = 'predictions own insert') then
     create policy "predictions own insert" on public.competition_predictions for insert with check (profile_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'predictions own update before lock' and policyname = 'predictions own update before lock') then
+    create policy "predictions own update before lock" on public.competition_predictions for update using (profile_id = auth.uid() and locked_at is null) with check (profile_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_predictions' and policyname = 'predictions admin score update') then
+    create policy "predictions admin score update" on public.competition_predictions for update using (public.is_admin()) with check (public.is_admin());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_matches' and policyname = 'matches public read') then
+    create policy "matches public read" on public.competition_matches for select using (deleted_at is null or public.is_admin());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_matches' and policyname = 'matches admin result update') then
+    create policy "matches admin result update" on public.competition_matches for update using (public.is_admin()) with check (public.is_admin());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_rankings' and policyname = 'rankings public read') then
+    create policy "rankings public read" on public.competition_rankings for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_ranking_items' and policyname = 'ranking items public read') then
+    create policy "ranking items public read" on public.competition_ranking_items for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_rankings' and policyname = 'rankings admin insert') then
+    create policy "rankings admin insert" on public.competition_rankings for insert with check (public.is_admin());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'competition_ranking_items' and policyname = 'ranking items admin insert') then
+    create policy "ranking items admin insert" on public.competition_ranking_items for insert with check (public.is_admin());
   end if;
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'barcoin_wallets' and policyname = 'wallet own read') then
     create policy "wallet own read" on public.barcoin_wallets for select using (profile_id = auth.uid() or public.is_admin());

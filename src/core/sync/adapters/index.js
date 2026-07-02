@@ -1,0 +1,5 @@
+export * from './createSyncAdapter'
+export * from './championshipsAdapter'
+export * from './gamesAdapter'
+export * from './standingsAdapter'
+export * from './newsAdapter'

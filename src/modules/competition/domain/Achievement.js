@@ -1,4 +1,5 @@
 import { createCompetitionId } from '../utils/idGenerator'
+import { nowUtcIso } from '../../../core/time'
 
 export function createAchievement(data = {}) {
   return {
@@ -6,7 +7,7 @@ export function createAchievement(data = {}) {
     userId: data.userId || '',
     title: data.title || 'Achievement',
     description: data.description || '',
-    unlockedAt: data.unlockedAt || new Date().toISOString(),
+    unlockedAt: data.unlockedAt || nowUtcIso(),
     metadata: data.metadata || {},
   }
 }

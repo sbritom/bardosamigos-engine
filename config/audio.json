@@ -1,0 +1,8 @@
+{
+  "sampleRate": 44100,
+  "channels": 2,
+  "bitrate": "128k",
+  "codec": "libmp3lame",
+  "format": "mp3",
+  "contentType": "audio/mpeg"
+}

@@ -1,5 +1,15 @@
 export const typography = Object.freeze({
   fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  scale: {
+    display: { fontSize: '3rem', lineHeight: '1.05', fontWeight: 900, letterSpacing: '0' },
+    h1: { fontSize: '2.25rem', lineHeight: '1.1', fontWeight: 900, letterSpacing: '0' },
+    h2: { fontSize: '1.875rem', lineHeight: '1.15', fontWeight: 800, letterSpacing: '0' },
+    h3: { fontSize: '1.5rem', lineHeight: '1.2', fontWeight: 800, letterSpacing: '0' },
+    title: { fontSize: '1.125rem', lineHeight: '1.35', fontWeight: 800, letterSpacing: '0' },
+    text: { fontSize: '1rem', lineHeight: '1.55', fontWeight: 500, letterSpacing: '0' },
+    caption: { fontSize: '0.875rem', lineHeight: '1.45', fontWeight: 600, letterSpacing: '0' },
+    overline: { fontSize: '0.75rem', lineHeight: '1.2', fontWeight: 900, letterSpacing: '0.08em' },
+  },
   sizes: {
     xs: '0.75rem',
     sm: '0.875rem',
@@ -7,11 +17,26 @@ export const typography = Object.freeze({
     lg: '1.125rem',
     xl: '1.25rem',
     '2xl': '1.5rem',
+    '3xl': '1.875rem',
+    '4xl': '2.25rem',
+    '5xl': '3rem',
   },
   weights: {
     regular: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
+    extrabold: 800,
+    black: 900,
+  },
+  lineHeights: {
+    tight: '1.1',
+    snug: '1.25',
+    normal: '1.5',
+    relaxed: '1.625',
+  },
+  letterSpacing: {
+    none: '0',
+    overline: '0.08em',
   },
 })

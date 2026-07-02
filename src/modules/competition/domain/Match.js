@@ -1,5 +1,6 @@
 import { MATCH_STATUS } from '../constants'
 import { createCompetitionId } from '../utils/idGenerator'
+import { nowUtcIso } from '../../../core/time'
 
 export function createMatch(data = {}) {
   return {
@@ -7,7 +8,7 @@ export function createMatch(data = {}) {
     roundId: data.roundId || '',
     homeParticipant: data.homeParticipant || '',
     awayParticipant: data.awayParticipant || '',
-    startsAt: data.startsAt || new Date().toISOString(),
+    startsAt: data.startsAt || nowUtcIso(),
     status: data.status || MATCH_STATUS.SCHEDULED,
     result: {
       homeScore: data.result?.homeScore ?? null,

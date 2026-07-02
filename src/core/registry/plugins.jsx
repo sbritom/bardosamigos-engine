@@ -13,6 +13,7 @@ import {
   CalendarDays,
   Shield,
   MessageCircle,
+  BookOpen,
 } from "lucide-react";
 
 import HomePage from "../../apps/portal/pages/HomePage";
@@ -20,10 +21,29 @@ import PluginPage from "../../shared/layout/PluginPage";
 import {
   ChampionshipsPage,
   MatchesPage,
+  MatchResultsPage,
   RoundsPage,
   SeasonsPage,
   TeamsPage,
 } from "../../modules/competition/admin";
+import CompetitionPredictionsPage from "../../modules/competition/predictions/pages/CompetitionPredictionsPage";
+import MyPredictionsPage from "../../modules/competition/predictions/pages/MyPredictionsPage";
+import MyPredictionResultPage from "../../modules/competition/predictions/pages/MyPredictionResultPage";
+import CompetitionRankingPage from "../../modules/competition/ranking/pages/CompetitionRankingPage";
+import FootballCenterPage from "../../modules/competition/football/pages/FootballCenterPage";
+import FootballMatchDetailsPage from "../../modules/competition/football/pages/FootballMatchDetailsPage";
+import FootballTeamPage from "../../modules/competition/football/pages/FootballTeamPage";
+import NewsPage from "../../modules/news/pages/NewsPage";
+import CommunityPage from "../../modules/community/pages/CommunityPage";
+import TVPage from "../../modules/tv/pages/TVPage";
+import { RadioPage } from "../../modules/radio";
+import BarStudioPage from "../../modules/barstudio/pages/BarStudioPage";
+import DesignerPage from "../../modules/barstudio/designer/pages/DesignerPage";
+import GamesPage from "../../modules/games/pages/GamesPage";
+import BarCoinsPage from "../../modules/barcoins/pages/BarCoinsPage";
+import EventsPage from "../../modules/events/pages/EventsPage";
+import ManualPage from "../../modules/manual/pages/ManualPage";
+import AdminPage from "../../modules/admin/pages/AdminPage";
 
 const FullScreenChat = React.lazy(() => import("../../modules/chat/pages/FullScreenChat"));
 
@@ -37,34 +57,22 @@ export const plugins = [
     element: <HomePage />,
   },
 
-  {
+    {
     id: "tv",
     title: "TV",
     path: "/tv",
     icon: Tv,
     menu: true,
-    element: (
-      <PluginPage
-        icon="📺"
-        title="TV Inteligente"
-        description="Sistema de TV Online do Bar dos Amigos."
-      />
-    ),
+    element: <TVPage />,
   },
 
-  {
+    {
     id: "radio",
     title: "Rádio",
     path: "/radio",
     icon: Radio,
     menu: true,
-    element: (
-      <PluginPage
-        icon="📻"
-        title="Rádio"
-        description="Player persistente e futura Rádio Bar dos Amigos."
-      />
-    ),
+    element: <RadioPage />,
   },
 
   {
@@ -73,6 +81,33 @@ export const plugins = [
     path: "/football",
     icon: Trophy,
     menu: true,
+    element: <FootballCenterPage />,
+  },
+
+  {
+    id: "football-match-details",
+    title: "Detalhes da Partida",
+    path: "/football/jogos/:matchId",
+    icon: Trophy,
+    menu: false,
+    element: <FootballMatchDetailsPage />,
+  },
+
+  {
+    id: "football-team-details",
+    title: "Time",
+    path: "/football/times/:teamId",
+    icon: Trophy,
+    menu: false,
+    element: <FootballTeamPage />,
+  },
+
+  {
+    id: "football-placeholder",
+    title: "Futebol",
+    path: "/football-placeholder",
+    icon: Trophy,
+    menu: false,
     element: (
       <PluginPage
         icon="⚽"
@@ -88,43 +123,43 @@ export const plugins = [
     path: "/news",
     icon: Newspaper,
     menu: true,
-    element: (
-      <PluginPage
-        icon="📰"
-        title="Notícias"
-        description="Últimas notícias do portal."
-      />
-    ),
+    element: <NewsPage />,
   },
 
-  {
+    {
     id: "tools",
-    title: "Ferramentas",
+    title: "BarStudio",
     path: "/tools",
     icon: Wrench,
     menu: true,
-    element: (
-      <PluginPage
-        icon="🛠️"
-        title="BarStudio"
-        description="Ferramentas exclusivas do Bar dos Amigos."
-      />
-    ),
+    element: <BarStudioPage />,
   },
 
   {
+    id: "barstudio-designer",
+    title: "Designer Pro",
+    path: "/barstudio/designer",
+    icon: Wrench,
+    menu: false,
+    element: <DesignerPage />,
+  },
+
+    {
     id: "games",
-    title: "Games",
-    path: "/games",
+    title: "Brincadeiras",
+    path: "/brincadeiras",
     icon: Gamepad2,
     menu: true,
-    element: (
-      <PluginPage
-        icon="🎮"
-        title="Games"
-        description="Área gamer do portal."
-      />
-    ),
+    element: <GamesPage />,
+  },
+
+  {
+    id: "games-alias",
+    title: "Brincadeiras",
+    path: "/games",
+    icon: Gamepad2,
+    menu: false,
+    element: <GamesPage />,
   },
 
   {
@@ -133,43 +168,43 @@ export const plugins = [
     path: "/community",
     icon: Users,
     menu: true,
-    element: (
-      <PluginPage
-        icon="👥"
-        title="Comunidade"
-        description="Eventos, ranking e interação."
-      />
-    ),
+    element: <CommunityPage />,
   },
 
-  {
+    {
     id: "barcoins",
     title: "BarCoins",
     path: "/barcoins",
     icon: Coins,
     menu: true,
-    element: (
-      <PluginPage
-        icon="💰"
-        title="BarCoins"
-        description="Sistema de moedas do portal."
-      />
-    ),
+    element: <BarCoinsPage />,
   },
 
-  {
+    {
     id: "events",
     title: "Eventos",
     path: "/events",
     icon: CalendarDays,
     menu: true,
-    element: (
-      <PluginPage
-        icon="📅"
-        title="Eventos"
-        description="Calendário oficial do Bar dos Amigos."
-      />
-    ),
+    element: <EventsPage />,
+  },
+
+  {
+    id: "manual",
+    title: "Manual",
+    path: "/manual",
+    icon: BookOpen,
+    menu: true,
+    element: <ManualPage />,
+  },
+
+  {
+    id: "admin",
+    title: "Admin",
+    path: "/admin",
+    icon: Shield,
+    menu: false,
+    element: <AdminPage />,
   },
 
   {
@@ -190,7 +225,7 @@ export const plugins = [
     title: "Admin Competition",
     path: "/admin/competition/campeonatos",
     icon: Shield,
-    menu: true,
+    menu: false,
     element: <ChampionshipsPage />,
   },
 
@@ -228,6 +263,51 @@ export const plugins = [
     icon: Shield,
     menu: false,
     element: <MatchesPage />,
+  },
+
+  {
+    id: "admin-competition-results",
+    title: "Admin Competition Resultados",
+    path: "/admin/competition/resultados",
+    icon: Shield,
+    menu: false,
+    element: <MatchResultsPage />,
+  },
+
+  {
+    id: "my-prediction-results",
+    title: "Meus Palpites",
+    path: "/meus-palpites/resultados",
+    icon: Trophy,
+    menu: false,
+    element: <MyPredictionResultPage />,
+  },
+
+  {
+    id: "competition-predictions",
+    title: "Palpites",
+    path: "/palpites",
+    icon: Trophy,
+    menu: true,
+    element: <CompetitionPredictionsPage />,
+  },
+
+  {
+    id: "my-predictions",
+    title: "Meus Palpites",
+    path: "/meus-palpites",
+    icon: Trophy,
+    menu: true,
+    element: <MyPredictionsPage />,
+  },
+
+  {
+    id: "competition-ranking",
+    title: "Ranking",
+    path: "/competition/ranking",
+    icon: Trophy,
+    menu: true,
+    element: <CompetitionRankingPage />,
   },
 ];
 

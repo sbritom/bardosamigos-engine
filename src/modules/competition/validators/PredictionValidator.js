@@ -1,12 +1,13 @@
 import { PREDICTION_STATUS } from '../constants'
 import { MatchValidator } from './MatchValidator'
+import { nowUtcIso } from '../../../core/time'
 
 function hasValidScoreValue(value) {
   return value == null || (Number.isInteger(Number(value)) && Number(value) >= 0)
 }
 
 export const PredictionValidator = {
-  validate({ prediction, match, user, existingPredictions = [], now = new Date() } = {}) {
+  validate({ prediction, match, user, existingPredictions = [], now = nowUtcIso() } = {}) {
     const errors = []
 
     if (!user?.id && !user?.userId) {

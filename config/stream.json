@@ -1,0 +1,12 @@
+{
+  "host": "localhost",
+  "port": 8000,
+  "mount": "/radio",
+  "username": "source",
+  "password": "hackme",
+  "protocol": "http",
+  "timeout": 5000,
+  "reconnect": true,
+  "heartbeat": 15000,
+  "dryRun": false
+}

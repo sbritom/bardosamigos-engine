@@ -1,73 +1,120 @@
-import { Beer, Search, Sun } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Beer, Search, ShieldCheck, Sun, UserCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { NavLink } from 'react-router-dom'
 
-import Container from "../../../shared/layout/Container";
-import { getMenuPlugins } from "../../../core/registry/plugins";
-import RadioBar from "./RadioBar";
+import Container from '../../../shared/layout/Container'
+import { getMenuPlugins } from '../../../core/registry/plugins'
+import { isLocalAdminEnabled, isLocalDesignerEnvironment, toggleLocalAdmin } from '../../../modules/barstudio/designer/services/layoutDesignerService'
+import RadioBar from './RadioBar'
+import '../../../design-system/styles/index.css'
+
+const PUBLIC_HOME_MENU = new Set(['home', 'tv', 'radio', 'football', 'news', 'community', 'tools'])
 
 export default function Header() {
-  const menu = getMenuPlugins();
+  const menu = getMenuPlugins().filter((item) => PUBLIC_HOME_MENU.has(item.id))
+  const [localAdminEnabled, setLocalAdminEnabledState] = useState(false)
+  const showLocalAdmin = isLocalDesignerEnvironment()
+
+  useEffect(() => {
+    if (!showLocalAdmin) return undefined
+    setLocalAdminEnabledState(isLocalAdminEnabled())
+
+    function handleLocalAdminUpdate() {
+      setLocalAdminEnabledState(isLocalAdminEnabled())
+    }
+
+    window.addEventListener('barstudio:local-admin-updated', handleLocalAdminUpdate)
+    return () => window.removeEventListener('barstudio:local-admin-updated', handleLocalAdminUpdate)
+  }, [showLocalAdmin])
 
   return (
     <>
       <RadioBar />
 
-      <header className="sticky top-0 z-40 border-b border-[#2c2108] bg-[#050505]/95 backdrop-blur">
+      <header className="bds-top-header" data-designer-id="header" data-designer-label="Header">
         <Container>
-          <div className="flex h-[74px] items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#D4AF37] bg-[#151515]">
-                <Beer size={28} color="#D4AF37" />
+          <div className="bds-top-header__bar">
+            <div className="flex min-w-0 items-center gap-3" data-designer-id="header.logo" data-designer-label="Header / Logo">
+              <div className="bds-top-header__brand-icon" data-designer-id="header.logoIcon" data-designer-label="Header / Icone">
+                <Beer size={36} />
               </div>
 
-              <div>
-                <div className="text-3xl font-black leading-none">
-                  BAR DOS{" "}
-                  <span className="text-[#D4AF37]">AMIGOS</span>
+              <div className="min-w-0">
+                <div className="bds-top-header__brand-title" data-designer-id="header.title" data-designer-label="Header / Titulo">
+                  BAR DOS <span>AMIGOS</span>
                 </div>
-
-                <div className="text-xs font-semibold text-zinc-400">
-                  DESDE 2016 • TECH PUB
-                </div>
+                <div className="bds-top-header__brand-subtitle" data-designer-id="header.subtitle" data-designer-label="Header / Subtitulo">DESDE 2016 • TECH PUB</div>
               </div>
             </div>
 
-            <nav className="hidden gap-2 xl:flex">
-              {menu.slice(0, 8).map((item) => {
-                const Icon = item.icon;
+            <nav className="hidden flex-1 justify-center gap-2 xl:flex" aria-label="Menu principal" data-designer-id="header.menu" data-designer-label="Header / Menu">
+              {menu.map((item) => {
+                const Icon = item.icon
 
                 return (
                   <NavLink
                     key={item.id}
                     to={item.path}
-                    end={item.path === "/"}
+                    end={item.path === '/'}
                     className={({ isActive }) =>
-                      `flex h-11 items-center gap-2 rounded-xl border px-4 text-sm font-bold transition ${
-                        isActive
-                          ? "border-[#D4AF37] bg-[#D4AF37] text-black"
-                          : "border-[#272727] bg-[#101214] text-white hover:border-[#D4AF37]"
-                      }`
+                      `bds-top-header__nav-link ${isActive ? 'bds-top-header__nav-link--active' : ''}`
                     }
                   >
                     <Icon size={16} />
                     {item.title}
                   </NavLink>
-                );
+                )
               })}
             </nav>
 
-            <div className="flex items-center gap-5 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-green-500" />
-                Online
+            <div className="flex shrink-0 items-center gap-2 text-sm" data-designer-id="header.actions" data-designer-label="Header / Acoes">
+              <div className="bds-top-header__online" data-designer-id="header.online" data-designer-label="Header / Indicador Online">
+                <span />
+                128 online
               </div>
 
-              <Search size={19} />
-              <Sun size={18} />
+              <button className="bds-top-header__icon-button" type="button" aria-label="Pesquisar">
+                <Search size={18} />
+              </button>
+              <button className="bds-top-header__icon-button" type="button" aria-label="Tema">
+                <Sun size={18} />
+              </button>
+              {showLocalAdmin && (
+                <button
+                  className={`bds-top-header__icon-button ${localAdminEnabled ? 'bds-top-header__icon-button--active' : ''}`}
+                  type="button"
+                  aria-label={localAdminEnabled ? 'Desativar administrador local' : 'Entrar como Administrador'}
+                  title={localAdminEnabled ? 'Admin Local ativo' : 'Entrar como Administrador'}
+                  onClick={() => setLocalAdminEnabledState(toggleLocalAdmin())}
+                >
+                  <ShieldCheck size={18} />
+                </button>
+              )}
+              <button className="bds-top-header__icon-button" type="button" aria-label="Perfil">
+                <UserCircle size={20} />
+              </button>
             </div>
           </div>
+          <nav className="bds-top-header__mobile-nav" aria-label="Menu principal mobile">
+            {menu.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  end={item.path === '/'}
+                  className={({ isActive }) =>
+                    `bds-top-header__mobile-link ${isActive ? 'bds-top-header__mobile-link--active' : ''}`
+                  }
+                >
+                  <Icon size={14} />
+                  {item.title}
+                </NavLink>
+              )
+            })}
+          </nav>
         </Container>
       </header>
     </>
-  );
+  )
 }

@@ -6,6 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "radio": "node server/src/index.js",
+    "stream": "node server/src/stream.js",
+    "engine": "node server/src/index.js",
+    "docker": "docker compose up --build",
+    "radio:test": "node server/src/tests/radioEngine.test.js",
+    "stream:test": "node server/src/tests/streamEngine.test.js",
+    "engine:test": "node server/src/tests/engine.test.js",
+    "validate-stream": "node server/src/tests/validateStream.test.js",
+    "sync:football": "npm run sync:football-data",
+    "sync:football-data": "node --experimental-specifier-resolution=node scripts/sync-football-data.mjs",
+    "sync:gnews": "node --experimental-specifier-resolution=node scripts/sync-gnews.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
