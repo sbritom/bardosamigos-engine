@@ -17,6 +17,12 @@ function sanitizeArgs(args) {
   });
 }
 
+function sanitizeText(value) {
+  return String(value || "")
+    .replace(/(icecasts?:\/\/[^:]+:)([^@]+)(@)/g, "$1***$3")
+    .replace(/(-password\s+)(\S+)/g, "$1***");
+}
+
 export class FFmpegEngine {
   constructor(config, logger) {
     this.config = config;
@@ -33,6 +39,8 @@ export class FFmpegEngine {
     this.signal = null;
     this.lastStdout = "";
     this.lastStderr = "";
+    this.stdoutBuffer = "";
+    this.stderrBuffer = "";
     this.lastError = null;
   }
 
@@ -63,7 +71,7 @@ export class FFmpegEngine {
     return true;
   }
 
-  start(inputPath, args) {
+  start(inputPath, args, diagnostics = {}) {
     if (this.dryRun) {
       this.logger.info("ffmpeg", "FFmpeg dry-run iniciado.", { inputPath });
       const stream = new PassThrough();
@@ -84,6 +92,27 @@ export class FFmpegEngine {
     this.exitCode = null;
     this.signal = null;
     this.lastError = null;
+    this.lastStdout = "";
+    this.lastStderr = "";
+    this.stdoutBuffer = "";
+    this.stderrBuffer = "";
+
+    const spawnDiagnostics = {
+      command: this.sanitizedCommand,
+      outputUrl: sanitizeText(diagnostics.outputUrl),
+      mount: diagnostics.mount,
+      protocol: diagnostics.protocol,
+      host: diagnostics.host,
+      port: diagnostics.port,
+      username: diagnostics.username,
+      authMethod: diagnostics.authMethod,
+      usesPasswordOption: Boolean(diagnostics.usesPasswordOption),
+    };
+    this.logger.info("ffmpeg", "FFmpeg spawn diagnostics.", spawnDiagnostics);
+    if (this.config.logLevel === "debug") {
+      console.info("[stream:debug] FFmpeg spawn diagnostics");
+      console.info(JSON.stringify(spawnDiagnostics, null, 2));
+    }
 
     this.process = spawn(this.executablePath, args, {
       cwd: path.dirname(inputPath),
@@ -99,16 +128,20 @@ export class FFmpegEngine {
     });
 
     this.process.stdout.on("data", (chunk) => {
+      this.stdoutBuffer += chunk.toString();
       this.lastStdout = chunk.toString().trim();
       if (this.lastStdout) {
         this.logger.info("ffmpeg", "FFmpeg stdout.", { pid: this.pid, output: this.lastStdout });
+        if (this.config.logLevel === "debug") console.info(`[stream:debug] FFmpeg stdout: ${this.lastStdout}`);
       }
     });
 
     this.process.stderr.on("data", (chunk) => {
+      this.stderrBuffer += chunk.toString();
       this.lastStderr = chunk.toString().trim();
       if (this.lastStderr) {
         this.logger.info("ffmpeg", "FFmpeg stderr.", { pid: this.pid, output: this.lastStderr });
+        if (this.config.logLevel === "debug") console.error(`[stream:debug] FFmpeg stderr: ${this.lastStderr}`);
       }
     });
 
@@ -118,10 +151,19 @@ export class FFmpegEngine {
       this.exitedAt = new Date().toISOString();
       this.logger.info("ffmpeg", "FFmpeg finalizado.", {
         pid: this.pid,
-        code,
+        exitCode: code,
         signal,
-        stderr: this.lastStderr,
+        stderr: this.stderrBuffer,
       });
+      if (this.config.logLevel === "debug") {
+        console.info("[stream:debug] FFmpeg exit");
+        console.info(JSON.stringify({
+          pid: this.pid,
+          exitCode: code,
+          signal,
+          stderr: this.stderrBuffer,
+        }, null, 2));
+      }
     });
 
     this.process.on("error", (error) => {
@@ -159,6 +201,8 @@ export class FFmpegEngine {
       signal: this.signal,
       lastStdout: this.lastStdout,
       lastStderr: this.lastStderr,
+      stdout: this.stdoutBuffer,
+      stderr: this.stderrBuffer,
       lastError: this.lastError,
     };
   }

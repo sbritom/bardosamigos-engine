@@ -1,5 +1,5 @@
 export class StreamEngine {
-  constructor({ audioQueue, audioPipeline, autodj, history, nowPlaying, logger, eventBus }) {
+  constructor({ audioQueue, audioPipeline, autodj, history, nowPlaying, logger, eventBus, networkDiagnostics = null }) {
     this.audioQueue = audioQueue;
     this.audioPipeline = audioPipeline;
     this.autodj = autodj;
@@ -7,6 +7,7 @@ export class StreamEngine {
     this.nowPlaying = nowPlaying;
     this.logger = logger;
     this.eventBus = eventBus;
+    this.networkDiagnostics = networkDiagnostics;
     this.connected = false;
     this.running = false;
     this.currentTrack = null;
@@ -34,6 +35,20 @@ export class StreamEngine {
   }
 
   async start({ once = false } = {}) {
+    if (!this.audioPipeline.ffmpeg.status().dryRun && this.networkDiagnostics) {
+      const network = await this.networkDiagnostics.run();
+      const target = network.testedHosts.find((item) => item.host === this.audioPipeline.icecast.config.host);
+      const reachable = target?.ok || network.icecastReachable;
+      if (!reachable) {
+        this.lastError = "Icecast indisponivel. Abortando transmissao.";
+        this.running = false;
+        this.logger.error("stream", this.lastError, { network });
+        console.error("Icecast indisponível.");
+        console.error("Abortando transmissão.");
+        return this.status();
+      }
+    }
+
     this.connect();
     this.running = true;
     this.startedAt = new Date().toISOString();

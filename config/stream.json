@@ -3,7 +3,7 @@
   "port": 8000,
   "mount": "/radio",
   "username": "source",
-  "password": "hackme",
+  "password": "BarDosAmigos2026!",
   "protocol": "http",
   "timeout": 5000,
   "reconnect": true,

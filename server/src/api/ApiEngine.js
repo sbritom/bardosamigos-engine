@@ -1,5 +1,6 @@
 import http from "node:http";
 import crypto from "node:crypto";
+import { LibraryApi } from "../library/LibraryApi.js";
 
 function sendJson(response, status, payload) {
   response.writeHead(status, {
@@ -39,7 +40,7 @@ export class ApiEngine {
       const url = new URL(request.url, `http://${request.headers.host}`);
       const data = request.method === "POST"
         ? this.resolvePost(url.pathname)
-        : this.resolve(url.pathname);
+        : this.resolve(url.pathname, url);
 
       if (data === undefined) {
         sendJson(response, 404, { ok: false, error: "Endpoint not found." });
@@ -53,9 +54,13 @@ export class ApiEngine {
     }
   }
 
-  resolve(pathname) {
+  resolve(pathname, url = null) {
+    const libraryApi = new LibraryApi(this.engine.libraryManager);
     const status = () => this.engine.getStatus();
-    const library = () => this.engine.library.list();
+    const library = () => libraryApi.list();
+    const libraryStats = () => libraryApi.stats();
+    const librarySearch = (url) => libraryApi.search(url.searchParams.get("q"));
+    const libraryEvents = (url) => libraryApi.events(url.searchParams.get("limit"));
     const history = () => this.engine.history.list();
     const nowPlaying = () => this.engine.nowPlaying.get();
     const health = () => this.engine.healthCheck();
@@ -69,10 +74,19 @@ export class ApiEngine {
       ffmpeg: this.engine.ffmpeg.status(),
     });
     const icecast = () => this.engine.icecast.status();
+    const icecastDebug = () => this.engine.icecast.debugStatus(this.engine.ffmpeg.status());
+    const networkDebug = () => this.engine.networkDiagnostics.lastResult || { ok: false, message: "Network diagnostics not executed yet." };
 
     const routes = {
       "/engine/status": status,
       "/engine/library": library,
+      "/engine/library/stats": libraryStats,
+      "/engine/library/search": librarySearch,
+      "/engine/library/events": libraryEvents,
+      "/engine/library/genres": () => libraryApi.genres(),
+      "/engine/library/artists": () => libraryApi.artists(),
+      "/engine/library/albums": () => libraryApi.albums(),
+      "/engine/library/folders": () => libraryApi.folders(),
       "/engine/history": history,
       "/engine/queue": queue,
       "/engine/nowplaying": nowPlaying,
@@ -82,6 +96,8 @@ export class ApiEngine {
       "/engine/stream": stream,
       "/engine/audio": audio,
       "/engine/icecast": icecast,
+      "/engine/icecast/debug": icecastDebug,
+      "/engine/network/debug": networkDebug,
       "/api/radio/status": status,
       "/api/radio/library": library,
       "/api/radio/history": history,
@@ -96,7 +112,7 @@ export class ApiEngine {
       "/api/radio/schedule": () => this.engine.scheduler.list(),
     };
 
-    return routes[pathname]?.();
+    return routes[pathname]?.(url);
   }
 
   resolvePost(pathname) {
@@ -113,7 +129,17 @@ export class ApiEngine {
   }
 
   bindEvents() {
-    ["trackChanged", "streamStarted", "streamStopped", "listenerUpdate", "metadataChanged"].forEach((eventName) => {
+    [
+      "trackChanged",
+      "streamStarted",
+      "streamStopped",
+      "listenerUpdate",
+      "metadataChanged",
+      "library:changed",
+      "playlist:reloaded",
+      "queue:updated",
+      "autodj:synchronized",
+    ].forEach((eventName) => {
       this.engine.events.on(eventName, (payload) => {
         this.broadcast({ event: eventName, payload, emittedAt: new Date().toISOString() });
       });

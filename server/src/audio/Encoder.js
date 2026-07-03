@@ -26,7 +26,7 @@ export class Encoder {
     ];
   }
 
-  getIcecastFFmpegArgs(inputPath, outputUrl, streamConfig = {}) {
+  getIcecastFFmpegArgs(inputPath, outputUrl) {
     return [
       "-hide_banner",
       "-loglevel",
@@ -45,8 +45,6 @@ export class Encoder {
       String(this.config.channels),
       "-content_type",
       this.config.contentType,
-      "-password",
-      streamConfig.password || "",
       "-f",
       this.config.format,
       outputUrl,

@@ -13,6 +13,10 @@ export class PlaylistEngine {
     this.reset();
   }
 
+  trackKey(track) {
+    return track?.id || track?.path || track?.filename || null;
+  }
+
   shuffle() {
     this.tracks = this.smartShuffle(this.tracks);
     this.index = -1;
@@ -116,5 +120,35 @@ export class PlaylistEngine {
     this.played = [];
     this.queueItems = [];
     return this.tracks;
+  }
+
+  reload(tracks = this.libraryEngine.list(), { currentTrack = null } = {}) {
+    const currentKey = this.trackKey(currentTrack) || this.trackKey(this.tracks[this.index]);
+    const nextTracks = Array.isArray(tracks) ? [...tracks] : [];
+    const tracksByKey = new Map(nextTracks.map((track) => [this.trackKey(track), track]).filter(([key]) => key));
+    const previousQueueSize = this.queueItems.length;
+
+    this.tracks = this.config.shuffle ? this.smartShuffle(nextTracks) : nextTracks;
+    this.queueItems = this.queueItems
+      .map((item) => {
+        const key = this.trackKey(item.track);
+        const track = tracksByKey.get(key);
+        return track ? { ...item, track } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.priority - a.priority);
+    this.played = this.played
+      .map((track) => tracksByKey.get(this.trackKey(track)) || track)
+      .filter((track) => currentKey === this.trackKey(track) || tracksByKey.has(this.trackKey(track)));
+    this.index = currentKey
+      ? this.tracks.findIndex((track) => this.trackKey(track) === currentKey)
+      : -1;
+
+    return {
+      tracks: this.tracks.length,
+      queueSize: this.queueItems.length,
+      removedQueueItems: previousQueueSize - this.queueItems.length,
+      currentTrackPreserved: Boolean(currentKey),
+    };
   }
 }

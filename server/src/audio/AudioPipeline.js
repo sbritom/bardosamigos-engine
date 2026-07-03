@@ -32,8 +32,9 @@ export class AudioPipeline {
     return new Promise((resolve, reject) => {
       try {
         const directToIcecast = Boolean(this.encoder.getIcecastFFmpegArgs && this.icecast.getSourceUrl);
+        const outputUrl = directToIcecast ? this.icecast.getSourceUrl() : null;
         const args = directToIcecast
-          ? this.encoder.getIcecastFFmpegArgs(track.path, this.icecast.getSourceUrl(), this.icecast.config)
+          ? this.encoder.getIcecastFFmpegArgs(track.path, outputUrl)
           : this.encoder.getFFmpegArgs(track.path);
         const icecastStream = directToIcecast
           ? null
@@ -41,7 +42,16 @@ export class AudioPipeline {
         if (directToIcecast) {
           this.icecast.prepareForExternalSource();
         }
-        const { stream, process } = this.ffmpeg.start(track.path, args);
+        const { stream, process } = this.ffmpeg.start(track.path, args, {
+          outputUrl,
+          mount: this.icecast.config.mount,
+          protocol: this.icecast.config.protocol,
+          host: this.icecast.config.host,
+          port: this.icecast.config.port,
+          username: this.icecast.config.username,
+          authMethod: directToIcecast ? "urlCredentials" : "sourceRequest",
+          usesPasswordOption: args.includes("-password"),
+        });
         let settled = false;
         this.currentProcess = process;
 
@@ -87,10 +97,22 @@ export class AudioPipeline {
         });
         process?.on("error", fail);
 
-        this.icecast.waitForMount({ timeoutMs: this.icecast.config.timeout || 10000 })
+        this.icecast.waitForMount({
+          timeoutMs: 15000,
+          intervalMs: 500,
+          getFfmpegStatus: () => this.ffmpeg.status(),
+        })
           .then((icecastStatus) => {
             if (settled) return;
             if (!icecastStatus.mountActive) {
+              this.logger.error("icecast", "Mount Icecast nao confirmado apos spawn FFmpeg.", {
+                mount: this.icecast.config.mount,
+                status: icecastStatus,
+              });
+              if (this.logger.config?.logLevel === "debug") {
+                console.error("[stream:debug] Icecast mount not confirmed");
+                console.error(JSON.stringify(icecastStatus, null, 2));
+              }
               fail(new Error("Icecast mount /radio was not confirmed."));
               return;
             }

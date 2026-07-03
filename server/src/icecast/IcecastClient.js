@@ -17,7 +17,10 @@ export class IcecastClient {
     this.connected = false;
     this.mountActive = false;
     this.lastStatus = null;
+    this.lastRawStatus = null;
     this.lastError = null;
+    this.lastDebug = null;
+    this.mountHistory = new Set();
     this.heartbeatTimer = null;
   }
 
@@ -78,10 +81,12 @@ export class IcecastClient {
 
   getSourceUrl() {
     const protocol = this.config.protocol === "https" ? "icecasts" : "icecast";
+    const user = encodeURIComponent(this.config.username || "source");
+    const password = encodeURIComponent(this.config.password || "");
     const mount = String(this.config.mount || "/radio").startsWith("/")
       ? this.config.mount
       : `/${this.config.mount}`;
-    return `${protocol}://${this.config.host}:${this.config.port}${mount}`;
+    return `${protocol}://${user}:${password}@${this.config.host}:${this.config.port}${mount}`;
   }
 
   disconnect() {
@@ -144,40 +149,136 @@ export class IcecastClient {
   }
 
   async refreshMountStatus() {
+    const checkedAt = new Date().toISOString();
+    const startedAt = Date.now();
+    const statusUrl = this.getStatusUrl();
     if (this.config.dryRun) {
       this.connected = true;
       this.mountActive = true;
+      this.lastDebug = {
+        connected: true,
+        httpStatus: 200,
+        statusUrl,
+        checkedAt,
+        mountExpected: this.normalizeMount(this.config.mount),
+        mountFound: this.normalizeMount(this.config.mount),
+        mounts: [this.createMountInfo({ mount: this.config.mount })],
+        mountCount: 1,
+        listeners: 0,
+        bitrate: null,
+        contentType: this.audio.contentType,
+        responseTimeMs: 0,
+      };
       return this.status();
     }
 
     try {
-      const status = await this.fetchStatusJson();
+      const response = await this.fetchStatusJson();
+      const responseTimeMs = Date.now() - startedAt;
+      const status = response.body;
+      this.lastRawStatus = status;
       const sources = this.normalizeSources(status?.icestats?.source);
-      const mount = String(this.config.mount || "/radio");
-      const activeSource = sources.find((source) => {
-        const listenUrl = String(source.listenurl || source.listenUrl || "");
-        const sourceMount = String(source.mount || source.server_name || "");
-        return listenUrl.endsWith(mount) || sourceMount === mount || sourceMount.endsWith(mount);
-      });
+      const mounts = sources.map((source) => this.createMountInfo(source));
+      const mount = this.normalizeMount(this.config.mount);
+      const activeSource = mounts.find((source) => this.mountMatches(source.mount, mount));
       this.lastStatus = activeSource || null;
       this.mountActive = Boolean(activeSource);
       this.connected = this.mountActive;
+      this.lastError = null;
+      this.lastDebug = {
+        connected: this.connected,
+        httpStatus: response.httpStatus,
+        statusUrl,
+        checkedAt,
+        mountExpected: mount,
+        mountFound: activeSource?.mount || null,
+        mounts,
+        mountCount: mounts.length,
+        listeners: Number(activeSource?.listeners || 0),
+        bitrate: activeSource?.bitrate || null,
+        contentType: activeSource?.contentType || null,
+        responseTimeMs,
+        rawResponse: status,
+      };
+      this.logDebugSnapshot(this.lastDebug);
       return this.status();
     } catch (error) {
       this.lastError = error.message;
       this.connected = false;
       this.mountActive = false;
+      this.lastDebug = {
+        connected: false,
+        httpStatus: null,
+        statusUrl,
+        checkedAt,
+        mountExpected: this.normalizeMount(this.config.mount),
+        mountFound: null,
+        mounts: [],
+        mountCount: 0,
+        listeners: 0,
+        bitrate: null,
+        contentType: null,
+        responseTimeMs: Date.now() - startedAt,
+        error: error.message,
+      };
       this.logger.error("icecast", "Falha ao consultar status do Icecast.", { error: error.message });
       return this.status();
     }
   }
 
-  waitForMount({ timeoutMs = 10000, intervalMs = 500 } = {}) {
+  waitForMount({ timeoutMs = 15000, intervalMs = 500, getFfmpegStatus = null } = {}) {
     const startedAt = Date.now();
+    let attempt = 0;
     return new Promise((resolve) => {
       const tick = async () => {
+        attempt += 1;
         const status = await this.refreshMountStatus();
-        if (status.mountActive || Date.now() - startedAt >= timeoutMs) {
+        const elapsedMs = Date.now() - startedAt;
+        const ffmpegStatus = getFfmpegStatus?.() || null;
+        const pollingInfo = {
+          attempt,
+          elapsedMs,
+          mountExpected: this.normalizeMount(this.config.mount),
+          mountFound: this.lastDebug?.mountFound || null,
+          mounts: this.lastDebug?.mounts || [],
+          ffmpeg: ffmpegStatus ? {
+            pid: ffmpegStatus.pid,
+            running: ffmpegStatus.running,
+            exitCode: ffmpegStatus.exitCode,
+            signal: ffmpegStatus.signal,
+            runtimeMs: ffmpegStatus.startedAt ? Date.now() - new Date(ffmpegStatus.startedAt).getTime() : null,
+            stderr: ffmpegStatus.stderr || ffmpegStatus.lastStderr || "",
+            stdout: ffmpegStatus.stdout || ffmpegStatus.lastStdout || "",
+          } : null,
+        };
+
+        this.logger.info("icecast", "Polling de mount Icecast.", pollingInfo);
+        if (this.logger.config?.logLevel === "debug") {
+          console.info(`[stream:debug] Icecast mount polling attempt ${attempt}`);
+          console.info(JSON.stringify(pollingInfo, null, 2));
+        }
+
+        if (status.mountActive) {
+          this.logger.info("icecast", `Mount encontrado apos ${(elapsedMs / 1000).toFixed(1)} segundos.`, {
+            attempts: attempt,
+            elapsedMs,
+            mount: this.lastDebug?.mountFound,
+          });
+          resolve(status);
+          return;
+        }
+
+        if (ffmpegStatus && !ffmpegStatus.running && ffmpegStatus.exitedAt) {
+          const message = "FFmpeg encerrou antes da confirmacao do mount.";
+          this.logger.error("icecast", message, pollingInfo);
+          if (this.logger.config?.logLevel === "debug") {
+            console.error(`[stream:debug] ${message}`);
+          }
+          resolve(status);
+          return;
+        }
+
+        if (Date.now() - startedAt >= timeoutMs) {
           resolve(status);
           return;
         }
@@ -209,7 +310,11 @@ export class IcecastClient {
             return;
           }
           try {
-            resolve(JSON.parse(body));
+            resolve({
+              httpStatus: response.statusCode,
+              rawText: body,
+              body: JSON.parse(body),
+            });
           } catch (error) {
             reject(error);
           }
@@ -226,6 +331,90 @@ export class IcecastClient {
   normalizeSources(source) {
     if (!source) return [];
     return Array.isArray(source) ? source : [source];
+  }
+
+  getStatusUrl() {
+    return `${this.config.protocol || "http"}://${this.config.host}:${this.config.port}/status-json.xsl`;
+  }
+
+  normalizeMount(mount) {
+    if (!mount) return "";
+    return String(mount).startsWith("/") ? String(mount) : `/${mount}`;
+  }
+
+  mountMatches(foundMount, expectedMount) {
+    const found = this.normalizeMount(foundMount);
+    const expected = this.normalizeMount(expectedMount);
+    return found === expected || found.endsWith(expected);
+  }
+
+  createMountInfo(source = {}) {
+    const listenUrl = String(source.listenurl || source.listenUrl || "");
+    const mountFromListenUrl = listenUrl ? new URL(listenUrl, "http://localhost").pathname : "";
+    const mount = this.normalizeMount(source.mount || mountFromListenUrl || source.server_name || "");
+    return {
+      mount,
+      listenUrl,
+      listeners: Number(source.listeners || 0),
+      bitrate: source.bitrate || source.audio_bitrate || null,
+      contentType: source.server_type || source.content_type || source.contentType || null,
+      title: source.title || source.yp_currently_playing || "",
+    };
+  }
+
+  logDebugSnapshot(debug) {
+    const mountNames = debug.mounts.map((mount) => mount.mount).filter(Boolean);
+    this.logger.info("icecast", "Diagnostico de status Icecast.", {
+      statusUrl: debug.statusUrl,
+      checkedAt: debug.checkedAt,
+      httpStatus: debug.httpStatus,
+      responseTimeMs: debug.responseTimeMs,
+      mountExpected: debug.mountExpected,
+      mountFound: debug.mountFound,
+      mountCount: debug.mountCount,
+      mounts: debug.mounts,
+    });
+
+    if (this.logger.config?.logLevel === "debug") {
+      console.info("[stream:debug] Icecast status check");
+      console.info(JSON.stringify({
+        statusUrl: debug.statusUrl,
+        checkedAt: debug.checkedAt,
+        httpStatus: debug.httpStatus,
+        responseTimeMs: debug.responseTimeMs,
+        mountExpected: debug.mountExpected,
+        mountFound: debug.mountFound,
+        mountCount: debug.mountCount,
+        mounts: debug.mounts,
+        rawResponse: debug.rawResponse,
+      }, null, 2));
+    }
+
+    mountNames.forEach((mount) => {
+      if (!this.mountHistory.has(mount)) {
+        this.mountHistory.add(mount);
+        this.logger.info("icecast", "Novo mount detectado.", { mount });
+      }
+    });
+  }
+
+  debugStatus(ffmpegStatus = null) {
+    return {
+      connected: this.connected,
+      httpStatus: this.lastDebug?.httpStatus || null,
+      mountExpected: this.lastDebug?.mountExpected || this.normalizeMount(this.config.mount),
+      mountFound: this.lastDebug?.mountFound || null,
+      listeners: this.lastDebug?.listeners || 0,
+      bitrate: this.lastDebug?.bitrate || null,
+      contentType: this.lastDebug?.contentType || null,
+      ffmpegRunning: Boolean(ffmpegStatus?.running),
+      ffmpegPid: ffmpegStatus?.pid || null,
+      lastCheck: this.lastDebug?.checkedAt || null,
+      responseTimeMs: this.lastDebug?.responseTimeMs || null,
+      mounts: this.lastDebug?.mounts || [],
+      rawResponse: this.lastDebug?.rawResponse || null,
+      error: this.lastDebug?.error || this.lastError || null,
+    };
   }
 
   safeConfig() {
@@ -245,6 +434,8 @@ export class IcecastClient {
       connected: this.connected,
       mountActive: this.mountActive,
       lastStatus: this.lastStatus,
+      lastRawStatus: this.lastRawStatus,
+      lastDebug: this.lastDebug,
       lastError: this.lastError,
       ...this.safeConfig(),
     };

@@ -8,11 +8,31 @@ export class AutoDJEngine {
     this.blacklist = new Set();
     this.lastTrack = null;
     this.active = false;
+    this.syncUnsubscribe = null;
   }
 
   init() {
     this.active = true;
+    this.bindSyncEvents();
     this.logger.info("autodj", "AutoDJ inicializado em modo logico.");
+  }
+
+  bindSyncEvents() {
+    if (!this.eventBus || this.syncUnsubscribe) return;
+    this.syncUnsubscribe = this.eventBus.on("queue:updated", (payload) => this.synchronize(payload));
+  }
+
+  synchronize(payload = {}) {
+    this.logger.info("autodj", "AutoDJ synchronized.", {
+      playlistSize: payload.playlistSize,
+      queueSize: payload.queueSize,
+      currentTrackPreserved: payload.currentTrackPreserved,
+    });
+    this.eventBus?.emit("autodj:synchronized", {
+      playlistSize: payload.playlistSize,
+      queueSize: payload.queueSize,
+      synchronizedAt: new Date().toISOString(),
+    });
   }
 
   selectNext() {

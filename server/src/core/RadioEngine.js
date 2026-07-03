@@ -9,8 +9,11 @@ import { FFmpegEngine } from "../ffmpeg/FFmpegEngine.js";
 import { HistoryEngine } from "../history/HistoryEngine.js";
 import { IcecastClient } from "../icecast/IcecastClient.js";
 import { LibraryEngine } from "../library/LibraryEngine.js";
+import { LibraryManager } from "../library/LibraryManager.js";
+import { LibrarySyncService } from "../library/LibrarySyncService.js";
 import { PlaylistEngine } from "../library/PlaylistEngine.js";
 import { LoggerEngine } from "../logger/LoggerEngine.js";
+import { NetworkDiagnostics } from "../network/NetworkDiagnostics.js";
 import { NowPlayingEngine } from "../player/NowPlayingEngine.js";
 import { PlayerEngine } from "../player/PlayerEngine.js";
 import { SchedulerEngine } from "../scheduler/SchedulerEngine.js";
@@ -50,6 +53,21 @@ export class RadioEngine {
     this.library.init();
     this.events.emit("libraryLoaded", { tracks: this.library.list().length });
 
+    this.libraryManager = new LibraryManager(this.config, this.logger, this.events);
+    const libraryManagerSummary = this.libraryManager.initialize();
+    console.info("Library Manager:");
+    console.info("OK");
+    console.info("Tracks:");
+    console.info(libraryManagerSummary.tracks);
+    console.info("Artists:");
+    console.info(libraryManagerSummary.stats.artistsCount);
+    console.info("Albums:");
+    console.info(libraryManagerSummary.stats.albumsCount);
+    console.info("Genres:");
+    console.info(libraryManagerSummary.stats.genresCount);
+    console.info("Cache:");
+    console.info("OK");
+
     this.playlist = new PlaylistEngine(this.library, this.config);
     this.playlist.init();
     this.events.emit("playlistChanged", { tracks: this.playlist.tracks.length });
@@ -65,13 +83,14 @@ export class RadioEngine {
     this.nowPlaying = new NowPlayingEngine(this.events);
     this.nowPlaying.init();
 
+    this.audioQueue = new QueueEngine();
     this.autodj = new AutoDJEngine(this.playlist, this.logger, this.events, this.nowPlaying, this.history);
     this.autodj.init();
 
-    this.audioQueue = new QueueEngine();
     this.encoder = new Encoder(this.config.audio);
     this.ffmpeg = new FFmpegEngine(this.config, this.logger);
     this.ffmpeg.detect();
+    this.networkDiagnostics = new NetworkDiagnostics(this.config, this.logger);
     this.icecast = new IcecastClient(this.config, this.logger);
     this.audioPipeline = new AudioPipeline({
       encoder: this.encoder,
@@ -87,7 +106,19 @@ export class RadioEngine {
       nowPlaying: this.nowPlaying,
       logger: this.logger,
       eventBus: this.events,
+      networkDiagnostics: this.networkDiagnostics,
     });
+    this.librarySync = new LibrarySyncService({
+      libraryManager: this.libraryManager,
+      libraryEngine: this.library,
+      playlistEngine: this.playlist,
+      audioQueue: this.audioQueue,
+      autodj: this.autodj,
+      logger: this.logger,
+      eventBus: this.events,
+      getCurrentTrack: () => this.stream?.currentTrack || this.nowPlaying?.get()?.track || null,
+    });
+    this.librarySync.init();
 
     this.api = new ApiEngine(this, this.logger);
     await this.api.init();
@@ -119,7 +150,9 @@ export class RadioEngine {
     clearInterval(this.heartbeatTimer);
     this.stream?.stop();
     await this.api?.stop();
+    this.librarySync?.stop();
     this.library?.closeWatchers();
+    this.libraryManager?.stop();
     this.events.emit("engineStopped");
     this.logger?.info("shutdown", "Shutdown executado.");
     this.logger?.info("engine", "Engine parada.");
@@ -169,6 +202,7 @@ export class RadioEngine {
       libraryPath: this.config?.libraryPath || this.config?.musicFolder,
       libraryPathFound: Boolean(this.config?.libraryPathFound),
       librarySize: this.library?.list().length || 0,
+      libraryManager: this.libraryManager?.getSummary(),
       playlistSize: this.playlist?.tracks.length || 0,
       queueSize: this.getQueueSize(),
       schedulerActive: Boolean(this.scheduler?.active),
@@ -179,6 +213,7 @@ export class RadioEngine {
       stream: streamStatus,
       ffmpeg: this.ffmpeg?.status(),
       icecast: this.icecast?.status(),
+      network: this.networkDiagnostics?.lastResult,
       apiPort: this.config?.apiPort,
       waitingForStreaming: !this.stream?.status().running,
     };

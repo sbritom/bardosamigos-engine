@@ -70,4 +70,36 @@ export class AudioQueue {
   list() {
     return this.items;
   }
+
+  syncWithTracks(tracks = [], { currentTrack = null } = {}) {
+    const trackKey = (track) => track?.id || track?.path || track?.filename || null;
+    const tracksByKey = new Map(tracks.map((track) => [trackKey(track), track]).filter(([key]) => key));
+    const previousItems = this.items.length;
+    const previousPreloaded = Boolean(this.preloaded);
+
+    this.items = this.items
+      .map((item) => {
+        const key = trackKey(item.track);
+        const track = tracksByKey.get(key);
+        return track ? { ...item, track } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.priority - a.priority);
+
+    if (this.preloaded) {
+      const preloadedKey = trackKey(this.preloaded);
+      this.preloaded = tracksByKey.get(preloadedKey) || null;
+    }
+
+    this.played = this.played
+      .map((track) => tracksByKey.get(trackKey(track)) || track)
+      .filter((track) => trackKey(track) === trackKey(currentTrack) || tracksByKey.has(trackKey(track)));
+
+    return {
+      queueSize: this.items.length,
+      removedQueueItems: previousItems - this.items.length,
+      preloadedPreserved: previousPreloaded && Boolean(this.preloaded),
+      currentTrackPreserved: Boolean(currentTrack),
+    };
+  }
 }
