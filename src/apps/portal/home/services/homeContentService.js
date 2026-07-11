@@ -18,6 +18,7 @@ import {
 
 const NEWS_LIMIT = 3
 const MATCH_LIMIT = 3
+const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'
 
 function formatDate(value) {
   return value ? formatBrazilDate(value) : ''
@@ -99,6 +100,41 @@ function sortCurrentMatches(matches = [], now = nowUtcIso()) {
   return sortLiveMatchCenterMatches(matches, now)
 }
 
+async function listFootballProxyMatches() {
+  if (typeof fetch !== 'function') return { data: [], error: new Error('Football proxy indisponivel.'), source: 'football-data-proxy' }
+
+  try {
+    const response = await fetch(FOOTBALL_PROXY_ENDPOINT, {
+      headers: { Accept: 'application/json' },
+    })
+    const payload = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      return {
+        data: [],
+        error: new Error(payload.error || payload.errors?.join(', ') || `Football proxy retornou ${response.status}.`),
+        source: 'football-data-proxy',
+      }
+    }
+
+    return {
+      data: Array.isArray(payload.matches) ? payload.matches.map(normalizeCompetitionMatch) : [],
+      error: null,
+      source: 'football-data-proxy',
+    }
+  } catch (error) {
+    return { data: [], error, source: 'football-data-proxy' }
+  }
+}
+
+function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
+  const sortedMatches = sortCurrentMatches(matches, now)
+  const priorityMatches = sortedMatches.filter((match) => getMatchPriority(match, now) < 3)
+  const visibleMatches = priorityMatches.length ? priorityMatches : sortedMatches
+
+  return visibleMatches.slice(0, limit)
+}
+
 export async function listHybridNews({ limit = NEWS_LIMIT } = {}) {
   const client = getSupabaseClient()
 
@@ -145,17 +181,29 @@ export async function listNewsPageContent() {
 export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
   try {
     const result = await listCurrentFootballMatches({ includePredictions: true })
+    let matches = []
+    let fallbackError = null
+    let source = 'competition'
 
     if (result.error) {
-      return { data: [], next: null, results: [], error: result.error, source: 'supabase' }
+      const fallback = await listFootballProxyMatches()
+      matches = fallback.data || []
+      fallbackError = fallback.error || result.error
+      source = fallback.data?.length ? fallback.source : 'supabase'
+    } else {
+      matches = result.data?.matches || []
+      if (!matches.length) {
+        const fallback = await listFootballProxyMatches()
+        matches = fallback.data || []
+        fallbackError = fallback.error || null
+        source = fallback.data?.length ? fallback.source : 'competition'
+      }
     }
 
     const now = nowUtcIso()
-    const matches = sortCurrentMatches(result.data?.matches || [], now)
+    matches = sortCurrentMatches(matches, now)
     const liveMatchCenter = getLiveMatchCenter(matches, { now })
-    const visibleMatches = matches
-      .filter((match) => getMatchPriority(match, now) < 3)
-      .slice(0, limit)
+    const visibleMatches = selectVisibleFootballMatches(matches, now, limit)
     const finished = matches
       .filter((match) => isFinishedStatus(match.standardStatus))
       .slice(0, 2)
@@ -169,8 +217,8 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
       next: liveMatchCenter.match,
       liveMatchCenter,
       results: finished,
-      error: null,
-      source: 'competition',
+      error: visibleMatches.length ? null : fallbackError || result.error || null,
+      source,
     }
   } catch (error) {
     return { data: [], next: null, results: [], error, source: 'supabase' }

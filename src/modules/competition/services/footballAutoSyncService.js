@@ -11,6 +11,11 @@ export const FOOTBALL_AUTO_SYNC_INTERVALS = Object.freeze({
 let lastSyncAt = 0
 let runningSync = null
 
+function canRunFootballSyncInThisRuntime() {
+  if (typeof window === 'undefined') return true
+  return import.meta.env?.VITE_ENABLE_CLIENT_FOOTBALL_SYNC === 'true'
+}
+
 export function hasLiveFootballMatch(data) {
   const liveMatches = data?.live || data?.matches?.filter((match) => isLiveStatus(match.status || match.standardStatus)) || []
   const featuredStatus = data?.featured?.status || data?.featured?.standardStatus || data?.liveMatchCenter?.status || data?.liveMatchCenter?.heroStatus
@@ -23,6 +28,10 @@ export function getFootballAutoSyncInterval(hasLiveMatch = false) {
 }
 
 export async function syncFootballBeforeRead({ hasLiveMatch = false, force = false } = {}) {
+  if (!canRunFootballSyncInThisRuntime()) {
+    return { skipped: true, reason: 'client_sync_disabled' }
+  }
+
   const interval = getFootballAutoSyncInterval(hasLiveMatch)
   const now = Date.now()
 

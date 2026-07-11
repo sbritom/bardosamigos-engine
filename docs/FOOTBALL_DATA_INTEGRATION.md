@@ -13,6 +13,7 @@ Football-Data.org -> Sync Engine -> Supabase -> Competition/Home/Noticias
 ## Variavel de Ambiente
 
 - `VITE_FOOTBALL_DATA_API_KEY`
+- `FOOTBALL_DATA_API_KEY` para o proxy server-side/serverless em producao
 
 Nenhum valor de chave deve ser salvo no repositorio. A execucao real da sincronizacao deve ocorrer em ambiente controlado, preferencialmente server-side, para evitar exposicao indevida.
 
@@ -29,6 +30,20 @@ Endpoints:
 - `GET /competitions/{competitionCode}/matches?status=SCHEDULED`
 - `GET /competitions/{competitionCode}/matches?status=FINISHED`
 - `GET /competitions/{competitionCode}/standings`
+
+## Producao na Vercel
+
+O portal deve ler partidas do Supabase como fonte principal. Quando o Supabase nao retornar partidas para a Home, o fallback seguro usa o endpoint serverless:
+
+- `GET /api/football/matches`
+
+Variaveis necessarias na Vercel:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `FOOTBALL_DATA_API_KEY`
+
+Evite configurar `VITE_FOOTBALL_DATA_API_KEY` em producao, porque variaveis `VITE_` entram no bundle do frontend.
 
 ## Estrutura
 
