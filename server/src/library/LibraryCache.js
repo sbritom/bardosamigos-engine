@@ -54,7 +54,12 @@ export class LibraryCache {
         return;
       }
 
-      if (cached.id !== track.id || cached.size !== track.size || cached.modifiedAt !== track.modifiedAt) {
+      if (
+        cached.id !== track.id ||
+        cached.size !== track.size ||
+        cached.modifiedAt !== track.modifiedAt ||
+        cached.metadataSchemaVersion !== track.metadataSchemaVersion
+      ) {
         updated.push(track);
         tracks.push({ ...track, addedAt: cached.addedAt || track.addedAt });
         return;

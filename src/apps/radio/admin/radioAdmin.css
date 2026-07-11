@@ -1,0 +1,285 @@
+.radio-admin-page {
+  width: min(1320px, calc(100% - 32px));
+  margin: 0 auto;
+  color: #eef5ff;
+}
+
+.radio-admin-header {
+  padding: 22px;
+  border: 1px solid rgba(106, 142, 190, 0.22);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(3, 9, 18, 0.98), rgba(12, 27, 48, 0.95));
+}
+
+.radio-admin-header span {
+  color: #f2c66d;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.radio-admin-header h1 {
+  margin-top: 6px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.radio-admin-header p,
+.radio-admin-panel small,
+.radio-admin-track small {
+  color: #9fb5cf;
+}
+
+.radio-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.radio-admin-panel,
+.radio-admin-card {
+  border: 1px solid rgba(106, 142, 190, 0.2);
+  border-radius: 8px;
+  background: rgba(6, 16, 31, 0.94);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+}
+
+.radio-admin-panel {
+  grid-column: span 6;
+  padding: 16px;
+}
+
+.radio-admin-player,
+.radio-admin-logs {
+  grid-column: span 12;
+}
+
+.radio-admin-listeners {
+  grid-column: span 3;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.radio-admin-listeners strong {
+  color: #f2c66d;
+  font-size: 2.5rem;
+}
+
+.radio-admin-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #f2c66d;
+}
+
+.radio-admin-panel-title h2 {
+  font-size: 1rem;
+}
+
+.radio-admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.radio-admin-card {
+  display: grid;
+  gap: 5px;
+  min-height: 92px;
+  padding: 12px;
+}
+
+.radio-admin-card span {
+  color: #8fb4de;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.radio-admin-card strong {
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+}
+
+.radio-admin-card--ok strong {
+  color: #5df29a;
+}
+
+.radio-admin-card--warn strong {
+  color: #f2c66d;
+}
+
+.radio-admin-card--error strong {
+  color: #ff7272;
+}
+
+.radio-admin-player-grid {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.radio-admin-player-grid img,
+.radio-admin-cover-empty {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #111b2a;
+}
+
+.radio-admin-cover-empty {
+  display: grid;
+  place-items: center;
+  color: #7f96b4;
+}
+
+.radio-admin-player-grid div {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.radio-admin-player-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 1.8rem;
+}
+
+.radio-admin-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radio-admin-tags small,
+.radio-admin-health,
+.radio-admin-actions button,
+.radio-admin-track button,
+.radio-admin-log-tabs button {
+  border: 1px solid rgba(106, 142, 190, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.radio-admin-tags small {
+  padding: 7px 9px;
+}
+
+.radio-admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.radio-admin-list span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #9fb5cf;
+}
+
+.radio-admin-list strong {
+  color: #eef5ff;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.radio-admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.radio-admin-actions button,
+.radio-admin-track button,
+.radio-admin-log-tabs button {
+  min-height: 34px;
+  padding: 0 10px;
+  color: #eef5ff;
+}
+
+.radio-admin-track {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 0.5fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.radio-admin-track span,
+.radio-admin-track small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-admin-health-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radio-admin-health {
+  padding: 8px 10px;
+  color: #9fb5cf;
+}
+
+.radio-admin-health--ok {
+  color: #5df29a;
+}
+
+.radio-admin-health--warn {
+  color: #f2c66d;
+}
+
+.radio-admin-health--fail {
+  color: #ff7272;
+}
+
+.radio-admin-log-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.radio-admin-log-tabs button.is-active {
+  color: #07111f;
+  background: #f2c66d;
+}
+
+.radio-admin-logs pre {
+  max-height: 360px;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 8px;
+  color: #cbd9eb;
+  background: rgba(0, 0, 0, 0.34);
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 1100px) {
+  .radio-admin-panel,
+  .radio-admin-listeners {
+    grid-column: span 12;
+  }
+
+  .radio-admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .radio-admin-page {
+    width: min(100% - 20px, 1320px);
+  }
+
+  .radio-admin-metrics,
+  .radio-admin-player-grid,
+  .radio-admin-track {
+    grid-template-columns: 1fr;
+  }
+}

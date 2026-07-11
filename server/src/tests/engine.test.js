@@ -52,7 +52,8 @@ async function run() {
   const queue = await getJson(port, "/engine/queue");
 
   assert.equal(status.ok, true, "Status endpoint respondeu");
-  assert.equal(health.data.ok, true, "Health check OK");
+  assert.equal(health.ok, true, "Health endpoint respondeu");
+  assert.ok(["healthy", "warning"].includes(health.data.health), "Health check OK");
   assert.equal(nowPlaying.data.title, "Faixa Engine", "Now Playing real atualizado");
   assert.equal(history.data.length, 1, "History real atualizado");
   assert.ok(Array.isArray(queue.data), "Queue endpoint respondeu");

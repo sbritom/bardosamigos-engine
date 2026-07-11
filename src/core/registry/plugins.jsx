@@ -36,7 +36,8 @@ import FootballTeamPage from "../../modules/competition/football/pages/FootballT
 import NewsPage from "../../modules/news/pages/NewsPage";
 import CommunityPage from "../../modules/community/pages/CommunityPage";
 import TVPage from "../../modules/tv/pages/TVPage";
-import { RadioPage } from "../../modules/radio";
+import { TVManager } from "../../modules/tv/admin";
+import { RadioAdminPage, RadioPage, XatPreviewPage } from "../../apps/radio";
 import BarStudioPage from "../../modules/barstudio/pages/BarStudioPage";
 import DesignerPage from "../../modules/barstudio/designer/pages/DesignerPage";
 import GamesPage from "../../modules/games/pages/GamesPage";
@@ -73,6 +74,24 @@ export const plugins = [
     icon: Radio,
     menu: true,
     element: <RadioPage />,
+  },
+
+  {
+    id: "radio-xat",
+    title: "Radio xat",
+    path: "/radio/xat",
+    icon: Radio,
+    menu: false,
+    element: <XatPreviewPage />,
+  },
+
+  {
+    id: "radio-admin",
+    title: "Radio Admin",
+    path: "/radio/admin",
+    icon: Shield,
+    menu: false,
+    element: <RadioAdminPage />,
   },
 
   {
@@ -205,6 +224,60 @@ export const plugins = [
     icon: Shield,
     menu: false,
     element: <AdminPage />,
+  },
+
+  {
+    id: "admin-tv",
+    title: "TV Manager",
+    path: "/admin/tv",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="dashboard" />,
+  },
+
+  {
+    id: "admin-tv-categories",
+    title: "TV Manager Categorias",
+    path: "/admin/tv/categories",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="categories" />,
+  },
+
+  {
+    id: "admin-tv-channels",
+    title: "TV Manager Canais",
+    path: "/admin/tv/channels",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="channels" />,
+  },
+
+  {
+    id: "admin-tv-featured",
+    title: "TV Manager Destaques",
+    path: "/admin/tv/featured",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="featured" />,
+  },
+
+  {
+    id: "admin-tv-settings",
+    title: "TV Manager Configuracoes",
+    path: "/admin/tv/settings",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="settings" />,
+  },
+
+  {
+    id: "admin-tv-import",
+    title: "TV Manager Importacao",
+    path: "/admin/tv/import",
+    icon: Tv,
+    menu: false,
+    element: <TVManager section="import" />,
   },
 
   {

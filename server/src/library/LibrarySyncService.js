@@ -60,11 +60,7 @@ export class LibrarySyncService {
   }
 
   refreshTracks() {
-    if (this.libraryEngine?.reindex) {
-      return this.libraryEngine.reindex();
-    }
-
-    return this.libraryManager?.getTracks?.() || [];
+    return this.libraryManager?.getTracks?.() || this.libraryEngine?.list?.() || [];
   }
 
   stop() {

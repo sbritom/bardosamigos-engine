@@ -1,0 +1,16 @@
+{
+  "environment": "production",
+  "serverName": "bar-radio-server",
+  "domain": "",
+  "streamHost": "localhost",
+  "streamPort": 8000,
+  "mount": "/radio",
+  "apiPort": 3333,
+  "playerPort": 5173,
+  "publicUrl": "",
+  "ssl": {
+    "enabled": false,
+    "provider": "",
+    "email": ""
+  }
+}

@@ -22,3 +22,51 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Bar dos Amigos Engine - runtime e arquivos gerados
+server/backups/
+server/cache/
+server/storage/*
+!server/storage/.gitkeep
+
+# Caches gerados em runtime
+**/library-cache.json
+**/metadata-cache.json
+**/cover-cache.json
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Ambiente e segredos locais
+.env
+.env.*
+!.env.example
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini
+
+# Bar dos Amigos Engine - runtime e arquivos gerados
+server/backups/
+server/cache/
+server/storage/*
+!server/storage/.gitkeep
+
+# Caches gerados em runtime
+**/library-cache.json
+**/metadata-cache.json
+**/cover-cache.json
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Ambiente e segredos locais
+.env
+.env.*
+!.env.example
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini

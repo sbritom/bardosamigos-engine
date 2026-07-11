@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { RadioEngine } from "../core/RadioEngine.js";
+import { runFFmpegAudioPipelineLifecycleTests } from "./ffmpegAudioPipelineLifecycle.test.js";
 
 function createFakeAudio(root) {
   const musicFolder = path.join(root, "radio", "music", "Pagode");
@@ -13,6 +14,8 @@ function createFakeAudio(root) {
 }
 
 async function run() {
+  await runFFmpegAudioPipelineLifecycleTests();
+
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "bar-radio-stream-"));
   const musicFolder = createFakeAudio(root);
   const logFolder = path.join(root, "logs");

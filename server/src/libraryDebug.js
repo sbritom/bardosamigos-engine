@@ -69,7 +69,7 @@ syncService.init();
   });
 });
 
-const summary = manager.initialize();
+const summary = await manager.initialize();
 const stats = manager.getStats();
 const watcherStatus = manager.getWatcherStatus();
 

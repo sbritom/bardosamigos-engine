@@ -17,6 +17,12 @@ export class PlaylistEngine {
     return track?.id || track?.path || track?.filename || null;
   }
 
+  sameTrack(a, b) {
+    const aKey = this.trackKey(a);
+    const bKey = this.trackKey(b);
+    return Boolean(aKey && bKey && aKey === bKey);
+  }
+
   shuffle() {
     this.tracks = this.smartShuffle(this.tracks);
     this.index = -1;
@@ -43,17 +49,40 @@ export class PlaylistEngine {
   }
 
   next() {
-    if (this.queueItems.length > 0) {
-      const queued = this.queueItems.shift().track;
-      this.played.unshift(queued);
-      return queued;
-    }
+    const queued = this.consumeQueuedTrack();
+    if (queued) return queued;
     if (this.tracks.length === 0) return null;
     if (!this.repeatEnabled && this.index + 1 >= this.tracks.length) return null;
     this.index = (this.index + 1) % this.tracks.length;
     const track = this.tracks[this.index];
     this.played.unshift(track);
     return track;
+  }
+
+  consumeQueuedTrack(track = null) {
+    if (this.queueItems.length === 0) return null;
+    const index = track
+      ? this.queueItems.findIndex((item) => this.sameTrack(item.track, track))
+      : 0;
+    if (index < 0) return null;
+    const queued = this.queueItems.splice(index, 1)[0]?.track || null;
+    if (queued) this.played.unshift(queued);
+    return queued;
+  }
+
+  commitTrack(track) {
+    if (!track) return null;
+    const queued = this.consumeQueuedTrack(track);
+    if (queued) return queued;
+
+    const trackIndex = this.tracks.findIndex((item) => this.sameTrack(item, track));
+    if (trackIndex >= 0) {
+      this.index = trackIndex;
+      this.played.unshift(this.tracks[trackIndex]);
+      return this.tracks[trackIndex];
+    }
+
+    return null;
   }
 
   previous() {
@@ -94,6 +123,15 @@ export class PlaylistEngine {
     return this.queueItems;
   }
 
+  upcomingTracks() {
+    if (this.tracks.length === 0) return [];
+    const start = this.index + 1;
+    return Array.from({ length: this.tracks.length }, (_, offset) => {
+      const index = (start + offset) % this.tracks.length;
+      return this.tracks[index];
+    });
+  }
+
   repeat(enabled = true) {
     this.repeatEnabled = enabled;
   }
@@ -114,7 +152,7 @@ export class PlaylistEngine {
   }
 
   reset() {
-    this.tracks = this.libraryEngine.list();
+    this.tracks = this.getLibraryTracks();
     if (this.config.shuffle) this.shuffle();
     this.index = -1;
     this.played = [];
@@ -122,7 +160,7 @@ export class PlaylistEngine {
     return this.tracks;
   }
 
-  reload(tracks = this.libraryEngine.list(), { currentTrack = null } = {}) {
+  reload(tracks = this.getLibraryTracks(), { currentTrack = null } = {}) {
     const currentKey = this.trackKey(currentTrack) || this.trackKey(this.tracks[this.index]);
     const nextTracks = Array.isArray(tracks) ? [...tracks] : [];
     const tracksByKey = new Map(nextTracks.map((track) => [this.trackKey(track), track]).filter(([key]) => key));
@@ -150,5 +188,11 @@ export class PlaylistEngine {
       removedQueueItems: previousQueueSize - this.queueItems.length,
       currentTrackPreserved: Boolean(currentKey),
     };
+  }
+
+  getLibraryTracks() {
+    if (this.libraryEngine?.getTracks) return this.libraryEngine.getTracks();
+    if (this.libraryEngine?.list) return this.libraryEngine.list();
+    return [];
   }
 }

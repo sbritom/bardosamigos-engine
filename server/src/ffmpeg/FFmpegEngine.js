@@ -24,11 +24,16 @@ function sanitizeText(value) {
 }
 
 export class FFmpegEngine {
-  constructor(config, logger) {
+  constructor(config, logger, { spawnFactory = spawn } = {}) {
     this.config = config;
     this.logger = logger;
+    this.spawnFactory = spawnFactory;
     this.executablePath = null;
     this.process = null;
+    this.processGeneration = 0;
+    this.activeProcessToken = null;
+    this.activeProcessReason = null;
+    this.processHistory = [];
     this.dryRun = Boolean(config.stream?.dryRun);
     this.command = "";
     this.sanitizedCommand = "";
@@ -72,12 +77,17 @@ export class FFmpegEngine {
   }
 
   start(inputPath, args, diagnostics = {}) {
+    const generation = this.processGeneration + 1;
+    const processToken = `ffmpeg-${generation}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    this.processGeneration = generation;
+
     if (this.dryRun) {
-      this.logger.info("ffmpeg", "FFmpeg dry-run iniciado.", { inputPath });
+      this.activeProcessToken = processToken;
+      this.logger.info("ffmpeg", "FFmpeg dry-run iniciado.", { inputPath, processGeneration: generation, processToken });
       const stream = new PassThrough();
       Readable.from([Buffer.from("bar-radio-dry-run-audio")]).pipe(stream);
       this.process = null;
-      return { stream, process: null };
+      return { stream, process: null, processGeneration: generation, processToken };
     }
 
     this.ensureAvailable();
@@ -87,7 +97,8 @@ export class FFmpegEngine {
 
     this.command = [this.executablePath, ...args].join(" ");
     this.sanitizedCommand = [this.executablePath, ...sanitizeArgs(args)].join(" ");
-    this.startedAt = new Date().toISOString();
+    const startedAt = new Date().toISOString();
+    this.startedAt = startedAt;
     this.exitedAt = null;
     this.exitCode = null;
     this.signal = null;
@@ -96,6 +107,8 @@ export class FFmpegEngine {
     this.lastStderr = "";
     this.stdoutBuffer = "";
     this.stderrBuffer = "";
+    this.activeProcessToken = processToken;
+    this.activeProcessReason = "streaming";
 
     const spawnDiagnostics = {
       command: this.sanitizedCommand,
@@ -114,76 +127,186 @@ export class FFmpegEngine {
       console.info(JSON.stringify(spawnDiagnostics, null, 2));
     }
 
-    this.process = spawn(this.executablePath, args, {
+    const processRef = this.spawnFactory(this.executablePath, args, {
       cwd: path.dirname(inputPath),
       windowsHide: true,
     });
-    this.pid = this.process.pid || null;
+    const processPid = processRef.pid || null;
+    const processState = {
+      processGeneration: generation,
+      processToken,
+      processPid,
+      inputPath,
+      startedAt,
+      exitedAt: null,
+      exitCode: null,
+      signal: null,
+      stdoutBuffer: "",
+      stderrBuffer: "",
+      reason: "streaming",
+    };
+    this.process = processRef;
+    this.pid = processPid;
 
     this.logger.info("ffmpeg", "FFmpeg iniciado.", {
       executablePath: this.executablePath,
-      pid: this.pid,
+      pid: processPid,
+      processGeneration: generation,
+      processToken,
       command: this.sanitizedCommand,
       args: sanitizeArgs(args),
     });
 
-    this.process.stdout.on("data", (chunk) => {
-      this.stdoutBuffer += chunk.toString();
-      this.lastStdout = chunk.toString().trim();
-      if (this.lastStdout) {
-        this.logger.info("ffmpeg", "FFmpeg stdout.", { pid: this.pid, output: this.lastStdout });
+    processRef.stdout.on("data", (chunk) => {
+      processState.stdoutBuffer += chunk.toString();
+      const output = chunk.toString().trim();
+      if (this.isCurrentProcess(processRef, generation)) {
+        this.stdoutBuffer = processState.stdoutBuffer;
+        this.lastStdout = output;
+      }
+      if (output) {
+        this.logger.info("ffmpeg", "FFmpeg stdout.", {
+          pid: processPid,
+          processGeneration: generation,
+          processToken,
+          currentProcess: this.isCurrentProcess(processRef, generation),
+          output,
+        });
         if (this.config.logLevel === "debug") console.info(`[stream:debug] FFmpeg stdout: ${this.lastStdout}`);
       }
     });
 
-    this.process.stderr.on("data", (chunk) => {
-      this.stderrBuffer += chunk.toString();
-      this.lastStderr = chunk.toString().trim();
-      if (this.lastStderr) {
-        this.logger.info("ffmpeg", "FFmpeg stderr.", { pid: this.pid, output: this.lastStderr });
+    processRef.stderr.on("data", (chunk) => {
+      processState.stderrBuffer += chunk.toString();
+      const output = chunk.toString().trim();
+      if (this.isCurrentProcess(processRef, generation)) {
+        this.stderrBuffer = processState.stderrBuffer;
+        this.lastStderr = output;
+      }
+      if (output) {
+        this.logger.info("ffmpeg", "FFmpeg stderr.", {
+          pid: processPid,
+          processGeneration: generation,
+          processToken,
+          currentProcess: this.isCurrentProcess(processRef, generation),
+          output,
+        });
         if (this.config.logLevel === "debug") console.error(`[stream:debug] FFmpeg stderr: ${this.lastStderr}`);
       }
     });
 
-    this.process.on("exit", (code, signal) => {
-      this.exitCode = code;
-      this.signal = signal;
-      this.exitedAt = new Date().toISOString();
+    processRef.on("exit", (code, signal) => {
+      const exitedAt = new Date().toISOString();
+      const currentProcess = this.isCurrentProcess(processRef, generation);
+      processState.exitedAt = exitedAt;
+      processState.exitCode = code;
+      processState.signal = signal;
+      processState.reason = processRef.__barRadioStopReason || (code === 0 ? "natural_end" : "process_exit");
+      this.recordProcessHistory(processState);
+
+      if (currentProcess) {
+        this.exitCode = code;
+        this.signal = signal;
+        this.exitedAt = exitedAt;
+        this.stdoutBuffer = processState.stdoutBuffer;
+        this.stderrBuffer = processState.stderrBuffer;
+        this.lastStdout = processState.stdoutBuffer.trim().split(/\r?\n/).filter(Boolean).at(-1) || "";
+        this.lastStderr = processState.stderrBuffer.trim().split(/\r?\n/).filter(Boolean).at(-1) || "";
+      }
+
       this.logger.info("ffmpeg", "FFmpeg finalizado.", {
-        pid: this.pid,
+        pid: processPid,
+        processGeneration: generation,
+        processToken,
         exitCode: code,
         signal,
-        stderr: this.stderrBuffer,
+        startedAt,
+        exitedAt,
+        reason: processState.reason,
+        activeProcessAtExit: this.pid,
+        currentProcess,
+        stderr: processState.stderrBuffer,
       });
       if (this.config.logLevel === "debug") {
         console.info("[stream:debug] FFmpeg exit");
         console.info(JSON.stringify({
-          pid: this.pid,
+          pid: processPid,
+          processGeneration: generation,
+          processToken,
           exitCode: code,
           signal,
-          stderr: this.stderrBuffer,
+          stderr: processState.stderrBuffer,
+          currentProcess,
         }, null, 2));
       }
     });
 
-    this.process.on("error", (error) => {
-      this.lastError = error.message;
-      this.exitedAt = new Date().toISOString();
+    processRef.on("error", (error) => {
+      const exitedAt = new Date().toISOString();
+      const currentProcess = this.isCurrentProcess(processRef, generation);
+      processState.exitedAt = exitedAt;
+      processState.reason = "spawn_error";
+      this.recordProcessHistory(processState);
+      if (currentProcess) {
+        this.lastError = error.message;
+        this.exitedAt = exitedAt;
+      }
       this.logger.error("ffmpeg", "Falha ao iniciar FFmpeg.", {
-        pid: this.pid,
+        pid: processPid,
+        processGeneration: generation,
+        processToken,
         command: this.sanitizedCommand,
+        currentProcess,
         error: error.message,
       });
     });
 
-    return { stream: this.process.stdout, process: this.process };
+    return {
+      stream: processRef.stdout,
+      process: processRef,
+      processGeneration: generation,
+      processToken,
+      processPid,
+      startedAt,
+    };
   }
 
-  stop() {
-    if (this.process && !this.process.killed) {
-      this.process.kill("SIGTERM");
+  isCurrentProcess(processRef, generation) {
+    return Boolean(this.process === processRef && this.processGeneration === generation);
+  }
+
+  recordProcessHistory(processState) {
+    this.processHistory.unshift({
+      processGeneration: processState.processGeneration,
+      processToken: processState.processToken,
+      pid: processState.processPid,
+      startedAt: processState.startedAt,
+      exitedAt: processState.exitedAt,
+      exitCode: processState.exitCode,
+      signal: processState.signal,
+      reason: processState.reason,
+    });
+    this.processHistory = this.processHistory.slice(0, 20);
+  }
+
+  stop(processRef = this.process, { reason = "manual_stop", processGeneration = this.processGeneration } = {}) {
+    if (!processRef) return false;
+    const currentProcess = this.isCurrentProcess(processRef, processGeneration);
+    if (processRef && !processRef.killed) {
+      processRef.__barRadioStopReason = reason;
+      this.logger.info("ffmpeg", "FFmpeg stop solicitado.", {
+        pid: processRef.pid || null,
+        processGeneration,
+        reason,
+        currentProcess,
+      });
+      processRef.kill("SIGTERM");
     }
-    this.process = null;
+    if (currentProcess) {
+      this.activeProcessReason = reason;
+      this.process = null;
+    }
+    return currentProcess;
   }
 
   status() {
@@ -194,6 +317,9 @@ export class FFmpegEngine {
       command: this.sanitizedCommand,
       running,
       status: running ? "RUNNING" : "OFFLINE",
+      processGeneration: this.processGeneration,
+      processToken: this.activeProcessToken,
+      activeProcessReason: this.activeProcessReason,
       dryRun: this.dryRun,
       startedAt: this.startedAt,
       exitedAt: this.exitedAt,
@@ -204,6 +330,7 @@ export class FFmpegEngine {
       stdout: this.stdoutBuffer,
       stderr: this.stderrBuffer,
       lastError: this.lastError,
+      processHistory: this.processHistory,
     };
   }
 }

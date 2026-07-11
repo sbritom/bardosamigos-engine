@@ -1,5 +1,6 @@
 import { Activity, Bot, Coins, Gamepad2, Logs, Radio, Shield, Store, Tv, Users, Wrench } from 'lucide-react'
-import { FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
+import { useNavigate } from 'react-router-dom'
+import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
 
 const modules = [
   ['Football Admin', 'Competicoes, jogos, times e resultados.', Shield],
@@ -16,13 +17,18 @@ const modules = [
 ]
 
 export default function AdminPage() {
+  const navigate = useNavigate()
   return (
     <main className="bds-release-page">
       <HeroCard className="bds-release-hero" eyebrow="Admin modular" title="Administracao do portal" subtitle="Area preparada para usuarios autorizados. Nao deve aparecer para usuarios comuns no menu publico." />
       <section className="bds-release-section">
         <SectionHeader eyebrow="Modulos" title="Areas administrativas" subtitle="Admin modular, sem monolito." />
         <div className="bds-release-grid bds-release-grid--three">
-          {modules.map(([title, description, Icon]) => <FeatureCard key={title} icon={<Icon size={20} />} title={title} description={description} action={<StatusBadge status="ADMIN">ADMIN</StatusBadge>} />)}
+          {modules.map(([title, description, Icon]) => (
+            <FeatureCard key={title} icon={<Icon size={20} />} title={title} description={description} action={<StatusBadge status="ADMIN">ADMIN</StatusBadge>}>
+              {title === 'TV Admin' && <ActionButton variant="outline" onClick={() => navigate('/admin/tv')}>Abrir TV Manager</ActionButton>}
+            </FeatureCard>
+          ))}
         </div>
       </section>
     </main>

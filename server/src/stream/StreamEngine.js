@@ -92,7 +92,7 @@ export class StreamEngine {
       title: selected.title,
       duration: selected.duration,
     });
-    this.audioQueue.preload(this.autodj.selectNext());
+    this.audioQueue.preload(this.autodj.selectNext({ consume: false, origin: "preload" }));
 
     try {
       await this.audioPipeline.play(selected);
@@ -115,7 +115,10 @@ export class StreamEngine {
 
   selectTrack() {
     const queued = this.audioQueue.next();
-    return queued || this.autodj.selectNext();
+    if (queued) {
+      return this.autodj.commitSelection?.(queued, { origin: "preload" }) || queued;
+    }
+    return this.autodj.selectNext({ consume: true });
   }
 
   async recover(error, track) {

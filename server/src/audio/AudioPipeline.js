@@ -42,7 +42,7 @@ export class AudioPipeline {
         if (directToIcecast) {
           this.icecast.prepareForExternalSource();
         }
-        const { stream, process } = this.ffmpeg.start(track.path, args, {
+        const ffmpegRun = this.ffmpeg.start(track.path, args, {
           outputUrl,
           mount: this.icecast.config.mount,
           protocol: this.icecast.config.protocol,
@@ -52,6 +52,7 @@ export class AudioPipeline {
           authMethod: directToIcecast ? "urlCredentials" : "sourceRequest",
           usesPasswordOption: args.includes("-password"),
         });
+        const { stream, process, processGeneration, processToken, processPid, startedAt } = ffmpegRun;
         let settled = false;
         this.currentProcess = process;
 
@@ -66,36 +67,52 @@ export class AudioPipeline {
         this.logger.info("stream", "Audio pipeline aguardando mount Icecast.", {
           trackId: track.id,
           title: track.title,
-          pid: process?.pid || null,
+          pid: processPid || process?.pid || null,
+          processGeneration,
+          processToken,
+          startedAt,
         });
 
-        const finish = () => {
+        const finish = (reason = "natural_end") => {
           if (settled) return;
           settled = true;
-          this.setState(AUDIO_PIPELINE_STATES.FINISHED, { trackId: track.id });
+          this.setState(AUDIO_PIPELINE_STATES.FINISHED, {
+            trackId: track.id,
+            processGeneration,
+            processToken,
+            reason,
+          });
           resolve();
         };
 
-        const fail = (error) => {
+        const fail = (error, reason = "process_error") => {
           if (settled) return;
           settled = true;
           this.lastError = error.message;
-          this.setState(AUDIO_PIPELINE_STATES.OFFLINE, { trackId: track.id, error: error.message });
-          this.ffmpeg.stop();
+          this.setState(AUDIO_PIPELINE_STATES.OFFLINE, {
+            trackId: track.id,
+            processGeneration,
+            processToken,
+            reason,
+            error: error.message,
+          });
+          this.ffmpeg.stop(process, { reason, processGeneration });
           reject(error);
         };
 
-        stream?.on("end", finish);
-        stream?.on("error", fail);
-        icecastStream?.on?.("error", fail);
+        if (!directToIcecast) {
+          stream?.on("end", () => finish("stdout_end"));
+        }
+        stream?.on("error", (error) => fail(error, "stdout_error"));
+        icecastStream?.on?.("error", (error) => fail(error, "icecast_stream_error"));
         process?.on("exit", (code) => {
           if (code && code !== 0) {
-            fail(new Error(`FFmpeg exited with code ${code}`));
+            fail(new Error(`FFmpeg exited with code ${code}`), "process_exit_error");
             return;
           }
-          finish();
+          finish("natural_end");
         });
-        process?.on("error", fail);
+        process?.on("error", (error) => fail(error, "spawn_error"));
 
         this.icecast.waitForMount({
           timeoutMs: 15000,
@@ -113,26 +130,35 @@ export class AudioPipeline {
                 console.error("[stream:debug] Icecast mount not confirmed");
                 console.error(JSON.stringify(icecastStatus, null, 2));
               }
-              fail(new Error("Icecast mount /radio was not confirmed."));
+              fail(new Error("Icecast mount /radio was not confirmed."), "mount_not_confirmed");
               return;
             }
             this.setState(AUDIO_PIPELINE_STATES.STREAMING, {
               trackId: track.id,
               title: track.title,
-              pid: process?.pid || null,
+              pid: processPid || process?.pid || null,
+              processGeneration,
+              processToken,
             });
             this.logger.info("stream", "Audio pipeline iniciado.", {
               trackId: track.id,
               title: track.title,
-              pid: process?.pid || null,
+              pid: processPid || process?.pid || null,
+              processGeneration,
+              processToken,
               mount: this.icecast.config.mount,
             });
           })
-          .catch(fail);
+          .catch((error) => fail(error, "mount_check_error"));
 
         if (!process) {
-          this.setState(AUDIO_PIPELINE_STATES.STREAMING, { trackId: track.id, dryRun: true });
-          finish();
+          this.setState(AUDIO_PIPELINE_STATES.STREAMING, {
+            trackId: track.id,
+            processGeneration,
+            processToken,
+            dryRun: true,
+          });
+          finish("dry_run");
         }
       } catch (error) {
         this.lastError = error.message;
@@ -143,7 +169,7 @@ export class AudioPipeline {
   }
 
   stop() {
-    this.ffmpeg.stop();
+    this.ffmpeg.stop(this.currentProcess, { reason: "manual_stop" });
     this.icecast.disconnect();
     this.currentProcess = null;
     this.currentTrack = null;

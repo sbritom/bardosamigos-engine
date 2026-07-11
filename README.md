@@ -1,16 +1,46 @@
-# React + Vite
+# Bar dos Amigos Engine
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Release Candidate da Bar Streaming Engine v1.0.
 
-Currently, two official plugins are available:
+## Versao oficial
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Version: `1.0.0-rc.1`
+- Build: `20260707.1`
+- API: `v1`
+- Environment: `release-candidate`
 
-## React Compiler
+## Modulos principais
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Radio Engine, Stream Engine, FFmpeg, Icecast e Audio Pipeline
+- AutoDJ, Queue, Scheduler e Playlist
+- Library Manager, Metadata Engine e Cover Engine
+- Player Engine, Radio UI e Admin Dashboard
+- Audience & Requests Engine
+- Xat Integration
+- Deploy Engine
+- Release Engine
 
-## Expanding the ESLint configuration
+## Comandos principais
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run build
+npm run stream:test
+npm run release:check
+```
+
+## Radio
+
+```bash
+npm run radio
+```
+
+## Release
+
+```bash
+npm run release
+npm run release:health
+npm run release:report
+```
+
+Consulte `INSTALL.md`, `DEPLOY.md`, `API.md`, `RADIO.md`, `XAT.md` e `ROADMAP.md` para detalhes operacionais.

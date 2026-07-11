@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { RadioEngine } from "../core/RadioEngine.js";
+import { runAutoDJTests } from "./autodjEngine.test.js";
 
 function createFakeAudioLibrary(root) {
   const musicFolder = path.join(root, "radio", "music");
@@ -19,6 +20,8 @@ function createFakeAudioLibrary(root) {
 }
 
 async function run() {
+  await runAutoDJTests();
+
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "bar-radio-engine-"));
   const musicFolder = createFakeAudioLibrary(root);
   const logFolder = path.join(root, "logs");

@@ -8,6 +8,7 @@ import { EventBus } from "../events/EventBus.js";
 import { FFmpegEngine } from "../ffmpeg/FFmpegEngine.js";
 import { HistoryEngine } from "../history/HistoryEngine.js";
 import { IcecastClient } from "../icecast/IcecastClient.js";
+import { RadioHealthEngine } from "../health/RadioHealthEngine.js";
 import { LibraryEngine } from "../library/LibraryEngine.js";
 import { LibraryManager } from "../library/LibraryManager.js";
 import { LibrarySyncService } from "../library/LibrarySyncService.js";
@@ -19,6 +20,10 @@ import { PlayerEngine } from "../player/PlayerEngine.js";
 import { SchedulerEngine } from "../scheduler/SchedulerEngine.js";
 import { StreamEngine } from "../stream/StreamEngine.js";
 import { StreamStateStore } from "../state/StreamStateStore.js";
+import { XatEngine } from "../xat/XatEngine.js";
+import { DeployEngine } from "../deploy/DeployEngine.js";
+import { AudienceEngine } from "../audience/AudienceEngine.js";
+import { ReleaseEngine } from "../release/ReleaseEngine.js";
 
 export class RadioEngine {
   constructor({ env = process.env } = {}) {
@@ -50,11 +55,11 @@ export class RadioEngine {
     this.streamState = new StreamStateStore();
 
     this.library = new LibraryEngine(this.config, this.logger);
-    this.library.init();
+    await this.library.init();
     this.events.emit("libraryLoaded", { tracks: this.library.list().length });
 
     this.libraryManager = new LibraryManager(this.config, this.logger, this.events);
-    const libraryManagerSummary = this.libraryManager.initialize();
+    const libraryManagerSummary = await this.libraryManager.initialize();
     console.info("Library Manager:");
     console.info("OK");
     console.info("Tracks:");
@@ -68,7 +73,7 @@ export class RadioEngine {
     console.info("Cache:");
     console.info("OK");
 
-    this.playlist = new PlaylistEngine(this.library, this.config);
+    this.playlist = new PlaylistEngine(this.libraryManager, this.config);
     this.playlist.init();
     this.events.emit("playlistChanged", { tracks: this.playlist.tracks.length });
 
@@ -108,6 +113,14 @@ export class RadioEngine {
       eventBus: this.events,
       networkDiagnostics: this.networkDiagnostics,
     });
+    this.player.configure({
+      nowPlaying: this.nowPlaying,
+      history: this.history,
+      audioQueue: this.audioQueue,
+      playlist: this.playlist,
+      stream: this.stream,
+      logger: this.logger,
+    });
     this.librarySync = new LibrarySyncService({
       libraryManager: this.libraryManager,
       libraryEngine: this.library,
@@ -119,6 +132,32 @@ export class RadioEngine {
       getCurrentTrack: () => this.stream?.currentTrack || this.nowPlaying?.get()?.track || null,
     });
     this.librarySync.init();
+    this.healthEngine = new RadioHealthEngine(this, this.logger);
+    this.xat = new XatEngine({
+      radioConfig: this.config,
+      playerEngine: this.player,
+      logger: this.logger,
+      eventBus: this.events,
+      env: this.env,
+    });
+    this.xat.init();
+    this.deploy = new DeployEngine({
+      radioEngine: this,
+      env: this.env,
+      logger: this.logger,
+    });
+    this.deploy.ensureDirectories();
+    this.audience = new AudienceEngine({
+      engine: this,
+      logger: this.logger,
+      eventBus: this.events,
+    });
+    this.audience.init();
+    this.release = new ReleaseEngine({
+      engine: this,
+      logger: this.logger,
+    });
+    this.release.init();
 
     this.api = new ApiEngine(this, this.logger);
     await this.api.init();

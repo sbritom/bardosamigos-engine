@@ -7,6 +7,7 @@ import { LibraryCache } from "./LibraryCache.js";
 import { LibraryScanner } from "./LibraryScanner.js";
 import { LibraryStatistics } from "./LibraryStatistics.js";
 import { LibraryWatcher } from "./LibraryWatcher.js";
+import { MediaMetadataEngine } from "../metadata/MediaMetadataEngine.js";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverRoot = path.resolve(dirname, "..", "..");
@@ -20,14 +21,19 @@ export class LibraryManager extends EventEmitter {
     this.libraryPath = config.musicFolder;
     this.displayLibraryPath = config.libraryPath || config.musicFolder;
     this.cachePath = path.resolve(serverRoot, "storage", "library-cache.json");
-    this.scanner = new LibraryScanner({ libraryPath: this.libraryPath, logger });
+    this.metadataEngine = new MediaMetadataEngine({ logger });
+    this.scanner = new LibraryScanner({ libraryPath: this.libraryPath, logger, metadataEngine: this.metadataEngine });
     this.cache = new LibraryCache({ cachePath: this.cachePath, logger });
     this.watcher = new LibraryWatcher({
       libraryPath: this.libraryPath,
       logger,
       debounceMs: Number(config.libraryWatchDebounceMs || 1000),
       onReady: (status) => this.recordEvent("library:ready", status),
-      onChange: (change) => this.handleWatcherChange(change),
+      onChange: (change) => {
+        this.handleWatcherChange(change).catch((error) => {
+          this.logger?.error("library", "Falha ao atualizar biblioteca pelo watcher.", { error: error.message });
+        });
+      },
     });
     this.tracks = [];
     this.stats = LibraryStatistics.generate([]);
@@ -39,12 +45,12 @@ export class LibraryManager extends EventEmitter {
     this.ready = false;
   }
 
-  initialize() {
+  async initialize() {
     if (this.libraryPath) {
       fs.mkdirSync(this.libraryPath, { recursive: true });
     }
 
-    this.rescan("initial");
+    await this.rescan("initial");
     const watcherStatus = this.watcher.start();
     this.logger?.info("library", "Library Watcher monitorando.", {
       libraryPath: watcherStatus.libraryPath,
@@ -54,7 +60,7 @@ export class LibraryManager extends EventEmitter {
     return this.getSummary();
   }
 
-  rescan(reason = "manual") {
+  async rescan(reason = "manual") {
     if (this.rescanning) {
       this.pendingRescan = true;
       return this.getSummary();
@@ -68,7 +74,7 @@ export class LibraryManager extends EventEmitter {
       const cacheData = this.isSameLibraryCache(loadedCacheData)
         ? loadedCacheData
         : this.cache.empty();
-      const scannedTracks = this.scanner.scan(this.libraryPath);
+      const scannedTracks = await this.scanner.scan(this.libraryPath);
       reconciled = this.cache.reconcile(cacheData.tracks, scannedTracks);
       const saved = this.cache.save({
         libraryPath: this.displayLibraryPath,
@@ -106,9 +112,9 @@ export class LibraryManager extends EventEmitter {
     return this.getSummary();
   }
 
-  handleWatcherChange(change) {
+  async handleWatcherChange(change) {
     const previousTotal = this.tracks.length;
-    const summary = this.rescan("watcher");
+    const summary = await this.rescan("watcher");
 
     this.logger?.info("library", "Biblioteca atualizada.", {
       reason: change.eventType,
@@ -200,6 +206,10 @@ export class LibraryManager extends EventEmitter {
     return this.tracks;
   }
 
+  list() {
+    return this.getTracks();
+  }
+
   getStats() {
     return this.stats;
   }
@@ -254,6 +264,7 @@ export class LibraryManager extends EventEmitter {
       libraryPath: this.displayLibraryPath,
       fsPath: this.libraryPath,
       cachePath: this.cachePath,
+      metadataCache: this.metadataEngine.getCacheInfo(),
       tracks: this.tracks.length,
       stats: this.stats,
       changes: this.lastChanges,

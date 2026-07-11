@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { isSupportedAudio, readMetadata } from "./MetadataReader.js";
+import { isSupportedAudio } from "./MetadataReader.js";
+import { MediaMetadataEngine } from "../metadata/MediaMetadataEngine.js";
 
 export class LibraryEngine {
   constructor(config, logger) {
@@ -8,9 +9,10 @@ export class LibraryEngine {
     this.logger = logger;
     this.cache = new Map();
     this.watchers = [];
+    this.metadataEngine = new MediaMetadataEngine({ logger });
   }
 
-  init() {
+  async init() {
     fs.mkdirSync(this.config.cacheFolder, { recursive: true });
     if (!this.config.libraryPathFound || !fs.existsSync(this.config.musicFolder)) {
       this.logger.warn("library", "Library not found.", {
@@ -24,7 +26,7 @@ export class LibraryEngine {
       path: this.config.libraryPath,
       fsPath: this.config.musicFolder,
     });
-    this.reindex();
+    await this.reindex();
     this.watch();
     this.logger.info("library", "Biblioteca carregada.", { tracks: this.cache.size });
   }
@@ -52,17 +54,17 @@ export class LibraryEngine {
     return files;
   }
 
-  reindex() {
+  async reindex() {
     this.cache.clear();
     const files = this.walk(this.config.musicFolder);
-    files.forEach((filePath) => {
+    for (const filePath of files) {
       try {
-        const metadata = readMetadata(filePath);
+        const metadata = await this.metadataEngine.read(filePath, this.config.musicFolder);
         this.cache.set(metadata.id, metadata);
       } catch (error) {
         this.logger.warn("library", "Arquivo de audio ignorado.", { filePath, error: error.message });
       }
-    });
+    }
     this.writeCache();
     return this.list();
   }
@@ -74,7 +76,9 @@ export class LibraryEngine {
       const watcher = fs.watch(folder, { persistent: false }, () => {
         clearTimeout(this.reindexTimer);
         this.reindexTimer = setTimeout(() => {
-          this.reindex();
+          this.reindex().catch((error) => {
+            this.logger.warn("library", "Falha ao reindexar biblioteca.", { error: error.message });
+          });
           this.logger.info("library", "Biblioteca atualizada.", { tracks: this.cache.size });
         }, 250);
       });

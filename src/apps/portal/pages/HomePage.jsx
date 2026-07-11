@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
   CakeSlice,
@@ -8,12 +8,14 @@ import {
   Music2,
   Play,
   Radio,
+  Search,
   Scissors,
   Sparkles,
   Trophy,
   Users,
   Volume2,
   Wrench,
+  X,
 } from 'lucide-react'
 import {
   ActionButton,
@@ -40,6 +42,7 @@ import { useCountdown } from '../home/hooks/useCountdown'
 import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
 import { barStudioTools, communityEvents, tvEvent } from '../home/data/dashboardData'
+import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
 
 const OfficialChat = lazy(() =>
@@ -146,6 +149,26 @@ function HeroSection({ liveMatchCenter }) {
 
 function TvCard() {
   const safeTvEvent = tvEvent || {}
+  const [currentChannel, setCurrentChannel] = useState(HOME_TV_CHANNELS[0])
+  const [isChannelModalOpen, setIsChannelModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeCategory, setActiveCategory] = useState('Todos')
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  const filteredChannels = useMemo(() => {
+    return HOME_TV_CHANNELS.filter((channel) => {
+      const matchesCategory = activeCategory === 'Todos' || channel.category === activeCategory
+      const matchesSearch = !normalizedSearch ||
+        channel.name.toLowerCase().includes(normalizedSearch) ||
+        channel.category.toLowerCase().includes(normalizedSearch)
+
+      return matchesCategory && matchesSearch
+    })
+  }, [activeCategory, normalizedSearch])
+
+  function selectChannel(channel) {
+    setCurrentChannel(channel)
+    setIsChannelModalOpen(false)
+  }
 
   return (
     <FeatureCard
@@ -156,18 +179,87 @@ function TvCard() {
       icon={<Play size={20} />}
       action={<StatusBadge status={safeTvEvent.status || 'EM BREVE'} tone="live">{safeTvEvent.status || 'Pronta'}</StatusBadge>}
     >
-      <div className="bds-home-panel-body" data-designer-id="tv.content" data-designer-label="TV / Conteudo">
+      <div className="bds-home-panel-body bds-home-tv-panel" data-designer-id="tv.content" data-designer-label="TV / Conteudo">
         <div className="bds-home-tv-stage" data-designer-id="tv.player" data-designer-label="TV / Player">
-          <div className="bds-home-tv-content" data-designer-id="tv.categories" data-designer-label="TV / Categorias">
-            <Play size={32} />
-            <h3>TV <span>AO VIVO</span></h3>
-            <p>Transmissao principal da comunidade</p>
+          <iframe
+            key={currentChannel.id}
+            className="bds-home-tv-iframe"
+            src={currentChannel.src}
+            title={`TV ao vivo - ${currentChannel.name}`}
+            allow="autoplay; fullscreen; encrypted-media"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            allowFullScreen
+          />
+
+          <div className="bds-home-tv-overlay" data-designer-id="tv.categories" data-designer-label="TV / Categorias">
+            <div className="bds-home-tv-current">
+              <span>Canal atual</span>
+              <strong>{currentChannel.name}</strong>
+            </div>
+            <ActionButton className="bds-home-tv-channel-button" variant="secondary" onClick={() => setIsChannelModalOpen(true)}>
+              Escolher canal
+            </ActionButton>
           </div>
         </div>
 
+        {isChannelModalOpen && (
+          <div className="bds-home-tv-modal" role="dialog" aria-modal="true" aria-label="Escolher canal de TV">
+            <div className="bds-home-tv-modal__header">
+              <div>
+                <span>TV Ao Vivo</span>
+                <strong>Escolher canal</strong>
+              </div>
+              <button className="bds-home-tv-modal__close" type="button" aria-label="Fechar seletor de canais" onClick={() => setIsChannelModalOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <label className="bds-home-tv-search">
+              <Search size={16} />
+              <input
+                type="search"
+                value={searchTerm}
+                placeholder="Buscar canal"
+                aria-label="Buscar canal"
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </label>
+
+            <div className="bds-home-tv-categories" aria-label="Categorias de canais">
+              {HOME_TV_CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  className={category === activeCategory ? 'is-active' : ''}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <div className="bds-home-tv-channel-grid">
+              {filteredChannels.length ? filteredChannels.map((channel) => (
+                <button
+                  key={channel.id}
+                  className={channel.id === currentChannel.id ? 'bds-home-tv-channel is-active' : 'bds-home-tv-channel'}
+                  type="button"
+                  onClick={() => selectChannel(channel)}
+                >
+                  <span>{channel.category}</span>
+                  <strong>{channel.name}</strong>
+                </button>
+              )) : (
+                <div className="bds-home-tv-no-results">Nenhum canal encontrado.</div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="bds-home-stats-grid" data-designer-id="tv.stats" data-designer-label="TV / Estatisticas">
           <StatCard label="Proximo evento" value={safeTvEvent.title || 'Sem transmissao agendada'} />
-          <StatCard label="Categoria" value={safeTvEvent.category || 'TV'} />
+          <StatCard label="Categoria" value={currentChannel.category || safeTvEvent.category || 'TV'} />
           <StatCard label="Status" value={safeTvEvent.status || 'Pronta'} />
         </div>
       </div>

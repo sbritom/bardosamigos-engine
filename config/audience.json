@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "allowRequests": true,
+  "allowDuplicates": false,
+  "minimumInterval": 60,
+  "favoritesEnabled": true,
+  "historyLimit": 1000,
+  "statisticsLimit": 100,
+  "storagePath": "server/storage/audience"
+}

@@ -1,6 +1,15 @@
 import http from "node:http";
 import crypto from "node:crypto";
+import fs from "node:fs";
+import { CoverApi } from "../covers/CoverApi.js";
+import { HealthApi } from "../health/HealthApi.js";
 import { LibraryApi } from "../library/LibraryApi.js";
+import { MetadataApi } from "../metadata/MetadataApi.js";
+import { PlayerApi } from "../player/PlayerApi.js";
+import { XatApi } from "../xat/XatApi.js";
+import { RadioAdminApi } from "../admin/RadioAdminApi.js";
+import { AudienceApi } from "../audience/AudienceApi.js";
+import { ReleaseApi } from "../release/ReleaseApi.js";
 
 function sendJson(response, status, payload) {
   response.writeHead(status, {
@@ -10,6 +19,15 @@ function sendJson(response, status, payload) {
     "Access-Control-Allow-Headers": "Content-Type,Authorization",
   });
   response.end(JSON.stringify(payload));
+}
+
+function sendImage(response, payload) {
+  response.writeHead(200, {
+    "Content-Type": payload.mimeType,
+    "Cache-Control": "public, max-age=86400",
+    "Access-Control-Allow-Origin": "*",
+  });
+  fs.createReadStream(payload.filePath).pipe(response);
 }
 
 export class ApiEngine {
@@ -30,7 +48,7 @@ export class ApiEngine {
     this.logger.info("api", "API iniciada.", { port: this.engine.config.apiPort });
   }
 
-  handle(request, response) {
+  async handle(request, response) {
     if (request.method === "OPTIONS") {
       sendJson(response, 204, null);
       return;
@@ -38,9 +56,17 @@ export class ApiEngine {
 
     try {
       const url = new URL(request.url, `http://${request.headers.host}`);
+      const imagePayload = this.resolveImage(url.pathname);
+      if (imagePayload) {
+        sendImage(response, imagePayload);
+        return;
+      }
+
       const data = request.method === "POST"
-        ? this.resolvePost(url.pathname)
-        : this.resolve(url.pathname, url);
+        ? this.resolvePost(url.pathname, await this.readBody(request))
+        : request.method === "DELETE"
+          ? this.resolveDelete(url.pathname)
+        : await this.resolve(url.pathname, url);
 
       if (data === undefined) {
         sendJson(response, 404, { ok: false, error: "Endpoint not found." });
@@ -56,6 +82,17 @@ export class ApiEngine {
 
   resolve(pathname, url = null) {
     const libraryApi = new LibraryApi(this.engine.libraryManager);
+    const metadataApi = new MetadataApi(this.engine.libraryManager?.metadataEngine, this.engine.libraryManager);
+    const healthApi = new HealthApi(this.engine.healthEngine);
+    const playerApi = new PlayerApi(this.engine.player);
+    const xatApi = new XatApi(this.engine.xat);
+    const adminApi = new RadioAdminApi(this.engine);
+    const audienceApi = new AudienceApi(this.engine.audience);
+    const releaseApi = new ReleaseApi(this.engine.release);
+    const coverApi = new CoverApi({
+      coverEngine: this.engine.libraryManager?.metadataEngine?.coverEngine,
+      libraryManager: this.engine.libraryManager,
+    });
     const status = () => this.engine.getStatus();
     const library = () => libraryApi.list();
     const libraryStats = () => libraryApi.stats();
@@ -63,7 +100,7 @@ export class ApiEngine {
     const libraryEvents = (url) => libraryApi.events(url.searchParams.get("limit"));
     const history = () => this.engine.history.list();
     const nowPlaying = () => this.engine.nowPlaying.get();
-    const health = () => this.engine.healthCheck();
+    const health = () => healthApi.health();
     const config = () => this.engine.config;
     const queue = () => this.engine.playlist.queueList();
     const stream = () => this.engine.stream.status();
@@ -76,6 +113,10 @@ export class ApiEngine {
     const icecast = () => this.engine.icecast.status();
     const icecastDebug = () => this.engine.icecast.debugStatus(this.engine.ffmpeg.status());
     const networkDebug = () => this.engine.networkDiagnostics.lastResult || { ok: false, message: "Network diagnostics not executed yet." };
+    const metadata = (pathname) => metadataApi.get(pathname.replace("/engine/metadata/", ""));
+    const deployStatus = () => this.engine.deploy?.status();
+    const deployServices = () => this.engine.deploy?.services();
+    const deployVersion = () => this.engine.deploy?.version();
 
     const routes = {
       "/engine/status": status,
@@ -87,17 +128,51 @@ export class ApiEngine {
       "/engine/library/artists": () => libraryApi.artists(),
       "/engine/library/albums": () => libraryApi.albums(),
       "/engine/library/folders": () => libraryApi.folders(),
+      "/engine/metadata/cache": () => metadataApi.cache(),
+      "/engine/metadata/stats": () => metadataApi.stats(),
+      "/engine/covers/stats": () => coverApi.stats(),
+      "/engine/player/state": () => playerApi.state(),
+      "/engine/player/nowplaying": () => playerApi.nowPlaying(),
+      "/engine/player/history": () => playerApi.history(),
+      "/engine/player/next": () => playerApi.next(),
+      "/engine/player/status": () => playerApi.status(),
+      "/engine/xat/config": () => xatApi.config(),
+      "/engine/xat/status": () => xatApi.status(),
+      "/engine/xat/widget": () => xatApi.widget(),
+      "/engine/xat/stream": () => xatApi.stream(),
       "/engine/history": history,
       "/engine/queue": queue,
       "/engine/nowplaying": nowPlaying,
       "/engine/now-playing": nowPlaying,
       "/engine/health": health,
+      "/engine/health/report": () => healthApi.report(),
+      "/engine/health/modules": () => healthApi.modules(),
+      "/engine/health/events": () => healthApi.events(),
+      "/engine/health/version": () => healthApi.version(),
       "/engine/config": config,
       "/engine/stream": stream,
       "/engine/audio": audio,
       "/engine/icecast": icecast,
       "/engine/icecast/debug": icecastDebug,
       "/engine/network/debug": networkDebug,
+      "/engine/deploy/status": deployStatus,
+      "/engine/deploy/services": deployServices,
+      "/engine/deploy/version": deployVersion,
+      "/engine/admin/dashboard": () => adminApi.dashboard(),
+      "/engine/admin/storage": () => adminApi.storage(),
+      "/engine/admin/system": () => adminApi.system(),
+      "/engine/admin/config": () => adminApi.config(),
+      "/engine/admin/logs": () => adminApi.logs(),
+      "/engine/audience": () => audienceApi.summary(),
+      "/engine/audience/stats": () => audienceApi.stats(),
+      "/engine/audience/history": () => audienceApi.history(),
+      "/engine/audience/most-played": () => audienceApi.mostPlayed(),
+      "/engine/audience/favorites": () => audienceApi.favorites(),
+      "/engine/requests": () => audienceApi.requests(),
+      "/engine/release": () => releaseApi.release(),
+      "/engine/release/status": () => releaseApi.status(),
+      "/engine/release/report": () => releaseApi.report(),
+      "/engine/release/version": () => releaseApi.version(),
       "/api/radio/status": status,
       "/api/radio/library": library,
       "/api/radio/history": history,
@@ -112,10 +187,46 @@ export class ApiEngine {
       "/api/radio/schedule": () => this.engine.scheduler.list(),
     };
 
+    if (pathname.startsWith("/engine/metadata/") && !routes[pathname]) {
+      return metadata(pathname);
+    }
+
     return routes[pathname]?.(url);
   }
 
-  resolvePost(pathname) {
+  resolveImage(pathname) {
+    const coverEngine = this.engine.libraryManager?.metadataEngine?.coverEngine;
+    if (!coverEngine || !pathname.startsWith("/engine/covers/")) return null;
+    if (pathname === "/engine/covers/stats") return null;
+
+    const coverApi = new CoverApi({
+      coverEngine,
+      libraryManager: this.engine.libraryManager,
+    });
+
+    if (pathname === "/engine/covers/default") return coverApi.resolve("default");
+
+    const match = pathname.match(/^\/engine\/covers\/([^/]+)(?:\/(512|256|128|64))?$/);
+    if (!match) return null;
+
+    return coverApi.resolve(decodeURIComponent(match[1]), match[2] || null);
+  }
+
+  async readBody(request) {
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
+    if (!chunks.length) return {};
+    const raw = Buffer.concat(chunks).toString("utf8");
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { raw };
+    }
+  }
+
+  resolvePost(pathname, body = {}) {
+    const audienceApi = new AudienceApi(this.engine.audience);
     const routes = {
       "/engine/restart": () => {
         this.engine.restart().catch((error) => {
@@ -123,9 +234,20 @@ export class ApiEngine {
         });
         return { restarting: true };
       },
+      "/engine/requests": () => audienceApi.createRequest(body),
     };
 
     return routes[pathname]?.();
+  }
+
+  resolveDelete(pathname) {
+    const audienceApi = new AudienceApi(this.engine.audience);
+    const requestMatch = pathname.match(/^\/engine\/requests\/([^/]+)$/);
+    if (requestMatch) {
+      return audienceApi.cancelRequest(decodeURIComponent(requestMatch[1]));
+    }
+
+    return undefined;
   }
 
   bindEvents() {
@@ -139,6 +261,24 @@ export class ApiEngine {
       "playlist:reloaded",
       "queue:updated",
       "autodj:synchronized",
+      "player:ready",
+      "player:updated",
+      "player:trackChanged",
+      "player:volumeChanged",
+      "xat:ready",
+      "xat:connected",
+      "xat:disconnected",
+      "xat:widgetUpdated",
+      "admin:opened",
+      "admin:updated",
+      "admin:settingsChanged",
+      "request:created",
+      "request:accepted",
+      "request:rejected",
+      "request:played",
+      "favorites:updated",
+      "statistics:updated",
+      "audience:updated",
     ].forEach((eventName) => {
       this.engine.events.on(eventName, (payload) => {
         this.broadcast({ event: eventName, payload, emittedAt: new Date().toISOString() });
