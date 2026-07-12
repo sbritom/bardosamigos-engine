@@ -28,8 +28,14 @@ Endpoints:
 - `GET /competitions`
 - `GET /competitions/{competitionCode}/teams`
 - `GET /competitions/{competitionCode}/matches?status=SCHEDULED`
+- `GET /competitions/{competitionCode}/matches?status=TIMED`
+- `GET /competitions/{competitionCode}/matches?status=LIVE`
+- `GET /competitions/{competitionCode}/matches?status=IN_PLAY`
+- `GET /competitions/{competitionCode}/matches?status=PAUSED`
 - `GET /competitions/{competitionCode}/matches?status=FINISHED`
 - `GET /competitions/{competitionCode}/standings`
+
+Com a chave atual, `GET /competitions` retorna competicoes como `BSA`, `CLI`, `WC`, `CL`, `PL` e `PD`. Durante a janela ativa da Copa do Mundo FIFA 2026, o fallback da Home descobre a competicao `FIFA World Cup` pela API, consulta a temporada 2026 e prioriza seus jogos ate a final encerrar. Depois disso, o fallback volta automaticamente para as competicoes gerais.
 
 ## Producao na Vercel
 
