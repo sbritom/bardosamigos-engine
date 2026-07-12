@@ -43,7 +43,6 @@ export default function Header() {
                 <div className="bds-top-header__brand-title" data-designer-id="header.title" data-designer-label="Header / Titulo">
                   BAR DOS <span>AMIGOS</span>
                 </div>
-                <div className="bds-top-header__brand-subtitle" data-designer-id="header.subtitle" data-designer-label="Header / Subtitulo">DESDE 2016 • TECH PUB</div>
               </div>
             </div>
 
@@ -68,11 +67,6 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-2 text-sm" data-designer-id="header.actions" data-designer-label="Header / Acoes">
-              <div className="bds-top-header__online" data-designer-id="header.online" data-designer-label="Header / Indicador Online">
-                <span />
-                128 online
-              </div>
-
               <button className="bds-top-header__icon-button" type="button" aria-label="Pesquisar">
                 <Search size={18} />
               </button>

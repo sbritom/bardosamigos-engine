@@ -11,7 +11,7 @@ export default function RadioBar() {
     <div className="bds-radio-strip">
       <Container>
         <div className="bds-radio-strip__bar">
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="bds-radio-strip__station">
             <div className="bds-radio-strip__icon">
               <Radio size={26} />
             </div>
@@ -26,7 +26,7 @@ export default function RadioBar() {
             </div>
           </div>
 
-          <div className="flex min-w-[280px] flex-1 items-center gap-4 md:max-w-[620px]">
+          <div className="bds-radio-strip__controls">
             <Button
               aria-label={playing ? "Pausar radio" : "Tocar radio"}
               className="h-11 w-11 rounded-full p-0"
@@ -36,7 +36,7 @@ export default function RadioBar() {
               {loading ? <Loader2 size={20} className="animate-spin" /> : playing ? <Pause size={20} /> : <Play size={20} />}
             </Button>
 
-            <div className="hidden min-w-0 flex-1 md:block">
+            <div className="bds-radio-strip__progress">
               <div className="mb-1 flex justify-between text-xs font-bold uppercase text-[var(--secondary)]">
                 <span>{error || currentStation.program}</span>
                 <span>{playing ? "Online" : "Pronta"}</span>
@@ -44,7 +44,7 @@ export default function RadioBar() {
               <Progress value={playing ? 100 : 0} />
             </div>
 
-            <label className="hidden min-w-[150px] items-center gap-2 text-xs font-bold text-[var(--secondary)] sm:flex">
+            <label className="bds-radio-strip__volume">
               <Volume2 size={18} className="text-[var(--gold)]" />
               <input
                 aria-label="Volume da radio"

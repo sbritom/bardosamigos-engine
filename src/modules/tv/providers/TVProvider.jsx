@@ -8,8 +8,23 @@ import {
 } from '../services'
 import { TVContext } from '../runtime'
 import { normalizeTVError } from '../utils'
+import { getLocalTVPlatformCatalog } from '../data/tvFallbackCatalog'
 
 const EMPTY_COLLECTION = { data: [], count: 0, error: null }
+
+function filterFallbackChannels(channels, filters) {
+  const search = String(filters.search || '').trim().toLowerCase()
+  return channels.filter((channel) => {
+    const matchesCategory = !filters.categoryId
+      || channel.categoryId === filters.categoryId
+      || channel.category?.id === filters.categoryId
+    const matchesSearch = !search
+      || channel.name.toLowerCase().includes(search)
+      || channel.category?.name?.toLowerCase().includes(search)
+      || channel.slug?.toLowerCase().includes(search)
+    return matchesCategory && matchesSearch
+  })
+}
 
 export function TVProvider({ children, userId = null }) {
   const [categories, setCategories] = useState(EMPTY_COLLECTION)
@@ -33,8 +48,29 @@ export function TVProvider({ children, userId = null }) {
     ]
     const [categoryResult, channelResult, featuredResult, favoriteResult, recentResult] =
       await Promise.all(requests)
-    setCategories(categoryResult)
-    setChannels(channelResult)
+    const fallback = getLocalTVPlatformCatalog()
+    const fallbackChannels = filterFallbackChannels(fallback.channels, filters)
+    const shouldFallbackChannels = channelResult.error || !channelResult.data?.length
+    const shouldFallbackCategories = categoryResult.error || !categoryResult.data?.length
+    const finalCategories = shouldFallbackCategories
+      ? {
+        data: fallback.categories,
+        count: fallback.categories.length,
+        error: categoryResult.error || null,
+        source: 'local-fallback',
+      }
+      : categoryResult
+    const finalChannels = shouldFallbackChannels
+      ? {
+        data: fallbackChannels,
+        count: fallbackChannels.length,
+        error: channelResult.error || null,
+        source: 'local-fallback',
+      }
+      : channelResult
+
+    setCategories(finalCategories)
+    setChannels(finalChannels)
     setFeatured(featuredResult)
     setFavorites(favoriteResult)
     setRecent(recentResult)

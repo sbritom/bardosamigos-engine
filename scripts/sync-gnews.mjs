@@ -31,10 +31,22 @@ function requiredEnv(name) {
   return value
 }
 
+function optionalEnv(...names) {
+  for (const name of names) {
+    const value = process.env[name]
+    if (value) return String(value).trim().replace(/^['"]|['"]$/g, '').trim()
+  }
+
+  return ''
+}
+
 async function main() {
   const supabaseUrl = requiredEnv('VITE_SUPABASE_URL')
   const supabaseAnonKey = requiredEnv('VITE_SUPABASE_ANON_KEY')
-  const gnewsApiKey = requiredEnv('VITE_GNEWS_API_KEY')
+  const gnewsApiKey = optionalEnv('GNEWS_API_KEY', 'VITE_GNEWS_API_KEY')
+  if (!gnewsApiKey) {
+    throw new Error('GNEWS_API_KEY is required to run GNews sync. VITE_GNEWS_API_KEY is still accepted locally for backward compatibility.')
+  }
   const client = createClient(supabaseUrl, supabaseAnonKey)
   const service = createGNewsService({ client, apiKey: gnewsApiKey })
   const result = await service.sync({

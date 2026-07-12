@@ -1970,12 +1970,11 @@
 }
 
 .bds-radio-strip__bar {
-  display: flex;
+  display: grid;
   min-height: calc(var(--bds-space-64) + var(--bds-space-16));
-  flex-wrap: wrap;
+  grid-template-columns: minmax(260px, 1.2fr) auto minmax(260px, 1.45fr) minmax(150px, 0.62fr);
   align-items: center;
-  justify-content: space-between;
-  gap: var(--bds-space-16);
+  gap: clamp(var(--bds-space-12), 2vw, var(--bds-space-28));
   padding-block: var(--bds-space-8);
 }
 
@@ -1990,6 +1989,69 @@
   background: var(--bds-color-primary);
   color: var(--bds-color-primary-text);
   box-shadow: 0 0 24px rgba(240, 191, 47, 0.22);
+}
+
+.bds-radio-strip__station,
+.bds-radio-strip__controls,
+.bds-radio-strip__volume {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.bds-radio-strip__station {
+  gap: clamp(var(--bds-space-16), 2.2vw, var(--bds-space-32));
+}
+
+.bds-radio-strip__controls {
+  display: contents;
+}
+
+.bds-radio-strip__progress {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.bds-radio-strip__volume {
+  justify-self: end;
+  gap: var(--bds-space-8);
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 900;
+}
+
+.bds-radio-strip__volume input {
+  width: 100%;
+  min-width: var(--bds-space-80);
+  accent-color: var(--bds-color-primary);
+}
+
+@media (max-width: 980px) {
+  .bds-radio-strip__bar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(160px, 0.8fr);
+  }
+
+  .bds-radio-strip__progress {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .bds-radio-strip__bar {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: center;
+  }
+
+  .bds-radio-strip__station {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .bds-radio-strip__volume {
+    justify-self: center;
+    width: min(100%, 220px);
+  }
 }
 
 /* Live Match Center 2.0: central hero presentation. */
@@ -2194,6 +2256,7 @@
 
 /* Hero Match Center V2: faithful sports banner based on the approved mockup. */
 .bds-home-shell .bds-hero-v2 {
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   padding: var(--bds-space-8) var(--bds-space-24);
   border-color: rgba(212, 175, 55, 0.18);
@@ -2204,8 +2267,27 @@
 }
 
 .bds-home-shell .bds-hero-v2 .bds-hero-card__content {
-  display: block;
+  display: grid;
+  min-height: 100%;
   width: 100%;
+}
+
+.bds-home-shell .bds-hero-v2--empty .bds-hero-card__content {
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+}
+
+.bds-hero-v2-empty {
+  display: grid;
+  width: min(100%, 860px);
+  min-height: 100%;
+  place-items: center;
+  text-align: center;
+}
+
+.bds-hero-v2-empty .bds-empty-state {
+  width: min(100%, 620px);
+  margin-inline: auto;
 }
 
 .bds-hero-v2-content {
@@ -2365,6 +2447,107 @@
   font-size: var(--bds-font-small);
 }
 
+/* Home content cleanup: visual-only alignment pass. */
+.bds-home-shell .bds-hero-v2-content {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bds-home-shell .bds-hero-v2-match,
+.bds-home-shell .bds-hero-v2-meta,
+.bds-home-shell .bds-hero-v2-info {
+  grid-column: 1;
+}
+
+.bds-home-shell .bds-hero-v2-match {
+  max-width: 980px;
+  margin-inline: auto;
+  justify-content: center;
+}
+
+.bds-home-shell .bds-hero-v2-team {
+  justify-content: flex-end;
+}
+
+.bds-home-shell .bds-hero-v2-team--away {
+  justify-content: flex-end;
+}
+
+.bds-home-shell .bds-hero-v2-score {
+  min-width: calc(var(--bds-space-96) + var(--bds-space-40));
+  text-align: center;
+}
+
+.bds-home-shell .bds-home-tv-header-button {
+  white-space: nowrap;
+}
+
+.bds-home-shell .bds-home-tv-stage {
+  isolation: isolate;
+}
+
+.bds-home-shell .bds-home-tv-iframe {
+  z-index: 1;
+}
+
+.bds-home-shell .bds-home-tv-modal {
+  z-index: 4;
+}
+
+.bds-home-shell [data-designer-id="football"] .bds-home-card-list,
+.bds-home-shell [data-designer-id="news"] .bds-home-card-list {
+  align-content: start;
+  height: 100%;
+}
+
+.bds-home-shell [data-designer-id="football"] .bds-match-card,
+.bds-home-shell [data-designer-id="news"] .bds-news-card {
+  min-height: 112px;
+}
+
+.bds-home-shell [data-designer-id="news"] .bds-news-card h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bds-home-shell [data-designer-id="news"] .bds-news-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bds-home-request-button {
+  display: inline-flex;
+  min-height: var(--bds-space-32);
+  align-items: center;
+  justify-content: center;
+  gap: var(--bds-space-8);
+  border: 1px solid rgba(212, 175, 55, 0.26);
+  border-radius: var(--bds-radius-md);
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--bds-color-primary);
+  cursor: default;
+  font-size: var(--bds-font-small);
+  font-weight: 900;
+  line-height: var(--bds-line-tight);
+  padding: 0 var(--bds-space-10);
+}
+
+.bds-home-shell [data-designer-id="radio"] .bds-home-radio-card,
+.bds-home-shell [data-designer-id="community"] .bds-home-stats-grid {
+  height: 100%;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-stats-card > strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 900px) {
   .bds-hero-v2-content {
     grid-template-columns: minmax(0, 1fr);
@@ -2389,6 +2572,10 @@
   .bds-hero-v2-actions {
     width: 100%;
     justify-content: center;
+  }
+
+  .bds-home-shell [data-designer-id="community"] .bds-home-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 

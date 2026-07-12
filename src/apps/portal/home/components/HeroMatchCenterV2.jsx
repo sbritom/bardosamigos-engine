@@ -1,5 +1,5 @@
-import { CalendarDays, MapPin, Play, Trophy } from 'lucide-react'
-import { ActionButton, EmptyState, HeroCard, StatusBadge } from '../../../../design-system'
+import { CalendarDays, MapPin, Trophy } from 'lucide-react'
+import { EmptyState, HeroCard, StatusBadge } from '../../../../design-system'
 import { formatBrazilDateTime, nowUtcIso } from '../../../../core/time'
 import { getLiveMatchCenter } from '../../../../modules/competition/services/liveMatchCenterService'
 import { useCountdown } from '../hooks/useCountdown'
@@ -37,13 +37,13 @@ export function HeroMatchCenterV2({ liveMatchCenter }) {
 
   if (hero.isEmpty) {
     return (
-      <HeroCard className="bds-hero-v2">
-        <EmptyState
-          title="Nenhuma partida disponivel"
-          description="Assim que houver jogos sincronizados, o destaque aparece aqui automaticamente."
-          actionLabel="Abrir Competition"
-          onAction={() => { window.location.href = '/football' }}
-        />
+      <HeroCard className="bds-hero-v2 bds-hero-v2--empty">
+        <div className="bds-hero-v2-empty">
+          <EmptyState
+            title="Nenhuma partida disponivel"
+            description="Assim que houver jogos sincronizados, o destaque aparece aqui automaticamente."
+          />
+        </div>
       </HeroCard>
     )
   }
@@ -76,19 +76,6 @@ export function HeroMatchCenterV2({ liveMatchCenter }) {
             ))}
           </div>
         )}
-
-        <div className="bds-hero-v2-actions" data-designer-id="hero.buttons" data-designer-label="Hero / Botoes">
-          {hero.showTvButton && (
-            <span data-designer-id="hero.watchButton" data-designer-label="Hero / Botao Assistir"><ActionButton icon={<Play size={16} />} variant="secondary" onClick={() => { window.location.href = '/tv' }}>
-              Assistir
-            </ActionButton></span>
-          )}
-          {hero.showCompetitionButton && (
-            <span data-designer-id="hero.competitionButton" data-designer-label="Hero / Botao Competition"><ActionButton icon={<Trophy size={16} />} onClick={() => { window.location.href = '/football' }}>
-              Competition
-            </ActionButton></span>
-          )}
-        </div>
       </section>
     </HeroCard>
   )

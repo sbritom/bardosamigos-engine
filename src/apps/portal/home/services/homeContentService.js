@@ -338,7 +338,8 @@ export async function listHybridNews({ limit = NEWS_LIMIT } = {}) {
       source: 'supabase',
     }
   } catch (error) {
-    return { data: [], error, source: 'supabase' }
+    const fallback = await listNewsProxyArticles({ limit })
+    return fallback.data.length ? fallback : { data: [], error: fallback.error || error, source: 'supabase' }
   }
 }
 
@@ -397,7 +398,20 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
       source,
     }
   } catch (error) {
-    return { data: [], next: null, results: [], error, source: 'supabase' }
+    const fallback = await listFootballProxyMatches()
+    const now = nowUtcIso()
+    const matches = sortCurrentMatches(fallback.data || [], now)
+    const liveMatchCenter = getLiveMatchCenter(matches, { now })
+    const visibleMatches = selectVisibleFootballMatches(matches, now, limit)
+
+    return {
+      data: visibleMatches,
+      next: liveMatchCenter.match,
+      liveMatchCenter,
+      results: [],
+      error: visibleMatches.length ? null : fallback.error || error,
+      source: visibleMatches.length ? fallback.source : 'supabase',
+    }
   }
 }
 

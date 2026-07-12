@@ -41,6 +41,15 @@ function requiredEnv(name) {
   return value
 }
 
+function optionalEnv(...names) {
+  for (const name of names) {
+    const value = normalizeEnvValue(process.env[name])
+    if (value) return value
+  }
+
+  return ''
+}
+
 function formatExternalError(error) {
   if (!error) return 'Unknown error'
   return [error.message, error.code, error.details, error.hint].filter(Boolean).join(' | ')
@@ -202,7 +211,10 @@ async function main() {
 
   const supabaseUrl = requiredEnv('VITE_SUPABASE_URL')
   const supabaseAnonKey = requiredEnv('VITE_SUPABASE_ANON_KEY')
-  const footballDataApiKey = requiredEnv('VITE_FOOTBALL_DATA_API_KEY')
+  const footballDataApiKey = optionalEnv('FOOTBALL_DATA_API_KEY', 'VITE_FOOTBALL_DATA_API_KEY')
+  if (!footballDataApiKey) {
+    throw new Error('FOOTBALL_DATA_API_KEY is required to run Football-Data sync. VITE_FOOTBALL_DATA_API_KEY is still accepted locally for backward compatibility.')
+  }
   const footballDataAdapter = createFootballDataAdapter({ apiKey: footballDataApiKey })
   const footballDataPreflight = await footballDataAdapter.fetchCompetitions()
   const availableCompetitionCodes = new Set((footballDataPreflight.data?.competitions || []).map((competition) => competition.code).filter(Boolean))

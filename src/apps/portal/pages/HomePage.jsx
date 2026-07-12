@@ -19,11 +19,8 @@ import {
 } from 'lucide-react'
 import {
   ActionButton,
-  CardHeader,
   DashboardGrid,
-  EmptyState,
   FeatureCard,
-  HeroCard,
   Loading,
   MatchCard,
   NewsCard,
@@ -35,15 +32,13 @@ import {
 import '../../../design-system/styles/index.css'
 import { getSupabaseClient } from '../../../core/database'
 import { useRadio } from '../../../core/providers/RadioProvider'
-import { formatBrazilDateTime, nowUtcIso } from '../../../core/time'
-import { getLiveMatchCenter } from '../../../modules/competition/services/liveMatchCenterService'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
-import { useCountdown } from '../home/hooks/useCountdown'
 import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
-import { barStudioTools, communityEvents, tvEvent } from '../home/data/dashboardData'
+import { barStudioTools, communityEvents, latestResults } from '../home/data/dashboardData'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
+import { loadHomeTVChannels } from '../../../modules/tv/services/TVHomeChannelSource'
 
 const OfficialChat = lazy(() =>
   import('../../../modules/chat/components/OfficialChat').then((module) => ({
@@ -62,100 +57,43 @@ const initialDashboard = {
 
 const studioToolMeta = {
   'Cortar Foto Redonda': ['Scissors', 'Foto redonda para perfil e xat.'],
-  NameGrad: ['Sparkles', 'Gradiente premium para nomes.'],
-  NameWave: ['Sparkles', 'Efeito visual para nomes.'],
-  'Pedir Musica': ['Music2', 'Pedido privado para locutores.'],
-  'Redimensionar Imagem': ['Wrench', 'Tamanho certo em segundos.'],
-  'Remover Fundo (Em breve)': ['Wrench', 'Recorte automatico em breve.'],
-  'Criador de Avatar (Em breve)': ['Sparkles', 'Avatar exclusivo em breve.'],
+  'Gerador de Cores': ['Sparkles', 'Cores para nomes e visual do xat.'],
+  'Remover Fundo': ['Wrench', 'Recorte de imagem preparado.'],
+  'Criador de Avatar (Em breve)': ['Sparkles', 'Em breve.'],
 }
 
 const toolIcons = { Scissors, Sparkles, Music2, Wrench }
 
-function formatCountdown(remaining) {
-  return remaining.label || `${String(remaining.hours).padStart(2, '0')}h ${String(remaining.minutes).padStart(2, '0')}m`
-}
-
-function formatDateTime(value) {
-  return formatBrazilDateTime(value)
-}
-
-function TeamCrest({ name, label, src, side = 'home' }) {
-  const displayName = name || 'Time'
-  const fallbackLabel = label || displayName.slice(0, 3).toUpperCase()
-
-  return (
-    <div className={`bds-live-hero-team bds-live-hero-team--${side}`}>
-      <div className="bds-live-hero-crest">
-        {src ? <img src={src} alt="" loading="lazy" /> : fallbackLabel}
-      </div>
-      <span className="bds-live-hero-team-name">{displayName}</span>
-    </div>
-  )
-}
-
-function HeroSection({ liveMatchCenter }) {
-  const baseMatch = liveMatchCenter?.match || null
-  const remaining = useCountdown(baseMatch?.startsAt || nowUtcIso())
-  const hero = getLiveMatchCenter([], {
-    match: baseMatch,
-    countdownLabel: formatCountdown(remaining),
-    formattedDateTime: formatDateTime(baseMatch?.startsAt),
-  })
-
-  if (hero.isEmpty) {
-    return (
-      <HeroCard className="bds-home-live-hero">
-        <EmptyState
-          title="Nenhuma partida disponivel"
-          description="Assim que houver jogos sincronizados, o destaque aparece aqui automaticamente."
-          actionLabel="Abrir Competition"
-          onAction={() => { window.location.href = '/football' }}
-        />
-      </HeroCard>
-    )
-  }
-
-  return (
-    <HeroCard className="bds-home-live-hero">
-      <div className="bds-live-hero-banner">
-        <div className="bds-live-hero-competition">
-          {hero.competitionLogo && <img src={hero.competitionLogo} alt="" className="bds-home-competition-logo" loading="lazy" />}
-          <strong>{hero.competition}</strong>
-        </div>
-
-        <StatusBadge status={hero.displayStatus} tone={hero.statusTone}>{hero.displayStatus}</StatusBadge>
-
-        <div className="bds-live-hero-match" aria-label={`${hero.homeTeam} contra ${hero.awayTeam}`}>
-          <TeamCrest name={hero.homeTeam} label={hero.homeShield} src={hero.homeCrest} side="home" />
-          <strong className="bds-live-hero-score">{hero.score}</strong>
-          <TeamCrest name={hero.awayTeam} label={hero.awayShield} src={hero.awayCrest} side="away" />
-        </div>
-
-        {hero.infoItems.length > 0 && (
-          <div className="bds-live-hero-info">
-            {hero.infoItems.map((item) => <span key={item}>{item}</span>)}
-          </div>
-        )}
-
-        <div className="bds-live-hero-actions">
-          {hero.showTvButton && <ActionButton variant="secondary" onClick={() => { window.location.href = '/tv' }}>Assistir na TV</ActionButton>}
-          {hero.showCompetitionButton && <ActionButton onClick={() => { window.location.href = '/football' }}>Abrir Competition</ActionButton>}
-        </div>
-      </div>
-    </HeroCard>
-  )
-}
-
 function TvCard() {
-  const safeTvEvent = tvEvent || {}
+  const [tvChannels, setTvChannels] = useState(HOME_TV_CHANNELS)
+  const [tvCategories, setTvCategories] = useState(HOME_TV_CATEGORIES)
   const [currentChannel, setCurrentChannel] = useState(HOME_TV_CHANNELS[0])
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState('Todos')
   const normalizedSearch = searchTerm.trim().toLowerCase()
+
+  useEffect(() => {
+    let active = true
+    loadHomeTVChannels().then((catalog) => {
+      if (!active) return
+      const nextChannels = catalog.channels?.length ? catalog.channels : HOME_TV_CHANNELS
+      const nextCategories = catalog.categories?.length ? catalog.categories : HOME_TV_CATEGORIES
+      setTvChannels(nextChannels)
+      setTvCategories(nextCategories)
+      setCurrentChannel((channel) => {
+        if (channel && nextChannels.some((item) => item.id === channel.id)) return channel
+        return nextChannels[0] || HOME_TV_CHANNELS[0]
+      })
+      setActiveCategory((category) => (nextCategories.includes(category) ? category : 'Todos'))
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
   const filteredChannels = useMemo(() => {
-    return HOME_TV_CHANNELS.filter((channel) => {
+    return tvChannels.filter((channel) => {
       const matchesCategory = activeCategory === 'Todos' || channel.category === activeCategory
       const matchesSearch = !normalizedSearch ||
         channel.name.toLowerCase().includes(normalizedSearch) ||
@@ -163,7 +101,7 @@ function TvCard() {
 
       return matchesCategory && matchesSearch
     })
-  }, [activeCategory, normalizedSearch])
+  }, [activeCategory, normalizedSearch, tvChannels])
 
   function selectChannel(channel) {
     setCurrentChannel(channel)
@@ -173,11 +111,9 @@ function TvCard() {
   return (
     <FeatureCard
       className="bds-home-card-full"
-      eyebrow="Arena principal"
-      title="TV Ao Vivo"
-      description="Transmissao e eventos em destaque"
+      title="TV AO VIVO"
       icon={<Play size={20} />}
-      action={<StatusBadge status={safeTvEvent.status || 'EM BREVE'} tone="live">{safeTvEvent.status || 'Pronta'}</StatusBadge>}
+      action={<ActionButton className="bds-home-tv-header-button" variant="secondary" onClick={() => setIsChannelModalOpen(true)}>Escolha outro canal</ActionButton>}
     >
       <div className="bds-home-panel-body bds-home-tv-panel" data-designer-id="tv.content" data-designer-label="TV / Conteudo">
         <div className="bds-home-tv-stage" data-designer-id="tv.player" data-designer-label="TV / Player">
@@ -192,15 +128,6 @@ function TvCard() {
             allowFullScreen
           />
 
-          <div className="bds-home-tv-overlay" data-designer-id="tv.categories" data-designer-label="TV / Categorias">
-            <div className="bds-home-tv-current">
-              <span>Canal atual</span>
-              <strong>{currentChannel.name}</strong>
-            </div>
-            <ActionButton className="bds-home-tv-channel-button" variant="secondary" onClick={() => setIsChannelModalOpen(true)}>
-              Escolher canal
-            </ActionButton>
-          </div>
         </div>
 
         {isChannelModalOpen && (
@@ -227,7 +154,7 @@ function TvCard() {
             </label>
 
             <div className="bds-home-tv-categories" aria-label="Categorias de canais">
-              {HOME_TV_CATEGORIES.map((category) => (
+              {tvCategories.map((category) => (
                 <button
                   key={category}
                   className={category === activeCategory ? 'is-active' : ''}
@@ -257,11 +184,6 @@ function TvCard() {
           </div>
         )}
 
-        <div className="bds-home-stats-grid" data-designer-id="tv.stats" data-designer-label="TV / Estatisticas">
-          <StatCard label="Proximo evento" value={safeTvEvent.title || 'Sem transmissao agendada'} />
-          <StatCard label="Categoria" value={currentChannel.category || safeTvEvent.category || 'TV'} />
-          <StatCard label="Status" value={safeTvEvent.status || 'Pronta'} />
-        </div>
       </div>
     </FeatureCard>
   )
@@ -287,9 +209,8 @@ function CompetitionMatchRow({ match }) {
   )
 }
 
-function FootballCard({ matches, results }) {
+function FootballCard({ matches }) {
   const safeMatches = Array.isArray(matches) ? matches : []
-  const safeResults = Array.isArray(results) ? results : []
 
   return (
     <FeatureCard
@@ -303,19 +224,6 @@ function FootballCard({ matches, results }) {
       <div className="bds-home-card-list" data-designer-id="football.cards" data-designer-label="Futebol / Cards">
         {safeMatches.length ? safeMatches.slice(0, 3).map((match) => <CompetitionMatchRow key={match.id} match={match} />) : (
           <div className="bds-home-empty">Nenhum jogo sincronizado encontrado.</div>
-        )}
-        {safeResults.length > 0 && (
-          <div className="bds-home-result-box" data-designer-id="football.results" data-designer-label="Futebol / Resultados">
-            <CardHeader eyebrow="Ultimos resultados" />
-            <div className="bds-home-card-list">
-              {safeResults.slice(0, 2).map((result, index) => (
-                <div key={result.id || `result-${index}`} className="bds-home-result-row">
-                  <span>{result.game || 'Resultado indisponivel'}</span>
-                  <small>{result.championship || 'Competicao'}</small>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
       </div>
     </FeatureCard>
@@ -336,7 +244,7 @@ function NewsPanel({ news, loading }) {
     >
       {loading ? <Loading label="Carregando noticias" /> : safeNews.length ? (
         <div className="bds-home-card-list" data-designer-id="news.cards" data-designer-label="Noticias / Cards">
-          {safeNews.map((item, index) => (
+          {safeNews.slice(0, 3).map((item, index) => (
             <NewsCard
               key={item.id || `news-${index}`}
               category={item.category || 'Comunidade'}
@@ -356,23 +264,21 @@ function NewsPanel({ news, loading }) {
 function CommunityPanel() {
   const safeEvents = Array.isArray(communityEvents) ? communityEvents : []
   const nextEvent = safeEvents[0] || null
+  const lastResult = latestResults[0] || null
 
   return (
     <FeatureCard
       className="bds-home-card-full"
       eyebrow="Movimento do bar"
-      title="Comunidade"
-      description="Sem exposicao de nomes, so sinais do grupo"
+      title="Movimento do Bar"
+      description="Eventos, bolao e competicoes"
       icon={<Users size={20} />}
+      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Competicao</ActionButton>}
     >
       <div className="bds-home-stats-grid" data-designer-id="community.stats" data-designer-label="Comunidade / Estatisticas">
-        <StatCard icon={<Users size={18} />} label="Online agora" value="128" hint="amigos conectados" />
-        <StatCard icon={<Trophy size={18} />} label="Ultimo campeao" value="Equipe Ouro" hint="Bar Competition" />
-        <StatCard icon={<CalendarDays size={18} />} label="Proximo evento" value={nextEvent?.title || '-'} hint={nextEvent?.date || ''} />
-        <StatCard icon={<CakeSlice size={18} />} label="Aniversario" value="Em breve" hint="agenda privada" />
-      </div>
-      <div className="bds-home-community-note" data-designer-id="community.events" data-designer-label="Comunidade / Eventos">
-        A comunidade acompanha TV, futebol, radio e chat oficial em um so lugar.
+        <StatCard icon={<CalendarDays size={18} />} label="Proximo evento" value={nextEvent?.date || 'A definir'} hint={nextEvent?.title || 'Em breve'} />
+        <StatCard icon={<Trophy size={18} />} label="Noite do Bolao" value={nextEvent?.title || 'Em breve'} hint={nextEvent?.category || 'Competicao'} />
+        <StatCard icon={<CakeSlice size={18} />} label="Resultado do ultimo campeonato" value={lastResult?.game || 'Sem resultado disponivel'} hint={lastResult?.championship || 'A definir'} />
       </div>
     </FeatureCard>
   )
@@ -386,7 +292,7 @@ function RadioCard() {
     <FeatureCard
       className="bds-home-card-full"
       eyebrow="Player do bar"
-      title="Radio"
+      title="RÁDIO DO BAR"
       description="Som do bar em tempo real"
       icon={<Radio size={20} />}
       action={<StatusBadge status={playing ? 'AO VIVO' : 'EM BREVE'} tone={playing ? 'live' : 'neutral'}>{playing ? 'AO VIVO' : 'Pronta'}</StatusBadge>}
@@ -415,6 +321,10 @@ function RadioCard() {
           <input aria-label="Volume da radio" max="100" min="0" onChange={(event) => setVolume(event.target.value)} type="range" value={volume} />
           <span>{volume}%</span>
         </label>
+        <button className="bds-home-request-button" type="button" aria-label="Pedir música" title="Pedidos musicais em breve">
+          <Music2 size={16} />
+          Pedir música
+        </button>
         {error && <div className="bds-home-error"><AlertCircle size={18} />{error}</div>}
       </div>
     </FeatureCard>
@@ -426,8 +336,8 @@ function BarStudioCard() {
 
   return (
     <FeatureCard
-      eyebrow="Hub oficial de ferramentas"
-      title="BarStudio"
+      eyebrow="Bar Studio"
+      title="Bar Studio"
       description="Ferramentas rapidas para a comunidade"
       icon={<Scissors size={20} />}
       action={<ActionButton onClick={() => { window.location.href = '/tools' }}>Abrir BarStudio</ActionButton>}
@@ -525,8 +435,8 @@ export default function HomePage() {
           <div className="bds-grid-span-12" data-designer-id="hero" data-designer-label="Hero"><HomeModuleBoundary moduleName="Hero"><HeroMatchCenterV2 liveMatchCenter={dashboard.liveMatchCenter} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="tv" data-designer-label="TV"><HomeModuleBoundary moduleName="TV"><TvCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
-          <div className="bds-grid-span-7" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} results={dashboard.latestResults} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-5" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><RadioCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
