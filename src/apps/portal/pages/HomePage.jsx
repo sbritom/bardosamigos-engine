@@ -39,6 +39,7 @@ import { barStudioTools, communityEvents, latestResults } from '../home/data/das
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
 import { loadHomeTVChannels } from '../../../modules/tv/services/TVHomeChannelSource'
+import { submitRadioMusicRequest } from '../../radio/requests/radioRequestsApi'
 
 const OfficialChat = lazy(() =>
   import('../../../modules/chat/components/OfficialChat').then((module) => ({
@@ -283,6 +284,9 @@ function RadioCard() {
   const station = currentStation || {}
   const [requestModalOpen, setRequestModalOpen] = useState(false)
   const [requestFeedback, setRequestFeedback] = useState('')
+  const [requestFeedbackTone, setRequestFeedbackTone] = useState('info')
+  const [requestSubmitting, setRequestSubmitting] = useState(false)
+  const [requestForm, setRequestForm] = useState({ songAndArtist: '', message: '' })
   const [failedCoverUrl, setFailedCoverUrl] = useState('')
   const listenerCount = Number(station.listeners) || 0
   const listenerLabel = `${listenerCount} ${listenerCount === 1 ? 'ouvinte' : 'ouvintes'}`
@@ -291,12 +295,34 @@ function RadioCard() {
 
   function handleOpenRequestModal() {
     setRequestFeedback('')
+    setRequestFeedbackTone('info')
     setRequestModalOpen(true)
   }
 
-  function handleRequestSubmit(event) {
+  function handleRequestChange(event) {
+    const { name, value } = event.target
+    setRequestForm((current) => ({ ...current, [name]: value }))
+  }
+
+  async function handleRequestSubmit(event) {
     event.preventDefault()
-    setRequestFeedback('A integracao real de pedidos musicais ainda esta em preparacao. Nenhum pedido foi enviado ou registrado.')
+    setRequestFeedback('')
+    setRequestFeedbackTone('info')
+
+    try {
+      setRequestSubmitting(true)
+      await submitRadioMusicRequest(requestForm)
+      setRequestFeedback('Pedido enviado para o locutor! Seu pedido foi registrado com sucesso.')
+      setRequestFeedbackTone('success')
+      setRequestForm({ songAndArtist: '', message: '' })
+    } catch (requestError) {
+      setRequestFeedback(requestError.status === 429
+        ? 'Aguarde um pouco antes de enviar outro pedido.'
+        : requestError.message || 'Nao foi possivel registrar o pedido agora.')
+      setRequestFeedbackTone('error')
+    } finally {
+      setRequestSubmitting(false)
+    }
   }
 
   return (
@@ -356,16 +382,32 @@ function RadioCard() {
               <form className="bds-home-radio-request-form" onSubmit={handleRequestSubmit}>
                 <label>
                   Musica e artista
-                  <input name="songAndArtist" placeholder="Nome da musica e do artista" type="text" />
+                  <input
+                    name="songAndArtist"
+                    placeholder="Nome da musica e do artista"
+                    type="text"
+                    minLength={3}
+                    maxLength={180}
+                    required
+                    value={requestForm.songAndArtist}
+                    onChange={handleRequestChange}
+                  />
                 </label>
                 <label>
                   Recado <span>(opcional)</span>
-                  <textarea name="message" placeholder="Deixe um recado para a radio" rows="3" />
+                  <textarea
+                    name="message"
+                    placeholder="Deixe um recado para a radio"
+                    rows="3"
+                    maxLength={500}
+                    value={requestForm.message}
+                    onChange={handleRequestChange}
+                  />
                 </label>
-                {requestFeedback && <p className="bds-home-radio-request-feedback">{requestFeedback}</p>}
+                {requestFeedback && <p className={`bds-home-radio-request-feedback is-${requestFeedbackTone}`}>{requestFeedback}</p>}
                 <div className="bds-home-radio-request-actions">
-                  <button type="button" onClick={() => setRequestModalOpen(false)}>Fechar</button>
-                  <button type="submit">Enviar pedido</button>
+                  <button type="button" onClick={() => setRequestModalOpen(false)} disabled={requestSubmitting}>Fechar</button>
+                  <button type="submit" disabled={requestSubmitting}>{requestSubmitting ? 'Enviando...' : 'Enviar pedido'}</button>
                 </div>
               </form>
             </div>

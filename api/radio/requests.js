@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 const TABLE = 'radio_music_requests'
 const VALID_STATUSES = new Set(['pending', 'read'])
 const REQUEST_WINDOW_SECONDS = 60
+const AUTHORIZED_ROLES = new Set(['admin', 'locutor'])
 
 function setCors(response) {
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
@@ -52,9 +53,9 @@ function createFingerprint(request) {
     .digest('hex')
 }
 
-function isAdminUser(user) {
+function isAuthorizedRadioUser(user) {
   const role = user?.app_metadata?.role || user?.user_metadata?.role
-  return role === 'admin' || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true
+  return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true
 }
 
 async function requireAdmin(request, supabase) {
@@ -67,7 +68,7 @@ async function requireAdmin(request, supabase) {
 
   const { data, error } = await supabase.auth.getUser(token)
 
-  if (error || !isAdminUser(data?.user)) {
+  if (error || !isAuthorizedRadioUser(data?.user)) {
     return { ok: false, status: 403, error: 'Acesso administrativo negado.' }
   }
 

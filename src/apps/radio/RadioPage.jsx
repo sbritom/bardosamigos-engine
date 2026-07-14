@@ -129,7 +129,7 @@ export default function RadioPage() {
     try {
       setRequestSubmitting(true);
       await submitRadioMusicRequest(requestForm);
-      setRequestFeedback("Pedido enviado para o locutor! Ele foi registrado e esta aguardando analise.");
+      setRequestFeedback("Pedido enviado para o locutor! Seu pedido foi registrado com sucesso.");
       setRequestFeedbackTone("success");
       setRequestForm({ songAndArtist: "", message: "" });
     } catch (error) {

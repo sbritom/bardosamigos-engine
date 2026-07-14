@@ -1,99 +1,154 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { LogOut } from "lucide-react";
 
-import Loading from "../components/Loading";
-import AutoDJCard from "./components/AutoDJCard";
-import FFmpegCard from "./components/FFmpegCard";
-import HealthCard from "./components/HealthCard";
-import HistoryCard from "./components/HistoryCard";
-import IcecastCard from "./components/IcecastCard";
-import LibraryCard from "./components/LibraryCard";
-import ListenersCard from "./components/ListenersCard";
-import LogsCard from "./components/LogsCard";
-import PlayerCard from "./components/PlayerCard";
-import QueueCard from "./components/QueueCard";
-import SchedulerCard from "./components/SchedulerCard";
-import SettingsCard from "./components/SettingsCard";
-import StatusCard from "./components/StatusCard";
-import StorageCard from "./components/StorageCard";
-import { loadAdminDashboard, POLLING_INTERVAL } from "./adminApi";
+import {
+  getRadioRequestsAdminAccess,
+  signInRadioRequestsAdmin,
+  signOutRadioRequestsAdmin,
+} from "../requests/radioRequestsApi";
 import RadioRequestsPanel from "../requests/RadioRequestsPanel";
 import "./radioAdmin.css";
 
-const EMPTY_DATA = {
-  dashboard: null,
-  storage: null,
-  system: null,
-  config: null,
-  logs: null,
-  error: false,
+const INITIAL_ACCESS = {
+  loading: true,
+  allowed: false,
+  hasSession: false,
+  reason: "",
+  user: null,
 };
 
 export default function RadioAdminPage() {
-  const [data, setData] = useState(EMPTY_DATA);
-  const [loading, setLoading] = useState(true);
-
-  const refresh = useCallback(async (signal) => {
-    try {
-      setData(await loadAdminDashboard({ signal }));
-    } catch {
-      setData((current) => ({ ...current, error: true }));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [access, setAccess] = useState(INITIAL_ACCESS);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const refreshTimer = window.setTimeout(() => refresh(controller.signal), 0);
-    const intervalId = window.setInterval(() => refresh(controller.signal), POLLING_INTERVAL);
-
+    let active = true;
+    getRadioRequestsAdminAccess().then((result) => {
+      if (active) setAccess({ loading: false, ...result });
+    });
     return () => {
-      controller.abort();
-      window.clearTimeout(refreshTimer);
-      window.clearInterval(intervalId);
+      active = false;
     };
-  }, [refresh]);
+  }, []);
 
-  const dashboard = data.dashboard || {};
-  const system = data.system || dashboard.system;
-  const storage = data.storage || dashboard.storage;
-  const config = data.config || dashboard.config;
-  const logs = data.logs || {};
+  function handleLoginChange(event) {
+    const { name, value } = event.target;
+    setLoginForm((current) => ({ ...current, [name]: value }));
+  }
 
-  const subtitle = useMemo(() => {
-    if (data.error) return "API administrativa indisponivel. Tentando reconectar.";
-    return `Atualizacao automatica a cada ${Math.round(POLLING_INTERVAL / 1000)}s`;
-  }, [data.error]);
+  async function handleLoginSubmit(event) {
+    event.preventDefault();
+    setLoginError("");
+
+    try {
+      setLoginLoading(true);
+      const result = await signInRadioRequestsAdmin(loginForm);
+      setAccess({ loading: false, ...result });
+    } catch (error) {
+      setLoginError(error.message || "Nao foi possivel entrar no painel.");
+    } finally {
+      setLoginLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    await signOutRadioRequestsAdmin();
+    setLoginForm({ email: "", password: "" });
+    setLoginError("");
+    setAccess({ ...INITIAL_ACCESS, loading: false });
+  }
+
+  if (access.loading) {
+    return (
+      <main className="radio-admin-page">
+        <header className="radio-admin-header">
+          <h1>PAINEL DO LOCUTOR</h1>
+        </header>
+        <section className="radio-admin-panel radio-admin-auth-panel">
+          <p>Carregando acesso...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!access.hasSession) {
+    return (
+      <main className="radio-admin-page">
+        <section className="radio-admin-login-card" aria-labelledby="radio-admin-login-title">
+          <header className="radio-admin-login-header">
+            <span>Radio do Bar</span>
+            <h1 id="radio-admin-login-title">PAINEL DO LOCUTOR</h1>
+          </header>
+
+          <form className="radio-admin-login-form" onSubmit={handleLoginSubmit}>
+            <label>
+              E-mail
+              <input
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={loginForm.email}
+                onChange={handleLoginChange}
+                required
+              />
+            </label>
+
+            <label>
+              Senha
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={loginForm.password}
+                onChange={handleLoginChange}
+                required
+              />
+            </label>
+
+            {loginError && <p className="radio-admin-auth-error">{loginError}</p>}
+
+            <button type="submit" disabled={loginLoading}>
+              {loginLoading ? "ENTRANDO..." : "ENTRAR"}
+            </button>
+          </form>
+        </section>
+      </main>
+    );
+  }
+
+  if (!access.allowed) {
+    return (
+      <main className="radio-admin-page">
+        <header className="radio-admin-header radio-admin-header--with-actions">
+          <h1>PAINEL DO LOCUTOR</h1>
+          <button type="button" onClick={handleLogout}>
+            <LogOut size={16} />
+            Sair
+          </button>
+        </header>
+
+        <section className="radio-admin-panel radio-admin-auth-panel">
+          <p>{access.reason || "Acesso nao autorizado para este usuario."}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="radio-admin-page">
-      <header className="radio-admin-header">
-        <span>Radio Control Center</span>
-        <h1>Admin Dashboard</h1>
-        <p>{subtitle}</p>
+      <header className="radio-admin-header radio-admin-header--with-actions">
+        <h1>PAINEL DO LOCUTOR</h1>
+        <button type="button" onClick={handleLogout}>
+          <LogOut size={16} />
+          Sair
+        </button>
       </header>
 
-      {loading ? (
-        <Loading label="Carregando centro de controle" />
-      ) : (
-        <div className="radio-admin-grid">
-          <RadioRequestsPanel />
-          <StatusCard dashboard={dashboard} system={system} />
-          <ListenersCard player={dashboard.player} icecast={dashboard.icecast} />
-          <PlayerCard player={dashboard.player} />
-          <LibraryCard library={dashboard.library} />
-          <QueueCard queue={dashboard.queue} />
-          <HistoryCard history={dashboard.history} />
-          <IcecastCard icecast={dashboard.icecast} />
-          <FFmpegCard ffmpeg={dashboard.ffmpeg} />
-          <SchedulerCard scheduler={dashboard.scheduler} />
-          <AutoDJCard autodj={dashboard.autodj} />
-          <StorageCard storage={storage} />
-          <SettingsCard config={config} />
-          <HealthCard health={dashboard.health} />
-          <LogsCard logs={logs} />
-        </div>
-      )}
+      <div className="radio-admin-grid">
+        <RadioRequestsPanel access={access} />
+      </div>
     </main>
   );
 }

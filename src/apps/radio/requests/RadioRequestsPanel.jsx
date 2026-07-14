@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BellRing, Music2, ShieldAlert } from "lucide-react";
 
-import { getDesignerUserAccess } from "../../../modules/barstudio/designer/services/layoutDesignerService";
-import { listRadioMusicRequests, updateRadioMusicRequest } from "./radioRequestsApi";
+import { getRadioRequestsAdminAccess, listRadioMusicRequests, updateRadioMusicRequest } from "./radioRequestsApi";
 import RadioRequestCard from "./RadioRequestCard";
 
 const POLLING_INTERVAL = 10000;
 
-export default function RadioRequestsPanel() {
+function getHandledBy(user) {
+  return user?.user_metadata?.name || user?.email || user?.id || "locutor";
+}
+
+export default function RadioRequestsPanel({ access: providedAccess } = {}) {
   const knownIdsRef = useRef(new Set());
   const initializedRef = useRef(false);
   const [access, setAccess] = useState({ loading: true, allowed: false, reason: "" });
@@ -21,6 +24,7 @@ export default function RadioRequestsPanel() {
     () => requests.filter((request) => request.status === "pending").length,
     [requests],
   );
+  const effectiveAccess = providedAccess ? { loading: false, ...providedAccess } : access;
 
   const refresh = useCallback(async () => {
     try {
@@ -46,17 +50,19 @@ export default function RadioRequestsPanel() {
   }, []);
 
   useEffect(() => {
+    if (providedAccess) return undefined;
+
     let active = true;
-    getDesignerUserAccess().then((result) => {
+    getRadioRequestsAdminAccess().then((result) => {
       if (active) setAccess({ loading: false, ...result });
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [providedAccess]);
 
   useEffect(() => {
-    if (access.loading || !access.allowed) {
+    if (effectiveAccess.loading || !effectiveAccess.allowed) {
       const loadingTimer = window.setTimeout(() => setLoading(false), 0);
       return () => window.clearTimeout(loadingTimer);
     }
@@ -67,7 +73,7 @@ export default function RadioRequestsPanel() {
       window.clearTimeout(refreshTimer);
       window.clearInterval(intervalId);
     };
-  }, [access.allowed, access.loading, refresh]);
+  }, [effectiveAccess.allowed, effectiveAccess.loading, refresh]);
 
   const handleMarkRead = useCallback(async (request) => {
     try {
@@ -75,7 +81,7 @@ export default function RadioRequestsPanel() {
       const updated = await updateRadioMusicRequest({
         id: request.id,
         status: "read",
-        handledBy: access.user?.email || access.user?.id || "locutor",
+        handledBy: getHandledBy(effectiveAccess.user),
       });
       setRequests((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setNewPendingIds((current) => {
@@ -89,9 +95,9 @@ export default function RadioRequestsPanel() {
     } finally {
       setBusyId("");
     }
-  }, [access.user]);
+  }, [effectiveAccess.user]);
 
-  if (access.loading || loading) {
+  if (effectiveAccess.loading || loading) {
     return (
       <section className="radio-admin-panel radio-requests-panel">
         <div className="radio-admin-panel-title">
@@ -103,14 +109,14 @@ export default function RadioRequestsPanel() {
     );
   }
 
-  if (!access.allowed) {
+  if (!effectiveAccess.allowed) {
     return (
       <section className="radio-admin-panel radio-requests-panel">
         <div className="radio-admin-panel-title">
           <ShieldAlert size={18} />
           <h2>Pedidos Musicais</h2>
         </div>
-        <p>{access.reason || "Entre com uma conta administradora para ver os pedidos."}</p>
+        <p>{effectiveAccess.reason || "Entre com uma conta administradora para ver os pedidos."}</p>
       </section>
     );
   }

@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "../../../core/database";
 
 const REQUESTS_ENDPOINT = "/api/radio/requests";
+const AUTHORIZED_ROLES = new Set(["admin", "locutor"]);
 
 function normalizeRequest(row = {}) {
   return {
@@ -21,6 +22,59 @@ async function getAdminToken() {
   if (!client) return "";
   const { data } = await client.auth.getSession();
   return data?.session?.access_token || "";
+}
+
+function isAuthorizedRadioUser(user) {
+  const role = user?.app_metadata?.role || user?.user_metadata?.role;
+  return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true;
+}
+
+export async function getRadioRequestsAdminAccess() {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { allowed: false, reason: "Supabase nao configurado." };
+  }
+
+  const { data, error } = await client.auth.getSession();
+  const session = data?.session;
+
+  if (error || !session?.access_token) {
+    return { allowed: false, hasSession: false, reason: "Entre para acessar o painel do locutor." };
+  }
+
+  const user = session.user;
+  const allowed = isAuthorizedRadioUser(user);
+
+  return {
+    allowed,
+    hasSession: true,
+    reason: allowed ? "" : "Acesso nao autorizado para este usuario.",
+    user,
+  };
+}
+
+export async function signInRadioRequestsAdmin({ email, password }) {
+  const client = getSupabaseClient();
+  if (!client) {
+    throw new Error("Supabase nao configurado.");
+  }
+
+  const { error } = await client.auth.signInWithPassword({
+    email: String(email || "").trim(),
+    password: String(password || ""),
+  });
+
+  if (error) {
+    throw new Error("E-mail ou senha invalidos.");
+  }
+
+  return getRadioRequestsAdminAccess();
+}
+
+export async function signOutRadioRequestsAdmin() {
+  const client = getSupabaseClient();
+  if (!client) return;
+  await client.auth.signOut();
 }
 
 async function parseResponse(response) {
