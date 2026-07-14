@@ -215,9 +215,7 @@ function FootballCard({ matches }) {
   return (
     <FeatureCard
       className="bds-home-card-full"
-      eyebrow="Sofascore do bar"
       title="Futebol"
-      description="Ao vivo, proximos jogos e resultados"
       icon={<CalendarDays size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Abrir</ActionButton>}
     >
@@ -236,9 +234,7 @@ function NewsPanel({ news, loading }) {
   return (
     <FeatureCard
       className="bds-home-card-full"
-      eyebrow="Radar da comunidade"
       title="Noticias"
-      description="Resumo rapido do que importa"
       icon={<Mic2 size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/news' }}>Ver todas</ActionButton>}
     >

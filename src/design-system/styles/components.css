@@ -2485,6 +2485,13 @@
   min-height: 112px;
 }
 
+.bds-home-shell [data-designer-id="football"] .bds-match-card .bds-status-badge {
+  min-height: var(--bds-space-20);
+  padding: 0 var(--bds-space-6);
+  font-size: var(--bds-font-micro);
+  line-height: 1;
+}
+
 .bds-home-shell [data-designer-id="news"] .bds-news-card h3 {
   display: -webkit-box;
   overflow: hidden;
