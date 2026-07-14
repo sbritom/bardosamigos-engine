@@ -304,9 +304,22 @@
 .bar-radio-request-feedback {
   margin: 0;
   padding: 10px 12px;
+  border: 1px solid rgba(242, 198, 109, 0.16);
   border-radius: 8px;
   color: #ffd78c !important;
   background: rgba(242, 198, 109, 0.08);
+}
+
+.bar-radio-request-feedback.is-success {
+  border-color: rgba(93, 242, 154, 0.22);
+  color: #9cf6bd !important;
+  background: rgba(93, 242, 154, 0.08);
+}
+
+.bar-radio-request-feedback.is-error {
+  border-color: rgba(255, 114, 114, 0.24);
+  color: #ffaaaa !important;
+  background: rgba(255, 114, 114, 0.08);
 }
 
 .bar-radio-request-actions {
@@ -325,6 +338,11 @@
 .bar-radio-request-actions button[type="submit"] {
   color: #07111f;
   background: #f2c66d;
+}
+
+.bar-radio-request-actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .bar-radio-spin-icon {

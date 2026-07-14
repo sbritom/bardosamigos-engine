@@ -6,6 +6,7 @@ import {
   getMxCastStreamUrl,
   getRadioMetadataInterval,
 } from "./mxcastRadioApi";
+import { submitRadioMusicRequest } from "./requests/radioRequestsApi";
 import "./radioUi.css";
 
 const INITIAL_METADATA = {
@@ -38,6 +39,12 @@ export default function RadioPage() {
   const [failedCover, setFailedCover] = useState("");
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [requestFeedback, setRequestFeedback] = useState("");
+  const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    songAndArtist: "",
+    message: "",
+  });
 
   const streamUrl = useMemo(() => getMxCastStreamUrl(), []);
   const coverUrl = typeof metadata.cover === "string" ? metadata.cover.trim() : "";
@@ -64,11 +71,12 @@ export default function RadioPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    refreshMetadata(controller.signal);
+    const refreshTimer = window.setTimeout(() => refreshMetadata(controller.signal), 0);
     const intervalId = window.setInterval(() => refreshMetadata(controller.signal), getRadioMetadataInterval());
 
     return () => {
       controller.abort();
+      window.clearTimeout(refreshTimer);
       window.clearInterval(intervalId);
     };
   }, [refreshMetadata]);
@@ -105,10 +113,34 @@ export default function RadioPage() {
     setVolume(Number(event.target.value));
   }, []);
 
-  const handleRequestSubmit = useCallback((event) => {
-    event.preventDefault();
-    setRequestFeedback("O backend real de pedidos musicais ainda precisa ser conectado. Nenhum pedido foi enviado ou registrado.");
+  const handleRequestChange = useCallback((event) => {
+    const { name, value } = event.target;
+    setRequestForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }, []);
+
+  const handleRequestSubmit = useCallback(async (event) => {
+    event.preventDefault();
+    setRequestFeedback("");
+    setRequestFeedbackTone("info");
+
+    try {
+      setRequestSubmitting(true);
+      await submitRadioMusicRequest(requestForm);
+      setRequestFeedback("Pedido enviado para o locutor! Ele foi registrado e esta aguardando analise.");
+      setRequestFeedbackTone("success");
+      setRequestForm({ songAndArtist: "", message: "" });
+    } catch (error) {
+      setRequestFeedback(error.status === 429
+        ? "Aguarde um pouco antes de enviar outro pedido."
+        : error.message || "Nao foi possivel registrar o pedido agora.");
+      setRequestFeedbackTone("error");
+    } finally {
+      setRequestSubmitting(false);
+    }
+  }, [requestForm]);
 
   return (
     <main className="bar-radio-page">
@@ -204,6 +236,7 @@ export default function RadioPage() {
       <section className="bar-radio-request-block">
         <button className="bar-radio-request-button" type="button" onClick={() => {
           setRequestFeedback("");
+          setRequestFeedbackTone("info");
           setRequestModalOpen(true);
         }}>
           <Music2 size={18} />
@@ -224,19 +257,37 @@ export default function RadioPage() {
             <form className="bar-radio-request-form" onSubmit={handleRequestSubmit}>
               <label>
                 M&uacute;sica e artista
-                <input name="songAndArtist" type="text" placeholder="Nome da musica e do artista" required />
+                <input
+                  name="songAndArtist"
+                  type="text"
+                  placeholder="Nome da musica e do artista"
+                  minLength={3}
+                  maxLength={180}
+                  required
+                  value={requestForm.songAndArtist}
+                  onChange={handleRequestChange}
+                />
               </label>
 
               <label>
                 Deixe seu recado <span>(opcional)</span>
-                <textarea name="message" placeholder="Deixe um recado para a radio" rows={3} />
+                <textarea
+                  name="message"
+                  placeholder="Deixe um recado para a radio"
+                  maxLength={500}
+                  rows={3}
+                  value={requestForm.message}
+                  onChange={handleRequestChange}
+                />
               </label>
 
-              {requestFeedback && <p className="bar-radio-request-feedback">{requestFeedback}</p>}
+              {requestFeedback && <p className={`bar-radio-request-feedback is-${requestFeedbackTone}`}>{requestFeedback}</p>}
 
               <div className="bar-radio-request-actions">
-                <button type="button" onClick={() => setRequestModalOpen(false)}>Fechar</button>
-                <button type="submit">Enviar pedido</button>
+                <button type="button" onClick={() => setRequestModalOpen(false)} disabled={requestSubmitting}>Fechar</button>
+                <button type="submit" disabled={requestSubmitting}>
+                  {requestSubmitting ? "Enviando..." : "Enviar pedido"}
+                </button>
               </div>
             </form>
           </div>

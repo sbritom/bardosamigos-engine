@@ -50,7 +50,8 @@
 }
 
 .radio-admin-player,
-.radio-admin-logs {
+.radio-admin-logs,
+.radio-requests-panel {
   grid-column: span 12;
 }
 
@@ -215,6 +216,152 @@
   white-space: nowrap;
 }
 
+.radio-requests-panel__title {
+  justify-content: space-between;
+}
+
+.radio-requests-panel__title div,
+.radio-requests-counter,
+.radio-request-card__main strong,
+.radio-request-card__main small,
+.radio-request-card__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-requests-counter {
+  padding: 7px 10px;
+  border: 1px solid rgba(106, 142, 190, 0.22);
+  border-radius: 8px;
+  color: #9fb5cf;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.radio-requests-counter.is-live {
+  border-color: rgba(242, 198, 109, 0.3);
+  color: #f2c66d;
+  background: rgba(242, 198, 109, 0.08);
+}
+
+.radio-requests-list {
+  display: grid;
+  gap: 10px;
+}
+
+.radio-requests-error {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 114, 114, 0.24);
+  border-radius: 8px;
+  color: #ffaaaa;
+  background: rgba(255, 114, 114, 0.08);
+}
+
+.radio-request-highlight {
+  animation: radio-request-pulse 1.6s ease-in-out 2;
+}
+
+.radio-request-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(106, 142, 190, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.radio-request-card--pending {
+  border-color: rgba(242, 198, 109, 0.28);
+}
+
+.radio-request-card__main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.radio-request-card__main strong {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.radio-request-card__main p {
+  margin: 0;
+  color: #cbd9eb;
+}
+
+.radio-request-card__main small {
+  color: #9fb5cf;
+}
+
+.radio-request-card__status {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: #9fb5cf;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.radio-request-card__status.is-pending {
+  color: #f2c66d;
+  background: rgba(242, 198, 109, 0.1);
+}
+
+.radio-request-card__status.is-approved {
+  color: #8fc7ff;
+  background: rgba(77, 163, 255, 0.1);
+}
+
+.radio-request-card__status.is-rejected {
+  color: #ffaaaa;
+  background: rgba(255, 114, 114, 0.1);
+}
+
+.radio-request-card__status.is-played {
+  color: #9cf6bd;
+  background: rgba(93, 242, 154, 0.1);
+}
+
+.radio-request-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.radio-request-card__actions button {
+  min-height: 34px;
+  border: 1px solid rgba(106, 142, 190, 0.2);
+  border-radius: 8px;
+  color: #eef5ff;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 800;
+}
+
+.radio-request-card__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+@keyframes radio-request-pulse {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+
+  50% {
+    box-shadow: 0 0 0 3px rgba(242, 198, 109, 0.22);
+  }
+}
+
 .radio-admin-health-grid {
   display: flex;
   flex-wrap: wrap;
@@ -279,7 +426,16 @@
 
   .radio-admin-metrics,
   .radio-admin-player-grid,
-  .radio-admin-track {
+  .radio-admin-track,
+  .radio-request-card {
     grid-template-columns: 1fr;
+  }
+
+  .radio-request-card__actions {
+    justify-content: stretch;
+  }
+
+  .radio-request-card__actions button {
+    justify-content: center;
   }
 }

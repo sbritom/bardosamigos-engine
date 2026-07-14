@@ -16,6 +16,7 @@ import SettingsCard from "./components/SettingsCard";
 import StatusCard from "./components/StatusCard";
 import StorageCard from "./components/StorageCard";
 import { loadAdminDashboard, POLLING_INTERVAL } from "./adminApi";
+import RadioRequestsPanel from "../requests/RadioRequestsPanel";
 import "./radioAdmin.css";
 
 const EMPTY_DATA = {
@@ -43,11 +44,12 @@ export default function RadioAdminPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    refresh(controller.signal);
+    const refreshTimer = window.setTimeout(() => refresh(controller.signal), 0);
     const intervalId = window.setInterval(() => refresh(controller.signal), POLLING_INTERVAL);
 
     return () => {
       controller.abort();
+      window.clearTimeout(refreshTimer);
       window.clearInterval(intervalId);
     };
   }, [refresh]);
@@ -75,6 +77,7 @@ export default function RadioAdminPage() {
         <Loading label="Carregando centro de controle" />
       ) : (
         <div className="radio-admin-grid">
+          <RadioRequestsPanel />
           <StatusCard dashboard={dashboard} system={system} />
           <ListenersCard player={dashboard.player} icecast={dashboard.icecast} />
           <PlayerCard player={dashboard.player} />
