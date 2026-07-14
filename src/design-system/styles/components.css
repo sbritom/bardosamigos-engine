@@ -1968,6 +1968,31 @@
 }
 
 @media (min-width: 1280px) {
+  .bds-top-header__bar {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: var(--bds-space-24);
+  }
+
+  .bds-top-header [data-designer-id="header.logo"] {
+    min-width: max-content;
+    justify-self: start;
+    white-space: nowrap;
+  }
+
+  .bds-top-header [data-designer-id="header.menu"] {
+    min-width: 0;
+    width: 100%;
+    justify-self: stretch;
+    justify-content: center;
+  }
+
+  .bds-top-header [data-designer-id="header.actions"] {
+    min-width: max-content;
+    justify-self: end;
+  }
+
   .bds-top-header__mobile-nav {
     display: none;
   }

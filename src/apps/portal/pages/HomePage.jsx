@@ -265,9 +265,7 @@ function CommunityPanel() {
   return (
     <FeatureCard
       className="bds-home-card-full"
-      eyebrow="Movimento do bar"
-      title="Movimento do Bar"
-      description="Eventos, bolao e competicoes"
+      title="EVENTOS DO BAR"
       icon={<Users size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Competicao</ActionButton>}
     >
@@ -383,9 +381,7 @@ function BarStudioCard() {
 
   return (
     <FeatureCard
-      eyebrow="Bar Studio"
-      title="Bar Studio"
-      description="Ferramentas rapidas para a comunidade"
+      title="BAR STUDIO"
       icon={<Scissors size={20} />}
       action={<ActionButton onClick={() => { window.location.href = '/tools' }}>Abrir BarStudio</ActionButton>}
     >
