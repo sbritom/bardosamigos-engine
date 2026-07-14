@@ -1,41 +1,37 @@
-import { useMemo, useState } from 'react'
-import { Clock3, Heart, RadioTower, SearchX, Tv } from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Maximize2, RadioTower, SearchX, Tv } from 'lucide-react'
 import { Alert, Badge } from '../../../design-system'
 import {
-  TVCategoryCard,
   TVChannelCard,
   TVEmptyState,
-  TVHero,
   TVLoading,
   TVPlayer,
   TVSearch,
   TVSection,
-  TVSidebar,
 } from '../components'
 import {
   useTVCategories,
   useTVChannels,
-  useTVFavorites,
   useTVFeatured,
-  useTVRecent,
 } from '../hooks'
 import { TVProvider } from '../providers'
 import './tvPlatform.css'
 
 function TVPlatformContent() {
   const [activeChannel, setActiveChannel] = useState(null)
-  const [view, setView] = useState('all')
+  const playerRef = useRef(null)
   const categories = useTVCategories()
   const channels = useTVChannels()
   const featured = useTVFeatured()
-  const favorites = useTVFavorites()
-  const recent = useTVRecent()
 
-  const visibleChannels = useMemo(() => {
-    if (view === 'favorites') return favorites.data.map((item) => item.channel).filter(Boolean)
-    if (view === 'recent') return recent.data.map((item) => item.channel).filter(Boolean)
-    return channels.data
-  }, [view, channels.data, favorites.data, recent.data])
+  const visibleChannels = channels.data
+  const channelCount = channels.count || visibleChannels.length
+  const fallbackChannel = useMemo(
+    () => featured.data.find((item) => item?.channel)?.channel || visibleChannels[0] || null,
+    [featured.data, visibleChannels],
+  )
+  const selectedChannel = activeChannel || fallbackChannel
+  const activeCategoryName = selectedChannel?.category?.name || selectedChannel?.language || 'Ao vivo'
 
   const emptyCopy = useMemo(() => {
     if (channels.filters.search) {
@@ -45,35 +41,45 @@ function TVPlatformContent() {
         description: 'Tente outro termo ou remova os filtros da pesquisa.',
       }
     }
-    if (view === 'favorites') {
-      return {
-        icon: <Heart size={32} />,
-        title: 'Seus favoritos aparecerao aqui',
-        description: 'Entre na sua conta e favorite canais quando o catalogo estiver publicado.',
-      }
-    }
-    if (view === 'recent') {
-      return {
-        icon: <Clock3 size={32} />,
-        title: 'Nenhum canal assistido recentemente',
-        description: 'Seu historico sera preenchido automaticamente durante a reproducao.',
-      }
-    }
     return {
       icon: <RadioTower size={32} />,
       title: 'Catalogo em preparacao',
-      description: 'Nenhum canal foi publicado ainda. A infraestrutura ja esta pronta para receber o catalogo.',
+      description: 'Nenhum canal foi publicado ainda.',
     }
-  }, [channels.filters.search, view])
+  }, [channels.filters.search])
+
+  const selectChannel = useCallback((channel) => {
+    setActiveChannel(channel)
+    window.requestAnimationFrame(() => {
+      const player = playerRef.current
+      if (!player) return
+      const rect = player.getBoundingClientRect()
+      const outsideViewport = rect.top < 0 || rect.bottom > window.innerHeight
+      if (outsideViewport) {
+        player.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    })
+  }, [])
+
+  const openFullscreen = useCallback(async () => {
+    const player = playerRef.current
+    if (!player || !player.requestFullscreen) return
+    try {
+      await player.requestFullscreen()
+    } catch (error) {
+      console.warn('[TVPage] Nao foi possivel abrir tela cheia.', error)
+    }
+  }, [])
 
   return (
     <main className="tv-platform">
-      <TVHero featured={featured.data[0]} onWatch={setActiveChannel} />
-
-      <div className="tv-platform__toolbar">
-        <TVSidebar active={view} onChange={setView} />
-        <TVSearch value={channels.filters.search} onChange={channels.setSearch} />
-      </div>
+      <header className="tv-platform__header">
+        <div className="tv-platform__brand">
+          <span><Tv size={20} aria-hidden="true" /></span>
+          <h1>TV DO BAR</h1>
+        </div>
+        <Badge>{channelCount} CANAIS</Badge>
+      </header>
 
       {channels.error && (
         <Alert status="warning" title="TV temporariamente indisponivel">
@@ -81,55 +87,64 @@ function TVPlatformContent() {
         </Alert>
       )}
 
-      <TVSection eyebrow="TRANSMISSAO" title="Player principal" subtitle="Selecione um canal para assistir.">
+      <section className="tv-platform__player-section" ref={playerRef}>
         <TVPlayer
-          embed_url={activeChannel?.embedUrl}
-          title={activeChannel?.name}
-          poster={activeChannel?.logo}
-          provider={activeChannel?.provider}
+          embed_url={selectedChannel?.embedUrl}
+          title={selectedChannel?.name}
+          poster={selectedChannel?.logo}
+          provider={selectedChannel?.provider}
         />
-      </TVSection>
-
-      <TVSection
-        eyebrow="EXPLORE"
-        title="Categorias"
-        subtitle="O catalogo sera organizado automaticamente conforme novas categorias forem publicadas."
-        action={<Badge>{categories.count} CATEGORIAS</Badge>}
-      >
-        {categories.loading ? (
-          <TVLoading count={4} />
-        ) : categories.data.length ? (
-          <div className="tv-platform__categories">
-            {categories.data.map((category) => (
-              <TVCategoryCard
-                key={category.id}
-                category={category}
-                active={channels.filters.categoryId === category.id}
-                onSelect={(id) => channels.setCategory(channels.filters.categoryId === id ? '' : id)}
-              />
-            ))}
+        <div className="tv-platform__nowbar">
+          <div>
+            <span>Canal atual</span>
+            <strong>{selectedChannel?.name || 'Selecione um canal'}</strong>
+            {selectedChannel && <small>{activeCategoryName}</small>}
           </div>
-        ) : (
-          <TVEmptyState
-            icon={<Tv size={32} />}
-            title="Categorias ainda nao publicadas"
-            description="Elas aparecerao aqui assim que forem habilitadas no TV Manager."
-          />
-        )}
-      </TVSection>
+          <button type="button" onClick={openFullscreen}>
+            <Maximize2 size={16} aria-hidden="true" />
+            Tela cheia
+          </button>
+        </div>
+      </section>
+
+      <section className="tv-platform__controls" aria-label="Filtros da TV">
+        <TVSearch value={channels.filters.search} onChange={channels.setSearch} />
+        <div className="tv-platform__categories" aria-label="Categorias">
+          <button
+            type="button"
+            className={!channels.filters.categoryId ? 'is-active' : ''}
+            onClick={() => channels.setCategory('')}
+          >
+            Todos
+          </button>
+          {categories.data.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              className={channels.filters.categoryId === category.id ? 'is-active' : ''}
+              onClick={() => channels.setCategory(channels.filters.categoryId === category.id ? '' : category.id)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </section>
 
       <TVSection
-        eyebrow="CATALOGO"
-        title={view === 'favorites' ? 'Favoritos' : view === 'recent' ? 'Recentes' : 'Canais'}
-        subtitle="Somente canais ativos e verificados pelo catalogo sao exibidos."
-        action={<Badge>{visibleChannels.length} CANAIS</Badge>}
+        title="Canais"
+        action={<Badge>{visibleChannels.length} EXIBIDOS</Badge>}
       >
-        {channels.loading ? (
-          <TVLoading count={6} />
+        {channels.loading || categories.loading ? (
+          <TVLoading count={8} />
         ) : visibleChannels.length ? (
           <div className="tv-platform__channels">
             {visibleChannels.map((channel) => (
-              <TVChannelCard key={channel.id} channel={channel} onSelect={setActiveChannel} />
+              <TVChannelCard
+                key={channel.id}
+                channel={channel}
+                active={selectedChannel?.id === channel.id}
+                onSelect={selectChannel}
+              />
             ))}
           </div>
         ) : (

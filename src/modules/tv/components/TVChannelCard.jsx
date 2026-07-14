@@ -1,9 +1,11 @@
-import { CheckCircle2, Play } from 'lucide-react'
-import { Card, IconButton } from '../../../design-system'
+import { Play } from 'lucide-react'
+import { Card } from '../../../design-system'
 
-export function TVChannelCard({ channel, onSelect }) {
+export function TVChannelCard({ channel, active = false, onSelect }) {
+  const category = channel.category?.name || channel.language || 'Ao vivo'
+
   return (
-    <Card as="article" className="tv-channel-card">
+    <Card as="article" className={`tv-channel-card${active ? ' tv-channel-card--active' : ''}`}>
       <button type="button" className="tv-channel-card__media" onClick={() => onSelect(channel)}>
         {channel.logo ? (
           <img src={channel.logo} alt="" loading="lazy" />
@@ -15,12 +17,8 @@ export function TVChannelCard({ channel, onSelect }) {
       <div className="tv-channel-card__body">
         <div>
           <strong>{channel.name}</strong>
-          {channel.verified && <CheckCircle2 size={15} aria-label="Canal verificado" />}
+          <span>{category}</span>
         </div>
-        <span>{channel.category?.name || channel.language || 'Ao vivo'}</span>
-        <IconButton aria-label={`Assistir ${channel.name}`} title="Assistir" onClick={() => onSelect(channel)}>
-          <Play size={17} />
-        </IconButton>
       </div>
     </Card>
   )
