@@ -5,6 +5,7 @@ import {
   normalizeMatchStatus,
   STANDARD_MATCH_STATUS,
 } from '../../../core/time/timeService.js'
+import { translateCountry } from '../../../core/sports/sportsDictionary.js'
 
 const RECENT_FINISHED_HOURS = 48
 const LIVE_MATCH_STALE_HOURS = 3
@@ -229,8 +230,8 @@ export function createLiveMatchCenterHeroModel(match, options = {}) {
     reason,
     competition: safeMatch.championship || safeMatch.competitionName || safeMatch.competition_name || 'Competicao',
     competitionLogo: safeMatch.competitionLogo || safeMatch.competition_logo || '',
-    homeTeam: safeMatch.homeTeam || safeMatch.homeParticipant || safeMatch.home_participant || 'Mandante',
-    awayTeam: safeMatch.awayTeam || safeMatch.awayParticipant || safeMatch.away_participant || 'Visitante',
+    homeTeam: translateCountry(safeMatch.homeTeam || safeMatch.homeParticipant || safeMatch.home_participant || 'Mandante'),
+    awayTeam: translateCountry(safeMatch.awayTeam || safeMatch.awayParticipant || safeMatch.away_participant || 'Visitante'),
     homeShield: safeMatch.homeShield || 'BDA',
     awayShield: safeMatch.awayShield || 'BDA',
     homeCrest: safeMatch.homeTeamCrest || safeMatch.homeCrest || safeMatch.home_crest || '',

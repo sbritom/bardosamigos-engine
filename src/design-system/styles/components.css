@@ -1820,6 +1820,11 @@
   padding-block: var(--bds-space-8);
 }
 
+.bds-top-header [data-designer-id="header.logo"] {
+  column-gap: var(--bds-space-16);
+  padding-left: var(--bds-space-8);
+}
+
 .bds-top-header__brand-icon,
 .bds-top-header__icon-button {
   display: flex;
@@ -1978,6 +1983,7 @@
   .bds-top-header [data-designer-id="header.logo"] {
     min-width: max-content;
     justify-self: start;
+    padding-left: var(--bds-space-16);
     white-space: nowrap;
   }
 
@@ -2405,7 +2411,7 @@
   min-width: 0;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--bds-space-12);
+  gap: 12px;
 }
 
 .bds-hero-v2-team--away {

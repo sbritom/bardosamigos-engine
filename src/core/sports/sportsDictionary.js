@@ -102,7 +102,33 @@ export const SPORTS_STATUS_LABELS = Object.freeze({
 })
 
 export function translateCountry(value) {
-  return SPORTS_COUNTRY_TRANSLATIONS[value] || value || ''
+  if (!value) return ''
+
+  const aliases = {
+    netherlands: 'Holanda',
+    usa: 'Estados Unidos',
+  }
+  const direct = SPORTS_COUNTRY_TRANSLATIONS[value]
+  if (direct) return direct
+
+  const normalizedValue = String(value).trim()
+  const normalizedKey = normalizedValue
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (aliases[normalizedKey]) return aliases[normalizedKey]
+
+  const entry = Object.entries(SPORTS_COUNTRY_TRANSLATIONS).find(([key]) => {
+    const normalizedTranslationKey = key
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+
+    return normalizedTranslationKey === normalizedKey
+  })
+
+  return entry?.[1] || normalizedValue
 }
 
 export function translateCompetition(value, code) {
