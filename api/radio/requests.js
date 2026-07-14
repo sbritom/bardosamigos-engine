@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 
 const TABLE = 'radio_music_requests'
-const VALID_STATUSES = new Set(['pending', 'approved', 'rejected', 'played'])
+const VALID_STATUSES = new Set(['pending', 'read'])
 const REQUEST_WINDOW_SECONDS = 60
 
 function setCors(response) {
@@ -154,7 +154,7 @@ async function handleGet(request, response, supabase) {
   const status = cleanText(request.query?.status, 30)
   let query = supabase
     .from(TABLE)
-    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at, played_at')
+    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at')
     .order('created_at', { ascending: false })
     .limit(100)
 
@@ -185,7 +185,7 @@ async function handlePatch(request, response, supabase) {
   const id = cleanText(body.id, 80)
   const status = cleanText(body.status, 30)
 
-  if (!id || !VALID_STATUSES.has(status) || status === 'pending') {
+  if (!id || status !== 'read') {
     response.status(400).json({
       ok: false,
       error: 'Pedido ou status invalido.',
@@ -197,14 +197,13 @@ async function handlePatch(request, response, supabase) {
     status,
     admin_note: cleanText(body.adminNote, 500) || null,
     handled_by: cleanText(body.handledBy, 120) || admin.user?.email || admin.user?.id || null,
-    played_at: status === 'played' ? new Date().toISOString() : null,
   }
 
   const { data, error } = await supabase
     .from(TABLE)
     .update(payload)
     .eq('id', id)
-    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at, played_at')
+    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at')
     .single()
 
   if (error) {

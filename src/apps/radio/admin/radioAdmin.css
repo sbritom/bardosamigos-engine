@@ -314,19 +314,9 @@
   background: rgba(242, 198, 109, 0.1);
 }
 
-.radio-request-card__status.is-approved {
+.radio-request-card__status.is-read {
   color: #8fc7ff;
   background: rgba(77, 163, 255, 0.1);
-}
-
-.radio-request-card__status.is-rejected {
-  color: #ffaaaa;
-  background: rgba(255, 114, 114, 0.1);
-}
-
-.radio-request-card__status.is-played {
-  color: #9cf6bd;
-  background: rgba(93, 242, 154, 0.1);
 }
 
 .radio-request-card__actions {

@@ -69,12 +69,12 @@ export default function RadioRequestsPanel() {
     };
   }, [access.allowed, access.loading, refresh]);
 
-  const handleUpdate = useCallback(async (request, status) => {
+  const handleMarkRead = useCallback(async (request) => {
     try {
       setBusyId(request.id);
       const updated = await updateRadioMusicRequest({
         id: request.id,
-        status,
+        status: "read",
         handledBy: access.user?.email || access.user?.id || "locutor",
       });
       setRequests((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -124,7 +124,7 @@ export default function RadioRequestsPanel() {
         </div>
         <span className={pendingCount ? "radio-requests-counter is-live" : "radio-requests-counter"}>
           <BellRing size={15} />
-          {pendingCount} pendente{pendingCount === 1 ? "" : "s"}
+          {pendingCount ? `${pendingCount} NOVO${pendingCount === 1 ? "" : "S"}` : "Nenhum pedido novo"}
         </span>
       </div>
 
@@ -133,7 +133,7 @@ export default function RadioRequestsPanel() {
       <div className="radio-requests-list">
         {requests.length ? requests.map((request) => (
           <div className={newPendingIds.has(request.id) ? "radio-request-highlight" : ""} key={request.id}>
-            <RadioRequestCard request={request} busy={busyId === request.id} onUpdate={handleUpdate} />
+            <RadioRequestCard request={request} busy={busyId === request.id} onMarkRead={handleMarkRead} />
           </div>
         )) : (
           <p>Nenhum pedido musical registrado ainda.</p>

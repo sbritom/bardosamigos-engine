@@ -13,7 +13,6 @@ function normalizeRequest(row = {}) {
     handledBy: row.handled_by || row.handledBy || "",
     createdAt: row.created_at || row.createdAt || "",
     updatedAt: row.updated_at || row.updatedAt || "",
-    playedAt: row.played_at || row.playedAt || "",
   };
 }
 

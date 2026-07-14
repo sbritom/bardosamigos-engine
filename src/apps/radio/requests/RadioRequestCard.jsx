@@ -1,11 +1,9 @@
 import { memo } from "react";
-import { Check, CheckCircle2, Clock3, Music2, X } from "lucide-react";
+import { Check, Clock3, Music2 } from "lucide-react";
 
 const STATUS_LABELS = {
-  pending: "Novo",
-  approved: "Aceito",
-  rejected: "Recusado",
-  played: "Tocada",
+  pending: "NOVO",
+  read: "LIDO",
 };
 
 function formatRequestDate(value) {
@@ -18,8 +16,9 @@ function formatRequestDate(value) {
   });
 }
 
-function RadioRequestCard({ request, busy, onUpdate }) {
+function RadioRequestCard({ request, busy, onMarkRead }) {
   const status = request.status || "pending";
+  const isPending = status === "pending";
 
   return (
     <article className={`radio-request-card radio-request-card--${status}`}>
@@ -39,20 +38,14 @@ function RadioRequestCard({ request, busy, onUpdate }) {
         {request.handledBy && <small>Locutor: {request.handledBy}</small>}
       </div>
 
-      <div className="radio-request-card__actions">
-        <button type="button" disabled={busy || status === "approved" || status === "played"} onClick={() => onUpdate(request, "approved")}>
-          <Check size={15} />
-          Aceitar
-        </button>
-        <button type="button" disabled={busy || status === "rejected" || status === "played"} onClick={() => onUpdate(request, "rejected")}>
-          <X size={15} />
-          Recusar
-        </button>
-        <button type="button" disabled={busy || status === "played"} onClick={() => onUpdate(request, "played")}>
-          <CheckCircle2 size={15} />
-          Tocada
-        </button>
-      </div>
+      {isPending && (
+        <div className="radio-request-card__actions">
+          <button type="button" disabled={busy} onClick={() => onMarkRead(request)}>
+            <Check size={15} />
+            MARCAR COMO LIDO
+          </button>
+        </div>
+      )}
     </article>
   );
 }
