@@ -26,6 +26,8 @@ export const HOME_TV_CHANNELS = [
   channel('premiereclubes', 'Premiere Clubes', 'Esportes'),
   channel('premiere2', 'Premiere 2', 'Esportes'),
   channel('sportv', 'SporTV', 'Esportes'),
+  channel('cazetv', 'CazéTV', 'Esportes'),
+  channel('getv', 'GETV', 'Esportes'),
   channel('tnt', 'TNT', 'Filmes e Séries'),
   channel('casadopatrao01', 'Casa do Patrão 01', 'Especiais'),
   channel('casadopatrao02', 'Casa do Patrão 02', 'Especiais'),
