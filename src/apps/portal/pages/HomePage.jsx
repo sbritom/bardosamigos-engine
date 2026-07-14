@@ -287,19 +287,40 @@ function CommunityPanel() {
 function RadioCard() {
   const { currentStation, playing, loading, error, toggle, volume, setVolume } = useRadio()
   const station = currentStation || {}
+  const [requestModalOpen, setRequestModalOpen] = useState(false)
+  const [requestFeedback, setRequestFeedback] = useState('')
+  const [failedCoverUrl, setFailedCoverUrl] = useState('')
+  const listenerCount = Number(station.listeners) || 0
+  const listenerLabel = `${listenerCount} ${listenerCount === 1 ? 'ouvinte' : 'ouvintes'}`
+  const coverUrl = typeof station.cover === 'string' ? station.cover.trim() : ''
+  const hasCover = /^https?:\/\//i.test(coverUrl) && failedCoverUrl !== coverUrl
+
+  function handleOpenRequestModal() {
+    setRequestFeedback('')
+    setRequestModalOpen(true)
+  }
+
+  function handleRequestSubmit(event) {
+    event.preventDefault()
+    setRequestFeedback('A integracao real de pedidos musicais ainda esta em preparacao. Nenhum pedido foi enviado ou registrado.')
+  }
 
   return (
     <FeatureCard
       className="bds-home-card-full"
-      eyebrow="Player do bar"
       title="RÁDIO DO BAR"
-      description="Som do bar em tempo real"
       icon={<Radio size={20} />}
-      action={<StatusBadge status={playing ? 'AO VIVO' : 'EM BREVE'} tone={playing ? 'live' : 'neutral'}>{playing ? 'AO VIVO' : 'Pronta'}</StatusBadge>}
+      action={station.online ? <StatusBadge status="AO VIVO" tone="live">AO VIVO</StatusBadge> : null}
     >
       <div className="bds-home-radio-card" data-designer-id="radio.player" data-designer-label="Radio / Player">
         <div className="bds-home-radio-main" data-designer-id="radio.currentTrack" data-designer-label="Radio / Musica Atual">
-          <div className="bds-home-radio-icon" data-designer-id="radio.icon" data-designer-label="Radio / Icone"><Radio size={34} /></div>
+          <div className="bds-home-radio-icon" data-designer-id="radio.icon" data-designer-label="Radio / Icone">
+            {hasCover ? (
+              <img src={coverUrl} alt="" onError={() => setFailedCoverUrl(coverUrl)} />
+            ) : (
+              <Radio size={34} />
+            )}
+          </div>
           <div>
             <span>Tocando agora</span>
             <strong>{station.currentTrack || 'Radio pronta'}</strong>
@@ -311,8 +332,8 @@ function RadioCard() {
         </div>
         <div>
           <div className="bds-home-radio-status">
-            <span>{error || station.program || 'Programacao indisponivel'}</span>
-            <span>{loading ? 'Conectando' : playing ? 'Online' : 'Pronta'}</span>
+            <span>{error || listenerLabel}</span>
+            <span>{loading ? 'Conectando' : station.online ? 'AO VIVO' : 'Aguardando sinal'}</span>
           </div>
           <Progress value={playing ? 100 : 0} />
         </div>
@@ -321,11 +342,41 @@ function RadioCard() {
           <input aria-label="Volume da radio" max="100" min="0" onChange={(event) => setVolume(event.target.value)} type="range" value={volume} />
           <span>{volume}%</span>
         </label>
-        <button className="bds-home-request-button" type="button" aria-label="Pedir música" title="Pedidos musicais em breve">
+        <button className="bds-home-request-button" type="button" aria-label="Pedir música" title="Pedidos musicais em preparacao" onClick={handleOpenRequestModal}>
           <Music2 size={16} />
           Pedir música
         </button>
         {error && <div className="bds-home-error"><AlertCircle size={18} />{error}</div>}
+        {requestModalOpen && (
+          <div className="bds-home-radio-request-modal" role="dialog" aria-modal="true" aria-labelledby="radio-request-title">
+            <div className="bds-home-radio-request-panel">
+              <div className="bds-home-radio-request-header">
+                <div>
+                  <span>Radio do Bar</span>
+                  <strong id="radio-request-title">Pedir musica</strong>
+                </div>
+                <button type="button" aria-label="Fechar pedido de musica" onClick={() => setRequestModalOpen(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <form className="bds-home-radio-request-form" onSubmit={handleRequestSubmit}>
+                <label>
+                  Musica e artista
+                  <input name="songAndArtist" placeholder="Nome da musica e do artista" type="text" />
+                </label>
+                <label>
+                  Recado <span>(opcional)</span>
+                  <textarea name="message" placeholder="Deixe um recado para a radio" rows="3" />
+                </label>
+                {requestFeedback && <p className="bds-home-radio-request-feedback">{requestFeedback}</p>}
+                <div className="bds-home-radio-request-actions">
+                  <button type="button" onClick={() => setRequestModalOpen(false)}>Fechar</button>
+                  <button type="submit">Enviar pedido</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </FeatureCard>
   )

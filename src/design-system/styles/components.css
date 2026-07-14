@@ -917,6 +917,7 @@
 }
 
 .bds-home-radio-card {
+  position: relative;
   display: grid;
   gap: var(--bds-space-16);
 }
@@ -935,6 +936,14 @@
   background: var(--bds-color-primary);
   color: var(--bds-color-primary-text);
   box-shadow: var(--bds-shadow-level-1);
+  overflow: hidden;
+}
+
+.bds-home-radio-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .bds-home-radio-main strong {
@@ -2256,8 +2265,10 @@
 
 /* Hero Match Center V2: faithful sports banner based on the approved mockup. */
 .bds-home-shell .bds-hero-v2 {
-  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
   padding: var(--bds-space-8) var(--bds-space-24);
   border-color: rgba(212, 175, 55, 0.18);
   background:
@@ -2268,12 +2279,14 @@
 
 .bds-home-shell .bds-hero-v2 .bds-hero-card__content {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 100%;
   width: 100%;
+  align-items: center;
+  justify-items: center;
 }
 
 .bds-home-shell .bds-hero-v2--empty .bds-hero-card__content {
-  grid-template-columns: minmax(0, 1fr);
   place-items: center;
 }
 
@@ -2294,8 +2307,9 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: minmax(var(--bds-space-80), 0.38fr) minmax(0, 1.62fr) minmax(var(--bds-space-80), 0.38fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
+  align-content: center;
   justify-content: center;
   gap: var(--bds-space-8);
   justify-items: center;
@@ -2306,8 +2320,8 @@
 .bds-hero-v2-meta,
 .bds-hero-v2-info,
 .bds-hero-v2-actions {
-  grid-column: 2;
-  width: min(100%, 1080px);
+  grid-column: 1;
+  width: min(100%, 980px);
 }
 
 .bds-hero-v2-meta {
@@ -2351,8 +2365,9 @@
 }
 
 .bds-hero-v2-match {
-  display: flex;
+  display: grid;
   width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   justify-content: center;
   gap: var(--bds-space-16);
@@ -2369,8 +2384,7 @@
 }
 
 .bds-hero-v2-team--away {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .bds-hero-v2-crest {
@@ -2439,39 +2453,6 @@
   gap: var(--bds-space-12);
 }
 
-.bds-hero-v2-actions .bds-action-button {
-  width: auto;
-  min-height: var(--bds-space-32);
-  justify-content: center;
-  padding-inline: var(--bds-space-12);
-  font-size: var(--bds-font-small);
-}
-
-/* Home content cleanup: visual-only alignment pass. */
-.bds-home-shell .bds-hero-v2-content {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.bds-home-shell .bds-hero-v2-match,
-.bds-home-shell .bds-hero-v2-meta,
-.bds-home-shell .bds-hero-v2-info {
-  grid-column: 1;
-}
-
-.bds-home-shell .bds-hero-v2-match {
-  max-width: 980px;
-  margin-inline: auto;
-  justify-content: center;
-}
-
-.bds-home-shell .bds-hero-v2-team {
-  justify-content: flex-end;
-}
-
-.bds-home-shell .bds-hero-v2-team--away {
-  justify-content: flex-end;
-}
-
 .bds-home-shell .bds-hero-v2-score {
   min-width: calc(var(--bds-space-96) + var(--bds-space-40));
   text-align: center;
@@ -2527,11 +2508,131 @@
   border-radius: var(--bds-radius-md);
   background: rgba(212, 175, 55, 0.08);
   color: var(--bds-color-primary);
-  cursor: default;
+  cursor: pointer;
   font-size: var(--bds-font-small);
   font-weight: 900;
   line-height: var(--bds-line-tight);
   padding: 0 var(--bds-space-10);
+}
+
+.bds-home-request-button:hover {
+  border-color: rgba(212, 175, 55, 0.48);
+  background: rgba(212, 175, 55, 0.14);
+}
+
+.bds-home-radio-request-modal {
+  position: absolute;
+  inset: var(--bds-space-8);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  border-radius: var(--bds-radius-md);
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.bds-home-radio-request-panel {
+  width: min(100%, 360px);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: var(--bds-radius-md);
+  background:
+    linear-gradient(180deg, rgba(212, 175, 55, 0.12), transparent 42%),
+    var(--bds-color-background-secondary);
+  box-shadow: var(--bds-shadow-level-2);
+  padding: var(--bds-space-16);
+}
+
+.bds-home-radio-request-header,
+.bds-home-radio-request-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bds-space-12);
+}
+
+.bds-home-radio-request-header span,
+.bds-home-radio-request-form label span {
+  color: var(--bds-color-text-muted);
+  font-size: var(--bds-font-caption);
+  font-weight: 800;
+}
+
+.bds-home-radio-request-header strong {
+  display: block;
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-title);
+  font-weight: 900;
+}
+
+.bds-home-radio-request-header button,
+.bds-home-radio-request-actions button {
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-md);
+  background: var(--bds-color-surface);
+  color: var(--bds-color-text);
+  cursor: pointer;
+}
+
+.bds-home-radio-request-header button {
+  display: inline-grid;
+  width: var(--bds-space-32);
+  height: var(--bds-space-32);
+  place-items: center;
+  padding: 0;
+}
+
+.bds-home-radio-request-form {
+  display: grid;
+  gap: var(--bds-space-12);
+  margin-top: var(--bds-space-16);
+}
+
+.bds-home-radio-request-form label {
+  display: grid;
+  gap: var(--bds-space-6);
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-small);
+  font-weight: 900;
+}
+
+.bds-home-radio-request-form input,
+.bds-home-radio-request-form textarea {
+  width: 100%;
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-md);
+  background: var(--bds-color-background);
+  color: var(--bds-color-text);
+  font: inherit;
+  padding: var(--bds-space-10);
+}
+
+.bds-home-radio-request-form textarea {
+  min-height: var(--bds-space-64);
+  resize: vertical;
+}
+
+.bds-home-radio-request-feedback {
+  margin: 0;
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  border-radius: var(--bds-radius-md);
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 700;
+  line-height: var(--bds-line-normal);
+  padding: var(--bds-space-10);
+}
+
+.bds-home-radio-request-actions button {
+  min-height: var(--bds-space-36);
+  padding: 0 var(--bds-space-12);
+  font-weight: 900;
+}
+
+.bds-home-radio-request-actions button[type="submit"] {
+  border-color: rgba(212, 175, 55, 0.42);
+  background: var(--bds-color-primary);
+  color: var(--bds-color-primary-text);
 }
 
 .bds-home-shell [data-designer-id="radio"] .bds-home-radio-card,
@@ -2561,11 +2662,15 @@
     grid-column: 1;
   }
 
-  .bds-hero-v2-match,
+  .bds-hero-v2-match {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .bds-hero-v2-team,
   .bds-hero-v2-team--away {
     width: 100%;
     flex-direction: column;
+    justify-content: center;
     gap: var(--bds-space-4);
   }
 
@@ -3361,4 +3466,57 @@ body.bds-designer-preview .bds-designer-selected {
   .bds-designer-workspace {
     width: min(100% - var(--bds-space-16), 1920px);
   }
+}
+
+/* =========================================================
+   MXCAST PLAYER — RÁDIO BAR DOS AMIGOS
+   ========================================================= */
+
+.bds-mxcast-player {
+  width: 100%;
+  max-width: 100%;
+  height: 90px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #000;
+}
+
+.bds-mxcast-player__iframe {
+  display: block;
+  width: 100%;
+  height: 90px;
+  border: 0;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .bds-mxcast-player,
+  .bds-mxcast-player__iframe {
+    height: 90px;
+  }
+}
+
+/* Ajuste final de altura do player MxCast */
+.bds-mxcast-player,
+.bds-mxcast-player__iframe {
+  height: 46px;
+  min-height: 46px;
+}
+
+.bds-mxcast-player {
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Altura oficial do player MxCast */
+.bds-mxcast-player,
+.bds-mxcast-player__iframe {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+}
+
+.bds-mxcast-player {
+  overflow: hidden;
+  border-radius: 0;
 }

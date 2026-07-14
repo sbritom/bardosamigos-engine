@@ -30,6 +30,121 @@ function sendImage(response, payload) {
   fs.createReadStream(payload.filePath).pipe(response);
 }
 
+const MXCAST_OFFICIAL_STATS_URL = "https://api.mxcast.com.br/stream/7186/stats";
+const MXCAST_LEGACY_STATS_URL = "https://stm1.mxcast.com.br:7186/stats?sid=1";
+const MXCAST_AUDIO_STREAM_URL = "https://stm1.mxcast.com.br:7186/stream";
+const MXCAST_REQUEST_TIMEOUT_MS = 8000;
+
+function normalizeMxCastJson(data = {}) {
+  const online = String(data.stream_status || "").toLowerCase() === "on";
+
+  return {
+    online,
+    songTitle: data.song_title || "Programação ao vivo",
+    listeners: Number(data.listeners) || 0,
+    peakListeners: Number(data.peak_listeners) || 0,
+    bitrate: Number(data.bitrate) || 0,
+    sampleRate: Number(data.samplerate) || 0,
+    contentType: data.encoder || "",
+    serverTitle: data.server_name || "Radio Bar Dos Amigos",
+    streamUrl: MXCAST_AUDIO_STREAM_URL,
+    cover: data.cover || "",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function fetchOfficialMxCastStatus() {
+  const response = await fetch(MXCAST_OFFICIAL_STATS_URL, {
+    headers: {
+      "User-Agent": "Radio-Bar-dos-Amigos/1.0",
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(MXCAST_REQUEST_TIMEOUT_MS),
+  });
+
+  if (!response.ok) {
+    throw new Error(`MxCast oficial respondeu com HTTP ${response.status}`);
+  }
+
+  return normalizeMxCastJson(await response.json());
+}
+
+async function fetchLegacyMxCastStatus() {
+  const response = await fetch(MXCAST_LEGACY_STATS_URL, {
+    headers: {
+      "User-Agent": "Radio-Bar-dos-Amigos/1.0",
+      Accept: "application/xml,text/xml,*/*",
+    },
+    signal: AbortSignal.timeout(MXCAST_REQUEST_TIMEOUT_MS),
+  });
+
+  if (!response.ok) {
+    throw new Error(`MxCast legado respondeu com HTTP ${response.status}`);
+  }
+
+  const xml = await response.text();
+
+  function getXmlValue(tagName) {
+    const match = xml.match(
+      new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, "i")
+    );
+
+    return match?.[1]?.trim() || "";
+  }
+
+  function decodeXml(value) {
+    return String(value || "")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  }
+
+  const rawSongTitle = decodeXml(getXmlValue("SONGTITLE"));
+  const streamStatus = getXmlValue("STREAMSTATUS") === "1";
+  const listeners = Number(getXmlValue("CURRENTLISTENERS")) || 0;
+  const peakListeners = Number(getXmlValue("PEAKLISTENERS")) || 0;
+  const bitrate = Number(getXmlValue("BITRATE")) || 0;
+  const sampleRate = Number(getXmlValue("SAMPLERATE")) || 0;
+  const contentType = getXmlValue("CONTENT") || "";
+  const serverTitle = decodeXml(getXmlValue("SERVERTITLE")) || "Radio Bar Dos Amigos";
+
+  return {
+    online: streamStatus,
+    songTitle: rawSongTitle || "Programação ao vivo",
+    listeners,
+    peakListeners,
+    bitrate,
+    sampleRate,
+    contentType,
+    serverTitle,
+    streamUrl: MXCAST_AUDIO_STREAM_URL,
+    cover: "",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function getMxCastStatus() {
+  try {
+    return await fetchOfficialMxCastStatus();
+  } catch (officialError) {
+    try {
+      const fallbackStatus = await fetchLegacyMxCastStatus();
+
+      return {
+        ...fallbackStatus,
+        fallback: true,
+        fallbackReason: officialError.message,
+      };
+    } catch (fallbackError) {
+      throw new Error(
+        `MxCast indisponível. Oficial: ${officialError.message}. Fallback: ${fallbackError.message}`
+      );
+    }
+  }
+}
+
 export class ApiEngine {
   constructor(engine, logger) {
     this.engine = engine;
@@ -151,6 +266,7 @@ export class ApiEngine {
       "/engine/health/version": () => healthApi.version(),
       "/engine/config": config,
       "/engine/stream": stream,
+      "/engine/radio/mxcast/status": () => getMxCastStatus(),
       "/engine/audio": audio,
       "/engine/icecast": icecast,
       "/engine/icecast/debug": icecastDebug,

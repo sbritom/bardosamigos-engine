@@ -24,6 +24,8 @@ const MATCH_LIMIT = 3
 const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'
 const FOOTBALL_TIME_ZONE = 'America/Maceio'
 const WORLD_CUP_YEAR = 2026
+const WORLD_CUP_START_DATE = '2026-06-11'
+const WORLD_CUP_END_DATE = '2026-07-19'
 
 function formatDate(value) {
   return value ? formatBrazilDate(value) : ''
@@ -197,9 +199,16 @@ function isWorldCupMatch(match = {}) {
   return year === WORLD_CUP_YEAR && (code === 'WC' || name.includes('fifa world cup') || name.includes('copa do mundo'))
 }
 
+function isWorldCupWindowActive(now = nowUtcIso()) {
+  const today = getFootballDateKey(now)
+
+  return Boolean(today && today >= WORLD_CUP_START_DATE && today <= WORLD_CUP_END_DATE)
+}
+
 function isWorldCupActive(matches = [], now = nowUtcIso()) {
   const worldCupMatches = matches.filter(isWorldCupMatch)
   if (!worldCupMatches.length) return false
+  if (isWorldCupWindowActive(now)) return true
 
   const nowTime = getUtcTimestamp(now)
   const latestMatchTime = worldCupMatches.reduce((latest, match) => Math.max(latest, getUtcTimestamp(match.startsAt || match.utcDate)), 0)
@@ -301,6 +310,13 @@ function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = M
   return visibleMatches.slice(0, limit)
 }
 
+function shouldUseFootballProxy({ matches = [], visibleMatches = [], now = nowUtcIso() } = {}) {
+  if (!visibleMatches.length) return true
+  if (!isWorldCupWindowActive(now)) return false
+
+  return !visibleMatches.some(isWorldCupMatch)
+}
+
 export async function listHybridNews({ limit = NEWS_LIMIT } = {}) {
   const client = getSupabaseClient()
 
@@ -379,8 +395,21 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
 
     const now = nowUtcIso()
     matches = sortCurrentMatches(matches, now)
+    let visibleMatches = selectVisibleFootballMatches(matches, now, limit)
+
+    if (shouldUseFootballProxy({ matches, visibleMatches, now })) {
+      const fallback = await listFootballProxyMatches()
+      if (fallback.data?.length) {
+        matches = sortCurrentMatches(fallback.data, now)
+        visibleMatches = selectVisibleFootballMatches(matches, now, limit)
+        fallbackError = null
+        source = fallback.source
+      } else {
+        fallbackError = fallback.error || fallbackError
+      }
+    }
+
     const liveMatchCenter = getLiveMatchCenter(matches, { now })
-    const visibleMatches = selectVisibleFootballMatches(matches, now, limit)
     const finished = matches
       .filter((match) => isFinishedStatus(match.standardStatus))
       .slice(0, 2)
