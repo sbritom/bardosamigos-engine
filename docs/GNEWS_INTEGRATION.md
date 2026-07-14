@@ -1,71 +1,184 @@
-# GNews Sync v1.0
+# GNews Sync v2.0
 
-Integracao oficial da API GNews ao Sync Engine.
+Sistema economico e persistente de noticias do portal Bar dos Amigos.
 
-## Regra Principal
+## Arquitetura
 
-Componentes React nao consomem GNews diretamente.
+Visitantes nao chamam mais a GNews.
 
-Fluxo:
+Fluxo oficial:
 
-GNews -> Sync Engine -> Supabase -> Home / Noticias
+```text
+Vercel Cron
+-> /api/cron/sync-news
+-> GNews
+-> normalizacao e deduplicacao
+-> Supabase public.news_articles
+-> /api/news
+-> Home e /news
+```
 
-## Variavel de Ambiente
+## Horarios
 
-- `GNEWS_API_KEY` para o fallback server-side `/api/news`
-- `VITE_GNEWS_API_KEY` legado para rotinas antigas de sync no frontend/admin
+A Vercel Cron usa UTC.
 
-O valor da chave nao deve ser salvo no repositorio nem exibido em componentes React.
+- 08:00 em Brasilia: `0 11 * * *`
+- 18:00 em Brasilia: `0 21 * * *`
 
-## Endpoint Utilizado
+## Variaveis Necessarias
 
-Base URL:
+Server-side:
 
-- `https://gnews.io/api/v4`
+- `GNEWS_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `CRON_SECRET`
+
+Nao usar em frontend:
+
+- `VITE_GNEWS_API_KEY`
+- `VITE_SUPABASE_SERVICE_ROLE_KEY`
+
+## Endpoint De Sincronizacao
 
 Endpoint:
 
-- `GET /search`
+```text
+/api/cron/sync-news
+```
 
-Parametros preparados:
+Metodos:
 
-- `q`
-- `lang=pt`
-- `country=br`
-- `max`
-- `apikey`
+- `GET`
+- `POST`
 
-## Categorias Sincronizadas
+Autorizacao:
 
-- Futebol
-- Esportes
-- Brasil
+- Vercel Cron com headers validos; ou
+- `Authorization: Bearer <CRON_SECRET>`
 
-## Campos Persistidos
+Resposta:
 
-- titulo
-- descricao
-- imagem
-- fonte
-- URL original
-- categoria
-- data de publicacao
+```json
+{
+  "ok": true,
+  "data": {
+    "fetched": 20,
+    "inserted": 12,
+    "updated": 4,
+    "skipped": 4,
+    "cleanup": { "softDeleted": 0 },
+    "errors": []
+  }
+}
+```
 
-## Fallback
+## Topicos
 
-Home e Noticias consultam o Supabase como fonte principal. Se o Supabase falhar, estiver vazio ou retornar apenas noticias antigas, a Home usa o endpoint server-side `/api/news`, que consulta GNews com `process.env.GNEWS_API_KEY` sem expor chave no frontend.
+Cada sincronizacao consulta no maximo quatro topicos:
 
-O fallback server-side busca conteudo em portugues do Brasil para Brasil, futebol/esportes, entretenimento e tecnologia. Durante a Copa do Mundo FIFA 2026, noticias da Copa recebem prioridade adicional sem ocupar todo o feed.
+- Brasil: `brasil`
+- Esportes: `futebol OR esportes`
+- Entretenimento: `entretenimento`
+- Tecnologia: `tecnologia`
 
-## Execucao Manual
+Durante a janela da Copa do Mundo FIFA 2026, o topico Esportes usa:
+
+```text
+"Copa do Mundo" OR futebol OR esportes
+```
+
+## Persistencia
+
+Tabela principal:
+
+- `public.news_articles`
+
+Categorias:
+
+- `public.news_categories`
+
+Logs:
+
+- `public.analytics_events`
+
+Campos relevantes em `metadata`:
+
+- `provider`
+- `category`
+- `source`
+- `sourceUrl`
+- `originalUrl`
+- `relevanceScore`
+- `syncedAt`
+
+## Deduplicacao
+
+A sincronizacao evita duplicatas por:
+
+1. URL original normalizada;
+2. `slug`.
+
+Quando uma noticia ja existe, os dados relevantes sao atualizados em vez de criar novo registro.
+
+## Limpeza
+
+Apos uma sincronizacao com conteudo novo valido, o sistema mantem ate 50 noticias publicadas por categoria.
+
+Noticias excedentes recebem soft delete por `deleted_at`.
+
+Se a GNews falhar, a limpeza nao remove as ultimas noticias validas.
+
+## /api/news
+
+`/api/news` nao chama mais a GNews.
+
+Ele le somente o cache persistente no Supabase e preserva o formato consumido pela Home e pela pagina `/news`:
+
+```json
+{
+  "source": "supabase-cache",
+  "articles": [],
+  "categories": [],
+  "errors": []
+}
+```
+
+Cache HTTP:
+
+```text
+s-maxage=300
+stale-while-revalidate=120
+```
+
+## Execucao Manual Segura
+
+Apos deploy, execute uma sincronizacao manual com:
+
+```bash
+curl -X POST "https://SEU_DOMINIO/api/cron/sync-news" \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Localmente, com variaveis server-side configuradas:
 
 ```bash
 npm run sync:gnews
 ```
 
-## Proximos Passos
+## Consumo Estimado
 
-1. Migrar rotinas antigas de sincronizacao manual para `GNEWS_API_KEY` server-side.
-2. Criar agendamento periodico.
-3. Adicionar upsert por URL original/slug quando constraints estiverem definidas.
-4. Evoluir painel admin de sincronizacao com historico completo.
+- 4 chamadas GNews por sincronizacao.
+- 8 chamadas GNews por dia.
+- Aproximadamente 240 chamadas por mes.
+
+O limite exato depende do plano contratado na GNews.
+
+## Falhas
+
+Se a GNews atingir limite, ficar offline ou retornar erro:
+
+- a sincronizacao registra o erro;
+- as ultimas noticias validas continuam no Supabase;
+- `/api/news` continua lendo o cache persistente;
+- visitantes nao consomem cota da GNews.

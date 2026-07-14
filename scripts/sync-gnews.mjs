@@ -1,7 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { existsSync, readFileSync } from 'node:fs'
-import { createGNewsService } from '../src/core/sync/providers/gnews/gnewsService.js'
-import { GNEWS_CATEGORIES } from '../src/core/sync/providers/gnews/gnewsConstants.js'
+import { syncGNewsToSupabase } from '../api/_lib/newsCacheService.js'
 
 const startedAt = Date.now()
 
@@ -23,48 +21,16 @@ function loadEnvLocal() {
 
 loadEnvLocal()
 
-function requiredEnv(name) {
-  const value = process.env[name]
-  if (!value) {
-    throw new Error(`${name} is required to run GNews sync.`)
-  }
-  return value
-}
-
-function optionalEnv(...names) {
-  for (const name of names) {
-    const value = process.env[name]
-    if (value) return String(value).trim().replace(/^['"]|['"]$/g, '').trim()
-  }
-
-  return ''
-}
-
 async function main() {
-  const supabaseUrl = requiredEnv('VITE_SUPABASE_URL')
-  const supabaseAnonKey = requiredEnv('VITE_SUPABASE_ANON_KEY')
-  const gnewsApiKey = optionalEnv('GNEWS_API_KEY', 'VITE_GNEWS_API_KEY')
-  if (!gnewsApiKey) {
-    throw new Error('GNEWS_API_KEY is required to run GNews sync. VITE_GNEWS_API_KEY is still accepted locally for backward compatibility.')
-  }
-  const client = createClient(supabaseUrl, supabaseAnonKey)
-  const service = createGNewsService({ client, apiKey: gnewsApiKey })
-  const result = await service.sync({
-    params: {
-      categories: Object.values(GNEWS_CATEGORIES),
-      max: Number(process.env.GNEWS_MAX || 10),
-    },
-  })
+  const result = await syncGNewsToSupabase()
   const report = {
-    news: result.records,
+    ...result,
     elapsedMs: Date.now() - startedAt,
-    error: result.error?.message || null,
-    metadata: result.metadata,
   }
 
   console.log(JSON.stringify(report, null, 2))
 
-  if (result.error) {
+  if (!result.ok) {
     process.exitCode = 1
   }
 }

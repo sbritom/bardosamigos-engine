@@ -4,7 +4,6 @@ import { getSupabaseClient } from '../../../../core/database'
 import { SYNC_INTEGRATIONS } from '../../../../core/sync'
 import { syncAdminService } from '../../../../core/sync/admin'
 import { FOOTBALL_DATA_SYNC_TYPES } from '../../../../core/sync/providers/footballData'
-import { GNEWS_CATEGORIES } from '../../../../core/sync/providers/gnews'
 import {
   createBrazilDateWindow,
   formatBrazilFullDateTime,
@@ -34,6 +33,10 @@ function createSummary(results, elapsedMs) {
     elapsedMs,
     errors: results.filter((item) => item.error).map((item) => item.error.message),
   }
+}
+
+function getCurrentTimestamp() {
+  return Date.now()
 }
 
 async function loadFootballStatusSummary() {
@@ -155,8 +158,8 @@ export function IntegrationsPanel() {
       {
         id: SYNC_INTEGRATIONS.GNEWS,
         name: 'GNews',
-        status: import.meta.env.VITE_GNEWS_API_KEY ? 'Configurado' : 'Aguardando chave',
-        canSync: true,
+        status: 'Cron protegido no servidor',
+        canSync: false,
       },
       {
         id: 'hunter-fm',
@@ -186,7 +189,7 @@ export function IntegrationsPanel() {
   }, [])
 
   async function syncFootballData() {
-    const startedAt = performance.now()
+    const startedAt = getCurrentTimestamp()
     setRunning(SYNC_INTEGRATIONS.FOOTBALL_DATA)
 
     const results = []
@@ -198,24 +201,9 @@ export function IntegrationsPanel() {
     setSummaries((current) => ({
       ...current,
       [SYNC_INTEGRATIONS.FOOTBALL_DATA]: {
-        ...createSummary(results, Math.round(performance.now() - startedAt)),
+        ...createSummary(results, getCurrentTimestamp() - startedAt),
         statusSummary,
       },
-    }))
-    setRunning('')
-  }
-
-  async function syncGNews() {
-    const startedAt = performance.now()
-    setRunning(SYNC_INTEGRATIONS.GNEWS)
-
-    const result = await syncAdminService.syncNow(SYNC_INTEGRATIONS.GNEWS, {
-      categories: Object.values(GNEWS_CATEGORIES),
-    })
-
-    setSummaries((current) => ({
-      ...current,
-      [SYNC_INTEGRATIONS.GNEWS]: createSummary([result], Math.round(performance.now() - startedAt)),
     }))
     setRunning('')
   }
@@ -223,11 +211,6 @@ export function IntegrationsPanel() {
   async function handleSync(id) {
     if (id === SYNC_INTEGRATIONS.FOOTBALL_DATA) {
       await syncFootballData()
-      return
-    }
-
-    if (id === SYNC_INTEGRATIONS.GNEWS) {
-      await syncGNews()
     }
   }
 
