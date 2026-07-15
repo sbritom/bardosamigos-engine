@@ -10,6 +10,7 @@ import {
 } from '../../../../core/time'
 import { getSportsStatusLabel, translateCompetition, translateCountry } from '../../../../core/sports'
 import { listCurrentFootballMatches } from '../../../../modules/competition/services/footballMatchQueryService'
+import { listHomeEvents } from '../../../../modules/events/services/eventsService'
 import {
   getLiveMatchCenter,
   getLiveMatchCenterStatus,
@@ -310,7 +311,7 @@ function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = M
   return visibleMatches.slice(0, limit)
 }
 
-function shouldUseFootballProxy({ matches = [], visibleMatches = [], now = nowUtcIso() } = {}) {
+function shouldUseFootballProxy({ visibleMatches = [], now = nowUtcIso() } = {}) {
   if (!visibleMatches.length) return true
   if (!isWorldCupWindowActive(now)) return false
 
@@ -445,10 +446,18 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
 }
 
 export async function loadHomeDashboardContent() {
-  const [news, competition] = await Promise.all([listHybridNews(), listHomeCompetitionMatches()])
+  const [news, competition, events] = await Promise.all([
+    listHybridNews(),
+    listHomeCompetitionMatches(),
+    listHomeEvents().catch((error) => {
+      console.warn('[homeContentService] Falha ao carregar eventos da Home', error)
+      return { data: [], error }
+    }),
+  ])
 
   return {
     news: Array.isArray(news?.data) ? news.data : [],
+    events: Array.isArray(events?.data) ? events.data : [],
     competitionMatches: Array.isArray(competition?.data) ? competition.data : [],
     nextMatch: competition?.next || null,
     liveMatchCenter: competition?.liveMatchCenter || getLiveMatchCenter([]),

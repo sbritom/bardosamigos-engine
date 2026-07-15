@@ -2682,9 +2682,21 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.bds-home-shell [data-designer-id="community"] .bds-stats-card {
+  min-width: 0;
+  align-content: start;
+  gap: var(--bds-space-6);
+}
+
 .bds-home-shell [data-designer-id="community"] .bds-stats-card > strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-stats-card span,
+.bds-home-shell [data-designer-id="community"] .bds-stats-card p {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 @media (max-width: 900px) {

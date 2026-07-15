@@ -1,100 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, Clock, ExternalLink, ImageIcon, MapPin, PartyPopper, Repeat2, Sparkles } from 'lucide-react'
 import { ActionButton, EmptyState, HeroCard, SectionHeader } from '../../../design-system'
-import { getSupabaseClient } from '../../../core/database'
+import {
+  formatEventDate,
+  formatEventTime,
+  getEventActionUrl,
+  getEventImage,
+  getEventRecurrenceLabel,
+  getEventSummary,
+  getEventTimeLabel,
+  getEventType,
+  getParticipationRule,
+  isFeaturedEvent,
+  isRecurringEvent,
+  listPublishedEvents,
+} from '../services/eventsService'
 import './eventsPage.css'
 
 const HERO_TEXT = 'Bingos, brincadeiras e momentos especiais. Confira o que vem por aí e não fique de fora.'
-
-function normalizeMetadata(metadata) {
-  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
-    return {}
-  }
-
-  return metadata
-}
-
-function isTruthy(value) {
-  return value === true || value === 'true' || value === 1 || value === '1'
-}
-
-function getEventType(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.type || metadata.eventType || metadata.category || metadata.kind || null
-}
-
-function getEventImage(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.imageUrl || metadata.image || metadata.coverUrl || metadata.cover || null
-}
-
-function getEventSummary(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.summary || metadata.shortDescription || event.description || null
-}
-
-function getEventTimeLabel(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.timeLabel || metadata.time || null
-}
-
-function getEventRecurrenceLabel(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.recurrence || metadata.repeat || metadata.frequency || null
-}
-
-function getParticipationRule(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return metadata.participationRule || metadata.rule || metadata.requirement || null
-}
-
-function getEventActionUrl(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  const configuredUrl = metadata.actionUrl || metadata.url || metadata.link || metadata.participationUrl
-
-  if (configuredUrl) return configuredUrl
-
-  if (typeof event.location === 'string' && event.location.toLowerCase().includes('xat.com/bardosamigos')) {
-    return 'https://xat.com/BarDosAmigos'
-  }
-
-  return null
-}
-
-function isFeaturedEvent(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return isTruthy(metadata.featured) || isTruthy(metadata.highlighted) || isTruthy(metadata.isFeatured)
-}
-
-function isRecurringEvent(event) {
-  const metadata = normalizeMetadata(event.metadata)
-  return isTruthy(metadata.recurring) || Boolean(metadata.recurrence || metadata.repeat || metadata.frequency)
-}
-
-function formatDate(value) {
-  if (!value) return null
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(date)
-}
-
-function formatTime(value) {
-  if (!value) return null
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-}
 
 function EventMedia({ event }) {
   const image = getEventImage(event)
@@ -111,8 +34,8 @@ function EventMedia({ event }) {
 }
 
 function EventMeta({ event }) {
-  const date = formatDate(event.starts_at)
-  const time = getEventTimeLabel(event) || formatTime(event.starts_at)
+  const date = event.dateLabel || formatEventDate(event.starts_at || event.startsAt)
+  const time = getEventTimeLabel(event) || formatEventTime(event.starts_at || event.startsAt)
   const type = getEventType(event)
   const recurrence = getEventRecurrenceLabel(event)
 
@@ -181,29 +104,6 @@ function EventsEmptyState() {
   )
 }
 
-async function loadPublishedEvents() {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return []
-  }
-
-  const { data, error } = await client
-    .from('events')
-    .select('id,title,slug,description,location,starts_at,ends_at,status,capacity,metadata,created_at,updated_at,deleted_at,version')
-    .eq('status', 'published')
-    .is('deleted_at', null)
-    .order('starts_at', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.warn('[EventsPage] Falha ao carregar eventos publicados', error)
-    return []
-  }
-
-  return data || []
-}
-
 export default function EventsPage() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -213,10 +113,14 @@ export default function EventsPage() {
 
     async function loadEvents() {
       setLoading(true)
-      const data = await loadPublishedEvents()
+      const result = await listPublishedEvents()
+
+      if (result.error) {
+        console.warn('[EventsPage] Falha ao carregar eventos publicados', result.error)
+      }
 
       if (active) {
-        setEvents(data)
+        setEvents(Array.isArray(result.data) ? result.data : [])
         setLoading(false)
       }
     }

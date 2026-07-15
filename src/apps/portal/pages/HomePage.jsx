@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
-  CakeSlice,
   CalendarDays,
+  Clock,
   Headphones,
   Mic2,
   Music2,
@@ -11,7 +11,6 @@ import {
   Search,
   Scissors,
   Sparkles,
-  Trophy,
   Users,
   Volume2,
   Wrench,
@@ -35,7 +34,7 @@ import { useRadio } from '../../../core/providers/RadioProvider'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
-import { barStudioTools, communityEvents, latestResults } from '../home/data/dashboardData'
+import { barStudioTools } from '../home/data/dashboardData'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
 import { loadHomeTVChannels } from '../../../modules/tv/services/TVHomeChannelSource'
@@ -49,6 +48,7 @@ const OfficialChat = lazy(() =>
 
 const initialDashboard = {
   news: [],
+  events: [],
   competitionMatches: [],
   nextMatch: null,
   liveMatchCenter: null,
@@ -258,23 +258,26 @@ function NewsPanel({ news, loading }) {
   )
 }
 
-function CommunityPanel() {
-  const safeEvents = Array.isArray(communityEvents) ? communityEvents : []
+function CommunityPanel({ events = [] }) {
+  const safeEvents = Array.isArray(events) ? events : []
   const nextEvent = safeEvents[0] || null
-  const lastResult = latestResults[0] || null
 
   return (
     <FeatureCard
       className="bds-home-card-full"
       title="EVENTOS DO BAR"
       icon={<Users size={20} />}
-      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Competicao</ActionButton>}
+      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/events' }}>VER EVENTOS</ActionButton>}
     >
-      <div className="bds-home-stats-grid" data-designer-id="community.stats" data-designer-label="Comunidade / Estatisticas">
-        <StatCard icon={<CalendarDays size={18} />} label="Proximo evento" value={nextEvent?.date || 'A definir'} hint={nextEvent?.title || 'Em breve'} />
-        <StatCard icon={<Trophy size={18} />} label="Noite do Bolao" value={nextEvent?.title || 'Em breve'} hint={nextEvent?.category || 'Competicao'} />
-        <StatCard icon={<CakeSlice size={18} />} label="Resultado do ultimo campeonato" value={lastResult?.game || 'Sem resultado disponivel'} hint={lastResult?.championship || 'A definir'} />
-      </div>
+      {nextEvent ? (
+        <div className="bds-home-stats-grid" data-designer-id="community.stats" data-designer-label="Comunidade / Estatisticas">
+          <StatCard icon={<CalendarDays size={18} />} label="Frequência" value={nextEvent.homeDateLabel || nextEvent.recurrenceLabel || nextEvent.dateLabel || 'A definir'} hint={nextEvent.typeLabel || 'Evento publicado'} />
+          <StatCard icon={<Sparkles size={18} />} label="Evento" value={nextEvent.title || 'Evento do Bar'} hint={nextEvent.recurring ? 'Evento recorrente' : nextEvent.typeLabel || 'Evento publicado'} />
+          <StatCard icon={<Clock size={18} />} label="Horário" value={nextEvent.homeTimeLabel || nextEvent.timeLabel || 'A definir'} hint={nextEvent.location || 'Veja os detalhes em Eventos'} />
+        </div>
+      ) : (
+        <div className="bds-home-empty">Nenhum evento programado no momento.</div>
+      )}
     </FeatureCard>
   )
 }
@@ -469,6 +472,7 @@ export default function HomePage() {
           })
           setDashboard({
             news: Array.isArray(content?.news) ? content.news : [],
+            events: Array.isArray(content?.events) ? content.events : [],
             competitionMatches: Array.isArray(content?.competitionMatches) ? content.competitionMatches : [],
             nextMatch: content?.nextMatch || null,
             liveMatchCenter: content?.liveMatchCenter || null,
@@ -523,7 +527,7 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><RadioCard /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel events={dashboard.events} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
