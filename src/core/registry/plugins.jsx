@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 
 import {
@@ -43,6 +44,7 @@ import DesignerPage from "../../modules/barstudio/designer/pages/DesignerPage";
 import GamesPage from "../../modules/games/pages/GamesPage";
 import BarCoinsPage from "../../modules/barcoins/pages/BarCoinsPage";
 import EventsPage from "../../modules/events/pages/EventsPage";
+import EventsAdminPage from "../../modules/events/admin/pages/EventsAdminPage";
 import ManualPage from "../../modules/manual/pages/ManualPage";
 import AdminPage from "../../modules/admin/pages/AdminPage";
 
@@ -206,6 +208,15 @@ export const plugins = [
     icon: CalendarDays,
     menu: true,
     element: <EventsPage />,
+  },
+
+  {
+    id: "events-admin",
+    title: "Eventos Admin",
+    path: "/events/admin",
+    icon: Shield,
+    menu: false,
+    element: <EventsAdminPage />,
   },
 
   {
