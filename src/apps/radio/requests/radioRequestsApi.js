@@ -1,7 +1,13 @@
-import { getSupabaseClient } from "../../../core/database";
+import {
+  ADMIN_ROLES,
+  getAdminAccess,
+  getAdminAccessToken,
+  signInAdminWithUsername,
+  signOutAdmin,
+} from "../../../core/auth/adminAuthService";
 
 const REQUESTS_ENDPOINT = "/api/radio/requests";
-const AUTHORIZED_ROLES = new Set(["admin", "locutor"]);
+const RADIO_ADMIN_ROLES = [ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR];
 
 function normalizeRequest(row = {}) {
   return {
@@ -17,64 +23,25 @@ function normalizeRequest(row = {}) {
   };
 }
 
-async function getAdminToken() {
-  const client = getSupabaseClient();
-  if (!client) return "";
-  const { data } = await client.auth.getSession();
-  return data?.session?.access_token || "";
-}
-
-function isAuthorizedRadioUser(user) {
-  const role = user?.app_metadata?.role || user?.user_metadata?.role;
-  return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true;
-}
-
 export async function getRadioRequestsAdminAccess() {
-  const client = getSupabaseClient();
-  if (!client) {
-    return { allowed: false, reason: "Supabase nao configurado." };
-  }
-
-  const { data, error } = await client.auth.getSession();
-  const session = data?.session;
-
-  if (error || !session?.access_token) {
-    return { allowed: false, hasSession: false, reason: "Entre para acessar o painel do locutor." };
-  }
-
-  const user = session.user;
-  const allowed = isAuthorizedRadioUser(user);
-
-  return {
-    allowed,
-    hasSession: true,
-    reason: allowed ? "" : "Acesso nao autorizado para este usuario.",
-    user,
-  };
+  return getAdminAccess({
+    allowedRoles: RADIO_ADMIN_ROLES,
+    allowLegacyUserMetadata: true,
+    noSessionReason: "Entre para acessar o painel do locutor.",
+  });
 }
 
-export async function signInRadioRequestsAdmin({ email, password }) {
-  const client = getSupabaseClient();
-  if (!client) {
-    throw new Error("Supabase nao configurado.");
-  }
-
-  const { error } = await client.auth.signInWithPassword({
-    email: String(email || "").trim(),
-    password: String(password || ""),
+export async function signInRadioRequestsAdmin({ username, password }) {
+  return signInAdminWithUsername({
+    username,
+    password,
+    allowedRoles: RADIO_ADMIN_ROLES,
+    allowLegacyUserMetadata: true,
   });
-
-  if (error) {
-    throw new Error("E-mail ou senha invalidos.");
-  }
-
-  return getRadioRequestsAdminAccess();
 }
 
 export async function signOutRadioRequestsAdmin() {
-  const client = getSupabaseClient();
-  if (!client) return;
-  await client.auth.signOut();
+  await signOutAdmin();
 }
 
 async function parseResponse(response) {
@@ -103,7 +70,7 @@ export async function submitRadioMusicRequest({ songAndArtist, message }) {
 }
 
 export async function listRadioMusicRequests({ status } = {}) {
-  const token = await getAdminToken();
+  const token = await getAdminAccessToken();
   if (!token) {
     throw new Error("Entre com uma conta administradora para ver os pedidos.");
   }
@@ -121,7 +88,7 @@ export async function listRadioMusicRequests({ status } = {}) {
 }
 
 export async function updateRadioMusicRequest({ id, status, adminNote = "", handledBy = "" }) {
-  const token = await getAdminToken();
+  const token = await getAdminAccessToken();
   if (!token) {
     throw new Error("Entre com uma conta administradora para atualizar pedidos.");
   }
@@ -140,7 +107,7 @@ export async function updateRadioMusicRequest({ id, status, adminNote = "", hand
 }
 
 export async function deleteRadioMusicRequest(id) {
-  const token = await getAdminToken();
+  const token = await getAdminAccessToken();
   if (!token) {
     throw new Error("Entre com uma conta administradora para remover pedidos.");
   }

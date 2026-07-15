@@ -19,7 +19,7 @@ const INITIAL_ACCESS = {
 
 export default function RadioAdminPage() {
   const [access, setAccess] = useState(INITIAL_ACCESS);
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -55,7 +55,7 @@ export default function RadioAdminPage() {
 
   async function handleLogout() {
     await signOutRadioRequestsAdmin();
-    setLoginForm({ email: "", password: "" });
+    setLoginForm({ username: "", password: "" });
     setLoginError("");
     setAccess({ ...INITIAL_ACCESS, loading: false });
   }
@@ -84,12 +84,12 @@ export default function RadioAdminPage() {
 
           <form className="radio-admin-login-form" onSubmit={handleLoginSubmit}>
             <label>
-              E-mail
+              Usuário
               <input
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={loginForm.email}
+                name="username"
+                type="text"
+                autoComplete="username"
+                value={loginForm.username}
                 onChange={handleLoginChange}
                 required
               />
