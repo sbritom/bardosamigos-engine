@@ -8,16 +8,18 @@ import { isLocalAdminEnabled, isLocalDesignerEnvironment, toggleLocalAdmin } fro
 import RadioBar from './RadioBar'
 import '../../../design-system/styles/index.css'
 
-const PUBLIC_HOME_MENU = new Set(['home', 'tv', 'radio', 'football', 'news', 'community', 'tools'])
+const PUBLIC_HOME_MENU = ['home', 'tv', 'radio', 'football', 'news', 'events', 'tools']
+const PUBLIC_HOME_MENU_ORDER = new Map(PUBLIC_HOME_MENU.map((id, index) => [id, index]))
 
 export default function Header() {
-  const menu = getMenuPlugins().filter((item) => PUBLIC_HOME_MENU.has(item.id))
-  const [localAdminEnabled, setLocalAdminEnabledState] = useState(false)
+  const menu = getMenuPlugins()
+    .filter((item) => PUBLIC_HOME_MENU_ORDER.has(item.id))
+    .sort((first, second) => PUBLIC_HOME_MENU_ORDER.get(first.id) - PUBLIC_HOME_MENU_ORDER.get(second.id))
   const showLocalAdmin = isLocalDesignerEnvironment()
+  const [localAdminEnabled, setLocalAdminEnabledState] = useState(() => (showLocalAdmin ? isLocalAdminEnabled() : false))
 
   useEffect(() => {
     if (!showLocalAdmin) return undefined
-    setLocalAdminEnabledState(isLocalAdminEnabled())
 
     function handleLocalAdminUpdate() {
       setLocalAdminEnabledState(isLocalAdminEnabled())
