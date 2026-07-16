@@ -11,13 +11,13 @@ function score(match) {
 
 function MatchRow({ match, onOpen }) {
   return (
-    <button className="w-full rounded-xl border border-[var(--border)] bg-black p-3 text-left" type="button" onClick={() => onOpen(match.id)}>
+    <button className="w-full rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3 text-left" type="button" onClick={() => onOpen(match.id)}>
       <div className="flex flex-wrap items-center gap-2">
         <Badge>{getSportsStatusLabel(match.status)}</Badge>
-        <span className="text-xs font-bold uppercase text-[var(--secondary)]">{match.competitionName}</span>
+        <span className="text-xs font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
       </div>
-      <div className="mt-2 font-black">{match.homeTeam} <span className="text-[var(--gold)]">{score(match)}</span> {match.awayTeam}</div>
-      <div className="mt-1 text-sm text-[var(--secondary)]">{formatBrazilFullDateTime(match.startsAt)}</div>
+      <div className="mt-2 font-black">{match.homeTeam} <span className="text-[var(--bds-color-primary-hover)]">{score(match)}</span> {match.awayTeam}</div>
+      <div className="mt-1 text-sm text-[var(--bds-color-text-secondary)]">{formatBrazilFullDateTime(match.startsAt)}</div>
     </button>
   )
 }
@@ -73,14 +73,14 @@ export default function FootballTeamPage() {
 
   return (
     <section className="space-y-5">
-      <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             {crest && <img src={crest} alt="" className="h-20 w-20 object-contain" loading="lazy" />}
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase text-[var(--gold)]">Equipe</p>
+              <p className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Equipe</p>
               <h1 className="truncate text-3xl font-black">{team.name}</h1>
-              <p className="mt-1 text-sm text-[var(--secondary)]">{team.country || '-'} · {team.competitionName || team.competitions?.name || '-'}</p>
+              <p className="mt-1 text-sm text-[var(--bds-color-text-secondary)]">{team.country || '-'} · {team.competitionName || team.competitions?.name || '-'}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -88,7 +88,7 @@ export default function FootballTeamPage() {
             <Button variant="secondary" onClick={() => navigate('/football')}>Voltar</Button>
           </div>
         </div>
-        {state.message && <p className="mt-3 text-sm font-bold text-[var(--gold)]">{state.message}</p>}
+        {state.message && <p className="mt-3 text-sm font-bold text-[var(--bds-color-primary-hover)]">{state.message}</p>}
       </Card>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -99,14 +99,14 @@ export default function FootballTeamPage() {
       </div>
 
       <section className="grid gap-5 xl:grid-cols-2">
-        <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
           <h2 className="mb-4 text-xl font-black">Próximos Jogos</h2>
           <div className="space-y-3">
             {upcoming.length ? upcoming.slice(0, 8).map((match) => <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />) : <EmptyState title="Sem jogos futuros" description="Novas partidas aparecerão após a sincronização." />}
           </div>
         </Card>
 
-        <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
           <h2 className="mb-4 text-xl font-black">Últimos Jogos</h2>
           <div className="space-y-3">
             {finished.length ? finished.map((match) => <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />) : <EmptyState title="Sem resultados" description="Resultados sincronizados aparecem aqui." />}
@@ -114,7 +114,7 @@ export default function FootballTeamPage() {
         </Card>
       </section>
 
-      <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <h2 className="mb-4 text-xl font-black">Classificação</h2>
         <TeamStandings rows={standings} teamName={team.name} />
       </Card>

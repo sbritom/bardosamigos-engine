@@ -19,8 +19,8 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-4 py-3 transition ${
                   isActive
-                    ? "bg-[var(--gold)] text-black"
-                    : "text-white hover:bg-black hover:text-[var(--gold)]"
+                    ? "bg-[var(--bds-color-primary)] text-[var(--bds-color-text)]"
+                    : "text-[var(--bds-color-text)] hover:bg-[var(--bds-color-surface)] hover:text-[var(--bds-color-primary-hover)]"
                 }`
               }
             >

@@ -37,12 +37,12 @@ export function FootballDataSyncPanel() {
   }
 
   return (
-    <section className="rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-5">
+    <section className="rounded-[18px] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-[var(--secondary)]">Football-Data</p>
-          <h2 className="mt-1 text-xl font-black text-[var(--gold)]">Sincronizacao</h2>
-          <p className="mt-2 text-sm text-[var(--secondary)]">
+          <p className="text-sm font-bold uppercase tracking-wide text-[var(--bds-color-text-secondary)]">Football-Data</p>
+          <h2 className="mt-1 text-xl font-black text-[var(--bds-color-primary-hover)]">Sincronizacao</h2>
+          <p className="mt-2 text-sm text-[var(--bds-color-text-secondary)]">
             Executa a sincronizacao via Sync Engine e mantem Home e Competition consumindo apenas Supabase.
           </p>
         </div>
@@ -59,20 +59,20 @@ export function FootballDataSyncPanel() {
 
       {lastRun && (
         <div className="mt-4 grid gap-3 text-sm md:grid-cols-4">
-          <div className="rounded-xl border border-[var(--border)] bg-black p-3">
-            <div className="text-[var(--secondary)]">Ultima sincronizacao</div>
+          <div className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3">
+            <div className="text-[var(--bds-color-text-secondary)]">Ultima sincronizacao</div>
             <div className="font-black">{formatBrazilFullDateTime(lastRun.finishedAt)}</div>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-black p-3">
-            <div className="text-[var(--secondary)]">Registros</div>
+          <div className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3">
+            <div className="text-[var(--bds-color-text-secondary)]">Registros</div>
             <div className="font-black">{lastRun.records}</div>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-black p-3">
-            <div className="text-[var(--secondary)]">Tempo</div>
+          <div className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3">
+            <div className="text-[var(--bds-color-text-secondary)]">Tempo</div>
             <div className="font-black">{lastRun.elapsedMs}ms</div>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-black p-3">
-            <div className="text-[var(--secondary)]">Erros</div>
+          <div className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3">
+            <div className="text-[var(--bds-color-text-secondary)]">Erros</div>
             <div className="font-black">{lastRun.errors.length || 'Nenhum'}</div>
           </div>
         </div>

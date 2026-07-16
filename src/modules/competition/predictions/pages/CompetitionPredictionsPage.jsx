@@ -54,9 +54,9 @@ export default function CompetitionPredictionsPage() {
   return (
     <section className="space-y-5">
       <div>
-        <div className="text-xs font-black uppercase text-[var(--gold)]">Bar Competition</div>
+        <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Bar Competition</div>
         <h1 className="text-3xl font-black">Palpites</h1>
-        <p className="mt-2 text-[var(--secondary)]">Visualize jogos, faça seu palpite e edite até o horário limite.</p>
+        <p className="mt-2 text-[var(--bds-color-text-secondary)]">Visualize jogos, faça seu palpite e edite até o horário limite.</p>
       </div>
 
       {message && <Alert status="success" title="Sucesso">{message}</Alert>}

@@ -31,7 +31,7 @@ export default function MyPredictionsPage() {
   return (
     <section className="space-y-5">
       <div>
-        <div className="text-xs font-black uppercase text-[var(--gold)]">Historico</div>
+        <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Historico</div>
         <h1 className="text-3xl font-black">Meus Palpites</h1>
       </div>
 
@@ -42,14 +42,14 @@ export default function MyPredictionsPage() {
           {predictions.map((prediction) => {
             const match = prediction.competitionMatches
             return (
-              <Card key={prediction.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
+              <Card key={prediction.id} className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
                 <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
                   <div>
-                    <div className="text-xs font-black uppercase text-[var(--gold)]">
+                    <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">
                       {match?.competitionRounds?.competitionStages?.competitionSeasons?.competitions?.name || 'Competicao'}
                     </div>
                     <h2 className="text-xl font-black">{match?.homeParticipant || 'Mandante'} x {match?.awayParticipant || 'Visitante'}</h2>
-                    <p className="text-sm text-[var(--secondary)]">{match?.competitionRounds?.name || 'Rodada'}</p>
+                    <p className="text-sm text-[var(--bds-color-text-secondary)]">{match?.competitionRounds?.name || 'Rodada'}</p>
                   </div>
                   <Badge>{prediction.status}</Badge>
                 </div>

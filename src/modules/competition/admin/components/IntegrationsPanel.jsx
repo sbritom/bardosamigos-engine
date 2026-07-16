@@ -215,11 +215,11 @@ export function IntegrationsPanel() {
   }
 
   return (
-    <section className="rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-5">
+    <section className="rounded-[18px] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
       <div className="mb-4">
-        <p className="text-sm font-bold uppercase tracking-wide text-[var(--secondary)]">Admin</p>
-        <h2 className="mt-1 text-xl font-black text-[var(--gold)]">Integracoes</h2>
-        <p className="mt-2 text-sm text-[var(--secondary)]">
+        <p className="text-sm font-bold uppercase tracking-wide text-[var(--bds-color-text-secondary)]">Admin</p>
+        <h2 className="mt-1 text-xl font-black text-[var(--bds-color-primary-hover)]">Integracoes</h2>
+        <p className="mt-2 text-sm text-[var(--bds-color-text-secondary)]">
           Status das integracoes externas e sincronizacao via Sync Engine.
         </p>
       </div>
@@ -230,10 +230,10 @@ export function IntegrationsPanel() {
           const isRunning = running === integration.id
 
           return (
-            <div key={integration.id} className="rounded-xl border border-[var(--border)] bg-black p-4">
-              <div className="text-xs font-black uppercase text-[var(--secondary)]">{integration.status}</div>
+            <div key={integration.id} className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-4">
+              <div className="text-xs font-black uppercase text-[var(--bds-color-text-secondary)]">{integration.status}</div>
               <h3 className="mt-1 text-lg font-black">{integration.name}</h3>
-              <div className="mt-3 space-y-1 text-sm text-[var(--secondary)]">
+              <div className="mt-3 space-y-1 text-sm text-[var(--bds-color-text-secondary)]">
                 <div>Ultima sincronizacao: <strong>{formatTime(summary?.lastSyncAt)}</strong></div>
                 <div>Registros: <strong>{summary?.records ?? '-'}</strong></div>
                 <div>Tempo: <strong>{summary?.elapsedMs ? `${summary.elapsedMs}ms` : '-'}</strong></div>
@@ -252,7 +252,7 @@ export function IntegrationsPanel() {
                 )}
               </div>
               {integration.id === SYNC_INTEGRATIONS.FOOTBALL_DATA && summary?.details && (
-                <div className="mt-3 rounded-lg border border-[var(--border)] p-3 text-xs uppercase text-[var(--secondary)]">
+                <div className="mt-3 rounded-lg border border-[var(--bds-color-border)] p-3 text-xs uppercase text-[var(--bds-color-text-secondary)]">
                   Fases: <strong>{summary.details.stages}</strong> · Grupos: <strong>{summary.details.groups}</strong> · Rodadas: <strong>{summary.details.rounds}</strong>
                   {summary.details.latestMatchUpdate && <> · Ultima atualizacao: <strong>{formatTime(summary.details.latestMatchUpdate)}</strong></>}
                 </div>

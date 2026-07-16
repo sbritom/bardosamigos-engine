@@ -7,13 +7,13 @@ export default function Card({
       className={`
         rounded-[18px]
         border
-        border-[var(--border)]
-        bg-[var(--card)]
-        shadow-lg
+        border-[var(--bds-color-border)]
+        bg-[var(--bds-color-surface)]
+        shadow-[var(--bds-shadow-level-1)]
         p-5
         transition-all
         duration-300
-        hover:border-[var(--gold)]
+        hover:border-[var(--bds-color-primary-hover)]
         ${className}
       `}
     >

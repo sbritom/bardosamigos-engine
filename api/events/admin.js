@@ -43,7 +43,7 @@ function getSupabaseAdmin() {
 
 function setCors(response) {
   response.setHeader('Access-Control-Allow-Origin', '*')
-  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 }
 
@@ -108,8 +108,9 @@ async function readBody(request) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'))
 }
 
-function assertAllowedFields(body = {}) {
+function assertAllowedFields(body = {}, { allowId = false } = {}) {
   const allowedFields = new Set([
+    ...(allowId ? ['id'] : []),
     'title',
     'description',
     'type',
@@ -166,15 +167,16 @@ function buildMetadata({ body, type, recurring, timeLabel }) {
   return metadata
 }
 
-function validateCreateEventPayload(body = {}) {
-  const unexpectedFieldsError = assertAllowedFields(body)
+function validateEventPayload(body = {}, { requireId = false } = {}) {
+  const unexpectedFieldsError = assertAllowedFields(body, { allowId: requireId })
   if (unexpectedFieldsError) return { error: unexpectedFieldsError }
 
-  const allowedTypes = new Set(['Bingo', 'Brincadeira', 'Campeonato', 'Especial', 'Musica ao Vivo', 'Promocao', 'Outro'])
-  const allowedRecurrences = new Set(['Toda segunda-feira', 'Toda sexta-feira', 'Todo sabado', 'Mensal', 'Personalizado'])
+  const allowedTypes = new Set(['Bingo', 'Brincadeira', 'Campeonato', 'Especial', 'Musica ao Vivo', 'Música ao Vivo', 'Promocao', 'Promoção', 'Outro'])
+  const allowedRecurrences = new Set(['Toda segunda-feira', 'Toda sexta-feira', 'Todo sabado', 'Todo sábado', 'Mensal', 'Personalizado'])
   const allowedStatuses = new Set(['published', 'draft'])
   const allowedTimeModes = new Set(['announced', 'specific'])
 
+  const id = cleanText(body.id, 80)
   const title = cleanText(body.title, 160)
   const description = cleanText(body.description, 3000)
   const slug = slugify(title)
@@ -184,6 +186,7 @@ function validateCreateEventPayload(body = {}) {
   const timeMode = cleanText(body.timeMode, 20) || 'announced'
   const time = cleanText(body.time, 8)
 
+  if (requireId && !id) return { error: 'Informe o evento que sera atualizado.' }
   if (!title) return { error: 'Informe o titulo do evento.' }
   if (!description) return { error: 'Informe a descricao do evento.' }
   if (!slug) return { error: 'Nao foi possivel gerar o slug do evento.' }
@@ -215,6 +218,7 @@ function validateCreateEventPayload(body = {}) {
       status,
       metadata: buildMetadata({ body, type, recurring, timeLabel }),
     },
+    id,
   }
 }
 
@@ -235,7 +239,7 @@ async function createEvent(request, response, supabase) {
     return
   }
 
-  const validation = validateCreateEventPayload(body)
+  const validation = validateEventPayload(body)
 
   if (validation.error) {
     response.status(400).json({ ok: false, error: validation.error })
@@ -274,6 +278,60 @@ async function createEvent(request, response, supabase) {
   response.status(201).json({ ok: true, data })
 }
 
+async function updateEvent(request, response, supabase) {
+  let body
+
+  try {
+    body = await readBody(request)
+  } catch {
+    response.status(400).json({ ok: false, error: 'JSON invalido.' })
+    return
+  }
+
+  const validation = validateEventPayload(body, { requireId: true })
+
+  if (validation.error) {
+    response.status(400).json({ ok: false, error: validation.error })
+    return
+  }
+
+  const { event, id } = validation
+
+  const { data: existingEvent, error: slugError } = await supabase
+    .from('events')
+    .select('id')
+    .eq('slug', event.slug)
+    .neq('id', id)
+    .maybeSingle()
+
+  if (slugError) {
+    response.status(500).json({ ok: false, error: 'Nao foi possivel validar o slug do evento.' })
+    return
+  }
+
+  if (existingEvent) {
+    response.status(409).json({ ok: false, error: 'Ja existe outro evento com este slug.' })
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      ...event,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select(EVENT_SELECT_FIELDS)
+    .single()
+
+  if (error) {
+    response.status(500).json({ ok: false, error: 'Nao foi possivel atualizar o evento.' })
+    return
+  }
+
+  response.status(200).json({ ok: true, data })
+}
+
 export default async function handler(request, response) {
   setCors(response)
 
@@ -282,8 +340,8 @@ export default async function handler(request, response) {
     return
   }
 
-  if (!['GET', 'POST'].includes(request.method)) {
-    response.setHeader('Allow', 'GET, POST, OPTIONS')
+  if (!['GET', 'POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'GET, POST, PATCH, OPTIONS')
     response.status(405).json({ ok: false, error: 'Metodo nao permitido.' })
     return
   }
@@ -299,6 +357,11 @@ export default async function handler(request, response) {
 
     if (request.method === 'POST') {
       await createEvent(request, response, supabase)
+      return
+    }
+
+    if (request.method === 'PATCH') {
+      await updateEvent(request, response, supabase)
       return
     }
 

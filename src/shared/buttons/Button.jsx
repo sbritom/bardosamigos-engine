@@ -5,10 +5,10 @@ export default function Button({
   ...props
 }) {
   const variants = {
-    gold: "bg-[var(--gold)] text-black hover:bg-[var(--gold-light)]",
-    dark: "bg-black text-white border border-[var(--border)] hover:border-[var(--gold)]",
-    ghost: "bg-transparent text-white border border-[var(--border)] hover:border-[var(--gold)]",
-    danger: "bg-[var(--danger)] text-white hover:brightness-110",
+    gold: "bg-[var(--bds-color-primary)] text-[var(--bds-color-text)] hover:bg-[var(--bds-color-primary-hover)]",
+    dark: "bg-[var(--bds-color-surface)] text-[var(--bds-color-text)] border border-[var(--bds-color-border)] hover:border-[var(--bds-color-primary-hover)]",
+    ghost: "bg-transparent text-[var(--bds-color-text)] border border-[var(--bds-color-border)] hover:border-[var(--bds-color-primary-hover)]",
+    danger: "bg-[var(--bds-color-danger)] text-[var(--bds-color-text)] hover:brightness-110",
   };
 
   return (

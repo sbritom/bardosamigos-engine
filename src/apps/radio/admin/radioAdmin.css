@@ -1,14 +1,14 @@
 .radio-admin-page {
   width: min(1320px, calc(100% - 32px));
   margin: 0 auto;
-  color: #eef5ff;
+  color: var(--bds-color-text);
 }
 
 .radio-admin-header {
   padding: 22px;
-  border: 1px solid rgba(106, 142, 190, 0.22);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(3, 9, 18, 0.98), rgba(12, 27, 48, 0.95));
+  background: linear-gradient(135deg, rgba(1, 10, 38, 0.98), rgba(2, 17, 64, 0.95));
 }
 
 .radio-admin-header--with-actions {
@@ -19,7 +19,7 @@
 }
 
 .radio-admin-header span {
-  color: #f2c66d;
+  color: var(--bds-color-primary-hover);
   font-size: 0.8rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -37,10 +37,10 @@
 .radio-admin-header button,
 .radio-admin-login-form button {
   min-height: 40px;
-  border: 1px solid rgba(242, 198, 109, 0.35);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  color: #07111f;
-  background: #f2c66d;
+  color: var(--bds-color-primary-text);
+  background: linear-gradient(180deg, var(--bds-color-primary-hover), var(--bds-color-primary));
   font-weight: 950;
 }
 
@@ -56,14 +56,14 @@
   width: min(100%, 460px);
   margin: 56px auto 0;
   padding: 22px;
-  border: 1px solid rgba(106, 142, 190, 0.22);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(3, 9, 18, 0.98), rgba(12, 27, 48, 0.95));
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(135deg, rgba(1, 10, 38, 0.98), rgba(2, 17, 64, 0.95));
+  box-shadow: var(--bds-shadow-level-2);
 }
 
 .radio-admin-auth-panel {
-  color: #cbd9eb;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-admin-login-header {
@@ -71,7 +71,7 @@
 }
 
 .radio-admin-login-header span {
-  color: #f2c66d;
+  color: var(--bds-color-primary-hover);
   font-size: 0.78rem;
   font-weight: 950;
   text-transform: uppercase;
@@ -90,18 +90,18 @@
 .radio-admin-login-form label {
   display: grid;
   gap: 7px;
-  color: #cbd9eb;
+  color: var(--bds-color-text-secondary);
   font-size: 0.86rem;
   font-weight: 850;
 }
 
 .radio-admin-login-form input {
   min-height: 44px;
-  border: 1px solid rgba(106, 142, 190, 0.24);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
   padding: 0 12px;
-  color: #eef5ff;
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--bds-color-text);
+  background: rgba(2, 17, 64, 0.56);
 }
 
 .radio-admin-login-form button:disabled {
@@ -112,16 +112,16 @@
 .radio-admin-auth-error {
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 114, 114, 0.24);
+  border: 1px solid rgba(255, 68, 68, 0.24);
   border-radius: 8px;
-  color: #ffaaaa;
-  background: rgba(255, 114, 114, 0.08);
+  color: var(--bds-color-danger);
+  background: rgba(255, 68, 68, 0.08);
 }
 
 .radio-admin-header p,
 .radio-admin-panel small,
 .radio-admin-track small {
-  color: #9fb5cf;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-admin-grid {
@@ -133,10 +133,10 @@
 
 .radio-admin-panel,
 .radio-admin-card {
-  border: 1px solid rgba(106, 142, 190, 0.2);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  background: rgba(6, 16, 31, 0.94);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+  background: rgba(2, 17, 64, 0.72);
+  box-shadow: var(--bds-shadow-level-1);
 }
 
 .radio-admin-panel {
@@ -158,7 +158,7 @@
 }
 
 .radio-admin-listeners strong {
-  color: #f2c66d;
+  color: var(--bds-color-primary-hover);
   font-size: 2.5rem;
 }
 
@@ -167,7 +167,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
-  color: #f2c66d;
+  color: var(--bds-color-primary-hover);
 }
 
 .radio-admin-panel-title h2 {
@@ -188,7 +188,7 @@
 }
 
 .radio-admin-card span {
-  color: #8fb4de;
+  color: var(--bds-color-text-secondary);
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -199,15 +199,15 @@
 }
 
 .radio-admin-card--ok strong {
-  color: #5df29a;
+  color: var(--bds-color-success);
 }
 
 .radio-admin-card--warn strong {
-  color: #f2c66d;
+  color: var(--bds-color-warning);
 }
 
 .radio-admin-card--error strong {
-  color: #ff7272;
+  color: var(--bds-color-danger);
 }
 
 .radio-admin-player-grid {
@@ -222,13 +222,13 @@
   height: 140px;
   object-fit: cover;
   border-radius: 8px;
-  background: #111b2a;
+  background: var(--bds-color-surface);
 }
 
 .radio-admin-cover-empty {
   display: grid;
   place-items: center;
-  color: #7f96b4;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-admin-player-grid div {
@@ -254,9 +254,9 @@
 .radio-admin-actions button,
 .radio-admin-track button,
 .radio-admin-log-tabs button {
-  border: 1px solid rgba(106, 142, 190, 0.2);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(2, 17, 64, 0.56);
 }
 
 .radio-admin-tags small {
@@ -272,11 +272,11 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  color: #9fb5cf;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-admin-list strong {
-  color: #eef5ff;
+  color: var(--bds-color-text);
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -292,7 +292,7 @@
 .radio-admin-log-tabs button {
   min-height: 34px;
   padding: 0 10px;
-  color: #eef5ff;
+  color: var(--bds-color-text);
 }
 
 .radio-admin-track {
@@ -301,7 +301,7 @@
   align-items: center;
   gap: 8px;
   min-height: 42px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--bds-color-border);
 }
 
 .radio-admin-track span,
@@ -327,18 +327,18 @@
 
 .radio-requests-counter {
   padding: 7px 10px;
-  border: 1px solid rgba(106, 142, 190, 0.22);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  color: #9fb5cf;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--bds-color-text-secondary);
+  background: rgba(2, 17, 64, 0.56);
   font-size: 0.82rem;
   font-weight: 900;
 }
 
 .radio-requests-counter.is-live {
-  border-color: rgba(242, 198, 109, 0.3);
-  color: #f2c66d;
-  background: rgba(242, 198, 109, 0.08);
+  border-color: var(--bds-color-border);
+  color: var(--bds-color-primary-hover);
+  background: rgba(5, 108, 242, 0.08);
 }
 
 .radio-requests-list {
@@ -349,10 +349,10 @@
 .radio-requests-error {
   margin-bottom: 12px;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 114, 114, 0.24);
+  border: 1px solid rgba(255, 68, 68, 0.24);
   border-radius: 8px;
-  color: #ffaaaa;
-  background: rgba(255, 114, 114, 0.08);
+  color: var(--bds-color-danger);
+  background: rgba(255, 68, 68, 0.08);
 }
 
 .radio-request-highlight {
@@ -364,13 +364,13 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
   padding: 12px;
-  border: 1px solid rgba(106, 142, 190, 0.16);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(2, 17, 64, 0.48);
 }
 
 .radio-request-card--pending {
-  border-color: rgba(242, 198, 109, 0.28);
+  border-color: rgba(5, 108, 242, 0.28);
 }
 
 .radio-request-card__main {
@@ -386,32 +386,32 @@
 
 .radio-request-card__main p {
   margin: 0;
-  color: #cbd9eb;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-request-card__main small {
-  color: #9fb5cf;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-request-card__status {
   width: fit-content;
   padding: 5px 8px;
   border-radius: 8px;
-  color: #9fb5cf;
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--bds-color-text-secondary);
+  background: rgba(2, 17, 64, 0.56);
   font-size: 0.72rem;
   font-weight: 950;
   text-transform: uppercase;
 }
 
 .radio-request-card__status.is-pending {
-  color: #f2c66d;
-  background: rgba(242, 198, 109, 0.1);
+  color: var(--bds-color-primary-hover);
+  background: rgba(5, 108, 242, 0.1);
 }
 
 .radio-request-card__status.is-read {
-  color: #8fc7ff;
-  background: rgba(77, 163, 255, 0.1);
+  color: var(--bds-color-info);
+  background: rgba(5, 108, 242, 0.1);
 }
 
 .radio-request-card__actions {
@@ -424,10 +424,10 @@
 
 .radio-request-card__actions button {
   min-height: 34px;
-  border: 1px solid rgba(106, 142, 190, 0.2);
+  border: 1px solid var(--bds-color-border);
   border-radius: 8px;
-  color: #eef5ff;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--bds-color-text);
+  background: rgba(2, 17, 64, 0.56);
   font-weight: 800;
 }
 
@@ -443,7 +443,7 @@
   }
 
   50% {
-    box-shadow: 0 0 0 3px rgba(242, 198, 109, 0.22);
+    box-shadow: 0 0 0 3px var(--bds-color-glow);
   }
 }
 
@@ -455,19 +455,19 @@
 
 .radio-admin-health {
   padding: 8px 10px;
-  color: #9fb5cf;
+  color: var(--bds-color-text-secondary);
 }
 
 .radio-admin-health--ok {
-  color: #5df29a;
+  color: var(--bds-color-success);
 }
 
 .radio-admin-health--warn {
-  color: #f2c66d;
+  color: var(--bds-color-warning);
 }
 
 .radio-admin-health--fail {
-  color: #ff7272;
+  color: var(--bds-color-danger);
 }
 
 .radio-admin-log-tabs {
@@ -478,8 +478,8 @@
 }
 
 .radio-admin-log-tabs button.is-active {
-  color: #07111f;
-  background: #f2c66d;
+  color: var(--bds-color-primary-text);
+  background: linear-gradient(180deg, var(--bds-color-primary-hover), var(--bds-color-primary));
 }
 
 .radio-admin-logs pre {
@@ -487,8 +487,8 @@
   overflow: auto;
   padding: 14px;
   border-radius: 8px;
-  color: #cbd9eb;
-  background: rgba(0, 0, 0, 0.34);
+  color: var(--bds-color-text-secondary);
+  background: rgba(1, 10, 38, 0.72);
   font-size: 0.82rem;
   white-space: pre-wrap;
 }

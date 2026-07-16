@@ -11,7 +11,7 @@ function score(match) {
 function TeamBlock({ name, crest }) {
   return (
     <div className="min-w-0 text-center">
-      {crest ? <img src={crest} alt="" className="mx-auto h-20 w-20 object-contain" loading="lazy" /> : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--radius)] border border-[var(--gold)] bg-black text-[var(--gold)]">BDA</div>}
+      {crest ? <img src={crest} alt="" className="mx-auto h-20 w-20 object-contain" loading="lazy" /> : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--radius)] border border-[var(--bds-color-primary-hover)] bg-[var(--bds-color-background)] text-[var(--bds-color-primary-hover)]">BDA</div>}
       <h2 className="mt-3 truncate text-2xl font-black">{name}</h2>
     </div>
   )
@@ -58,21 +58,21 @@ export default function FootballMatchDetailsPage() {
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase text-[var(--gold)]">Detalhes da Partida</p>
+          <p className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Detalhes da Partida</p>
           <h1 className="text-3xl font-black">{match.homeTeam} x {match.awayTeam}</h1>
         </div>
         <Button variant="secondary" onClick={() => navigate('/football')}>Voltar para Futebol</Button>
       </div>
 
-      <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <div className="flex flex-wrap items-center justify-center gap-2">
           {match.competitionLogo && <img src={match.competitionLogo} alt="" className="h-7 w-7 object-contain" loading="lazy" />}
           <Badge>{match.statusLabel}</Badge>
-          <span className="text-sm font-bold text-[var(--secondary)]">{match.competitionName}</span>
+          <span className="text-sm font-bold text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
         </div>
         <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <TeamBlock name={match.homeTeam} crest={match.homeCrest} />
-          <div className="text-center text-4xl font-black text-[var(--gold)]">{score(match)}</div>
+          <div className="text-center text-4xl font-black text-[var(--bds-color-primary-hover)]">{score(match)}</div>
           <TeamBlock name={match.awayTeam} crest={match.awayCrest} />
         </div>
       </Card>
@@ -81,7 +81,7 @@ export default function FootballMatchDetailsPage() {
         {info.map(([label, value]) => <StatCard key={label} label={label} value={value || '-'} />)}
       </div>
 
-      <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <h2 className="text-xl font-black">Estatísticas Preparadas</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {Object.entries(match.statistics).map(([key, value]) => (

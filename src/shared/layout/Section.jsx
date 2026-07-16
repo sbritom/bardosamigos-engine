@@ -14,13 +14,13 @@ export default function Section({
           <div className="mb-5">
 
             {title && (
-              <h2 className="text-2xl font-bold text-[var(--gold)]">
+              <h2 className="text-2xl font-bold text-[var(--bds-color-primary-hover)]">
                 {title}
               </h2>
             )}
 
             {subtitle && (
-              <p className="mt-2 text-[var(--secondary)]">
+              <p className="mt-2 text-[var(--bds-color-text-secondary)]">
                 {subtitle}
               </p>
             )}

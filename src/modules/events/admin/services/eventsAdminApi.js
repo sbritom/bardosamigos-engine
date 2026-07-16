@@ -55,3 +55,28 @@ export async function createAdminEvent(eventPayload) {
 
   return normalizeEvent(payload?.data || {})
 }
+
+export async function updateAdminEvent(eventPayload) {
+  const token = await getAdminAccessToken()
+
+  if (!token) {
+    throw new Error('Entre com uma conta administradora para editar eventos.')
+  }
+
+  const response = await fetch(EVENTS_ADMIN_ENDPOINT, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventPayload),
+  })
+
+  const payload = await response.json().catch(() => null)
+
+  if (!response.ok || payload?.ok === false) {
+    throw new Error(getErrorMessage(payload, 'Nao foi possivel atualizar o evento.'))
+  }
+
+  return normalizeEvent(payload?.data || {})
+}

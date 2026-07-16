@@ -12,7 +12,7 @@ function NewsCover({ item }) {
   }
 
   return (
-    <div className="flex h-40 w-full items-center justify-center rounded-xl border border-[var(--border)] bg-black text-2xl font-black text-[var(--gold)]">
+    <div className="flex h-40 w-full items-center justify-center rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] text-2xl font-black text-[var(--bds-color-primary-hover)]">
       Bar dos Amigos
     </div>
   )
@@ -94,7 +94,7 @@ export default function NewsPage() {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-[var(--border)] bg-black p-3 text-sm text-[var(--secondary)]">
+          <div className="mt-4 rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-3 text-sm text-[var(--bds-color-text-secondary)]">
             Exibindo conteudo local enquanto a fonte principal fica indisponivel.
           </div>
         )}
@@ -107,18 +107,18 @@ export default function NewsPage() {
           <>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {paginatedNews.map((item) => (
-                <article key={item.id} className="rounded-xl border border-[var(--border)] bg-black p-3">
+                <article key={item.id} className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-3">
                   <NewsCover item={item} />
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <StatusPill>{item.category}</StatusPill>
-                    <span className="text-xs text-[var(--secondary)]">{item.date}</span>
+                    <span className="text-xs text-[var(--bds-color-text-secondary)]">{item.date}</span>
                   </div>
                   <h2 className="mt-2 text-lg font-black">{item.title}</h2>
                 </article>
               ))}
             </div>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-black p-3 text-sm">
-              <span className="font-bold text-[var(--secondary)]">
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-3 text-sm">
+              <span className="font-bold text-[var(--bds-color-text-secondary)]">
                 Pagina {page} de {totalPages}
               </span>
               <div className="flex gap-2">

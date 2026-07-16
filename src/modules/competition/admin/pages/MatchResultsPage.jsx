@@ -28,11 +28,11 @@ export default function MatchResultsPage() {
 
   return (
     <CompetitionAdminLayout>
-      <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <div className="mb-5">
-          <div className="text-xs font-black uppercase text-[var(--gold)]">Encerramento</div>
+          <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Encerramento</div>
           <h1 className="text-2xl font-black">Resultado oficial do jogo</h1>
-          <p className="mt-2 text-[var(--secondary)]">
+          <p className="mt-2 text-[var(--bds-color-text-secondary)]">
             Informe o placar oficial para bloquear palpites, recalcular pontos, rankings e registrar auditoria.
           </p>
         </div>

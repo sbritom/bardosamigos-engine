@@ -40,9 +40,9 @@ export default function MyPredictionResultPage() {
   return (
     <section className="space-y-5">
       <div>
-        <div className="text-xs font-black uppercase text-[var(--gold)]">Bar Competition</div>
+        <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Bar Competition</div>
         <h1 className="text-3xl font-black">Resultado do Meu Palpite</h1>
-        <p className="mt-2 text-[var(--secondary)]">Acompanhe seu palpite, resultado oficial e pontos ganhos.</p>
+        <p className="mt-2 text-[var(--bds-color-text-secondary)]">Acompanhe seu palpite, resultado oficial e pontos ganhos.</p>
       </div>
 
       {error && <Alert status="danger" title="Erro">{error}</Alert>}
@@ -56,16 +56,16 @@ export default function MyPredictionResultPage() {
             const metadata = prediction.metadata || {}
 
             return (
-              <Card key={prediction.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
+              <Card key={prediction.id} className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
                 <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
                   <div>
-                    <div className="text-xs font-black uppercase text-[var(--gold)]">
+                    <div className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">
                       {match?.competitionRounds?.competitionStages?.competitionSeasons?.competitions?.name || 'Competicao'}
                     </div>
                     <h2 className="text-xl font-black">
                       {match?.homeParticipant || 'Mandante'} x {match?.awayParticipant || 'Visitante'}
                     </h2>
-                    <p className="text-sm text-[var(--secondary)]">
+                    <p className="text-sm text-[var(--bds-color-text-secondary)]">
                       Rodada: {match?.competitionRounds?.name || '-'}
                     </p>
                   </div>

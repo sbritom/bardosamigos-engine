@@ -8,7 +8,7 @@ import {
   signInAdminWithUsername,
   signOutAdmin,
 } from '../../../../core/auth/adminAuthService.js'
-import { createAdminEvent, listAdminEvents } from '../services/eventsAdminApi.js'
+import { createAdminEvent, listAdminEvents, updateAdminEvent } from '../services/eventsAdminApi.js'
 import './eventsAdmin.css'
 
 const INITIAL_ACCESS = {
@@ -19,8 +19,8 @@ const INITIAL_ACCESS = {
   user: null,
 }
 
-const EVENT_TYPES = ['Bingo', 'Brincadeira', 'Campeonato', 'Especial', 'Musica ao Vivo', 'Promocao', 'Outro']
-const RECURRENCE_OPTIONS = ['Toda segunda-feira', 'Toda sexta-feira', 'Todo sabado', 'Mensal', 'Personalizado']
+const EVENT_TYPES = ['Bingo', 'Brincadeira', 'Campeonato', 'Especial', 'Música ao Vivo', 'Promoção', 'Outro']
+const RECURRENCE_OPTIONS = ['Toda segunda-feira', 'Toda sexta-feira', 'Todo sábado', 'Mensal', 'Personalizado']
 
 const INITIAL_EVENT_FORM = {
   title: '',
@@ -66,6 +66,43 @@ function slugifyTitle(value) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 90)
+}
+
+function getDateInputValue(value) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return date.toISOString().slice(0, 10)
+}
+
+function getTimeInputValue(value) {
+  if (!value || !/^\d{2}:\d{2}$/.test(String(value))) return ''
+  return value
+}
+
+function getFormFromEvent(event = {}) {
+  const metadata = event.metadata || {}
+  const recurring = Boolean(event.recurring)
+  const timeLabel = event.timeLabel || metadata.timeLabel || ''
+  const time = getTimeInputValue(timeLabel)
+
+  return {
+    title: event.title || '',
+    description: event.description || '',
+    type: event.typeLabel || metadata.type || INITIAL_EVENT_FORM.type,
+    recurring,
+    recurrence: event.recurrenceLabel || metadata.recurrence || INITIAL_EVENT_FORM.recurrence,
+    startsAt: getDateInputValue(event.startsAt),
+    endsAt: getDateInputValue(event.endsAt),
+    timeMode: time ? 'specific' : 'announced',
+    time,
+    location: event.location || INITIAL_EVENT_FORM.location,
+    participationRule: event.participationRule || metadata.participationRule || '',
+    featured: Boolean(event.featured),
+    status: event.status === 'draft' ? 'draft' : 'published',
+  }
 }
 
 function getEventSummaryCards(events = []) {
@@ -165,7 +202,7 @@ function EventsAdminSummary({ events }) {
   )
 }
 
-function EventsAdminEventList({ events, loading }) {
+function EventsAdminEventList({ events, loading, onEdit }) {
   if (loading) {
     return <p className="events-admin-muted">Carregando eventos...</p>
   }
@@ -218,7 +255,7 @@ function EventsAdminEventList({ events, loading }) {
           </dl>
 
           <div className="events-admin-actions">
-            <button className="events-admin-icon-button" disabled title="Editar" type="button">
+            <button className="events-admin-icon-button" onClick={() => onEdit(event)} title="Editar" type="button">
               <Pencil size={15} />
               <span>Editar</span>
             </button>
@@ -233,16 +270,17 @@ function EventsAdminEventList({ events, loading }) {
   )
 }
 
-function EventsAdminCreateModal({ error, form, loading, onChange, onClose, onSubmit, success }) {
+function EventsAdminEventModal({ error, form, loading, mode, onChange, onClose, onSubmit, success }) {
   const slug = slugifyTitle(form.title)
+  const isEditMode = mode === 'edit'
 
   return (
-    <div className="events-admin-modal" role="dialog" aria-modal="true" aria-labelledby="events-admin-create-title">
+    <div className="events-admin-modal" role="dialog" aria-modal="true" aria-labelledby="events-admin-form-title">
       <div className="events-admin-modal__panel">
         <div className="events-admin-modal__header">
           <div>
-            <span className="events-admin-eyebrow">Novo evento</span>
-            <h2 id="events-admin-create-title">Criar evento</h2>
+            <span className="events-admin-eyebrow">{isEditMode ? 'Editar evento' : 'Novo evento'}</span>
+            <h2 id="events-admin-form-title">{isEditMode ? 'EDITAR EVENTO' : 'Criar evento'}</h2>
           </div>
           <button className="events-admin-button" disabled={loading} onClick={onClose} type="button">
             Fechar
@@ -362,7 +400,7 @@ function EventsAdminCreateModal({ error, form, loading, onChange, onClose, onSub
               Cancelar
             </button>
             <button className="events-admin-button events-admin-button--primary" disabled={loading} type="submit">
-              {loading ? 'Salvando...' : 'Criar evento'}
+              {loading ? 'Salvando...' : isEditMode ? 'Salvar alteracoes' : 'Criar evento'}
             </button>
           </div>
         </form>
@@ -381,6 +419,7 @@ export default function EventsAdminPage() {
   const [loginLoading, setLoginLoading] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [createForm, setCreateForm] = useState(INITIAL_EVENT_FORM)
+  const [editingEvent, setEditingEvent] = useState(null)
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError] = useState('')
   const [createSuccess, setCreateSuccess] = useState('')
@@ -470,12 +509,14 @@ export default function EventsAdminPage() {
     setEventsError('')
     setCreateOpen(false)
     setCreateForm(INITIAL_EVENT_FORM)
+    setEditingEvent(null)
     setCreateError('')
     setCreateSuccess('')
   }, [])
 
   const handleCreateOpen = useCallback(() => {
     setCreateForm(INITIAL_EVENT_FORM)
+    setEditingEvent(null)
     setCreateError('')
     setCreateSuccess('')
     setCreateOpen(true)
@@ -485,8 +526,17 @@ export default function EventsAdminPage() {
     if (createLoading) return
 
     setCreateOpen(false)
+    setEditingEvent(null)
     setCreateError('')
   }, [createLoading])
+
+  const handleEditOpen = useCallback((event) => {
+    setEditingEvent(event)
+    setCreateForm(getFormFromEvent(event))
+    setCreateError('')
+    setCreateSuccess('')
+    setCreateOpen(true)
+  }, [])
 
   const handleCreateChange = useCallback((event) => {
     const { checked, name, type, value } = event.target
@@ -504,9 +554,16 @@ export default function EventsAdminPage() {
     setCreateSuccess('')
 
     try {
-      await createAdminEvent(createForm)
-      setCreateSuccess('Evento criado com sucesso.')
+      if (editingEvent?.id) {
+        await updateAdminEvent({ id: editingEvent.id, ...createForm })
+        setCreateSuccess('Evento atualizado com sucesso.')
+      } else {
+        await createAdminEvent(createForm)
+        setCreateSuccess('Evento criado com sucesso.')
+      }
+
       setCreateOpen(false)
+      setEditingEvent(null)
       setCreateForm(INITIAL_EVENT_FORM)
       await loadEvents()
     } catch (error) {
@@ -514,7 +571,7 @@ export default function EventsAdminPage() {
     } finally {
       setCreateLoading(false)
     }
-  }, [createForm, loadEvents])
+  }, [createForm, editingEvent, loadEvents])
 
   if (access.loading) {
     return (
@@ -576,15 +633,16 @@ export default function EventsAdminPage() {
           {createSuccess ? <p className="events-admin-success">{createSuccess}</p> : null}
 
           <EventsAdminSummary events={events} />
-          <EventsAdminEventList events={events} loading={eventsLoading} />
+          <EventsAdminEventList events={events} loading={eventsLoading} onEdit={handleEditOpen} />
         </section>
       </section>
 
       {createOpen ? (
-        <EventsAdminCreateModal
+        <EventsAdminEventModal
           error={createError}
           form={createForm}
           loading={createLoading}
+          mode={editingEvent ? 'edit' : 'create'}
           onChange={handleCreateChange}
           onClose={handleCreateClose}
           onSubmit={handleCreateSubmit}

@@ -13,7 +13,7 @@ function score(match) {
 function TeamMark({ name, crest, onClick }) {
   return (
     <button className="flex min-w-0 items-center gap-2 text-left" type="button" onClick={onClick}>
-      {crest ? <img src={crest} alt="" className="h-8 w-8 object-contain" loading="lazy" /> : <span className="flex h-8 w-8 items-center justify-center rounded bg-black text-xs font-black text-[var(--gold)]">BDA</span>}
+      {crest ? <img src={crest} alt="" className="h-8 w-8 object-contain" loading="lazy" /> : <span className="flex h-8 w-8 items-center justify-center rounded bg-[var(--bds-color-surface)] text-xs font-black text-[var(--bds-color-primary-hover)]">BDA</span>}
       <span className="truncate font-black">{name}</span>
     </button>
   )
@@ -21,20 +21,20 @@ function TeamMark({ name, crest, onClick }) {
 
 function MatchCard({ match, onOpen, onTeam }) {
   return (
-    <Card className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
+    <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
       <div className="flex flex-wrap items-center gap-2">
         {match.competitionLogo && <img src={match.competitionLogo} alt="" className="h-5 w-5 object-contain" loading="lazy" />}
         <Badge>{getSportsStatusLabel(match.status)}</Badge>
-        <span className="text-xs font-bold uppercase text-[var(--secondary)]">{match.competitionName}</span>
+        <span className="text-xs font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
       </div>
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <TeamMark name={match.homeTeam} crest={match.homeCrest} onClick={() => onTeam(match.homeTeam)} />
-        <button className="text-xl font-black text-[var(--gold)]" type="button" onClick={() => onOpen(match.id)}>{score(match)}</button>
+        <button className="text-xl font-black text-[var(--bds-color-primary-hover)]" type="button" onClick={() => onOpen(match.id)}>{score(match)}</button>
         <div className="flex justify-end">
           <TeamMark name={match.awayTeam} crest={match.awayCrest} onClick={() => onTeam(match.awayTeam)} />
         </div>
       </div>
-      <div className="mt-3 text-sm text-[var(--secondary)]">
+      <div className="mt-3 text-sm text-[var(--bds-color-text-secondary)]">
         {match.localTime || formatBrazilFullDateTime(match.startsAt)}
         {[match.venue, match.city, match.country].filter(Boolean).length ? ` · ${[match.venue, match.city, match.country].filter(Boolean).join(' · ')}` : ''}
       </div>
@@ -45,7 +45,7 @@ function MatchCard({ match, onOpen, onTeam }) {
 
 function Section({ title, children, action }) {
   return (
-    <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+    <section className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-black">{title}</h2>
         {action}
@@ -141,12 +141,12 @@ export default function FootballCenterPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[linear-gradient(120deg,#050505,#17110a,#050505)] p-5">
+      <div className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[linear-gradient(120deg,var(--bds-color-background),var(--bds-color-surface),var(--bds-color-background))] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase text-[var(--gold)]">Futebol 100%</p>
+            <p className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Futebol 100%</p>
             <h1 className="text-3xl font-black">Central do Futebol</h1>
-            <p className="mt-2 text-sm text-[var(--secondary)]">Atualizado em {data.lastUpdatedAt}. Dados servidos pelo Supabase.</p>
+            <p className="mt-2 text-sm text-[var(--bds-color-text-secondary)]">Atualizado em {data.lastUpdatedAt}. Dados servidos pelo Supabase.</p>
           </div>
           <Button onClick={() => navigate('/palpites')}>Abrir Competition</Button>
         </div>
@@ -182,12 +182,12 @@ export default function FootballCenterPage() {
       <Section title="Informações da Competição">
         <div className="grid gap-3 xl:grid-cols-3">
           {data.competitions.map((competition) => (
-            <Card key={competition.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-black p-4">
+            <Card key={competition.id} className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
               <div className="flex items-center gap-3">
                 {competition.logo && <img src={competition.logo} alt="" className="h-10 w-10 object-contain" loading="lazy" />}
                 <div>
                   <h3 className="font-black">{competition.name}</h3>
-                  <p className="text-sm text-[var(--secondary)]">{competition.matches} jogos sincronizados</p>
+                  <p className="text-sm text-[var(--bds-color-text-secondary)]">{competition.matches} jogos sincronizados</p>
                 </div>
               </div>
               <Button className="mt-4" variant="secondary" onClick={() => favoriteCompetition(competition)}>

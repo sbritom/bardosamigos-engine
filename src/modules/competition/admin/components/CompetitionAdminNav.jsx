@@ -19,8 +19,8 @@ export function CompetitionAdminNav() {
           className={({ isActive }) =>
             `rounded-lg border px-3 py-2 text-sm font-bold ${
               isActive
-                ? 'border-[var(--gold)] bg-[var(--gold)] text-black'
-                : 'border-[var(--border)] bg-[var(--card)] text-[var(--text)] hover:text-[var(--gold)]'
+                ? 'border-[var(--bds-color-primary-hover)] bg-[var(--bds-color-primary)] text-[var(--bds-color-text)]'
+                : 'border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] text-[var(--bds-color-text)] hover:text-[var(--bds-color-primary-hover)]'
             }`
           }
         >
