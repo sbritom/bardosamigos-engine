@@ -30,3 +30,28 @@ export async function listAdminEvents() {
 
   return (payload?.data || []).map(normalizeEvent)
 }
+
+export async function createAdminEvent(eventPayload) {
+  const token = await getAdminAccessToken()
+
+  if (!token) {
+    throw new Error('Entre com uma conta administradora para criar eventos.')
+  }
+
+  const response = await fetch(EVENTS_ADMIN_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventPayload),
+  })
+
+  const payload = await response.json().catch(() => null)
+
+  if (!response.ok || payload?.ok === false) {
+    throw new Error(getErrorMessage(payload, 'Nao foi possivel criar o evento.'))
+  }
+
+  return normalizeEvent(payload?.data || {})
+}

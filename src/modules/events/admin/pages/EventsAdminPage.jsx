@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarDays, LogOut, Pencil, Plus, ShieldAlert, Trash2 } from 'lucide-react'
+import { Archive, CalendarDays, LogOut, Pencil, Plus, ShieldAlert, Star } from 'lucide-react'
 
 import {
   ADMIN_AUTH_ERRORS,
@@ -8,7 +8,7 @@ import {
   signInAdminWithUsername,
   signOutAdmin,
 } from '../../../../core/auth/adminAuthService.js'
-import { listAdminEvents } from '../services/eventsAdminApi.js'
+import { createAdminEvent, listAdminEvents } from '../services/eventsAdminApi.js'
 import './eventsAdmin.css'
 
 const INITIAL_ACCESS = {
@@ -17,6 +17,25 @@ const INITIAL_ACCESS = {
   hasSession: false,
   reason: '',
   user: null,
+}
+
+const EVENT_TYPES = ['Bingo', 'Brincadeira', 'Campeonato', 'Especial', 'Musica ao Vivo', 'Promocao', 'Outro']
+const RECURRENCE_OPTIONS = ['Toda segunda-feira', 'Toda sexta-feira', 'Todo sabado', 'Mensal', 'Personalizado']
+
+const INITIAL_EVENT_FORM = {
+  title: '',
+  description: '',
+  type: 'Bingo',
+  recurring: true,
+  recurrence: 'Toda segunda-feira',
+  startsAt: '',
+  endsAt: '',
+  timeMode: 'announced',
+  time: '',
+  location: 'xat.com/BarDosAmigos',
+  participationRule: '',
+  featured: false,
+  status: 'published',
 }
 
 function getEventDisplayValue(value) {
@@ -36,6 +55,38 @@ function getEventStatusLabel(status) {
 
 function getEventTimeDisplay(event) {
   return event.timeLabel || event.dateLabel || event.startsAt || '-'
+}
+
+function slugifyTitle(value) {
+  return String(value || '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90)
+}
+
+function getEventSummaryCards(events = []) {
+  return [
+    {
+      label: 'Publicados',
+      value: events.filter((event) => event.status === 'published').length,
+    },
+    {
+      label: 'Rascunhos',
+      value: events.filter((event) => event.status === 'draft').length,
+    },
+    {
+      label: 'Arquivados',
+      value: events.filter((event) => event.status === 'archived').length,
+    },
+    {
+      label: 'Destaques',
+      value: events.filter((event) => event.featured).length,
+    },
+  ]
 }
 
 function EventsAdminLogin({ error, form, loading, onChange, onSubmit }) {
@@ -99,47 +150,223 @@ function EventsAdminUnauthorized({ reason, onLogout }) {
   )
 }
 
-function EventsAdminTable({ events, loading }) {
+function EventsAdminSummary({ events }) {
+  const cards = getEventSummaryCards(events)
+
+  return (
+    <div className="events-admin-summary" aria-label="Resumo dos eventos">
+      {cards.map((card) => (
+        <article className="events-admin-summary-card" key={card.label}>
+          <span>{card.label}</span>
+          <strong>{card.value}</strong>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function EventsAdminEventList({ events, loading }) {
   if (loading) {
     return <p className="events-admin-muted">Carregando eventos...</p>
   }
 
   if (!events.length) {
-    return <p className="events-admin-empty">Nenhum evento cadastrado.</p>
+    return (
+      <div className="events-admin-empty">
+        <CalendarDays size={34} />
+        <strong>Nenhum evento cadastrado.</strong>
+        <span>Quando o CRUD for habilitado, os eventos criados aparecerao aqui.</span>
+      </div>
+    )
   }
 
   return (
-    <div className="events-admin-table" role="table" aria-label="Eventos cadastrados">
-      <div className="events-admin-table__row events-admin-table__row--head" role="row">
-        <span>Titulo</span>
-        <span>Status</span>
-        <span>Tipo</span>
-        <span>Recorrencia</span>
-        <span>Horario</span>
-        <span>Slug</span>
-        <span>Acoes</span>
-      </div>
-
+    <div className="events-admin-event-grid" aria-label="Eventos cadastrados">
       {events.map((event) => (
-        <div className="events-admin-table__row" key={event.id || event.slug} role="row">
-          <strong>{getEventDisplayValue(event.title)}</strong>
-          <span>{getEventStatusLabel(event.status)}</span>
-          <span>{getEventDisplayValue(event.typeLabel)}</span>
-          <span>{getEventDisplayValue(event.recurrenceLabel)}</span>
-          <span>{getEventTimeDisplay(event)}</span>
-          <code>{getEventDisplayValue(event.slug)}</code>
+        <article className="events-admin-event-card" key={event.id || event.slug}>
+          <div className="events-admin-event-card__top">
+            <span className="events-admin-status">{getEventStatusLabel(event.status)}</span>
+            {event.featured ? (
+              <span className="events-admin-featured">
+                <Star size={14} />
+                Destaque
+              </span>
+            ) : null}
+          </div>
+
+          <h3>{getEventDisplayValue(event.title)}</h3>
+
+          <dl className="events-admin-event-meta">
+            <div>
+              <dt>Tipo</dt>
+              <dd>{getEventDisplayValue(event.typeLabel)}</dd>
+            </div>
+            <div>
+              <dt>Recorrencia</dt>
+              <dd>{getEventDisplayValue(event.recurrenceLabel)}</dd>
+            </div>
+            <div>
+              <dt>Horario</dt>
+              <dd>{getEventTimeDisplay(event)}</dd>
+            </div>
+            <div>
+              <dt>Slug</dt>
+              <dd>
+                <code>{getEventDisplayValue(event.slug)}</code>
+              </dd>
+            </div>
+          </dl>
+
           <div className="events-admin-actions">
             <button className="events-admin-icon-button" disabled title="Editar" type="button">
               <Pencil size={15} />
               <span>Editar</span>
             </button>
-            <button className="events-admin-icon-button events-admin-icon-button--danger" disabled title="Excluir" type="button">
-              <Trash2 size={15} />
-              <span>Excluir</span>
+            <button className="events-admin-icon-button events-admin-icon-button--danger" disabled title="Arquivar" type="button">
+              <Archive size={15} />
+              <span>Arquivar</span>
             </button>
           </div>
-        </div>
+        </article>
       ))}
+    </div>
+  )
+}
+
+function EventsAdminCreateModal({ error, form, loading, onChange, onClose, onSubmit, success }) {
+  const slug = slugifyTitle(form.title)
+
+  return (
+    <div className="events-admin-modal" role="dialog" aria-modal="true" aria-labelledby="events-admin-create-title">
+      <div className="events-admin-modal__panel">
+        <div className="events-admin-modal__header">
+          <div>
+            <span className="events-admin-eyebrow">Novo evento</span>
+            <h2 id="events-admin-create-title">Criar evento</h2>
+          </div>
+          <button className="events-admin-button" disabled={loading} onClick={onClose} type="button">
+            Fechar
+          </button>
+        </div>
+
+        <form className="events-admin-form" onSubmit={onSubmit}>
+          <fieldset>
+            <legend>Informacoes basicas</legend>
+            <label>
+              <span>Titulo</span>
+              <input name="title" onChange={onChange} type="text" value={form.title} />
+            </label>
+            <label>
+              <span>Slug</span>
+              <input readOnly type="text" value={slug} />
+            </label>
+            <label className="events-admin-form__wide">
+              <span>Descricao</span>
+              <textarea name="description" onChange={onChange} rows="4" value={form.description} />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Tipo</legend>
+            <label>
+              <span>Tipo de evento</span>
+              <select name="type" onChange={onChange} value={form.type}>
+                {EVENT_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Evento recorrente</legend>
+            <label className="events-admin-check">
+              <input checked={form.recurring} name="recurring" onChange={onChange} type="checkbox" />
+              <span>Evento recorrente</span>
+            </label>
+
+            {form.recurring ? (
+              <label>
+                <span>Frequencia</span>
+                <select name="recurrence" onChange={onChange} value={form.recurrence}>
+                  {RECURRENCE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <>
+                <label>
+                  <span>Data inicial</span>
+                  <input name="startsAt" onChange={onChange} type="date" value={form.startsAt} />
+                </label>
+                <label>
+                  <span>Data final</span>
+                  <input name="endsAt" onChange={onChange} type="date" value={form.endsAt} />
+                </label>
+              </>
+            )}
+          </fieldset>
+
+          <fieldset>
+            <legend>Horario</legend>
+            <label className="events-admin-radio">
+              <input checked={form.timeMode === 'announced'} name="timeMode" onChange={onChange} type="radio" value="announced" />
+              <span>Horario divulgado no dia</span>
+            </label>
+            <label className="events-admin-radio">
+              <input checked={form.timeMode === 'specific'} name="timeMode" onChange={onChange} type="radio" value="specific" />
+              <span>Horario especifico</span>
+            </label>
+            {form.timeMode === 'specific' ? (
+              <label>
+                <span>Hora</span>
+                <input name="time" onChange={onChange} type="time" value={form.time} />
+              </label>
+            ) : null}
+          </fieldset>
+
+          <fieldset>
+            <legend>Detalhes</legend>
+            <label>
+              <span>Local</span>
+              <input name="location" onChange={onChange} type="text" value={form.location} />
+            </label>
+            <label className="events-admin-form__wide">
+              <span>Regra de participacao</span>
+              <textarea name="participationRule" onChange={onChange} rows="3" value={form.participationRule} />
+            </label>
+            <label className="events-admin-check">
+              <input checked={form.featured} name="featured" onChange={onChange} type="checkbox" />
+              <span>Evento em destaque</span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Status</legend>
+            <label className="events-admin-radio">
+              <input checked={form.status === 'published'} name="status" onChange={onChange} type="radio" value="published" />
+              <span>Publicado</span>
+            </label>
+            <label className="events-admin-radio">
+              <input checked={form.status === 'draft'} name="status" onChange={onChange} type="radio" value="draft" />
+              <span>Rascunho</span>
+            </label>
+          </fieldset>
+
+          {error ? <p className="events-admin-error">{error}</p> : null}
+          {success ? <p className="events-admin-success">{success}</p> : null}
+
+          <div className="events-admin-form__actions">
+            <button className="events-admin-button" disabled={loading} onClick={onClose} type="button">
+              Cancelar
+            </button>
+            <button className="events-admin-button events-admin-button--primary" disabled={loading} type="submit">
+              {loading ? 'Salvando...' : 'Criar evento'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
@@ -152,6 +379,11 @@ export default function EventsAdminPage() {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' })
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [createForm, setCreateForm] = useState(INITIAL_EVENT_FORM)
+  const [createLoading, setCreateLoading] = useState(false)
+  const [createError, setCreateError] = useState('')
+  const [createSuccess, setCreateSuccess] = useState('')
 
   const eventCountLabel = useMemo(() => {
     if (events.length === 1) return '1 evento cadastrado'
@@ -236,7 +468,53 @@ export default function EventsAdminPage() {
     setLoginForm({ username: '', password: '' })
     setLoginError('')
     setEventsError('')
+    setCreateOpen(false)
+    setCreateForm(INITIAL_EVENT_FORM)
+    setCreateError('')
+    setCreateSuccess('')
   }, [])
+
+  const handleCreateOpen = useCallback(() => {
+    setCreateForm(INITIAL_EVENT_FORM)
+    setCreateError('')
+    setCreateSuccess('')
+    setCreateOpen(true)
+  }, [])
+
+  const handleCreateClose = useCallback(() => {
+    if (createLoading) return
+
+    setCreateOpen(false)
+    setCreateError('')
+  }, [createLoading])
+
+  const handleCreateChange = useCallback((event) => {
+    const { checked, name, type, value } = event.target
+
+    setCreateForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
+  }, [])
+
+  const handleCreateSubmit = useCallback(async (event) => {
+    event.preventDefault()
+    setCreateLoading(true)
+    setCreateError('')
+    setCreateSuccess('')
+
+    try {
+      await createAdminEvent(createForm)
+      setCreateSuccess('Evento criado com sucesso.')
+      setCreateOpen(false)
+      setCreateForm(INITIAL_EVENT_FORM)
+      await loadEvents()
+    } catch (error) {
+      setCreateError(error?.message || 'Nao foi possivel criar o evento.')
+    } finally {
+      setCreateLoading(false)
+    }
+  }, [createForm, loadEvents])
 
   if (access.loading) {
     return (
@@ -288,17 +566,31 @@ export default function EventsAdminPage() {
               <p>Lista de eventos reais registrados em public.events.</p>
             </div>
 
-            <button className="events-admin-button events-admin-button--primary" disabled type="button">
+            <button className="events-admin-button events-admin-button--primary" onClick={handleCreateOpen} type="button">
               <Plus size={16} />
-              Novo Evento
+              NOVO EVENTO
             </button>
           </div>
 
           {eventsError ? <p className="events-admin-error">{eventsError}</p> : null}
+          {createSuccess ? <p className="events-admin-success">{createSuccess}</p> : null}
 
-          <EventsAdminTable events={events} loading={eventsLoading} />
+          <EventsAdminSummary events={events} />
+          <EventsAdminEventList events={events} loading={eventsLoading} />
         </section>
       </section>
+
+      {createOpen ? (
+        <EventsAdminCreateModal
+          error={createError}
+          form={createForm}
+          loading={createLoading}
+          onChange={handleCreateChange}
+          onClose={handleCreateClose}
+          onSubmit={handleCreateSubmit}
+          success=""
+        />
+      ) : null}
     </main>
   )
 }
