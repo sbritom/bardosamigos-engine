@@ -229,6 +229,20 @@ function FootballCard({ matches }) {
   )
 }
 
+function cleanCardText(value, fallback = '') {
+  if (typeof value !== 'string') return fallback
+  const normalized = value.replace(/\s+/g, ' ').trim()
+
+  return normalized || fallback
+}
+
+function truncateCardText(value, maxLength, fallback = '') {
+  const normalized = cleanCardText(value, fallback)
+  if (!normalized || normalized.length <= maxLength) return normalized
+
+  return `${normalized.slice(0, maxLength).trimEnd()}...`
+}
+
 function NewsPanel({ news, loading }) {
   const safeNews = Array.isArray(news) ? news : []
 
@@ -244,16 +258,17 @@ function NewsPanel({ news, loading }) {
           {safeNews.slice(0, 3).map((item, index) => (
             <NewsCard
               key={item.id || `news-${index}`}
-              category={item.category || 'Comunidade'}
+              category=""
               className="bds-home-news-row"
-              date={item.date || ''}
+              date=""
               image={item.image}
-              source="Fonte sincronizada"
-              title={item.title || 'Noticia indisponivel'}
+              onOpen={() => { window.location.href = '/news' }}
+              source=""
+              title={truncateCardText(item.title, 110, 'Noticia em atualização')}
             />
           ))}
         </div>
-      ) : <div className="bds-home-empty">Nenhuma noticia sincronizada encontrada.</div>}
+      ) : <div className="bds-home-empty">Sem notícias sincronizadas para exibir agora.</div>}
     </FeatureCard>
   )
 }
@@ -261,6 +276,11 @@ function NewsPanel({ news, loading }) {
 function CommunityPanel({ events = [] }) {
   const safeEvents = Array.isArray(events) ? events : []
   const nextEvent = safeEvents[0] || null
+  const eventDate = nextEvent ? truncateCardText(nextEvent.homeDateLabel || nextEvent.recurrenceLabel || nextEvent.dateLabel, 34, 'Data a definir') : ''
+  const eventTitle = nextEvent ? truncateCardText(nextEvent.title, 52, 'Evento do Bar') : ''
+  const eventTime = nextEvent ? truncateCardText(nextEvent.homeTimeLabel || nextEvent.timeLabel, 22, 'Horário a definir') : ''
+  const eventType = nextEvent ? truncateCardText(nextEvent.typeLabel, 32, 'Evento publicado') : ''
+  const eventLocation = nextEvent ? truncateCardText(nextEvent.location, 46, 'Local a confirmar') : ''
 
   return (
     <FeatureCard
@@ -271,12 +291,12 @@ function CommunityPanel({ events = [] }) {
     >
       {nextEvent ? (
         <div className="bds-home-stats-grid" data-designer-id="community.stats" data-designer-label="Comunidade / Estatisticas">
-          <StatCard icon={<CalendarDays size={18} />} label="Frequência" value={nextEvent.homeDateLabel || nextEvent.recurrenceLabel || nextEvent.dateLabel || 'A definir'} hint={nextEvent.typeLabel || 'Evento publicado'} />
-          <StatCard icon={<Sparkles size={18} />} label="Evento" value={nextEvent.title || 'Evento do Bar'} hint={nextEvent.recurring ? 'Evento recorrente' : nextEvent.typeLabel || 'Evento publicado'} />
-          <StatCard icon={<Clock size={18} />} label="Horário" value={nextEvent.homeTimeLabel || nextEvent.timeLabel || 'A definir'} hint={nextEvent.location || 'Veja os detalhes em Eventos'} />
+          <StatCard icon={<CalendarDays size={18} />} label="Data" value={eventDate} hint={eventType} />
+          <StatCard icon={<Sparkles size={18} />} label="Evento" value={eventTitle} hint={nextEvent.recurring ? 'Evento recorrente' : eventType} />
+          <StatCard icon={<Clock size={18} />} label="Horário" value={eventTime} hint={eventLocation} />
         </div>
       ) : (
-        <div className="bds-home-empty">Nenhum evento programado no momento.</div>
+        <div className="bds-home-empty">Sem eventos publicados para exibir agora.</div>
       )}
     </FeatureCard>
   )
