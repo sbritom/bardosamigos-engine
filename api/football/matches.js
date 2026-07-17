@@ -78,22 +78,51 @@ function createBrazilDatePayload(value) {
   }
 }
 
+function normalizeTeam(team = {}, fallbackName, fallbackTla) {
+  const safeTeam = team && typeof team === 'object' ? team : {}
+  const name = safeTeam.name || fallbackName
+  const shortName = safeTeam.shortName || safeTeam.short_name || safeTeam.tla || name
+  const tla = safeTeam.tla || fallbackTla || shortName
+
+  return {
+    id: safeTeam.id || null,
+    name,
+    shortName,
+    tla,
+    crest: safeTeam.crest || safeTeam.crestUrl || safeTeam.crest_url || safeTeam.logo || safeTeam.logoUrl || safeTeam.logo_url || '',
+  }
+}
+
 function mapMatch(match = {}) {
   const date = createBrazilDatePayload(match.utcDate)
   const status = normalizeStatus(match.status)
   const homeScore = match.score?.fullTime?.home ?? match.score?.regularTime?.home ?? match.score?.halfTime?.home ?? null
   const awayScore = match.score?.fullTime?.away ?? match.score?.regularTime?.away ?? match.score?.halfTime?.away ?? null
+  const homeTeam = normalizeTeam(match.homeTeam, 'Mandante', 'MAN')
+  const awayTeam = normalizeTeam(match.awayTeam, 'Visitante', 'VIS')
+  const competition = {
+    id: match.competition?.id || null,
+    name: match.competition?.name || 'Futebol',
+    code: match.competition?.code || '',
+    emblem: match.competition?.emblem || '',
+  }
 
   return {
-    id: `football-data-${match.id || `${match.utcDate}-${match.homeTeam?.name}-${match.awayTeam?.name}`}`,
-    homeParticipant: match.homeTeam?.name || 'Mandante',
-    awayParticipant: match.awayTeam?.name || 'Visitante',
-    homeTeam: match.homeTeam?.name || 'Mandante',
-    awayTeam: match.awayTeam?.name || 'Visitante',
-    homeCrest: match.homeTeam?.crest || '',
-    awayCrest: match.awayTeam?.crest || '',
+    id: `football-data-${match.id || `${match.utcDate}-${homeTeam.name}-${awayTeam.name}`}`,
+    homeParticipant: homeTeam.name,
+    awayParticipant: awayTeam.name,
+    homeTeam,
+    awayTeam,
+    homeCrest: homeTeam.crest,
+    awayCrest: awayTeam.crest,
+    homeShield: homeTeam.tla,
+    awayShield: awayTeam.tla,
     homeScore,
     awayScore,
+    score: {
+      home: homeScore,
+      away: awayScore,
+    },
     startsAt: date.utcDate,
     utcDate: date.utcDate,
     localDate: date.localDate,
@@ -101,10 +130,11 @@ function mapMatch(match = {}) {
     localTime: date.localTime,
     standardStatus: status,
     status,
-    competitionName: match.competition?.name || 'Futebol',
-    championship: match.competition?.name || 'Futebol',
-    competitionCode: match.competition?.code || '',
-    competitionLogo: match.competition?.emblem || '',
+    competition,
+    competitionName: competition.name,
+    championship: competition.name,
+    competitionCode: competition.code,
+    competitionLogo: competition.emblem,
     stage: match.stage || '',
     groupName: match.group || '',
     country: match.area?.name || match.competition?.area?.name || '',
@@ -117,10 +147,12 @@ function mapMatch(match = {}) {
       localDateIso: date.localDateIso,
       localTime: date.localTime,
       competition: {
-        code: match.competition?.code || '',
-        namePtBr: match.competition?.name || 'Futebol',
-        logoUrl: match.competition?.emblem || '',
+        code: competition.code,
+        namePtBr: competition.name,
+        logoUrl: competition.emblem,
       },
+      homeTeam,
+      awayTeam,
       raw: match,
     },
   }

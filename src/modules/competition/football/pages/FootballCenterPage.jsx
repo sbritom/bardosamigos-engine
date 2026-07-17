@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge, Button, Card, EmptyState, Loading, StatCard, Table } from '../../../../design-system'
-import { formatBrazilFullDateTime, isFinishedStatus, isLiveStatus } from '../../../../core/time'
+import { formatBrazilDate, formatBrazilFullDateTime, isFinishedStatus, isLiveStatus } from '../../../../core/time'
 import { getSportsStatusLabel } from '../../../../core/sports'
 import { listFootballCenterData, toggleFootballFavorite } from '../../services/footballCenterService'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../services/footballAutoSyncService'
@@ -36,10 +36,88 @@ function MatchCard({ match, onOpen, onTeam }) {
       </div>
       <div className="mt-3 text-sm text-[var(--bds-color-text-secondary)]">
         {match.localTime || formatBrazilFullDateTime(match.startsAt)}
-        {[match.venue, match.city, match.country].filter(Boolean).length ? ` · ${[match.venue, match.city, match.country].filter(Boolean).join(' · ')}` : ''}
+        {[match.venue, match.city, match.country].filter(Boolean).length ? ` Â· ${[match.venue, match.city, match.country].filter(Boolean).join(' Â· ')}` : ''}
       </div>
       <Button className="mt-4" variant="secondary" onClick={() => onOpen(match.id)}>Detalhes</Button>
     </Card>
+  )
+}
+
+function MatchTeamInline({ name, crest, align = 'left' }) {
+  return (
+    <div className={`flex min-w-0 items-center gap-2 ${align === 'right' ? 'justify-end text-right' : ''}`}>
+      {crest ? <img src={crest} alt="" className="h-7 w-7 shrink-0 object-contain" loading="lazy" /> : <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--bds-color-surface)] text-[10px] font-black text-[var(--bds-color-primary-hover)]">BDA</span>}
+      <span className="truncate text-sm font-black">{name}</span>
+    </div>
+  )
+}
+
+function UpcomingMatchRow({ match, onOpen }) {
+  return (
+    <button className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-3 text-left transition hover:border-[var(--bds-color-primary-hover)]" type="button" onClick={() => onOpen(match.id)}>
+      <MatchTeamInline name={match.homeTeam} crest={match.homeCrest} />
+      <div className="text-center">
+        <strong className="block text-sm font-black text-[var(--bds-color-primary-hover)]">{match.localTime || formatBrazilFullDateTime(match.startsAt)}</strong>
+        <span className="mt-1 block text-[11px] font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.dateLabel || formatBrazilDate(match.startsAt)}</span>
+      </div>
+      <MatchTeamInline name={match.awayTeam} crest={match.awayCrest} align="right" />
+      <span className="col-span-3 text-xs font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
+    </button>
+  )
+}
+
+function RecentMatchRow({ match, onOpen }) {
+  return (
+    <button className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-3 text-left transition hover:border-[var(--bds-color-primary-hover)]" type="button" onClick={() => onOpen(match.id)}>
+      <MatchTeamInline name={match.homeTeam} crest={match.homeCrest} />
+      <strong className="text-center text-lg font-black text-[var(--bds-color-primary-hover)]">{score(match)}</strong>
+      <MatchTeamInline name={match.awayTeam} crest={match.awayCrest} align="right" />
+      <div className="col-span-3 flex flex-wrap items-center justify-between gap-2">
+        <Badge>FINALIZADO</Badge>
+        <span className="text-xs font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
+      </div>
+    </button>
+  )
+}
+
+function MatchesSection({ data, onOpen, onTeam }) {
+  return (
+    <Section title="PARTIDAS">
+      <div className="space-y-5">
+        <div>
+          <h3 className="mb-3 text-sm font-black uppercase text-[var(--bds-color-danger)]">AO VIVO</h3>
+          {data.live.length ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {data.live.map((match) => <MatchCard key={match.id} match={match} onOpen={onOpen} onTeam={onTeam} />)}
+            </div>
+          ) : (
+            <EmptyState title="Nenhuma partida ao vivo no momento." description="" />
+          )}
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-sm font-black uppercase text-[var(--bds-color-warning)]">PROXIMAS PARTIDAS</h3>
+          {data.upcoming.length ? (
+            <div className="grid gap-3">
+              {data.upcoming.slice(0, 10).map((match) => <UpcomingMatchRow key={match.id} match={match} onOpen={onOpen} />)}
+            </div>
+          ) : (
+            <EmptyState title="Nenhuma prÃ³xima partida sincronizada." description="Novos jogos aparecerÃ£o quando forem recebidos pela integraÃ§Ã£o." />
+          )}
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-sm font-black uppercase text-[var(--bds-color-success)]">PARTIDAS RECENTES</h3>
+          {data.finished.length ? (
+            <div className="grid gap-3">
+              {data.finished.slice(0, 10).map((match) => <RecentMatchRow key={match.id} match={match} onOpen={onOpen} />)}
+            </div>
+          ) : (
+            <EmptyState title="Nenhuma partida recente sincronizada." description="Resultados finalizados aparecerÃ£o aqui automaticamente." />
+          )}
+        </div>
+      </div>
+    </Section>
   )
 }
 
@@ -76,10 +154,10 @@ function StandingsTable({ rows }) {
     { key: 'goalsFor', label: 'GP' },
     { key: 'goalsAgainst', label: 'GC' },
     { key: 'goalDifference', label: 'SG' },
-    { key: 'lastFive', label: 'Últimos 5', render: (row) => row.lastFive.join(' ') || '-' },
+    { key: 'lastFive', label: 'Ãšltimos 5', render: (row) => row.lastFive.join(' ') || '-' },
   ]
 
-  return rows.length ? <Table columns={columns} rows={rows} getRowKey={(row) => row.name} /> : <EmptyState title="Classificação indisponível" description="Quando houver resultados sincronizados, a tabela será calculada automaticamente." />
+  return rows.length ? <Table columns={columns} rows={rows} getRowKey={(row) => row.name} /> : <EmptyState title="ClassificaÃ§Ã£o indisponÃ­vel" description="Quando houver resultados sincronizados, a tabela serÃ¡ calculada automaticamente." />
 }
 
 export default function FootballCenterPage() {
@@ -136,8 +214,8 @@ export default function FootballCenterPage() {
   }
 
   if (state.loading) return <Loading label="Carregando central do futebol" />
-  if (state.error) return <EmptyState title="Não foi possível carregar o futebol" description={state.error} />
-  if (!data) return <EmptyState title="Nenhum dado sincronizado" description="Execute a sincronização Football-Data para preencher a central." />
+  if (state.error) return <EmptyState title="NÃ£o foi possÃ­vel carregar o futebol" description={state.error} />
+  if (!data) return <EmptyState title="Nenhum dado sincronizado" description="Execute a sincronizaÃ§Ã£o Football-Data para preencher a central." />
 
   return (
     <section className="space-y-5">
@@ -154,32 +232,22 @@ export default function FootballCenterPage() {
 
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard label="Ao vivo" value={data.live.length} />
-        <StatCard label="Próximos" value={data.upcoming.length} />
+        <StatCard label="PrÃ³ximos" value={data.upcoming.length} />
         <StatCard label="Finalizados" value={data.finished.length} />
-        <StatCard label="Competições" value={data.competitions.length} />
+        <StatCard label="CompetiÃ§Ãµes" value={data.competitions.length} />
       </div>
 
       <Section title="Jogo em Destaque">
         {data.featured ? <MatchCard match={data.featured} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} /> : <EmptyState title="Nenhum jogo sincronizado" description="O destaque aparece automaticamente quando houver partidas." />}
       </Section>
 
-      <Section title="Jogos Ao Vivo">
-        {data.live.length ? <div className="grid gap-4 xl:grid-cols-2">{data.live.map((match) => <MatchCard key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />)}</div> : <EmptyState title="Nenhum jogo ao vivo" description="Quando uma partida iniciar, ela ganha prioridade nesta área." />}
-      </Section>
+      <MatchesSection data={data} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />
 
-      <Section title="Próximos Jogos">
-        <div className="grid gap-4 xl:grid-cols-2">{data.upcoming.slice(0, 8).map((match) => <MatchCard key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />)}</div>
-      </Section>
-
-      <Section title="Últimos Resultados">
-        <div className="grid gap-4 xl:grid-cols-2">{data.finished.slice(0, 8).map((match) => <MatchCard key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />)}</div>
-      </Section>
-
-      <Section title="Classificação Completa">
+      <Section title="ClassificaÃ§Ã£o Completa">
         <StandingsTable rows={data.standings} />
       </Section>
 
-      <Section title="Informações da Competição">
+      <Section title="InformaÃ§Ãµes da CompetiÃ§Ã£o">
         <div className="grid gap-3 xl:grid-cols-3">
           {data.competitions.map((competition) => (
             <Card key={competition.id} className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
@@ -211,7 +279,7 @@ export default function FootballCenterPage() {
       </Section>
 
       <Section title="Mata-mata">
-        {data.knockout.length ? <div className="grid gap-4 xl:grid-cols-2">{data.knockout.map((match) => <MatchCard key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />)}</div> : <EmptyState title="Mata-mata indisponível" description="Quando a fase estiver sincronizada, os jogos aparecerão aqui." />}
+        {data.knockout.length ? <div className="grid gap-4 xl:grid-cols-2">{data.knockout.map((match) => <MatchCard key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} onTeam={openTeamByName} />)}</div> : <EmptyState title="Mata-mata indisponÃ­vel" description="Quando a fase estiver sincronizada, os jogos aparecerÃ£o aqui." />}
       </Section>
     </section>
   )

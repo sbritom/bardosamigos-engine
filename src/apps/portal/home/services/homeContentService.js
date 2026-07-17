@@ -36,6 +36,47 @@ function formatParticipant(value, fallback) {
   return value || fallback
 }
 
+function getTeamField(team, fields = []) {
+  if (!team || typeof team !== 'object') return ''
+  return fields.map((field) => team[field]).find(Boolean) || ''
+}
+
+function getTeamDisplayName(team, directValue, fallback) {
+  return formatParticipant(
+    directValue
+      || getTeamField(team, ['name', 'shortName', 'short_name', 'tla']),
+    fallback,
+  )
+}
+
+function getTeamShortLabel(team, fallback) {
+  return getTeamField(team, ['tla', 'shortName', 'short_name', 'name']) || fallback
+}
+
+function getTeamCrest(team, directValue, metadataValue) {
+  return directValue || getTeamField(team, ['crest', 'crestUrl', 'crest_url', 'logo', 'logoUrl', 'logo_url']) || metadataValue || ''
+}
+
+function normalizeTeamModel(team, {
+  directName,
+  directCrest,
+  metadataShortName,
+  fallbackName,
+  fallbackTla,
+} = {}) {
+  const name = getTeamDisplayName(team, directName, fallbackName)
+  const shortName = getTeamField(team, ['shortName', 'short_name']) || metadataShortName || name
+  const tla = getTeamField(team, ['tla']) || metadataShortName || fallbackTla || shortName
+
+  return {
+    id: getTeamField(team, ['id']) || null,
+    name,
+    shortName,
+    tla,
+    crest: getTeamCrest(team, directCrest, ''),
+  }
+}
+
 function getFootballDateParts(value) {
   const date = new Date(value)
   if (!value || Number.isNaN(date.getTime())) {
@@ -134,22 +175,51 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
   const competition = season.competitions || {}
   const competitionCode = safeMatch.competitionCode || safeMatch.competition_code || metadata.competition?.code || competition.code
   const competitionLogo = safeMatch.competitionLogo || safeMatch.competition_logo || competition.logoUrl || competition.logo_url || metadata.competition?.logoUrl || ''
-  const homeCrest = safeMatch.homeCrest || safeMatch.home_crest || metadata.homeShield || ''
-  const awayCrest = safeMatch.awayCrest || safeMatch.away_crest || metadata.awayShield || ''
+  const homeTeamData = safeMatch.homeTeam || safeMatch.home_team || metadata.homeTeam || metadata.home_team || null
+  const awayTeamData = safeMatch.awayTeam || safeMatch.away_team || metadata.awayTeam || metadata.away_team || null
+  const homeTeamModel = normalizeTeamModel(homeTeamData, {
+    directName: safeMatch.homeParticipant || safeMatch.home_participant,
+    directCrest: safeMatch.homeCrest || safeMatch.home_crest || metadata.homeShield,
+    metadataShortName: metadata.homeShortName || safeMatch.homeShield || safeMatch.home_shield,
+    fallbackName: 'Mandante',
+    fallbackTla: 'MAN',
+  })
+  const awayTeamModel = normalizeTeamModel(awayTeamData, {
+    directName: safeMatch.awayParticipant || safeMatch.away_participant,
+    directCrest: safeMatch.awayCrest || safeMatch.away_crest || metadata.awayShield,
+    metadataShortName: metadata.awayShortName || safeMatch.awayShield || safeMatch.away_shield,
+    fallbackName: 'Visitante',
+    fallbackTla: 'VIS',
+  })
+  const homeCrest = homeTeamModel.crest
+  const awayCrest = awayTeamModel.crest
   const dateSource = safeMatch.utcDate || safeMatch.utc_date || startsAt
   const localDateParts = getFootballDateParts(dateSource)
   const statusForDisplay = standardStatus
   const isFutureMatch = !isLiveStatus(statusForDisplay) && !isFinishedStatus(statusForDisplay) && getUtcTimestamp(startsAt) >= getUtcTimestamp(nowUtcIso())
+  const homeScore = safeMatch.homeScore ?? safeMatch.home_score ?? safeMatch.score?.home ?? safeMatch.result?.homeScore ?? null
+  const awayScore = safeMatch.awayScore ?? safeMatch.away_score ?? safeMatch.score?.away ?? safeMatch.result?.awayScore ?? null
+  const championship = translateCompetition(safeMatch.competitionName || safeMatch.competition_name || safeMatch.competition?.name || competition.name || metadata.competition?.namePtBr || metadata.championship, competitionCode) || 'Competicao'
 
   return {
     id: safeMatch.id || `fallback-match-${index}`,
-    championship: translateCompetition(safeMatch.competitionName || safeMatch.competition_name || competition.name || metadata.competition?.namePtBr || metadata.championship, competitionCode) || 'Competicao',
+    championship,
+    competition: {
+      id: safeMatch.competition?.id || competition.id || null,
+      name: championship,
+      code: competitionCode || '',
+      logo: competitionLogo,
+    },
     competitionLogo,
     competitionCode,
-    homeTeam: formatParticipant(safeMatch.homeParticipant || safeMatch.home_participant, 'Mandante'),
-    awayTeam: formatParticipant(safeMatch.awayParticipant || safeMatch.away_participant, 'Visitante'),
-    homeShield: metadata.homeShortName || 'BDA',
-    awayShield: metadata.awayShortName || 'BDA',
+    homeTeam: homeTeamModel.name,
+    awayTeam: awayTeamModel.name,
+    homeTeamData: homeTeamModel,
+    awayTeamData: awayTeamModel,
+    homeParticipant: homeTeamModel.name,
+    awayParticipant: awayTeamModel.name,
+    homeShield: homeTeamModel.tla || getTeamShortLabel(homeTeamData, 'BDA'),
+    awayShield: awayTeamModel.tla || getTeamShortLabel(awayTeamData, 'BDA'),
     homeCrest,
     awayCrest,
     homeTeamCrest: homeCrest,
@@ -168,8 +238,12 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
     city: safeMatch.city || metadata.city || '',
     stage: safeMatch.stage || metadata.stage || '',
     group: safeMatch.groupName || safeMatch.group_name || metadata.group || '',
-    homeScore: safeMatch.homeScore ?? safeMatch.home_score ?? safeMatch.result?.homeScore ?? null,
-    awayScore: safeMatch.awayScore ?? safeMatch.away_score ?? safeMatch.result?.awayScore ?? null,
+    homeScore,
+    awayScore,
+    score: {
+      home: homeScore,
+      away: awayScore,
+    },
     predictions: Number(metadata.predictionsCount || metadata.predictions || 0),
     closed: Boolean(safeMatch.closed),
     source: safeMatch.id ? 'competition' : 'fallback',
