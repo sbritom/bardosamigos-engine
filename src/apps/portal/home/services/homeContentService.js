@@ -27,6 +27,7 @@ const FOOTBALL_TIME_ZONE = 'America/Maceio'
 const WORLD_CUP_YEAR = 2026
 const WORLD_CUP_START_DATE = '2026-06-11'
 const WORLD_CUP_END_DATE = '2026-07-19'
+const TEAM_PLACEHOLDER_NAMES = new Set(['mandante', 'visitante', 'man', 'vis', 'bda'])
 
 function formatDate(value) {
   return value ? formatBrazilDate(value) : ''
@@ -296,8 +297,18 @@ function isWorldCupActive(matches = [], now = nowUtcIso()) {
   return hasPendingMatch || (latestMatchTime > 0 && nowTime <= latestMatchTime + finalGraceMs)
 }
 
+function hasDisplayableTeamName(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+  return Boolean(normalized && !TEAM_PLACEHOLDER_NAMES.has(normalized))
+}
+
+function hasDisplayableMatchTeams(match = {}) {
+  return hasDisplayableTeamName(match.homeTeam || match.homeParticipant || match.home_participant)
+    && hasDisplayableTeamName(match.awayTeam || match.awayParticipant || match.away_participant)
+}
+
 function selectWorldCupMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
-  const worldCupMatches = matches.filter(isWorldCupMatch)
+  const worldCupMatches = matches.filter(isWorldCupMatch).filter(hasDisplayableMatchTeams)
   const liveMatches = worldCupMatches.filter((match) => isLiveStatus(match.standardStatus || match.status))
   const todayUpcoming = worldCupMatches.filter((match) => {
     const status = match.standardStatus || match.status
@@ -346,12 +357,14 @@ async function listFootballProxyMatches() {
 }
 
 function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
-  if (isWorldCupActive(matches, now)) {
-    const worldCupMatches = selectWorldCupMatches(matches, now, limit)
+  const displayableMatches = matches.filter(hasDisplayableMatchTeams)
+
+  if (isWorldCupActive(displayableMatches, now)) {
+    const worldCupMatches = selectWorldCupMatches(displayableMatches, now, limit)
     if (worldCupMatches.length) return worldCupMatches
   }
 
-  const sortedMatches = sortCurrentMatches(matches, now)
+  const sortedMatches = sortCurrentMatches(displayableMatches, now)
     .sort((left, right) => {
       const leftStatus = left.standardStatus || left.status
       const rightStatus = right.standardStatus || right.status

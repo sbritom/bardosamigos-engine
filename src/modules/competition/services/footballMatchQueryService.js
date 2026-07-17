@@ -41,6 +41,54 @@ function getStage(match = {}) {
   return match.competitionRounds?.competitionStages || {}
 }
 
+function getTeamMetadata(match = {}, side) {
+  const metadata = match.metadata || {}
+  const rawTeam = metadata.raw?.[`${side}Team`]
+  const metadataTeam = metadata[`${side}Team`]
+
+  return (rawTeam && typeof rawTeam === 'object' ? rawTeam : null)
+    || (metadataTeam && typeof metadataTeam === 'object' ? metadataTeam : null)
+    || {}
+}
+
+function getTeamName(match = {}, side) {
+  const team = getTeamMetadata(match, side)
+  const participantKey = side === 'home' ? 'homeParticipant' : 'awayParticipant'
+  const participantSnakeKey = side === 'home' ? 'home_participant' : 'away_participant'
+  const officialNameKey = side === 'home' ? 'homeOfficialName' : 'awayOfficialName'
+
+  return match[participantKey]
+    || match[participantSnakeKey]
+    || match.metadata?.[officialNameKey]
+    || team.name
+    || team.shortName
+    || ''
+}
+
+function getTeamShortName(match = {}, side) {
+  const team = getTeamMetadata(match, side)
+  const shortNameKey = side === 'home' ? 'homeShortName' : 'awayShortName'
+
+  return match.metadata?.[shortNameKey]
+    || team.tla
+    || team.shortName
+    || team.name
+    || ''
+}
+
+function getTeamCrest(match = {}, side) {
+  const team = getTeamMetadata(match, side)
+  const crestKey = side === 'home' ? 'homeCrest' : 'awayCrest'
+  const crestSnakeKey = side === 'home' ? 'home_crest' : 'away_crest'
+  const shieldKey = side === 'home' ? 'homeShield' : 'awayShield'
+
+  return match[crestKey]
+    || match[crestSnakeKey]
+    || match.metadata?.[shieldKey]
+    || team.crest
+    || ''
+}
+
 function getMatchTeams(match = {}) {
   return [
     {
@@ -140,6 +188,12 @@ export function normalizeFootballMatch(match = {}) {
   const startsAt = match.startsAt || match.starts_at
   const rawStatus = match.standardStatus || match.standard_status || metadata.standardStatus || normalizeMatchStatus(match.status)
   const status = getLiveMatchCenterStatus({ ...match, startsAt, standardStatus: rawStatus })
+  const homeTeam = getTeamName(match, 'home')
+  const awayTeam = getTeamName(match, 'away')
+  const homeShield = getTeamShortName(match, 'home')
+  const awayShield = getTeamShortName(match, 'away')
+  const homeCrest = getTeamCrest(match, 'home')
+  const awayCrest = getTeamCrest(match, 'away')
 
   return {
     ...match,
@@ -152,16 +206,16 @@ export function normalizeFootballMatch(match = {}) {
     competitionName: translateCompetition(match.competitionName || match.competition_name || competition.name || metadata.competition?.namePtBr, competitionCode) || 'Competicao',
     championship: translateCompetition(match.competitionName || match.competition_name || competition.name || metadata.competition?.namePtBr, competitionCode) || 'Competicao',
     competitionLogo: match.competitionLogo || match.competition_logo || competition.logoUrl || competition.logo_url || metadata.competition?.logoUrl || '',
-    homeTeam: match.homeParticipant || match.home_participant || 'Mandante',
-    awayTeam: match.awayParticipant || match.away_participant || 'Visitante',
-    homeParticipant: match.homeParticipant || match.home_participant || 'Mandante',
-    awayParticipant: match.awayParticipant || match.away_participant || 'Visitante',
-    homeShield: metadata.homeShortName || 'BDA',
-    awayShield: metadata.awayShortName || 'BDA',
-    homeCrest: match.homeCrest || match.home_crest || metadata.homeShield || '',
-    awayCrest: match.awayCrest || match.away_crest || metadata.awayShield || '',
-    homeTeamCrest: match.homeCrest || match.home_crest || metadata.homeShield || '',
-    awayTeamCrest: match.awayCrest || match.away_crest || metadata.awayShield || '',
+    homeTeam,
+    awayTeam,
+    homeParticipant: homeTeam,
+    awayParticipant: awayTeam,
+    homeShield,
+    awayShield,
+    homeCrest,
+    awayCrest,
+    homeTeamCrest: homeCrest,
+    awayTeamCrest: awayCrest,
     homeScore,
     awayScore,
     startsAt,
