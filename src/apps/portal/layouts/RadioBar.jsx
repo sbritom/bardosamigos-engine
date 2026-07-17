@@ -1,7 +1,7 @@
 import Container from "../../../shared/layout/Container";
 
 const MXCAST_PLAYER_URL =
-  "https://player.mxcast.com.br/mx-player/7186/000000";
+  "https://player.mxcast.com.br/mx-player/7186/0B3D91";
 
 export default function RadioBar() {
   return (
