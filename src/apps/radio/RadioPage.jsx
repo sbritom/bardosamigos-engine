@@ -29,6 +29,7 @@ function getListenerLabel(count) {
 
 export default function RadioPage() {
   const audioRef = useRef(null);
+  const requestCloseTimerRef = useRef(null);
   const [metadata, setMetadata] = useState(INITIAL_METADATA);
   const [metadataLoading, setMetadataLoading] = useState(true);
   const [metadataError, setMetadataError] = useState("");
@@ -86,6 +87,10 @@ export default function RadioPage() {
     audioRef.current.volume = Math.min(Math.max(volume, 0), 100) / 100;
   }, [volume]);
 
+  useEffect(() => () => {
+    window.clearTimeout(requestCloseTimerRef.current);
+  }, []);
+
   const handleToggle = useCallback(async () => {
     if (!audioRef.current) return;
 
@@ -129,9 +134,15 @@ export default function RadioPage() {
     try {
       setRequestSubmitting(true);
       await submitRadioMusicRequest(requestForm);
-      setRequestFeedback("Pedido enviado para o locutor! Seu pedido foi registrado com sucesso.");
+      setRequestFeedback("Seu pedido foi enviado ao locutor.");
       setRequestFeedbackTone("success");
       setRequestForm({ songAndArtist: "", message: "" });
+      window.clearTimeout(requestCloseTimerRef.current);
+      requestCloseTimerRef.current = window.setTimeout(() => {
+        setRequestModalOpen(false);
+        setRequestFeedback("");
+        setRequestFeedbackTone("info");
+      }, 2400);
     } catch (error) {
       setRequestFeedback(error.status === 429
         ? "Aguarde um pouco antes de enviar outro pedido."
@@ -255,6 +266,10 @@ export default function RadioPage() {
             </div>
 
             <form className="bar-radio-request-form" onSubmit={handleRequestSubmit}>
+              <p className="bar-radio-request-intro">
+                O pedido sera registrado no painel do locutor assim que o envio for confirmado.
+              </p>
+
               <label>
                 M&uacute;sica e artista
                 <input

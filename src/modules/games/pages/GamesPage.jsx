@@ -1,5 +1,5 @@
 import { Dice5, Gift, HelpCircle, ListChecks, RotateCcw, Sparkles, Target, Trophy } from 'lucide-react'
-import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatCard, StatusBadge } from '../../../design-system'
+import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
 
 const games = [
   ['Quiz', 'Perguntas rapidas para movimentar o xat.', HelpCircle, 'PRONTO'],

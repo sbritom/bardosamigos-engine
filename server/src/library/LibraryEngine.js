@@ -32,26 +32,24 @@ export class LibraryEngine {
   }
 
   walk(folder) {
-    let entries = [];
     try {
-      entries = fs.readdirSync(folder, { withFileTypes: true });
+      const entries = fs.readdirSync(folder, { withFileTypes: true });
+      const files = [];
+
+      entries.forEach((entry) => {
+        const fullPath = path.join(folder, entry.name);
+        if (entry.isDirectory()) {
+          files.push(...this.walk(fullPath));
+        } else if (isSupportedAudio(fullPath)) {
+          files.push(fullPath);
+        }
+      });
+
+      return files;
     } catch (error) {
       this.logger.warn("library", "Pasta ignorada durante leitura da biblioteca.", { folder, error: error.message });
       return [];
     }
-
-    const files = [];
-
-    entries.forEach((entry) => {
-      const fullPath = path.join(folder, entry.name);
-      if (entry.isDirectory()) {
-        files.push(...this.walk(fullPath));
-      } else if (isSupportedAudio(fullPath)) {
-        files.push(fullPath);
-      }
-    });
-
-    return files;
   }
 
   async reindex() {
@@ -87,19 +85,18 @@ export class LibraryEngine {
   }
 
   walkDirectories(folder) {
-    let entries = [];
     try {
-      entries = fs.readdirSync(folder, { withFileTypes: true });
+      const entries = fs.readdirSync(folder, { withFileTypes: true });
+
+      return entries
+        .filter((entry) => entry.isDirectory())
+        .flatMap((entry) => {
+          const fullPath = path.join(folder, entry.name);
+          return [fullPath, ...this.walkDirectories(fullPath)];
+        });
     } catch {
       return [];
     }
-
-    return entries
-      .filter((entry) => entry.isDirectory())
-      .flatMap((entry) => {
-        const fullPath = path.join(folder, entry.name);
-        return [fullPath, ...this.walkDirectories(fullPath)];
-      });
   }
 
   closeWatchers() {

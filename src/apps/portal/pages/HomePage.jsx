@@ -1,18 +1,12 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertCircle,
   CalendarDays,
-  Clock,
-  Headphones,
   Mic2,
   Music2,
   Play,
-  Radio,
   Search,
   Scissors,
   Sparkles,
-  Users,
-  Volume2,
   Wrench,
   X,
 } from 'lucide-react'
@@ -23,14 +17,10 @@ import {
   Loading,
   MatchCard,
   NewsCard,
-  Progress,
   ResponsiveContainer,
-  StatCard,
-  StatusBadge,
 } from '../../../design-system'
 import '../../../design-system/styles/index.css'
 import { getSupabaseClient } from '../../../core/database'
-import { useRadio } from '../../../core/providers/RadioProvider'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
@@ -38,7 +28,6 @@ import { barStudioTools } from '../home/data/dashboardData'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
 import { loadHomeTVChannels } from '../../../modules/tv/services/TVHomeChannelSource'
-import { submitRadioMusicRequest } from '../../radio/requests/radioRequestsApi'
 
 const OfficialChat = lazy(() =>
   import('../../../modules/chat/components/OfficialChat').then((module) => ({
@@ -49,6 +38,7 @@ const OfficialChat = lazy(() =>
 const initialDashboard = {
   news: [],
   events: [],
+  youtubeHits: [],
   competitionMatches: [],
   nextMatch: null,
   liveMatchCenter: null,
@@ -244,11 +234,9 @@ function NewsPanel({ news, loading }) {
           {safeNews.slice(0, 3).map((item, index) => (
             <NewsCard
               key={item.id || `news-${index}`}
-              category={item.category || 'Comunidade'}
               className="bds-home-news-row"
-              date={item.date || ''}
               image={item.image}
-              source="Fonte sincronizada"
+              onOpen={() => { window.location.href = '/news' }}
               title={item.title || 'Noticia indisponivel'}
             />
           ))}
@@ -261,19 +249,22 @@ function NewsPanel({ news, loading }) {
 function CommunityPanel({ events = [] }) {
   const safeEvents = Array.isArray(events) ? events : []
   const nextEvent = safeEvents[0] || null
+  const eventDateTime = nextEvent
+    ? [nextEvent.homeDateLabel || nextEvent.dateLabel, nextEvent.homeTimeLabel || nextEvent.timeLabel].filter(Boolean).join(' â€¢ ') || 'Data e horario a definir'
+    : ''
 
   return (
     <FeatureCard
       className="bds-home-card-full"
       title="EVENTOS DO BAR"
-      icon={<Users size={20} />}
+      icon={<CalendarDays size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/events' }}>VER EVENTOS</ActionButton>}
     >
       {nextEvent ? (
-        <div className="bds-home-stats-grid" data-designer-id="community.stats" data-designer-label="Comunidade / Estatisticas">
-          <StatCard icon={<CalendarDays size={18} />} label="Frequência" value={nextEvent.homeDateLabel || nextEvent.recurrenceLabel || nextEvent.dateLabel || 'A definir'} hint={nextEvent.typeLabel || 'Evento publicado'} />
-          <StatCard icon={<Sparkles size={18} />} label="Evento" value={nextEvent.title || 'Evento do Bar'} hint={nextEvent.recurring ? 'Evento recorrente' : nextEvent.typeLabel || 'Evento publicado'} />
-          <StatCard icon={<Clock size={18} />} label="Horário" value={nextEvent.homeTimeLabel || nextEvent.timeLabel || 'A definir'} hint={nextEvent.location || 'Veja os detalhes em Eventos'} />
+        <div className="bds-home-community-note" data-designer-id="community.banner" data-designer-label="Eventos / Banner">
+          <span>{eventDateTime}</span>
+          <strong>{nextEvent.title || 'Evento do Bar'}</strong>
+          {nextEvent.summary && <p>{nextEvent.summary}</p>}
         </div>
       ) : (
         <div className="bds-home-empty">Nenhum evento programado no momento.</div>
@@ -282,139 +273,32 @@ function CommunityPanel({ events = [] }) {
   )
 }
 
-function RadioCard() {
-  const { currentStation, playing, loading, error, toggle, volume, setVolume } = useRadio()
-  const station = currentStation || {}
-  const [requestModalOpen, setRequestModalOpen] = useState(false)
-  const [requestFeedback, setRequestFeedback] = useState('')
-  const [requestFeedbackTone, setRequestFeedbackTone] = useState('info')
-  const [requestSubmitting, setRequestSubmitting] = useState(false)
-  const [requestForm, setRequestForm] = useState({ songAndArtist: '', message: '' })
-  const [failedCoverUrl, setFailedCoverUrl] = useState('')
-  const listenerCount = Number(station.listeners) || 0
-  const listenerLabel = `${listenerCount} ${listenerCount === 1 ? 'ouvinte' : 'ouvintes'}`
-  const coverUrl = typeof station.cover === 'string' ? station.cover.trim() : ''
-  const hasCover = /^https?:\/\//i.test(coverUrl) && failedCoverUrl !== coverUrl
-
-  function handleOpenRequestModal() {
-    setRequestFeedback('')
-    setRequestFeedbackTone('info')
-    setRequestModalOpen(true)
-  }
-
-  function handleRequestChange(event) {
-    const { name, value } = event.target
-    setRequestForm((current) => ({ ...current, [name]: value }))
-  }
-
-  async function handleRequestSubmit(event) {
-    event.preventDefault()
-    setRequestFeedback('')
-    setRequestFeedbackTone('info')
-
-    try {
-      setRequestSubmitting(true)
-      await submitRadioMusicRequest(requestForm)
-      setRequestFeedback('Pedido enviado para o locutor! Seu pedido foi registrado com sucesso.')
-      setRequestFeedbackTone('success')
-      setRequestForm({ songAndArtist: '', message: '' })
-    } catch (requestError) {
-      setRequestFeedback(requestError.status === 429
-        ? 'Aguarde um pouco antes de enviar outro pedido.'
-        : requestError.message || 'Nao foi possivel registrar o pedido agora.')
-      setRequestFeedbackTone('error')
-    } finally {
-      setRequestSubmitting(false)
-    }
-  }
+function RadioCard({ hits = [] }) {
+  const safeHits = Array.isArray(hits) ? hits : []
 
   return (
     <FeatureCard
       className="bds-home-card-full"
-      title="RÁDIO DO BAR"
-      icon={<Radio size={20} />}
-      action={station.online ? <StatusBadge status="AO VIVO" tone="live">AO VIVO</StatusBadge> : null}
+      title="📈 Hits do Momento"
+      description="As músicas em alta no YouTube Brasil."
+      icon={<Music2 size={20} />}
     >
-      <div className="bds-home-radio-card" data-designer-id="radio.player" data-designer-label="Radio / Player">
-        <div className="bds-home-radio-main" data-designer-id="radio.currentTrack" data-designer-label="Radio / Musica Atual">
-          <div className="bds-home-radio-icon" data-designer-id="radio.icon" data-designer-label="Radio / Icone">
-            {hasCover ? (
-              <img src={coverUrl} alt="" onError={() => setFailedCoverUrl(coverUrl)} />
-            ) : (
-              <Radio size={34} />
-            )}
-          </div>
-          <div>
-            <span>Tocando agora</span>
-            <strong>{station.currentTrack || 'Radio pronta'}</strong>
-            <p>{station.artist || station.name || 'Aguardando transmissao'}</p>
-          </div>
-          <span data-designer-id="radio.buttons" data-designer-label="Radio / Botoes"><ActionButton loading={loading} icon={playing ? <Headphones size={18} /> : <Play size={18} />} onClick={toggle}>
-            {playing ? 'Pausar' : 'Tocar'}
-          </ActionButton></span>
-        </div>
-        <div>
-          <div className="bds-home-radio-status">
-            <span>{error || listenerLabel}</span>
-            <span>{loading ? 'Conectando' : station.online ? 'AO VIVO' : 'Aguardando sinal'}</span>
-          </div>
-          <Progress value={playing ? 100 : 0} />
-        </div>
-        <label className="bds-home-volume" data-designer-id="radio.volume" data-designer-label="Radio / Volume">
-          <Volume2 size={18} />
-          <input aria-label="Volume da radio" max="100" min="0" onChange={(event) => setVolume(event.target.value)} type="range" value={volume} />
-          <span>{volume}%</span>
-        </label>
-        <button className="bds-home-request-button" type="button" aria-label="Pedir música" title="Pedidos musicais em preparacao" onClick={handleOpenRequestModal}>
-          <Music2 size={16} />
-          Pedir música
-        </button>
-        {error && <div className="bds-home-error"><AlertCircle size={18} />{error}</div>}
-        {requestModalOpen && (
-          <div className="bds-home-radio-request-modal" role="dialog" aria-modal="true" aria-labelledby="radio-request-title">
-            <div className="bds-home-radio-request-panel">
-              <div className="bds-home-radio-request-header">
-                <div>
-                  <span>Radio do Bar</span>
-                  <strong id="radio-request-title">Pedir musica</strong>
-                </div>
-                <button type="button" aria-label="Fechar pedido de musica" onClick={() => setRequestModalOpen(false)}>
-                  <X size={18} />
-                </button>
+      <div className="bds-home-card-list" data-designer-id="radio.topSongs" data-designer-label="Hits do Momento / Lista">
+        {safeHits.length ? safeHits.map((track, index) => (
+          <div key={track.id || `${track.position}-${track.title}`} className="bds-home-radio-card">
+            <div className="bds-home-radio-main">
+              <div className="bds-home-radio-icon">
+                {track.thumbnail ? <img src={track.thumbnail} alt="" loading="lazy" /> : String(track.position || index + 1).padStart(2, '0')}
               </div>
-              <form className="bds-home-radio-request-form" onSubmit={handleRequestSubmit}>
-                <label>
-                  Musica e artista
-                  <input
-                    name="songAndArtist"
-                    placeholder="Nome da musica e do artista"
-                    type="text"
-                    minLength={3}
-                    maxLength={180}
-                    required
-                    value={requestForm.songAndArtist}
-                    onChange={handleRequestChange}
-                  />
-                </label>
-                <label>
-                  Recado <span>(opcional)</span>
-                  <textarea
-                    name="message"
-                    placeholder="Deixe um recado para a radio"
-                    rows="3"
-                    maxLength={500}
-                    value={requestForm.message}
-                    onChange={handleRequestChange}
-                  />
-                </label>
-                {requestFeedback && <p className={`bds-home-radio-request-feedback is-${requestFeedbackTone}`}>{requestFeedback}</p>}
-                <div className="bds-home-radio-request-actions">
-                  <button type="button" onClick={() => setRequestModalOpen(false)} disabled={requestSubmitting}>Fechar</button>
-                  <button type="submit" disabled={requestSubmitting}>{requestSubmitting ? 'Enviando...' : 'Enviar pedido'}</button>
-                </div>
-              </form>
+              <div>
+                <span>#{String(track.position || index + 1).padStart(2, '0')}</span>
+                <strong>{track.title}</strong>
+                <p>{track.channelTitle}</p>
+              </div>
             </div>
           </div>
+        )) : (
+          <div className="bds-home-empty">Nenhum hit disponível no momento.</div>
         )}
       </div>
     </FeatureCard>
@@ -473,6 +357,7 @@ export default function HomePage() {
           setDashboard({
             news: Array.isArray(content?.news) ? content.news : [],
             events: Array.isArray(content?.events) ? content.events : [],
+            youtubeHits: Array.isArray(content?.youtubeHits) ? content.youtubeHits : [],
             competitionMatches: Array.isArray(content?.competitionMatches) ? content.competitionMatches : [],
             nextMatch: content?.nextMatch || null,
             liveMatchCenter: content?.liveMatchCenter || null,
@@ -526,7 +411,7 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><RadioCard /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><RadioCard hits={dashboard.youtubeHits} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel events={dashboard.events} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>
@@ -534,3 +419,4 @@ export default function HomePage() {
     </main>
   )
 }
+

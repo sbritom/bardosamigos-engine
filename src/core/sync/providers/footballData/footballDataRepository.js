@@ -7,11 +7,6 @@ export function createFootballDataRepository(client) {
     table: DATABASE_TABLES.COMPETITIONS,
     validateRecord: (record) => Boolean(record.name && record.slug),
   })
-  const teams = createSyncRepository({
-    client,
-    table: DATABASE_TABLES.COMPETITION_TEAMS,
-    validateRecord: (record) => Boolean(record.name),
-  })
   const matches = createSyncRepository({
     client,
     table: DATABASE_TABLES.COMPETITION_MATCHES,

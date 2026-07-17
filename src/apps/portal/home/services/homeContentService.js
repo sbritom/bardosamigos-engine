@@ -21,6 +21,8 @@ import {
 const NEWS_LIMIT = 3
 const NEWS_PROXY_ENDPOINT = '/api/news'
 const NEWS_STALE_HOURS = 8
+const YOUTUBE_HITS_LIMIT = 3
+const YOUTUBE_HITS_ENDPOINT = '/api/youtube/hits'
 const MATCH_LIMIT = 3
 const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'
 const FOOTBALL_TIME_ZONE = 'America/Maceio'
@@ -118,6 +120,48 @@ function normalizeNewsArticle(article = {}) {
     date: formatDate(safeArticle.publishedAt || safeArticle.published_at || safeArticle.createdAt || safeArticle.created_at),
     image: safeArticle.image || safeArticle.coverUrl || safeArticle.cover_url || metadata.image || metadata.thumbnail || '',
     source: safeArticle.source || metadata.source || 'internal',
+  }
+}
+
+function normalizeYoutubeHit(hit = {}, index = 0) {
+  const safeHit = hit && typeof hit === 'object' ? hit : {}
+
+  return {
+    id: safeHit.id || safeHit.videoId || safeHit.url || `youtube-hit-${index}`,
+    position: Number(safeHit.position || index + 1),
+    title: safeHit.title || 'Hit indisponivel',
+    channelTitle: safeHit.channelTitle || safeHit.channel || safeHit.artist || 'YouTube',
+    thumbnail: safeHit.thumbnail || safeHit.image || '',
+    url: safeHit.url || (safeHit.id ? `https://www.youtube.com/watch?v=${safeHit.id}` : ''),
+    publishedAt: safeHit.publishedAt || '',
+  }
+}
+
+export async function listYoutubeHits({ limit = YOUTUBE_HITS_LIMIT } = {}) {
+  if (typeof fetch !== 'function') return { data: [], error: new Error('YouTube proxy indisponivel.'), source: 'youtube-proxy' }
+
+  try {
+    const endpoint = `${YOUTUBE_HITS_ENDPOINT}?limit=${encodeURIComponent(String(limit))}`
+    const response = await fetch(endpoint, {
+      headers: { Accept: 'application/json' },
+    })
+    const payload = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      return {
+        data: [],
+        error: new Error(payload.error || payload.errors?.map((item) => item.message).filter(Boolean).join(', ') || `YouTube proxy retornou ${response.status}.`),
+        source: 'youtube-proxy',
+      }
+    }
+
+    return {
+      data: Array.isArray(payload.hits) ? payload.hits.map(normalizeYoutubeHit).slice(0, limit) : [],
+      error: Array.isArray(payload.errors) && payload.errors.length ? new Error(payload.errors.map((item) => item.message).filter(Boolean).join(', ')) : null,
+      source: 'youtube-proxy',
+    }
+  } catch (error) {
+    return { data: [], error, source: 'youtube-proxy' }
   }
 }
 
@@ -533,11 +577,15 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
 }
 
 export async function loadHomeDashboardContent() {
-  const [news, competition, events] = await Promise.all([
+  const [news, competition, events, youtubeHits] = await Promise.all([
     listHybridNews(),
     listHomeCompetitionMatches(),
     listHomeEvents().catch((error) => {
       console.warn('[homeContentService] Falha ao carregar eventos da Home', error)
+      return { data: [], error }
+    }),
+    listYoutubeHits().catch((error) => {
+      console.warn('[homeContentService] Falha ao carregar hits do YouTube', error)
       return { data: [], error }
     }),
   ])
@@ -545,6 +593,7 @@ export async function loadHomeDashboardContent() {
   return {
     news: Array.isArray(news?.data) ? news.data : [],
     events: Array.isArray(events?.data) ? events.data : [],
+    youtubeHits: Array.isArray(youtubeHits?.data) ? youtubeHits.data : [],
     competitionMatches: Array.isArray(competition?.data) ? competition.data : [],
     nextMatch: competition?.next || null,
     liveMatchCenter: competition?.liveMatchCenter || getLiveMatchCenter([]),

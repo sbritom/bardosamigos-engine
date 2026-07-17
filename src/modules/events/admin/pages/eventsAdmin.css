@@ -498,3 +498,57 @@
     flex-direction: column;
   }
 }
+
+/* Sprint UI 7.0 - events admin polish */
+.events-admin-button,
+.events-admin-icon-button,
+.events-admin-login__form input,
+.events-admin-form input,
+.events-admin-form select,
+.events-admin-form textarea,
+.events-admin-summary-card,
+.events-admin-event-card,
+.events-admin-empty {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.events-admin-button:focus-visible,
+.events-admin-icon-button:focus-visible,
+.events-admin-login__form input:focus-visible,
+.events-admin-form input:focus-visible,
+.events-admin-form select:focus-visible,
+.events-admin-form textarea:focus-visible {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bds-color-primary-hover) 14%, transparent);
+}
+
+.events-admin-event-card:hover,
+.events-admin-summary-card:hover {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 18%, var(--bds-color-border));
+  background: color-mix(in srgb, var(--bds-color-surface) 72%, transparent);
+}
+
+.events-admin-button:active:not(:disabled),
+.events-admin-icon-button:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.events-admin-button:disabled,
+.events-admin-icon-button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.82);
+  opacity: var(--bds-opacity-disabled);
+}
+
+.events-admin-form input::placeholder,
+.events-admin-form textarea::placeholder,
+.events-admin-login__form input::placeholder {
+  color: color-mix(in srgb, var(--bds-color-text-secondary) 72%, transparent);
+}

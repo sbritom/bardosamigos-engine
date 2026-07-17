@@ -1,4 +1,3 @@
-/* global process */
 import { Buffer } from 'node:buffer'
 import { createClient } from '@supabase/supabase-js'
 

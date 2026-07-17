@@ -4970,3 +4970,147 @@ body.bds-designer-preview .bds-designer-selected {
     grid-template-columns: 1fr;
   }
 }
+
+/* Sprint UI 7.0 - general visual polish */
+.bds-action-button,
+.bds-status-badge,
+.bds-live-indicator,
+.bds-metric-chip,
+.bds-stat-badge,
+.bds-top-header__icon-button,
+.bds-home-tv-channel-button,
+.bds-home-tv-modal__close,
+.bds-home-tv-categories button,
+.bds-home-tv-channel,
+.bds-home-request-button,
+.bds-home-radio-request-header button,
+.bds-home-radio-request-actions button,
+.bds-barstudio-sidebar-item,
+.bds-barstudio-crop-actions button,
+.bds-barstudio-crop-actions a,
+.bds-barstudio-crop-upload__button {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.bds-action-button,
+.bds-top-header__icon-button,
+.bds-home-tv-channel-button,
+.bds-home-tv-modal__close,
+.bds-home-tv-categories button,
+.bds-home-tv-channel,
+.bds-home-request-button,
+.bds-home-radio-request-header button,
+.bds-home-radio-request-actions button,
+.bds-barstudio-sidebar-item,
+.bds-barstudio-crop-actions button,
+.bds-barstudio-crop-actions a {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.bds-action-button:focus-visible,
+.bds-top-header__icon-button:focus-visible,
+.bds-home-tv-channel-button:focus-visible,
+.bds-home-tv-modal__close:focus-visible,
+.bds-home-tv-categories button:focus-visible,
+.bds-home-tv-channel:focus-visible,
+.bds-home-request-button:focus-visible,
+.bds-home-radio-request-header button:focus-visible,
+.bds-home-radio-request-actions button:focus-visible,
+.bds-barstudio-sidebar-item:focus-visible,
+.bds-barstudio-crop-upload:focus-visible,
+.bds-barstudio-crop-actions button:focus-visible,
+.bds-barstudio-crop-actions a:focus-visible {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--bds-color-primary-hover) 14%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--bds-color-text) 4%, transparent);
+}
+
+.bds-action-button:active:not(:disabled),
+.bds-home-tv-channel-button:active:not(:disabled),
+.bds-home-tv-modal__close:active:not(:disabled),
+.bds-home-tv-categories button:active:not(:disabled),
+.bds-home-request-button:active:not(:disabled),
+.bds-home-radio-request-actions button:active:not(:disabled),
+.bds-barstudio-sidebar-item:active:not(:disabled),
+.bds-barstudio-crop-actions button:active:not(:disabled),
+.bds-barstudio-crop-actions a:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.bds-action-button:disabled,
+.bds-home-tv-channel-button:disabled,
+.bds-home-tv-modal__close:disabled,
+.bds-home-tv-categories button:disabled,
+.bds-home-request-button:disabled,
+.bds-home-radio-request-header button:disabled,
+.bds-home-radio-request-actions button:disabled,
+.bds-barstudio-sidebar-item:disabled,
+.bds-barstudio-crop-actions button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.82);
+  opacity: var(--bds-opacity-disabled);
+}
+
+.bds-status-badge,
+.bds-live-indicator,
+.bds-metric-chip,
+.bds-stat-badge {
+  border-color: color-mix(in srgb, currentColor 18%, var(--bds-color-border));
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.bds-feature-card,
+.bds-hero-card,
+.bds-player-card,
+.bds-stats-card,
+.bds-panel,
+.bds-home-tv-modal {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 10%, var(--bds-color-border));
+}
+
+.bds-card-header__title,
+.bds-section-header__title,
+.bds-hero-card__title {
+  text-wrap: balance;
+}
+
+.bds-card-header__subtitle,
+.bds-section-header__description,
+.bds-hero-card__subtitle {
+  text-wrap: pretty;
+}
+
+.bds-home-tv-search,
+.bds-home-radio-request-form label,
+.bds-barstudio-search,
+.bds-barstudio-crop-zoom {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.bds-home-tv-search:focus-within,
+.bds-home-radio-request-form label:focus-within,
+.bds-barstudio-search:focus-within,
+.bds-barstudio-crop-zoom:focus-within {
+  border-color: var(--bds-color-primary-hover);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 16%, transparent);
+}
+
+.bds-home-empty,
+.bds-home-tv-no-results {
+  border-style: dashed;
+  color: var(--bds-color-text-secondary);
+  background: color-mix(in srgb, var(--bds-color-surface) 22%, transparent);
+}

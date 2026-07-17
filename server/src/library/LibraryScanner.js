@@ -34,21 +34,20 @@ export class LibraryScanner {
   }
 
   walk(folder) {
-    let entries = [];
     try {
-      entries = fs.readdirSync(folder, { withFileTypes: true });
+      const entries = fs.readdirSync(folder, { withFileTypes: true });
+
+      return entries.flatMap((entry) => {
+        const fullPath = path.join(folder, entry.name);
+        if (entry.isDirectory()) return this.walk(fullPath);
+        if (entry.isFile() && SUPPORTED_AUDIO_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+          return [fullPath];
+        }
+        return [];
+      });
     } catch (error) {
       this.logger?.warn("library", "LibraryScanner: pasta ignorada.", { folder, error: error.message });
       return [];
     }
-
-    return entries.flatMap((entry) => {
-      const fullPath = path.join(folder, entry.name);
-      if (entry.isDirectory()) return this.walk(fullPath);
-      if (entry.isFile() && SUPPORTED_AUDIO_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
-        return [fullPath];
-      }
-      return [];
-    });
   }
 }

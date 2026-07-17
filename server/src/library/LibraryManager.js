@@ -67,7 +67,6 @@ export class LibraryManager extends EventEmitter {
     }
 
     this.rescanning = true;
-    let reconciled = { added: [], removed: [], updated: [], tracks: this.tracks };
 
     try {
       const loadedCacheData = this.cache.load();
@@ -75,7 +74,7 @@ export class LibraryManager extends EventEmitter {
         ? loadedCacheData
         : this.cache.empty();
       const scannedTracks = await this.scanner.scan(this.libraryPath);
-      reconciled = this.cache.reconcile(cacheData.tracks, scannedTracks);
+      const reconciled = this.cache.reconcile(cacheData.tracks, scannedTracks);
       const saved = this.cache.save({
         libraryPath: this.displayLibraryPath,
         tracks: reconciled.tracks,

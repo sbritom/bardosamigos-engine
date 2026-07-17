@@ -1,19 +1,14 @@
 import { getSupabaseClient, toCamelCase } from '../../../core/database'
 import {
   createBrazilDateWindow,
-  formatBrazilFullDateTime,
   getUtcTimestamp,
-  normalizeMatchStatus,
   isFinishedStatus,
-  isLiveStatus,
   nowUtcIso,
 } from '../../../core/time'
-import { getSportsStatusLabel, translateCompetition, translateCountry, translateStage } from '../../../core/sports'
-import { getLiveMatchCenterStatus, selectLiveMatchCenterMatch, sortLiveMatchCenterMatches } from './liveMatchCenterService'
+import { sortLiveMatchCenterMatches } from './liveMatchCenterService'
 import { FOOTBALL_CURRENT_MATCH_WINDOW, calculateFootballStandings, listCurrentFootballMatches, normalizeFootballMatch } from './footballMatchQueryService'
 
 const MATCH_SELECT = '*, competition_rounds(*, competition_stages(*, competition_seasons(*, competitions(*))))'
-const MATCH_LIMIT = 160
 
 function configError() {
   return new Error('Supabase nao esta configurado.')
@@ -22,69 +17,6 @@ function configError() {
 async function getUser(client) {
   const { data } = await client.auth.getUser()
   return data?.user || null
-}
-
-function getCompetition(match = {}) {
-  return match.competitionRounds?.competitionStages?.competitionSeasons?.competitions || {}
-}
-
-function getSeason(match = {}) {
-  return match.competitionRounds?.competitionStages?.competitionSeasons || {}
-}
-
-function getStage(match = {}) {
-  return match.competitionRounds?.competitionStages || {}
-}
-
-function normalizeMatch(match = {}) {
-  const metadata = match.metadata || {}
-  const competition = getCompetition(match)
-  const competitionCode = match.competitionCode || match.competition_code || competition.code || metadata.competition?.code || ''
-  const homeScore = match.homeScore ?? match.home_score ?? match.result?.homeScore ?? null
-  const awayScore = match.awayScore ?? match.away_score ?? match.result?.awayScore ?? null
-  const startsAt = match.startsAt || match.starts_at
-  const rawStatus = match.standardStatus || match.standard_status || metadata.standardStatus || normalizeMatchStatus(match.status)
-  const status = getLiveMatchCenterStatus({ ...match, startsAt, standardStatus: rawStatus })
-
-  return {
-    ...match,
-    competition,
-    season: getSeason(match),
-    stageObject: getStage(match),
-    round: match.competitionRounds || match.competition_rounds || {},
-    competitionId: competition.id || match.competitionId || match.competition_id || null,
-    competitionCode,
-    competitionName: translateCompetition(match.competitionName || match.competition_name || competition.name || metadata.competition?.namePtBr, competitionCode) || 'Competição',
-    competitionLogo: match.competitionLogo || match.competition_logo || competition.logoUrl || competition.logo_url || metadata.competition?.logoUrl || '',
-    homeTeam: match.homeParticipant || match.home_participant || 'Mandante',
-    awayTeam: match.awayParticipant || match.away_participant || 'Visitante',
-    homeCrest: match.homeCrest || match.home_crest || metadata.homeShield || '',
-    awayCrest: match.awayCrest || match.away_crest || metadata.awayShield || '',
-    homeScore,
-    awayScore,
-    startsAt,
-    localTime: match.localTime || match.local_time || metadata.localTime || '',
-    localDateIso: match.localDateIso || match.local_date_iso || metadata.localDateIso || '',
-    status,
-    statusLabel: getSportsStatusLabel(status),
-    venue: match.venue || metadata.venue || '',
-    city: match.city || metadata.city || '',
-    country: translateCountry(match.country || metadata.country || ''),
-    stage: translateStage(match.stage || metadata.stage || ''),
-    groupName: translateStage(match.groupName || match.group_name || metadata.group || '') || '',
-    referee: metadata.referee || metadata.raw?.referees?.[0]?.name || '',
-    hasScore: homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined,
-    statistics: {
-      possession: metadata.statistics?.possession || null,
-      shots: metadata.statistics?.shots || null,
-      cards: metadata.statistics?.cards || null,
-      corners: metadata.statistics?.corners || null,
-      offsides: metadata.statistics?.offsides || null,
-      substitutions: metadata.statistics?.substitutions || null,
-      attendance: metadata.attendance || metadata.raw?.attendance || null,
-      referee: metadata.referee || metadata.raw?.referees?.[0]?.name || null,
-    },
-  }
 }
 
 function getMatchTeams(match = {}) {
@@ -166,15 +98,6 @@ export function calculateStandings(matches = []) {
       || left.name.localeCompare(right.name, 'pt-BR')
     ))
     .map((row, index) => ({ ...row, position: index + 1 }))
-}
-
-function groupBy(items = [], keyGetter) {
-  return items.reduce((groups, item) => {
-    const key = keyGetter(item) || 'Geral'
-    groups[key] = groups[key] || []
-    groups[key].push(item)
-    return groups
-  }, {})
 }
 
 async function listFavorites(client, user) {

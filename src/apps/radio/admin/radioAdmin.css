@@ -524,3 +524,57 @@
     justify-content: center;
   }
 }
+
+/* Sprint UI 7.0 - radio admin polish */
+.radio-admin-header button,
+.radio-admin-login-form button,
+.radio-admin-actions button,
+.radio-admin-track button,
+.radio-admin-log-tabs button,
+.radio-request-card__actions button,
+.radio-admin-login-form input,
+.radio-request-card,
+.radio-admin-panel,
+.radio-admin-card {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.radio-admin-header button:focus-visible,
+.radio-admin-login-form button:focus-visible,
+.radio-admin-actions button:focus-visible,
+.radio-admin-track button:focus-visible,
+.radio-admin-log-tabs button:focus-visible,
+.radio-request-card__actions button:focus-visible,
+.radio-admin-login-form input:focus-visible {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bds-color-primary-hover) 14%, transparent);
+}
+
+.radio-admin-login-form input:focus {
+  border-color: var(--bds-color-primary-hover);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 14%, transparent);
+  outline: 0;
+}
+
+.radio-request-card:hover,
+.radio-admin-card:hover {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 18%, var(--bds-color-border));
+  background: color-mix(in srgb, var(--bds-color-surface) 70%, transparent);
+}
+
+.radio-admin-header button:disabled,
+.radio-admin-login-form button:disabled,
+.radio-admin-actions button:disabled,
+.radio-admin-track button:disabled,
+.radio-admin-log-tabs button:disabled,
+.radio-request-card__actions button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.82);
+  opacity: var(--bds-opacity-disabled);
+}

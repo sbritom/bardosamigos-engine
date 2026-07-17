@@ -434,3 +434,55 @@
     flex-wrap: wrap;
   }
 }
+
+/* Sprint UI 7.0 - TV admin polish */
+.tv-manager__nav-link,
+.tv-admin-row-actions button,
+.tv-admin-form__actions button,
+.tv-admin-actions button,
+.tv-admin-table tr,
+.tv-admin-category-row,
+.tv-admin-featured-row,
+.tv-admin-form input,
+.tv-admin-form select,
+.tv-admin-form textarea {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.tv-manager__nav-link:focus-visible,
+.tv-admin-row-actions button:focus-visible,
+.tv-admin-form__actions button:focus-visible,
+.tv-admin-actions button:focus-visible,
+.tv-admin-form input:focus-visible,
+.tv-admin-form select:focus-visible,
+.tv-admin-form textarea:focus-visible {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bds-color-primary-hover) 14%, transparent);
+}
+
+.tv-admin-form input:focus,
+.tv-admin-form select:focus,
+.tv-admin-form textarea:focus {
+  border-color: var(--bds-color-primary-hover);
+  outline: 0;
+}
+
+.tv-admin-table tbody tr:hover,
+.tv-admin-category-row:hover,
+.tv-admin-featured-row:hover {
+  background: color-mix(in srgb, var(--bds-color-primary-hover) 6%, transparent);
+}
+
+.tv-admin-row-actions button:disabled,
+.tv-admin-form__actions button:disabled,
+.tv-admin-actions button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.82);
+  opacity: var(--bds-opacity-disabled);
+}

@@ -84,18 +84,16 @@ export class LibraryWatcher {
 
   handleFsEvent(eventType, filePath) {
     const targetPath = path.resolve(filePath);
-    let stats = null;
 
     try {
-      stats = fs.existsSync(targetPath) ? fs.statSync(targetPath) : null;
+      const stats = fs.existsSync(targetPath) ? fs.statSync(targetPath) : null;
+      if (stats?.isDirectory()) {
+        this.refreshWatchers();
+        this.schedule(targetPath, eventType);
+        return;
+      }
     } catch {
-      stats = null;
-    }
-
-    if (stats?.isDirectory()) {
-      this.refreshWatchers();
-      this.schedule(targetPath, eventType);
-      return;
+      // Ignore transient filesystem events for paths that no longer exist.
     }
 
     if (!isAudioPath(targetPath)) return;
@@ -144,16 +142,14 @@ export class LibraryWatcher {
 
     const folders = [rootFolder];
     for (const folder of folders) {
-      let entries = [];
       try {
-        entries = fs.readdirSync(folder, { withFileTypes: true });
+        const entries = fs.readdirSync(folder, { withFileTypes: true });
+        entries.forEach((entry) => {
+          if (entry.isDirectory()) folders.push(path.join(folder, entry.name));
+        });
       } catch {
         continue;
       }
-
-      entries.forEach((entry) => {
-        if (entry.isDirectory()) folders.push(path.join(folder, entry.name));
-      });
     }
 
     return folders;

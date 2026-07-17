@@ -1,4 +1,3 @@
-/* global process */
 import { createClient } from '@supabase/supabase-js'
 
 const GNEWS_BASE_URL = 'https://gnews.io/api/v4'

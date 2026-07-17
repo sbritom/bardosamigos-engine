@@ -139,7 +139,8 @@ async function getMxCastStatus() {
       };
     } catch (fallbackError) {
       throw new Error(
-        `MxCast indisponível. Oficial: ${officialError.message}. Fallback: ${fallbackError.message}`
+        `MxCast indisponivel. Oficial: ${officialError.message}. Fallback: ${fallbackError.message}`,
+        { cause: fallbackError }
       );
     }
   }

@@ -1,4 +1,3 @@
-/* global process */
 import { syncGNewsToSupabase } from '../_lib/newsCacheService.js'
 
 const ALLOWED_SCHEDULES = new Set(['0 11 * * *', '0 21 * * *'])
