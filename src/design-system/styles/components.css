@@ -344,6 +344,12 @@
   height: var(--bds-space-64);
   border-radius: var(--bds-radius-md);
   object-fit: cover;
+  object-position: center;
+  overflow: hidden;
+}
+
+.bds-news-card__image {
+  display: block;
 }
 
 .bds-media-block__fallback {
