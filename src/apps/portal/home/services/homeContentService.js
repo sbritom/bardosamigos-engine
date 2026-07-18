@@ -21,7 +21,7 @@ import {
 const NEWS_LIMIT = 3
 const NEWS_PROXY_ENDPOINT = '/api/news'
 const NEWS_STALE_HOURS = 8
-const YOUTUBE_HITS_LIMIT = 3
+const YOUTUBE_HITS_LIMIT = 5
 const YOUTUBE_HITS_ENDPOINT = '/api/youtube/hits'
 const MATCH_LIMIT = 3
 const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'

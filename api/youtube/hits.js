@@ -1,7 +1,38 @@
 const YOUTUBE_API_BASE_URL = 'https://www.googleapis.com/youtube/v3/videos'
-const DEFAULT_LIMIT = 3
-const MAX_LIMIT = 6
+const DEFAULT_LIMIT = 5
+const MAX_LIMIT = 5
+const FETCH_LIMIT = 25
 const REQUEST_TIMEOUT_MS = 8000
+const BLOCKED_TITLE_PATTERNS = [
+  /\bcover\b/i,
+  /\bkaraoke\b/i,
+  /\bkaraokê\b/i,
+  /\bplayback\b/i,
+  /\binstrumental\b/i,
+  /\bslowed\b/i,
+  /\bspeed\s+up\b/i,
+  /\bsped\s+up\b/i,
+  /\bremix\b/i,
+  /\bfan\s+made\b/i,
+  /\bunofficial\b/i,
+  /\breupload\b/i,
+  /\bshorts\b/i,
+]
+const OFFICIAL_CHANNEL_PATTERNS = [
+  /\bvevo\b/i,
+  /\bofficial\b/i,
+  /\boficial\b/i,
+  /\brecords\b/i,
+  /\brecordings\b/i,
+  /\bmusic\b/i,
+  /\bsony\b/i,
+  /\bwarner\b/i,
+  /\buniversal\b/i,
+  /\bsom\s+livre\b/i,
+  /\btratore\b/i,
+  /\bdeck\b/i,
+  /\bmk\s+music\b/i,
+]
 
 function getApiKey() {
   return String(process.env.YOUTUBE_API_KEY || process.env.GOOGLE_API_KEY || '').trim()
@@ -37,6 +68,40 @@ function normalizeVideo(video = {}, index = 0) {
   }
 }
 
+function hasBlockedTitle(title = '') {
+  return BLOCKED_TITLE_PATTERNS.some((pattern) => pattern.test(title))
+}
+
+function getOfficialChannelScore(channelTitle = '') {
+  return OFFICIAL_CHANNEL_PATTERNS.reduce((score, pattern) => score + (pattern.test(channelTitle) ? 1 : 0), 0)
+}
+
+function getVideoScore(video = {}) {
+  const snippet = video.snippet || {}
+  const statistics = video.statistics || {}
+  const officialScore = getOfficialChannelScore(snippet.channelTitle)
+  const viewCount = Number(statistics.viewCount || 0)
+  const likeCount = Number(statistics.likeCount || 0)
+
+  return officialScore * 1_000_000_000 + viewCount + likeCount
+}
+
+function selectBestVideos(videos = [], limit = DEFAULT_LIMIT) {
+  return videos
+    .filter((video) => !hasBlockedTitle(video.snippet?.title || ''))
+    .map((video, index) => ({
+      video,
+      index,
+      score: getVideoScore(video),
+    }))
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score
+      return left.index - right.index
+    })
+    .slice(0, limit)
+    .map((item, index) => normalizeVideo(item.video, index))
+}
+
 async function fetchYoutubeHits({ limit }) {
   const apiKey = getApiKey()
   if (!apiKey) {
@@ -55,7 +120,7 @@ async function fetchYoutubeHits({ limit }) {
       chart: 'mostPopular',
       regionCode: 'BR',
       videoCategoryId: '10',
-      maxResults: String(limit),
+      maxResults: String(FETCH_LIMIT),
       key: apiKey,
     })
     const response = await fetch(`${YOUTUBE_API_BASE_URL}?${params.toString()}`, {
@@ -72,7 +137,7 @@ async function fetchYoutubeHits({ limit }) {
     }
 
     return {
-      hits: Array.isArray(payload.items) ? payload.items.map(normalizeVideo) : [],
+      hits: Array.isArray(payload.items) ? selectBestVideos(payload.items, limit) : [],
       errors: [],
     }
   } catch (error) {

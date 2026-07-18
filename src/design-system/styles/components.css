@@ -2531,9 +2531,24 @@
 
 .bds-home-shell [data-designer-id="news"] .bds-news-card h3 {
   display: -webkit-box;
+  margin-top: 0;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.bds-home-shell [data-designer-id="news"] .bds-news-card {
+  align-items: start;
+}
+
+.bds-home-shell [data-designer-id="news"] .bds-news-card__content {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+}
+
+.bds-home-shell [data-designer-id="news"] .bds-news-card__meta:empty {
+  display: none;
 }
 
 .bds-home-shell [data-designer-id="news"] .bds-news-card p {
@@ -4358,6 +4373,74 @@ body.bds-designer-preview .bds-designer-selected {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* Sprint Home 6.3 - premium events banner, scoped to Home community module */
+.bds-home-shell [data-designer-id="community"] .bds-card-header__title {
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--bds-color-primary-hover) 16%, transparent);
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  gap: var(--bds-space-8);
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 12%, transparent);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent) 0 18px, transparent 19px),
+    radial-gradient(circle at 84% 24%, color-mix(in srgb, var(--bds-color-text) 5%, transparent) 0 14px, transparent 15px),
+    linear-gradient(135deg, color-mix(in srgb, var(--bds-color-primary) 16%, transparent), transparent 46%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bds-color-surface) 30%, transparent), color-mix(in srgb, var(--bds-color-background) 76%, transparent));
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.08;
+  background:
+    radial-gradient(circle at 18% 72%, var(--bds-color-text) 0 5px, transparent 6px),
+    radial-gradient(circle at 78% 76%, var(--bds-color-text) 0 4px, transparent 5px),
+    repeating-linear-gradient(90deg, transparent 0 22px, var(--bds-color-text) 23px 24px, transparent 25px 46px),
+    repeating-linear-gradient(0deg, transparent 0 20px, var(--bds-color-primary-hover) 21px 22px, transparent 23px 42px);
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note::after {
+  content: "♪ ♫";
+  position: absolute;
+  right: var(--bds-space-16);
+  bottom: var(--bds-space-8);
+  z-index: -1;
+  color: var(--bds-color-primary-hover);
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-weight: 900;
+  opacity: 0.08;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note__lead,
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note__footer {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 800;
+  line-height: var(--bds-line-compact);
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note strong {
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-h3);
+  font-weight: 950;
+  line-height: var(--bds-line-compact);
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note p {
+  margin: 0;
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 650;
+  line-height: var(--bds-line-normal);
 }
 
 .bds-home-shell .bds-feature-card:hover,

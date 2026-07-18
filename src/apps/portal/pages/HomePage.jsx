@@ -249,22 +249,26 @@ function NewsPanel({ news, loading }) {
 function CommunityPanel({ events = [] }) {
   const safeEvents = Array.isArray(events) ? events : []
   const nextEvent = safeEvents[0] || null
-  const eventDateTime = nextEvent
-    ? [nextEvent.homeDateLabel || nextEvent.dateLabel, nextEvent.homeTimeLabel || nextEvent.timeLabel].filter(Boolean).join(' â€¢ ') || 'Data e horario a definir'
-    : ''
+  const eventFrequency = nextEvent?.homeDateLabel || nextEvent?.recurrenceLabel || nextEvent?.dateLabel || 'Data a definir'
+  const eventType = nextEvent?.title ? nextEvent.title.replace(/\s+do\s+Bar$/i, '') : nextEvent?.typeLabel || 'Evento do Bar'
+  const eventTime = nextEvent?.homeTimeLabel || nextEvent?.timeLabel || 'Horario divulgado no dia'
+  const eventPromo = nextEvent?.metadata?.homePromo
+    || nextEvent?.metadata?.promo
+    || 'Venha participar de uma noite com música, bingos, brincadeiras e muita resenha. Convide seus amigos e faça parte da diversão!'
 
   return (
     <FeatureCard
       className="bds-home-card-full"
-      title="EVENTOS DO BAR"
+      title="📅 EVENTOS DO BAR"
       icon={<CalendarDays size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/events' }}>VER EVENTOS</ActionButton>}
     >
       {nextEvent ? (
         <div className="bds-home-community-note" data-designer-id="community.banner" data-designer-label="Eventos / Banner">
-          <span>{eventDateTime}</span>
+          <span className="bds-home-community-note__lead">🎉 {eventType} • {eventFrequency}</span>
           <strong>{nextEvent.title || 'Evento do Bar'}</strong>
-          {nextEvent.summary && <p>{nextEvent.summary}</p>}
+          <p>{eventPromo}</p>
+          <span className="bds-home-community-note__footer">🕗 {eventTime} do evento.</span>
         </div>
       ) : (
         <div className="bds-home-empty">Nenhum evento programado no momento.</div>
