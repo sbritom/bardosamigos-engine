@@ -95,6 +95,7 @@ export function mapFootballDataMatch(item = {}, roundId = null) {
   const translatedStage = translateStage(item.stage)
   const homeParticipant = translateCountry(item.homeTeam?.name) || item.homeTeam?.name || ''
   const awayParticipant = translateCountry(item.awayTeam?.name) || item.awayTeam?.name || ''
+  const syncedAt = nowUtcIso()
 
   return {
     round_id: roundId,
@@ -123,8 +124,10 @@ export function mapFootballDataMatch(item = {}, roundId = null) {
     away_score: awayScore ?? null,
     timezone: 'America/Sao_Paulo',
     external_ref: item.id ? String(item.id) : null,
+    updated_at: syncedAt,
     metadata: {
       provider: 'football-data.org',
+      syncedAt,
       providerStatus,
       standardStatus,
       statusLabel: getSportsStatusLabel(standardStatus),

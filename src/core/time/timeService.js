@@ -155,9 +155,10 @@ export function createBrazilDateWindow({ pastDays = 2, futureDays = 14, now = ne
 export function normalizeMatchStatus(status) {
   const value = String(status || '').toUpperCase()
 
-  if (['LIVE', 'IN_PLAY', 'AO_VIVO'].includes(value)) return STANDARD_MATCH_STATUS.AO_VIVO
-  if (['PAUSED', 'HALFTIME', 'HALF_TIME', 'INTERVALO'].includes(value)) return STANDARD_MATCH_STATUS.INTERVALO
-  if (['FINISHED', 'FINALIZADO'].includes(value)) return STANDARD_MATCH_STATUS.FINALIZADO
+  if (['LIVE', 'IN_PLAY', '1H', '2H', 'AO_VIVO'].includes(value)) return STANDARD_MATCH_STATUS.AO_VIVO
+  if (['PAUSED', 'HALFTIME', 'HALF_TIME', 'HT', 'INTERVALO'].includes(value)) return STANDARD_MATCH_STATUS.INTERVALO
+  if (['FINISHED', 'COMPLETED', 'FULL_TIME', 'FT', 'AFTER_EXTRA_TIME', 'PENALTY_SHOOTOUT', 'FINALIZADO'].includes(value)) return STANDARD_MATCH_STATUS.FINALIZADO
+  if (['TIMED', 'SCHEDULED', 'NS', 'NOT_STARTED', 'AGENDADO'].includes(value)) return STANDARD_MATCH_STATUS.AGENDADO
   if (['POSTPONED', 'SUSPENDED', 'ADIADO'].includes(value)) return STANDARD_MATCH_STATUS.ADIADO
   if (['CANCELED', 'CANCELLED', 'CANCELADO'].includes(value)) return STANDARD_MATCH_STATUS.CANCELADO
   if (['AWARDED', 'ENCERRADO'].includes(value)) return STANDARD_MATCH_STATUS.ENCERRADO

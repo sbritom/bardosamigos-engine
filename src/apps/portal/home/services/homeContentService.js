@@ -1,5 +1,7 @@
 import { createContentPersistenceService, getSupabaseClient, toCamelCase } from '../../../../core/database'
 import {
+  getBrazilDateKey,
+  getBrazilTime,
   formatBrazilDate,
   getRelativeBrazilDayLabel,
   getUtcTimestamp,
@@ -12,9 +14,12 @@ import { getSportsStatusLabel, translateCompetition, translateCountry } from '..
 import { listCurrentFootballMatches } from '../../../../modules/competition/services/footballMatchQueryService'
 import { listHomeEvents } from '../../../../modules/events/services/eventsService'
 import {
+  hasDisplayableMatchTeams,
+  selectHomeFootballMatchesByPriority,
+} from './homeFootballSelection'
+import {
   getLiveMatchCenter,
   getLiveMatchCenterStatus,
-  getLiveMatchCenterPriority,
   sortLiveMatchCenterMatches,
 } from '../../../../modules/competition/services/liveMatchCenterService'
 
@@ -25,18 +30,12 @@ const YOUTUBE_HITS_LIMIT = 5
 const YOUTUBE_HITS_ENDPOINT = '/api/youtube/hits'
 const MATCH_LIMIT = 3
 const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'
-const FOOTBALL_TIME_ZONE = 'America/Maceio'
 const WORLD_CUP_YEAR = 2026
 const WORLD_CUP_START_DATE = '2026-06-11'
 const WORLD_CUP_END_DATE = '2026-07-19'
-const TEAM_PLACEHOLDER_NAMES = new Set(['mandante', 'visitante', 'man', 'vis', 'bda'])
 
 function formatDate(value) {
   return value ? formatBrazilDate(value) : ''
-}
-
-function formatParticipant(value, fallback) {
-  return value || fallback
 }
 
 function getTeamField(team, fields = []) {
@@ -45,11 +44,9 @@ function getTeamField(team, fields = []) {
 }
 
 function getTeamDisplayName(team, directValue, fallback) {
-  return formatParticipant(
-    directValue
-      || getTeamField(team, ['name', 'shortName', 'short_name', 'tla']),
-    fallback,
-  )
+  return directValue
+    || getTeamField(team, ['name', 'shortName', 'short_name', 'tla'])
+    || fallback
 }
 
 function getTeamShortLabel(team, fallback) {
@@ -58,6 +55,31 @@ function getTeamShortLabel(team, fallback) {
 
 function getTeamCrest(team, directValue, metadataValue) {
   return directValue || getTeamField(team, ['crest', 'crestUrl', 'crest_url', 'logo', 'logoUrl', 'logo_url']) || metadataValue || ''
+}
+
+function getMatchMinute(match = {}) {
+  const metadata = match.metadata && typeof match.metadata === 'object' ? match.metadata : {}
+  const raw = metadata.raw && typeof metadata.raw === 'object' ? metadata.raw : {}
+  const value = match.minute
+    || match.elapsed
+    || match.currentMinute
+    || match.current_minute
+    || metadata.minute
+    || metadata.elapsed
+    || metadata.currentMinute
+    || metadata.current_minute
+    || raw.minute
+    || raw.elapsed
+
+  const minute = Number.parseInt(String(value || ''), 10)
+  return Number.isFinite(minute) && minute > 0 ? minute : null
+}
+
+function getMatchStatusLabel(match = {}, standardStatus) {
+  const label = getSportsStatusLabel(standardStatus)
+  const minute = isLiveStatus(standardStatus) ? getMatchMinute(match) : null
+
+  return minute ? `${label} ${minute}'` : label
 }
 
 function normalizeTeamModel(team, {
@@ -86,22 +108,9 @@ function getFootballDateParts(value) {
     return { dateKey: '', time: '' }
   }
 
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: FOOTBALL_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).formatToParts(date).reduce((acc, part) => {
-    acc[part.type] = part.value
-    return acc
-  }, {})
-
   return {
-    dateKey: `${parts.year}-${parts.month}-${parts.day}`,
-    time: `${parts.hour}:${parts.minute}`,
+    dateKey: getBrazilDateKey(date),
+    time: getBrazilTime(date),
   }
 }
 
@@ -226,15 +235,15 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
     directName: safeMatch.homeParticipant || safeMatch.home_participant,
     directCrest: safeMatch.homeCrest || safeMatch.home_crest || metadata.homeShield,
     metadataShortName: metadata.homeShortName || safeMatch.homeShield || safeMatch.home_shield,
-    fallbackName: 'Mandante',
-    fallbackTla: 'MAN',
+    fallbackName: '',
+    fallbackTla: '',
   })
   const awayTeamModel = normalizeTeamModel(awayTeamData, {
     directName: safeMatch.awayParticipant || safeMatch.away_participant,
     directCrest: safeMatch.awayCrest || safeMatch.away_crest || metadata.awayShield,
     metadataShortName: metadata.awayShortName || safeMatch.awayShield || safeMatch.away_shield,
-    fallbackName: 'Visitante',
-    fallbackTla: 'VIS',
+    fallbackName: '',
+    fallbackTla: '',
   })
   const homeCrest = homeTeamModel.crest
   const awayCrest = awayTeamModel.crest
@@ -263,8 +272,8 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
     awayTeamData: awayTeamModel,
     homeParticipant: homeTeamModel.name,
     awayParticipant: awayTeamModel.name,
-    homeShield: homeTeamModel.tla || getTeamShortLabel(homeTeamData, 'BDA'),
-    awayShield: awayTeamModel.tla || getTeamShortLabel(awayTeamData, 'BDA'),
+    homeShield: homeTeamModel.tla || getTeamShortLabel(homeTeamData, ''),
+    awayShield: awayTeamModel.tla || getTeamShortLabel(awayTeamData, ''),
     homeCrest,
     awayCrest,
     homeTeamCrest: homeCrest,
@@ -277,7 +286,7 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
     lastSyncedAt: safeMatch.lastSyncedAt || safeMatch.last_synced_at || safeMatch.syncedAt || safeMatch.synced_at || metadata.lastSyncedAt || metadata.last_synced_at || metadata.syncedAt || metadata.synced_at || '',
     dateLabel: isFutureMatch && localDateParts.time ? localDateParts.time : dateSource ? getRelativeBrazilDayLabel(dateSource) : '',
     standardStatus,
-    status: getSportsStatusLabel(standardStatus),
+    status: getMatchStatusLabel(safeMatch, standardStatus),
     stadium: safeMatch.venue || metadata.venue || '',
     country: translateCountry(safeMatch.country || metadata.country || ''),
     city: safeMatch.city || metadata.city || '',
@@ -294,16 +303,16 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
     source: safeMatch.id ? 'competition' : 'fallback',
   }
 }
-function getMatchPriority(match, now = nowUtcIso()) {
-  return getLiveMatchCenterPriority(match, now)
-}
-
 function sortCurrentMatches(matches = [], now = nowUtcIso()) {
   return sortLiveMatchCenterMatches(matches, now)
 }
 
-function isMatchToday(match = {}, now = nowUtcIso()) {
-  const matchDate = match.localDateIso || match.local_date_iso || getFootballDateKey(match.startsAt || match.starts_at || match.utcDate || match.utc_date)
+export function isHomeFootballMatchToday(match = {}, now = nowUtcIso()) {
+  const matchDate = getFootballDateKey(match.startsAt || match.starts_at || match.utcDate || match.utc_date)
+    || match.localDateIso
+    || match.local_date_iso
+    || match.localDate
+    || match.local_date
   const today = getFootballDateKey(now)
 
   return Boolean(matchDate && today && matchDate === today)
@@ -341,36 +350,9 @@ function isWorldCupActive(matches = [], now = nowUtcIso()) {
   return hasPendingMatch || (latestMatchTime > 0 && nowTime <= latestMatchTime + finalGraceMs)
 }
 
-function hasDisplayableTeamName(value) {
-  const normalized = String(value || '').trim().toLowerCase()
-  return Boolean(normalized && !TEAM_PLACEHOLDER_NAMES.has(normalized))
-}
-
-function hasDisplayableMatchTeams(match = {}) {
-  return hasDisplayableTeamName(match.homeTeam || match.homeParticipant || match.home_participant)
-    && hasDisplayableTeamName(match.awayTeam || match.awayParticipant || match.away_participant)
-}
-
 function selectWorldCupMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
   const worldCupMatches = matches.filter(isWorldCupMatch).filter(hasDisplayableMatchTeams)
-  const liveMatches = worldCupMatches.filter((match) => isLiveStatus(match.standardStatus || match.status))
-  const todayUpcoming = worldCupMatches.filter((match) => {
-    const status = match.standardStatus || match.status
-    return isMatchToday(match, now) && !isLiveStatus(status) && !isFinishedStatus(status)
-  })
-  const recentFinished = worldCupMatches
-    .filter((match) => isFinishedStatus(match.standardStatus || match.status))
-    .sort((left, right) => getUtcTimestamp(right.startsAt || right.utcDate) - getUtcTimestamp(left.startsAt || left.utcDate))
-  const nextMatches = worldCupMatches
-    .filter((match) => {
-      const status = match.standardStatus || match.status
-      return !isFinishedStatus(status) && !isLiveStatus(status) && getUtcTimestamp(match.startsAt || match.utcDate) >= getUtcTimestamp(now)
-    })
-    .sort((left, right) => getUtcTimestamp(left.startsAt || left.utcDate) - getUtcTimestamp(right.startsAt || right.utcDate))
-
-  return [...liveMatches, ...todayUpcoming, ...recentFinished, ...nextMatches]
-    .filter((match, index, list) => list.findIndex((item) => item.id === match.id) === index)
-    .slice(0, limit)
+  return selectHomeFootballMatchesByPriority(worldCupMatches, now, limit)
 }
 
 async function listFootballProxyMatches() {
@@ -400,7 +382,7 @@ async function listFootballProxyMatches() {
   }
 }
 
-function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
+export function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = MATCH_LIMIT) {
   const displayableMatches = matches.filter(hasDisplayableMatchTeams)
 
   if (isWorldCupActive(displayableMatches, now)) {
@@ -408,38 +390,14 @@ function selectVisibleFootballMatches(matches = [], now = nowUtcIso(), limit = M
     if (worldCupMatches.length) return worldCupMatches
   }
 
-  const sortedMatches = sortCurrentMatches(displayableMatches, now)
-    .sort((left, right) => {
-      const leftStatus = left.standardStatus || left.status
-      const rightStatus = right.standardStatus || right.status
-      const leftIsToday = isMatchToday(left, now)
-      const rightIsToday = isMatchToday(right, now)
-      const leftPriority = isLiveStatus(leftStatus) ? 0
-        : leftIsToday && !isFinishedStatus(leftStatus) ? 1
-        : leftIsToday && isFinishedStatus(leftStatus) ? 2
-        : getUtcTimestamp(left.startsAt) >= getUtcTimestamp(now) && !isFinishedStatus(leftStatus) ? 3
-        : getMatchPriority(left, now)
-      const rightPriority = isLiveStatus(rightStatus) ? 0
-        : rightIsToday && !isFinishedStatus(rightStatus) ? 1
-        : rightIsToday && isFinishedStatus(rightStatus) ? 2
-        : getUtcTimestamp(right.startsAt) >= getUtcTimestamp(now) && !isFinishedStatus(rightStatus) ? 3
-        : getMatchPriority(right, now)
+  return selectHomeFootballMatchesByPriority(displayableMatches, now, limit)
+}
 
-      if (leftPriority !== rightPriority) return leftPriority - rightPriority
-      if (leftPriority === 0 || leftPriority === 2) return getUtcTimestamp(right.startsAt) - getUtcTimestamp(left.startsAt)
-      return getUtcTimestamp(left.startsAt) - getUtcTimestamp(right.startsAt)
-    })
-  const todayMatches = sortedMatches.filter((match) => {
-    const status = match.standardStatus || match.status
-    return isLiveStatus(status) || isMatchToday(match, now)
-  })
-  const nextMatches = sortedMatches.filter((match) => {
-    const status = match.standardStatus || match.status
-    return !isMatchToday(match, now) && !isFinishedStatus(status) && getUtcTimestamp(match.startsAt) >= getUtcTimestamp(now)
-  })
-  const visibleMatches = todayMatches.length ? todayMatches : nextMatches
-
-  return visibleMatches.slice(0, limit)
+function getHomeLiveMatchCenter(visibleMatches = [], now = nowUtcIso()) {
+  const featuredMatch = visibleMatches[0] || null
+  return featuredMatch
+    ? getLiveMatchCenter(visibleMatches, { now, match: featuredMatch })
+    : getLiveMatchCenter([], { now })
 }
 
 function shouldUseFootballProxy({ visibleMatches = [], now = nowUtcIso() } = {}) {
@@ -526,13 +484,13 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
     }
 
     const now = nowUtcIso()
-    matches = sortCurrentMatches(matches, now)
+    matches = sortCurrentMatches(matches, now).filter(hasDisplayableMatchTeams)
     let visibleMatches = selectVisibleFootballMatches(matches, now, limit)
 
     if (shouldUseFootballProxy({ matches, visibleMatches, now })) {
       const fallback = await listFootballProxyMatches()
       if (fallback.data?.length) {
-        matches = sortCurrentMatches(fallback.data, now)
+        matches = sortCurrentMatches(fallback.data, now).filter(hasDisplayableMatchTeams)
         visibleMatches = selectVisibleFootballMatches(matches, now, limit)
         fallbackError = null
         source = fallback.source
@@ -541,7 +499,7 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
       }
     }
 
-    const liveMatchCenter = getLiveMatchCenter(matches, { now })
+    const liveMatchCenter = getHomeLiveMatchCenter(visibleMatches, now)
     const finished = matches
       .filter((match) => isFinishedStatus(match.standardStatus))
       .slice(0, 2)
@@ -561,9 +519,9 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
   } catch (error) {
     const fallback = await listFootballProxyMatches()
     const now = nowUtcIso()
-    const matches = sortCurrentMatches(fallback.data || [], now)
-    const liveMatchCenter = getLiveMatchCenter(matches, { now })
+    const matches = sortCurrentMatches(fallback.data || [], now).filter(hasDisplayableMatchTeams)
     const visibleMatches = selectVisibleFootballMatches(matches, now, limit)
+    const liveMatchCenter = getHomeLiveMatchCenter(visibleMatches, now)
 
     return {
       data: visibleMatches,
