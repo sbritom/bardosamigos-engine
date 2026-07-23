@@ -47,8 +47,8 @@ export async function getDesignerUserAccess() {
   if (error) return { allowed: false, reason: error.message === 'Auth session missing!' ? 'Acesso restrito a administradores.' : error.message }
 
   const user = data?.user
-  const role = user?.app_metadata?.role || user?.user_metadata?.role
-  const isAdmin = role === 'admin' || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true
+  const role = user?.app_metadata?.role
+  const isAdmin = role === 'admin' || user?.app_metadata?.is_admin === true
 
   return {
     allowed: Boolean(isAdmin),

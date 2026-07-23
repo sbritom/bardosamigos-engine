@@ -170,7 +170,7 @@ export function IntegrationsPanel() {
       {
         id: 'youtube',
         name: 'YouTube',
-        status: import.meta.env.VITE_YOUTUBE_API_KEY ? 'Configurado' : 'Aguardando chave',
+        status: 'Endpoint server-side',
         canSync: false,
       },
     ]

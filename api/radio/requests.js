@@ -53,8 +53,8 @@ function createFingerprint(request) {
 }
 
 function isAuthorizedRadioUser(user) {
-  const role = user?.app_metadata?.role || user?.user_metadata?.role
-  return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true || user?.user_metadata?.is_admin === true
+  const role = user?.app_metadata?.role
+  return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true
 }
 
 async function requireAdmin(request, supabase) {

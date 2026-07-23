@@ -21,6 +21,14 @@ const EVENT_SELECT_FIELDS = [
   'version',
 ].join(',')
 
+const ALLOWED_ORIGINS = new Set([
+  'https://bardosamigos.com.br',
+  'https://www.bardosamigos.com.br',
+  'https://bardosamigos-engine.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+])
+
 let supabaseAdmin
 
 function getSupabaseAdmin() {
@@ -41,9 +49,17 @@ function getSupabaseAdmin() {
 }
 
 function setCors(response) {
-  response.setHeader('Access-Control-Allow-Origin', '*')
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS')
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  response.setHeader('Vary', 'Origin')
+}
+
+function applyCors(request, response) {
+  const origin = String(request.headers.origin || '')
+  if (ALLOWED_ORIGINS.has(origin)) {
+    response.setHeader('Access-Control-Allow-Origin', origin)
+  }
+  setCors(response)
 }
 
 function getBearerToken(request) {
@@ -332,7 +348,7 @@ async function updateEvent(request, response, supabase) {
 }
 
 export default async function handler(request, response) {
-  setCors(response)
+  applyCors(request, response)
 
   if (request.method === 'OPTIONS') {
     response.status(204).end()

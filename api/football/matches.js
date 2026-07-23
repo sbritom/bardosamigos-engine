@@ -7,7 +7,7 @@ const DISPLAY_LIMIT = 12
 const WORLD_CUP_YEAR = 2026
 
 function getApiKey() {
-  return String(process.env.FOOTBALL_DATA_API_KEY || process.env.VITE_FOOTBALL_DATA_API_KEY || '').trim()
+  return String(process.env.FOOTBALL_DATA_API_KEY || '').trim()
 }
 
 function toMaceioDateOnly(date) {

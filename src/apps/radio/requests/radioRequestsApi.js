@@ -26,7 +26,7 @@ function normalizeRequest(row = {}) {
 export async function getRadioRequestsAdminAccess() {
   return getAdminAccess({
     allowedRoles: RADIO_ADMIN_ROLES,
-    allowLegacyUserMetadata: true,
+    allowLegacyUserMetadata: false,
     noSessionReason: "Entre para acessar o painel do locutor.",
   });
 }
@@ -36,7 +36,7 @@ export async function signInRadioRequestsAdmin({ username, password }) {
     username,
     password,
     allowedRoles: RADIO_ADMIN_ROLES,
-    allowLegacyUserMetadata: true,
+    allowLegacyUserMetadata: false,
   });
 }
 

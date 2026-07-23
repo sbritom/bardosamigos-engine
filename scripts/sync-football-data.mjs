@@ -211,9 +211,9 @@ async function main() {
 
   const supabaseUrl = requiredEnv('VITE_SUPABASE_URL')
   const supabaseAnonKey = requiredEnv('VITE_SUPABASE_ANON_KEY')
-  const footballDataApiKey = optionalEnv('FOOTBALL_DATA_API_KEY', 'VITE_FOOTBALL_DATA_API_KEY')
+  const footballDataApiKey = optionalEnv('FOOTBALL_DATA_API_KEY')
   if (!footballDataApiKey) {
-    throw new Error('FOOTBALL_DATA_API_KEY is required to run Football-Data sync. VITE_FOOTBALL_DATA_API_KEY is still accepted locally for backward compatibility.')
+    throw new Error('FOOTBALL_DATA_API_KEY is required to run Football-Data sync.')
   }
   const footballDataAdapter = createFootballDataAdapter({ apiKey: footballDataApiKey })
   const footballDataPreflight = await footballDataAdapter.fetchCompetitions()

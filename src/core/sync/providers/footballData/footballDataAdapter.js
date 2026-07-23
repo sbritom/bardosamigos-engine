@@ -2,7 +2,7 @@ import { createSyncCacheKey, getSyncCache, setSyncCache } from '../../cache/sync
 import { FOOTBALL_DATA_BASE_URL, FOOTBALL_DATA_ENDPOINTS } from './footballDataConstants.js'
 
 function createConfigError() {
-  return new Error('Football-Data API key is not configured. Set VITE_FOOTBALL_DATA_API_KEY in the sync runtime.')
+  return new Error('Football-Data API key is not configured. Provide apiKey from a server-side sync runtime.')
 }
 
 function normalizeApiKey(value) {
@@ -11,7 +11,7 @@ function normalizeApiKey(value) {
 
 export function createFootballDataAdapter(options = {}) {
   const baseUrl = options.baseUrl || FOOTBALL_DATA_BASE_URL
-  const apiKey = normalizeApiKey(options.apiKey || import.meta.env?.VITE_FOOTBALL_DATA_API_KEY)
+  const apiKey = normalizeApiKey(options.apiKey)
   const fetcher = options.fetcher || fetch
 
   async function request(path, params = {}) {

@@ -98,7 +98,7 @@ export const plugins = [
   {
     id: "football",
     title: "Futebol",
-    path: "/football",
+    path: "/football/*",
     icon: Trophy,
     menu: true,
     element: <FootballCenterPage />,
