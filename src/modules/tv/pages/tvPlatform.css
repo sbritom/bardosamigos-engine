@@ -401,3 +401,237 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Sprint TV Publica 10.0 - visual refinement only */
+.tv-platform {
+  gap: var(--bds-space-16);
+  padding: var(--bds-space-16) clamp(var(--bds-space-8), 3vw, var(--bds-space-32)) var(--bds-space-40);
+}
+
+.tv-platform__header {
+  min-height: var(--bds-space-40);
+}
+
+.tv-platform__brand {
+  gap: var(--bds-space-8);
+}
+
+.tv-platform__brand > span {
+  border-color: var(--bds-color-border);
+  background: color-mix(in srgb, var(--bds-color-primary) 12%, transparent);
+  box-shadow: none;
+}
+
+.tv-platform__brand h1 {
+  letter-spacing: var(--bds-letter-overline);
+}
+
+.tv-platform__player-section {
+  border-color: var(--bds-color-border);
+  border-radius: var(--bds-radius-md);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bds-color-surface) 50%, transparent), color-mix(in srgb, var(--bds-color-background) 58%, transparent)),
+    var(--bds-color-background);
+  box-shadow: var(--bds-shadow-level-1);
+}
+
+.tv-platform__nowbar {
+  gap: var(--bds-space-8);
+  padding: var(--bds-space-8) var(--bds-space-16);
+  border-top-color: var(--bds-color-border);
+  background: color-mix(in srgb, var(--bds-color-surface) 64%, var(--bds-color-background));
+}
+
+.tv-platform__nowbar > div {
+  gap: var(--bds-space-4);
+}
+
+.tv-platform__nowbar span,
+.tv-channel-card__body span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bds-space-8);
+}
+
+.tv-platform__nowbar span::before,
+.tv-channel-card__body span::before {
+  content: "";
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: var(--bds-radius-full);
+  background: var(--bds-color-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-success) 12%, transparent);
+}
+
+.tv-platform__nowbar strong {
+  font-size: var(--bds-font-text);
+  line-height: var(--bds-line-tight);
+}
+
+.tv-platform__nowbar small {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-caption);
+  font-weight: 750;
+}
+
+.tv-platform__nowbar button,
+.tv-platform__categories button {
+  min-height: var(--bds-space-32);
+  border-color: var(--bds-color-border);
+  background: color-mix(in srgb, var(--bds-color-surface) 72%, transparent);
+  color: var(--bds-color-text-secondary);
+  box-shadow: none;
+}
+
+.tv-platform__nowbar button:hover,
+.tv-platform__categories button:hover,
+.tv-platform__categories button.is-active {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 34%, transparent);
+  background: var(--bds-color-hover);
+  color: var(--bds-color-text);
+  box-shadow: none;
+}
+
+.tv-platform__controls {
+  gap: var(--bds-space-8);
+}
+
+.tv-search {
+  border-color: var(--bds-color-border);
+  background: color-mix(in srgb, var(--bds-color-surface) 62%, transparent);
+}
+
+.tv-platform__categories {
+  gap: var(--bds-space-8);
+}
+
+.tv-section {
+  gap: var(--bds-space-8);
+}
+
+.tv-platform__channels,
+.tv-platform__loading {
+  gap: var(--bds-space-8);
+}
+
+.tv-channel-card {
+  border-color: var(--bds-color-border);
+  border-radius: var(--bds-radius-md);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bds-color-surface) 78%, transparent), color-mix(in srgb, var(--bds-color-background) 28%, transparent)),
+    var(--bds-color-surface);
+  box-shadow: none;
+}
+
+.tv-channel-card:hover {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 34%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bds-color-primary) 10%, transparent), color-mix(in srgb, var(--bds-color-surface) 72%, transparent)),
+    var(--bds-color-surface);
+  box-shadow: var(--bds-shadow-level-1);
+  transform: translateY(-1px);
+}
+
+.tv-channel-card--active,
+.tv-channel-card--active:hover {
+  border-color: var(--bds-color-primary-hover);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bds-color-primary-hover) 36%, transparent);
+}
+
+.tv-channel-card__media {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--bds-color-primary) 12%, transparent), transparent 48%),
+    var(--bds-color-background);
+}
+
+.tv-channel-card__media img {
+  display: block;
+  object-position: center;
+}
+
+.tv-channel-card__media > span:first-child {
+  color: var(--bds-color-text-secondary);
+  letter-spacing: var(--bds-letter-overline);
+}
+
+.tv-channel-card__play {
+  background: color-mix(in srgb, var(--bds-color-background) 62%, transparent);
+}
+
+.tv-channel-card__body {
+  min-height: 52px;
+  padding: var(--bds-space-8);
+}
+
+.tv-channel-card__body > div {
+  gap: var(--bds-space-4);
+}
+
+.tv-channel-card__body strong {
+  font-size: var(--bds-font-small);
+  line-height: var(--bds-line-compact);
+}
+
+.tv-channel-card__body span {
+  font-size: var(--bds-font-caption);
+  line-height: var(--bds-line-compact);
+}
+
+.tv-platform__skeleton {
+  border-radius: var(--bds-radius-md);
+  background: color-mix(in srgb, var(--bds-color-surface) 68%, transparent);
+}
+
+.tv-platform__nowbar button:focus-visible,
+.tv-platform__categories button:focus-visible,
+.tv-channel-card__media:focus-visible,
+.tv-search:focus-within {
+  outline-color: var(--bds-color-primary-hover);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 12%, transparent);
+}
+
+@media (max-width: 760px) {
+  .tv-platform {
+    gap: var(--bds-space-8);
+    padding-inline: var(--bds-space-8);
+  }
+
+  .tv-platform__nowbar {
+    padding: var(--bds-space-8);
+  }
+}
+
+/* Sprint UI Polish 1.0 - reduce module glow only */
+.tv-platform__player-section,
+.tv-channel-card,
+.tv-search,
+.tv-platform__nowbar,
+.tv-platform__categories button {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 9%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.tv-channel-card:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--bds-color-background) 28%, transparent);
+}
+
+.tv-channel-card--active,
+.tv-channel-card--active:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bds-color-primary-hover) 22%, transparent);
+}
+
+.tv-platform__nowbar button:focus-visible,
+.tv-platform__categories button:focus-visible,
+.tv-channel-card__media:focus-visible,
+.tv-search:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 8%, transparent);
+}
+
+/* Hotfix UI Polish 1.1 - hero surface normalization */
+.tv-platform__header,
+.tv-platform__player-section {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 8%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}

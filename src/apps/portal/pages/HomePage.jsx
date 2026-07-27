@@ -23,6 +23,7 @@ import '../../../design-system/styles/index.css'
 import { getSupabaseClient } from '../../../core/database'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
+import { HomeHitsCard } from '../home/components/HomeHitsCard'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
 import { barStudioTools } from '../home/data/dashboardData'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
@@ -38,7 +39,7 @@ const OfficialChat = lazy(() =>
 const initialDashboard = {
   news: [],
   events: [],
-  youtubeHits: [],
+  topHits: [],
   competitionMatches: [],
   nextMatch: null,
   liveMatchCenter: null,
@@ -277,38 +278,6 @@ function CommunityPanel({ events = [] }) {
   )
 }
 
-function RadioCard({ hits = [] }) {
-  const safeHits = Array.isArray(hits) ? hits : []
-
-  return (
-    <FeatureCard
-      className="bds-home-card-full"
-      title="📈 Hits do Momento"
-      description="As músicas em alta no YouTube Brasil."
-      icon={<Music2 size={20} />}
-    >
-      <div className="bds-home-card-list" data-designer-id="radio.topSongs" data-designer-label="Hits do Momento / Lista">
-        {safeHits.length ? safeHits.map((track, index) => (
-          <div key={track.id || `${track.position}-${track.title}`} className="bds-home-radio-card">
-            <div className="bds-home-radio-main">
-              <div className="bds-home-radio-icon">
-                {track.thumbnail ? <img src={track.thumbnail} alt="" loading="lazy" /> : String(track.position || index + 1).padStart(2, '0')}
-              </div>
-              <div>
-                <span>#{String(track.position || index + 1).padStart(2, '0')}</span>
-                <strong>{track.title}</strong>
-                <p>{track.channelTitle}</p>
-              </div>
-            </div>
-          </div>
-        )) : (
-          <div className="bds-home-empty">Nenhum hit disponível no momento.</div>
-        )}
-      </div>
-    </FeatureCard>
-  )
-}
-
 function BarStudioCard() {
   const tools = Array.isArray(barStudioTools) ? barStudioTools : []
 
@@ -361,7 +330,7 @@ export default function HomePage() {
           setDashboard({
             news: Array.isArray(content?.news) ? content.news : [],
             events: Array.isArray(content?.events) ? content.events : [],
-            youtubeHits: Array.isArray(content?.youtubeHits) ? content.youtubeHits : [],
+            topHits: Array.isArray(content?.topHits) ? content.topHits : [],
             competitionMatches: Array.isArray(content?.competitionMatches) ? content.competitionMatches : [],
             nextMatch: content?.nextMatch || null,
             liveMatchCenter: content?.liveMatchCenter || null,
@@ -415,7 +384,7 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><RadioCard hits={dashboard.youtubeHits} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><HomeHitsCard hits={dashboard.topHits} loading={loading} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel events={dashboard.events} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>

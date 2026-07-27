@@ -22,6 +22,7 @@ const TEAM_PLACEHOLDER_NAMES = new Set([
   'a confirmar',
   'definir',
 ])
+const RECENT_FINISHED_HOURS = 48
 
 function getMatchDateValue(match = {}) {
   return match.startsAt || match.starts_at || match.utcDate || match.utc_date
@@ -56,6 +57,14 @@ export function isHomeFootballMatchToday(match = {}, now = nowUtcIso()) {
   return Boolean(matchDate && today && matchDate === today)
 }
 
+function isRecentFinishedHomeMatch(match = {}, now = nowUtcIso()) {
+  const status = match.standardStatus || match.status
+  if (!isFinishedStatus(status)) return false
+
+  const elapsedMs = getUtcTimestamp(now) - getUtcTimestamp(getMatchDateValue(match))
+  return elapsedMs >= 0 && elapsedMs <= RECENT_FINISHED_HOURS * 60 * 60 * 1000
+}
+
 export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIso(), limit = 3) {
   const displayableMatches = matches.filter(hasDisplayableMatchTeams)
   const selected = []
@@ -81,6 +90,10 @@ export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIs
       return isHomeFootballMatchToday(match, now) && !isLiveStatus(status) && !isFinishedStatus(status)
     })
     .sort(byMatchTimeAscending))
+
+  pushGroup(displayableMatches
+    .filter((match) => !isHomeFootballMatchToday(match, now) && isRecentFinishedHomeMatch(match, now))
+    .sort(byMatchTimeDescending))
 
   pushGroup(displayableMatches
     .filter((match) => {

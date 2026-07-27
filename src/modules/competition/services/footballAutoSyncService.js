@@ -44,7 +44,7 @@ export async function syncFootballBeforeRead({ hasLiveMatch = false, force = fal
   runningSync = syncAdminService
     .syncNow(SYNC_INTEGRATIONS.FOOTBALL_DATA, {
       type: FOOTBALL_DATA_SYNC_TYPES.UPCOMING_MATCHES,
-      fetchEachStatus: hasLiveMatch,
+      fetchEachStatus: true,
     })
     .then((result) => {
       lastSyncAt = Date.now()

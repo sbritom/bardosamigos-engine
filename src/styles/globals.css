@@ -13,6 +13,27 @@ body,
     min-height:100%;
 }
 
+html,
+body,
+#root{
+    min-height:100vh;
+}
+
+#root > .min-h-screen{
+    display:flex;
+    min-height:100vh;
+    flex-direction:column;
+}
+
+#root > .min-h-screen > .bds-home-shell,
+#root > .min-h-screen > .w-full{
+    flex:1 0 auto;
+}
+
+footer[data-designer-id="footer"]{
+    flex-shrink:0;
+}
+
 body{
     background:var(--bds-color-background);
     color:var(--bds-color-text);
@@ -40,6 +61,7 @@ a{
 :focus-visible{
     outline:2px solid var(--bds-color-primary-hover);
     outline-offset:3px;
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
 }
 
 ::selection{

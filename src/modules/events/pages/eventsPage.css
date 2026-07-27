@@ -704,3 +704,43 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Sprint UI Polish 1.0 - reduce module glow only */
+.bds-events-hero,
+.bds-events-highlight,
+.bds-events-card,
+.bds-events-empty,
+.bds-events-loading,
+.bds-events-note,
+.bds-events-detail__card,
+.bds-events-detail__section,
+.bds-events-rule,
+.bds-events-status {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 9%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.bds-events-card:hover,
+.bds-events-card:focus-visible {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--bds-color-background) 28%, transparent);
+}
+
+.bds-events-status,
+.bds-events-card__actions .bds-action-button,
+.bds-events-highlight .bds-action-button {
+  box-shadow: none;
+}
+
+/* Hotfix UI Polish 1.1 - hero surface normalization */
+.bds-events-hero,
+.bds-events-highlight {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 8%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.bds-events-hero::before,
+.bds-events-hero::after,
+.bds-events-highlight::before,
+.bds-events-highlight::after {
+  filter: none;
+}

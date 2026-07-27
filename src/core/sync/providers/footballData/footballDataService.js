@@ -171,6 +171,7 @@ export function createFootballDataService(options = {}) {
       const type = request.params?.type || FOOTBALL_DATA_SYNC_TYPES.COMPETITIONS
 
       if (type === FOOTBALL_DATA_SYNC_TYPES.TEAMS) return this.syncTeams(request.params)
+      if (type === FOOTBALL_DATA_SYNC_TYPES.UPCOMING_MATCHES && request.params?.fetchEachStatus === true) return this.syncCurrentMatches(request.params)
       if (type === FOOTBALL_DATA_SYNC_TYPES.UPCOMING_MATCHES) return this.syncUpcomingMatches(request.params)
       if (type === FOOTBALL_DATA_SYNC_TYPES.FINISHED_MATCHES) return this.syncFinishedMatches(request.params)
       if (type === FOOTBALL_DATA_SYNC_TYPES.STANDINGS) return this.syncStandings(request.params)

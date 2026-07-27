@@ -1,5 +1,6 @@
 import { createContentPersistenceService, getSupabaseClient, toCamelCase } from '../../../../core/database'
 import {
+  createBrazilDateWindow,
   getBrazilDateKey,
   getBrazilTime,
   formatBrazilDate,
@@ -26,8 +27,7 @@ import {
 const NEWS_LIMIT = 3
 const NEWS_PROXY_ENDPOINT = '/api/news'
 const NEWS_STALE_HOURS = 8
-const YOUTUBE_HITS_LIMIT = 5
-const YOUTUBE_HITS_ENDPOINT = '/api/youtube/hits'
+const TOP_HITS_LIMIT = 10
 const MATCH_LIMIT = 3
 const FOOTBALL_PROXY_ENDPOINT = '/api/football/matches'
 const WORLD_CUP_YEAR = 2026
@@ -132,45 +132,54 @@ function normalizeNewsArticle(article = {}) {
   }
 }
 
-function normalizeYoutubeHit(hit = {}, index = 0) {
+function normalizeTopHit(hit = {}, index = 0) {
   const safeHit = hit && typeof hit === 'object' ? hit : {}
+  const metadata = safeHit.metadata && typeof safeHit.metadata === 'object' ? safeHit.metadata : {}
+  const title = safeHit.title || safeHit.name || safeHit.songTitle || safeHit.song_title || metadata.title || metadata.songTitle
+  const artist = safeHit.artist || safeHit.artistName || safeHit.artist_name || safeHit.channelTitle || safeHit.channel || metadata.artist || metadata.artistName
+  const spotifyUrl = safeHit.spotifyUrl || safeHit.spotify_url || metadata.spotifyUrl || metadata.spotify_url || ''
+  const youtubeUrl = safeHit.youtubeUrl || safeHit.youtube_url || metadata.youtubeUrl || metadata.youtube_url || ''
+  const url = safeHit.url || safeHit.link || safeHit.externalUrl || safeHit.external_url || spotifyUrl || youtubeUrl || metadata.url || metadata.link || ''
+  const cover = safeHit.cover || safeHit.coverUrl || safeHit.cover_url || safeHit.albumCover || safeHit.album_cover || safeHit.thumbnail || safeHit.image || metadata.cover || metadata.thumbnail || metadata.image || ''
 
   return {
-    id: safeHit.id || safeHit.videoId || safeHit.url || `youtube-hit-${index}`,
+    id: safeHit.id || safeHit.slug || url || `top-hit-${index}`,
     position: Number(safeHit.position || index + 1),
-    title: safeHit.title || 'Hit indisponivel',
-    channelTitle: safeHit.channelTitle || safeHit.channel || safeHit.artist || 'YouTube',
-    thumbnail: safeHit.thumbnail || safeHit.image || '',
-    url: safeHit.url || (safeHit.id ? `https://www.youtube.com/watch?v=${safeHit.id}` : ''),
-    publishedAt: safeHit.publishedAt || '',
+    title: title || 'Hit indisponivel',
+    artist: artist || 'Artista indisponivel',
+    channelTitle: artist || 'Artista indisponivel',
+    cover,
+    thumbnail: cover,
+    spotifyUrl,
+    youtubeUrl,
+    url,
+    metadata,
   }
 }
 
-export async function listYoutubeHits({ limit = YOUTUBE_HITS_LIMIT } = {}) {
-  if (typeof fetch !== 'function') return { data: [], error: new Error('YouTube proxy indisponivel.'), source: 'youtube-proxy' }
+export async function listTopHits({ limit = TOP_HITS_LIMIT } = {}) {
+  const client = getSupabaseClient()
+
+  if (!client) return { data: [], error: new Error('Supabase nao esta configurado.'), source: 'supabase' }
 
   try {
-    const endpoint = `${YOUTUBE_HITS_ENDPOINT}?limit=${encodeURIComponent(String(limit))}`
-    const response = await fetch(endpoint, {
-      headers: { Accept: 'application/json' },
-    })
-    const payload = await response.json().catch(() => ({}))
+    const result = await client
+      .from('top_hits')
+      .select('*')
+      .order('position', { ascending: true })
+      .limit(limit)
 
-    if (!response.ok) {
-      return {
-        data: [],
-        error: new Error(payload.error || payload.errors?.map((item) => item.message).filter(Boolean).join(', ') || `YouTube proxy retornou ${response.status}.`),
-        source: 'youtube-proxy',
-      }
-    }
+    if (result.error) return { data: [], error: result.error, source: 'supabase' }
+
+    const hits = toCamelCase(Array.isArray(result.data) ? result.data : [])
 
     return {
-      data: Array.isArray(payload.hits) ? payload.hits.map(normalizeYoutubeHit).slice(0, limit) : [],
-      error: Array.isArray(payload.errors) && payload.errors.length ? new Error(payload.errors.map((item) => item.message).filter(Boolean).join(', ')) : null,
-      source: 'youtube-proxy',
+      data: hits.map(normalizeTopHit).slice(0, limit),
+      error: null,
+      source: 'supabase',
     }
   } catch (error) {
-    return { data: [], error, source: 'youtube-proxy' }
+    return { data: [], error, source: 'supabase' }
   }
 }
 
@@ -221,7 +230,8 @@ function normalizeCompetitionMatch(match = {}, index = 0) {
   const safeMatch = match && typeof match === 'object' ? match : {}
   const startsAt = safeMatch.startsAt || safeMatch.starts_at || null
   const metadata = safeMatch.metadata && typeof safeMatch.metadata === 'object' ? safeMatch.metadata : {}
-  const rawStatus = safeMatch.standardStatus || safeMatch.standard_status || metadata.standardStatus || normalizeMatchStatus(safeMatch.status)
+  const officialStatus = metadata.providerStatus || metadata.provider_status || metadata.raw?.status || ''
+  const rawStatus = officialStatus || safeMatch.standardStatus || safeMatch.standard_status || metadata.standardStatus || normalizeMatchStatus(safeMatch.status)
   const standardStatus = getLiveMatchCenterStatus({ ...safeMatch, startsAt, standardStatus: rawStatus })
   const round = safeMatch.competitionRounds || safeMatch.competition_rounds || {}
   const stage = round.competitionStages || round.competition_stages || {}
@@ -355,11 +365,22 @@ function selectWorldCupMatches(matches = [], now = nowUtcIso(), limit = MATCH_LI
   return selectHomeFootballMatchesByPriority(worldCupMatches, now, limit)
 }
 
-async function listFootballProxyMatches() {
+function getFootballProxyEndpoint(now = nowUtcIso()) {
+  const window = createBrazilDateWindow({ now })
+  const params = new URLSearchParams({
+    dateFrom: window.dateFrom,
+    dateTo: window.dateTo,
+    today: getBrazilDateKey(now),
+  })
+
+  return `${FOOTBALL_PROXY_ENDPOINT}?${params.toString()}`
+}
+
+async function listFootballProxyMatches({ now = nowUtcIso() } = {}) {
   if (typeof fetch !== 'function') return { data: [], error: new Error('Football proxy indisponivel.'), source: 'football-data-proxy' }
 
   try {
-    const response = await fetch(FOOTBALL_PROXY_ENDPOINT, {
+    const response = await fetch(getFootballProxyEndpoint(now), {
       headers: { Accept: 'application/json' },
     })
     const payload = await response.json().catch(() => ({}))
@@ -400,11 +421,42 @@ function getHomeLiveMatchCenter(visibleMatches = [], now = nowUtcIso()) {
     : getLiveMatchCenter([], { now })
 }
 
-function shouldUseFootballProxy({ visibleMatches = [], now = nowUtcIso() } = {}) {
+function hasStaleScheduledFootballMatches(matches = [], now = nowUtcIso()) {
+  const nowTimestamp = getUtcTimestamp(now)
+
+  return matches.some((match) => {
+    const status = match.standardStatus || match.status
+    const startsAt = match.startsAt || match.starts_at || match.utcDate || match.utc_date
+
+    return Boolean(startsAt)
+      && !isLiveStatus(status)
+      && !isFinishedStatus(status)
+      && getUtcTimestamp(startsAt) < nowTimestamp
+  })
+}
+
+function shouldUseFootballProxy({ matches = [], visibleMatches = [], now = nowUtcIso() } = {}) {
   if (!visibleMatches.length) return true
+  if (hasStaleScheduledFootballMatches(matches, now)) return true
   if (!isWorldCupWindowActive(now)) return false
 
   return !visibleMatches.some(isWorldCupMatch)
+}
+
+function getBestFootballMatchPriority(matches = [], now = nowUtcIso()) {
+  if (!matches.length) return Number.POSITIVE_INFINITY
+  return Math.min(...matches.map((match) => getLiveMatchCenterPriority(match, now)))
+}
+
+function shouldCheckFootballProxyForBetterMatches(visibleMatches = [], now = nowUtcIso()) {
+  return getBestFootballMatchPriority(visibleMatches, now) > 1
+}
+
+function shouldPreferFootballProxyMatches(currentMatches = [], proxyMatches = [], now = nowUtcIso()) {
+  if (!proxyMatches.length) return false
+  if (!currentMatches.length) return true
+
+  return getBestFootballMatchPriority(proxyMatches, now) < getBestFootballMatchPriority(currentMatches, now)
 }
 
 export async function listHybridNews({ limit = NEWS_LIMIT } = {}) {
@@ -462,6 +514,8 @@ export async function listNewsPageContent() {
 }
 
 export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
+  const now = nowUtcIso()
+
   try {
     const result = await listCurrentFootballMatches({ includePredictions: true })
     let matches = []
@@ -469,31 +523,38 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
     let source = 'competition'
 
     if (result.error) {
-      const fallback = await listFootballProxyMatches()
+      const fallback = await listFootballProxyMatches({ now })
       matches = fallback.data || []
       fallbackError = fallback.error || result.error
       source = fallback.data?.length ? fallback.source : 'supabase'
     } else {
       matches = result.data?.matches || []
       if (!matches.length) {
-        const fallback = await listFootballProxyMatches()
+        const fallback = await listFootballProxyMatches({ now })
         matches = fallback.data || []
         fallbackError = fallback.error || null
         source = fallback.data?.length ? fallback.source : 'competition'
       }
     }
 
-    const now = nowUtcIso()
     matches = sortCurrentMatches(matches, now).filter(hasDisplayableMatchTeams)
     let visibleMatches = selectVisibleFootballMatches(matches, now, limit)
 
-    if (shouldUseFootballProxy({ matches, visibleMatches, now })) {
-      const fallback = await listFootballProxyMatches()
+    const needsFootballProxy = shouldUseFootballProxy({ matches, visibleMatches, now })
+      || shouldCheckFootballProxyForBetterMatches(visibleMatches, now)
+
+    if (needsFootballProxy) {
+      const fallback = await listFootballProxyMatches({ now })
       if (fallback.data?.length) {
-        matches = sortCurrentMatches(fallback.data, now).filter(hasDisplayableMatchTeams)
-        visibleMatches = selectVisibleFootballMatches(matches, now, limit)
-        fallbackError = null
-        source = fallback.source
+        const fallbackMatches = sortCurrentMatches(fallback.data, now).filter(hasDisplayableMatchTeams)
+        const fallbackVisibleMatches = selectVisibleFootballMatches(fallbackMatches, now, limit)
+
+        if (shouldPreferFootballProxyMatches(visibleMatches, fallbackVisibleMatches, now)) {
+          matches = fallbackMatches
+          visibleMatches = fallbackVisibleMatches
+          fallbackError = null
+          source = fallback.source
+        }
       } else {
         fallbackError = fallback.error || fallbackError
       }
@@ -517,8 +578,7 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
       source,
     }
   } catch (error) {
-    const fallback = await listFootballProxyMatches()
-    const now = nowUtcIso()
+    const fallback = await listFootballProxyMatches({ now })
     const matches = sortCurrentMatches(fallback.data || [], now).filter(hasDisplayableMatchTeams)
     const visibleMatches = selectVisibleFootballMatches(matches, now, limit)
     const liveMatchCenter = getHomeLiveMatchCenter(visibleMatches, now)
@@ -535,15 +595,15 @@ export async function listHomeCompetitionMatches({ limit = MATCH_LIMIT } = {}) {
 }
 
 export async function loadHomeDashboardContent() {
-  const [news, competition, events, youtubeHits] = await Promise.all([
+  const [news, competition, events, topHits] = await Promise.all([
     listHybridNews(),
     listHomeCompetitionMatches(),
     listHomeEvents().catch((error) => {
       console.warn('[homeContentService] Falha ao carregar eventos da Home', error)
       return { data: [], error }
     }),
-    listYoutubeHits().catch((error) => {
-      console.warn('[homeContentService] Falha ao carregar hits do YouTube', error)
+    listTopHits().catch((error) => {
+      console.warn('[homeContentService] Falha ao carregar Top Hits da Home', error)
       return { data: [], error }
     }),
   ])
@@ -551,7 +611,7 @@ export async function loadHomeDashboardContent() {
   return {
     news: Array.isArray(news?.data) ? news.data : [],
     events: Array.isArray(events?.data) ? events.data : [],
-    youtubeHits: Array.isArray(youtubeHits?.data) ? youtubeHits.data : [],
+    topHits: Array.isArray(topHits?.data) ? topHits.data : [],
     competitionMatches: Array.isArray(competition?.data) ? competition.data : [],
     nextMatch: competition?.next || null,
     liveMatchCenter: competition?.liveMatchCenter || getLiveMatchCenter([]),

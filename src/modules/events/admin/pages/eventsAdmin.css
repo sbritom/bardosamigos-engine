@@ -552,3 +552,35 @@
 .events-admin-login__form input::placeholder {
   color: color-mix(in srgb, var(--bds-color-text-secondary) 72%, transparent);
 }
+
+/* Sprint UI Polish 1.0 - reduce admin glow only */
+.events-admin-login,
+.events-admin-panel,
+.events-admin-summary-card,
+.events-admin-event-card,
+.events-admin-empty,
+.events-admin-modal__content,
+.events-admin-form label,
+.events-admin-feedback {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 9%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.events-admin-event-card:hover,
+.events-admin-summary-card:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--bds-color-background) 28%, transparent);
+}
+
+.events-admin-button,
+.events-admin-icon-button {
+  box-shadow: none;
+}
+
+.events-admin-button:focus-visible,
+.events-admin-icon-button:focus-visible,
+.events-admin-login__form input:focus-visible,
+.events-admin-form input:focus-visible,
+.events-admin-form select:focus-visible,
+.events-admin-form textarea:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 8%, transparent);
+}

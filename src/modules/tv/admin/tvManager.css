@@ -486,3 +486,40 @@
   filter: saturate(0.82);
   opacity: var(--bds-opacity-disabled);
 }
+
+/* Sprint UI Polish 1.0 - reduce admin glow only */
+.tv-manager__sidebar,
+.tv-admin-panel,
+.tv-admin-card,
+.tv-admin-table tr,
+.tv-admin-category-row,
+.tv-admin-featured-row,
+.tv-admin-form input,
+.tv-admin-form select,
+.tv-admin-form textarea {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 9%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.tv-admin-table tbody tr:hover,
+.tv-admin-category-row:hover,
+.tv-admin-featured-row:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--bds-color-background) 28%, transparent);
+}
+
+.tv-manager__nav-link,
+.tv-admin-row-actions button,
+.tv-admin-form__actions button,
+.tv-admin-actions button {
+  box-shadow: none;
+}
+
+.tv-manager__nav-link:focus-visible,
+.tv-admin-row-actions button:focus-visible,
+.tv-admin-form__actions button:focus-visible,
+.tv-admin-actions button:focus-visible,
+.tv-admin-form input:focus-visible,
+.tv-admin-form select:focus-visible,
+.tv-admin-form textarea:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 8%, transparent);
+}

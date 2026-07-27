@@ -578,3 +578,39 @@
   filter: saturate(0.82);
   opacity: var(--bds-opacity-disabled);
 }
+
+/* Sprint UI Polish 1.0 - reduce admin glow only */
+.radio-admin-login,
+.radio-admin-panel,
+.radio-admin-card,
+.radio-request-card,
+.radio-admin-empty,
+.radio-admin-login-form input {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 9%, var(--bds-color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
+}
+
+.radio-request-card:hover,
+.radio-admin-card:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--bds-color-background) 28%, transparent);
+}
+
+.radio-admin-header button,
+.radio-admin-login-form button,
+.radio-admin-actions button,
+.radio-admin-track button,
+.radio-admin-log-tabs button,
+.radio-request-card__actions button {
+  box-shadow: none;
+}
+
+.radio-admin-header button:focus-visible,
+.radio-admin-login-form button:focus-visible,
+.radio-admin-actions button:focus-visible,
+.radio-admin-track button:focus-visible,
+.radio-admin-log-tabs button:focus-visible,
+.radio-request-card__actions button:focus-visible,
+.radio-admin-login-form input:focus-visible,
+.radio-admin-login-form input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 8%, transparent);
+}

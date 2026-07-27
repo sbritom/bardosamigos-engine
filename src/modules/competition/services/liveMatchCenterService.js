@@ -53,14 +53,14 @@ function getRawMatchStatus(match) {
   const safeMatch = normalizeMatchInput(match)
   if (!safeMatch) return LIVE_MATCH_CENTER_EMPTY_STATUS
 
+  const providerStatusValue = safeMatch.metadata?.providerStatus || safeMatch.metadata?.raw?.status
+  const providerStatus = providerStatusValue ? normalizeMatchStatus(providerStatusValue) : null
   const statusValue = safeMatch.standardStatus || safeMatch.standard_status || safeMatch.metadata?.standardStatus || safeMatch.status
   const storedStatus = normalizeMatchStatus(statusValue)
   const displayStatus = safeMatch.status ? normalizeMatchStatus(safeMatch.status) : null
-  const providerStatusValue = safeMatch.metadata?.providerStatus || safeMatch.metadata?.raw?.status
-  const providerStatus = providerStatusValue ? normalizeMatchStatus(providerStatusValue) : null
 
+  if (providerStatus) return providerStatus
   if (isLiveStatus(storedStatus) && displayStatus && isFinishedStatus(displayStatus)) return displayStatus
-  if (isLiveStatus(storedStatus) && providerStatus && isFinishedStatus(providerStatus)) return providerStatus
   return storedStatus
 }
 
