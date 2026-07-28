@@ -12,10 +12,11 @@
 }
 
 .bar-radio-hero {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--bds-color-primary) 86%, transparent), color-mix(in srgb, var(--bds-color-background) 96%, transparent) 54%, color-mix(in srgb, var(--bds-color-primary-hover) 16%, transparent));
+  background: var(--bds-color-surface);
   border: 1px solid var(--bds-color-border);
   border-radius: 22px;
-  box-shadow: var(--bds-shadow-level-2);
+  box-shadow: none;
+  filter: none;
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 500px);

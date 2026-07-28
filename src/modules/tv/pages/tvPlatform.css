@@ -635,3 +635,19 @@
   border-color: color-mix(in srgb, var(--bds-color-primary-hover) 8%, var(--bds-color-border));
   box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
 }
+
+/* Hotfix UI Polish 1.2 - TV warning removal and hero deglow */
+.tv-platform > .bds-alert {
+  display: none;
+}
+
+.tv-platform__header,
+.tv-platform__player-section {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 7%, var(--bds-color-border));
+  background: var(--bds-color-background);
+  box-shadow: none;
+}
+
+.tv-platform__player-section:hover {
+  box-shadow: none;
+}

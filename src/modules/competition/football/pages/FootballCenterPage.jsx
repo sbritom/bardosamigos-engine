@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays, CheckCircle2, Clock3, Heart, Radio } from 'lucide-react'
-import { EmptyState, Loading } from '../../../../design-system'
-import { FootballCompetitionGrid, FootballWorldCup } from '../components/FootballCompetitions'
-import { FootballFilterBar } from '../components/FootballFilterBar'
+import { EmptyState } from '../../../../design-system'
 import { FootballHero, FootballSummaryCards } from '../components/FootballHero'
 import { FootballBreadcrumb, FootballExperienceBar } from '../components/FootballNavigation'
 import { FootballRightPanel } from '../components/FootballRightPanel'
@@ -15,6 +13,7 @@ import { useFootballCenterView } from '../hooks/useFootballCenterView'
 import { getFootballFavoriteKeys } from '../utils/footballCenterUtils'
 import { listFootballCenterData, toggleFootballFavorite } from '../../services/footballCenterService'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../services/footballAutoSyncService'
+import './footballMotion.css'
 
 export default function FootballCenterPage() {
   const navigate = useNavigate()
@@ -23,7 +22,6 @@ export default function FootballCenterPage() {
   const [selectedCompetition, setSelectedCompetition] = useState('all')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [competitionSort, setCompetitionSort] = useState('alphabetical')
   const [favoriteMessage, setFavoriteMessage] = useState('')
   const hasLiveMatchRef = useRef(false)
   const data = state.data
@@ -70,10 +68,6 @@ export default function FootballCenterPage() {
     await load()
   }
 
-  function favoriteCompetition(competition) {
-    return toggleFavorite('competition', competition.id, { name: competition.name, code: competition.code, logo: competition.logo })
-  }
-
   function favoriteTeam(team) {
     return toggleFavorite('team', team.id, { name: team.name, crest: team.crest, competitionName: team.competitionName })
   }
@@ -114,21 +108,20 @@ export default function FootballCenterPage() {
     setSelectedCompetition('all')
   }
 
-  function clearCompetitionFilters() {
-    setSearchTerm('')
-    setActiveFilter('all')
-  }
-
   if (state.loading) {
     return (
-      <section className="space-y-[var(--bds-space-24)]">
-        <div className="h-[34rem] animate-pulse rounded-[var(--bds-radius-hero)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)]" />
-        <div className="grid gap-[var(--bds-space-16)] md:grid-cols-5">
-          {[1, 2, 3, 4, 5].map((item) => (
-            <div key={item} className="h-36 animate-pulse rounded-[var(--bds-radius-lg)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)]" />
-          ))}
+      <section className="bds-football-page space-y-[var(--bds-space-14)]">
+        <div className="bds-football-skeleton h-12 rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_44%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_26%,transparent)]" />
+        <div className="grid gap-[var(--bds-space-14)] lg:grid-cols-[minmax(12rem,14rem)_minmax(0,1fr)]">
+          <div className="bds-football-skeleton hidden h-[28rem] rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_44%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_18%,transparent)] lg:block" />
+          <div className="space-y-[var(--bds-space-10)]">
+            <div className="bds-football-skeleton h-[14rem] rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_44%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_22%,transparent)]" />
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="bds-football-skeleton h-16 border-y border-[color-mix(in_srgb,var(--bds-color-border)_32%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_12%,transparent)]" />
+            ))}
+          </div>
         </div>
-        <Loading label="Carregando central do futebol" />
+        <p className="sr-only" aria-live="polite">Carregando central do futebol</p>
       </section>
     )
   }
@@ -141,11 +134,13 @@ export default function FootballCenterPage() {
     matches: data.matches || [],
     activeCompetition: selectedCompetition,
     favoriteCount: favoriteKeys.size,
+    activeFilter,
     onSelect: selectCompetition,
+    onFilter: setActiveFilter,
   }
 
   return (
-    <section className="space-y-[var(--bds-space-18)]">
+    <section className="bds-football-page space-y-[var(--bds-space-14)]">
       <FootballDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} {...sidebarProps} />
       <FootballBreadcrumb activeCompetition={selectedCompetition} onHome={() => navigate('/')} onFootball={clearExperienceFilters} />
       <FootballExperienceBar
@@ -159,13 +154,12 @@ export default function FootballCenterPage() {
       />
       <p className="sr-only" aria-live="polite">{favoriteMessage}</p>
 
-      <div className="grid min-w-0 items-start gap-[var(--bds-space-16)] lg:grid-cols-[minmax(13.5rem,15rem)_minmax(0,1fr)_minmax(18rem,20rem)] xl:gap-[var(--bds-space-18)] 2xl:grid-cols-[minmax(14.5rem,16rem)_minmax(0,1fr)_minmax(20rem,21.5rem)]">
+      <div className="grid min-w-0 items-start gap-[var(--bds-space-14)] lg:grid-cols-[minmax(12rem,14rem)_minmax(0,1fr)] xl:grid-cols-[minmax(13rem,15rem)_minmax(0,1fr)]">
         <FootballSidebar {...sidebarProps} />
 
-        <main className="min-w-0 space-y-[var(--bds-space-16)]">
-          <FootballHero match={derived.hero} stats={derived.stats} onOpen={openMatch} onTeam={openTeamByName} teams={data.teams || []} favoriteKeys={favoriteKeys} onFavoriteTeam={favoriteTeam} />
+        <main className="min-w-0 space-y-[var(--bds-space-12)]">
+          <FootballHero match={derived.hero} onOpen={openMatch} onTeam={openTeamByName} teams={data.teams || []} favoriteKeys={favoriteKeys} onFavoriteTeam={favoriteTeam} />
           <FootballSummaryCards stats={derived.stats} onSelect={setActiveFilter} />
-          <FootballFilterBar activeFilter={activeFilter} onChange={setActiveFilter} onOpenMenu={() => setDrawerOpen(true)} />
 
           {searchTerm ? (
             <FootballSearchResults
@@ -190,41 +184,21 @@ export default function FootballCenterPage() {
               matches={derived.matches}
               onOpen={openMatch}
               emptyTitle={`Nenhuma partida em "${focusedView.title}"`}
-              emptyDescription="Ajuste os filtros para explorar os outros jogos carregados."
               favoriteKeys={favoriteKeys}
               onFavorite={favoriteMatch}
-              onClear={clearExperienceFilters}
             />
           ) : null}
 
           {!searchTerm && activeFilter === 'all' ? (
             <>
-              <FootballSection title="Ao Vivo" eyebrow="Prioridade maxima" icon={Radio} matches={derived.live} onOpen={openMatch} emptyTitle="Nenhuma partida ao vivo" emptyDescription="A central continua monitorando os jogos carregados." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} onClear={clearExperienceFilters} />
-              <FootballSection title="Jogos de Hoje" eyebrow="Agenda do dia" icon={CalendarDays} matches={derived.today} onOpen={openMatch} emptyTitle="Nenhum jogo hoje" emptyDescription="Confira resultados recentes e proximos confrontos." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} onClear={clearExperienceFilters} />
-              <FootballSection title="Ultimos Resultados" eyebrow="Placares recentes" icon={CheckCircle2} matches={derived.results} onOpen={openMatch} emptyTitle="Nenhum resultado disponivel" emptyDescription="Os proximos jogos seguem organizados na agenda." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} onClear={clearExperienceFilters} />
-              <FootballSection title="Proximos Jogos" eyebrow="Calendario" icon={Clock3} matches={derived.upcoming} onOpen={openMatch} emptyTitle="Nenhum proximo jogo sincronizado" emptyDescription="A agenda sera preenchida com os dados ja carregados." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} onClear={clearExperienceFilters} />
-              <FootballWorldCup data={{ ...data, matches: derived.searchedMatches }} onOpen={openMatch} />
-              <FootballCompetitionGrid
-                competitions={(data.competitions || []).filter((competition) => selectedCompetition === 'all' || derived.searchedMatches.some((match) => match.competitionId === competition.id))}
-                matches={derived.searchedMatches}
-                favoriteKeys={favoriteKeys}
-                activeCompetition={selectedCompetition}
-                onSelect={selectCompetition}
-                onFavorite={favoriteCompetition}
-                sortBy={competitionSort}
-                onSort={setCompetitionSort}
-              />
+              <FootballSection title="Ao Vivo" icon={Radio} matches={derived.live} onOpen={openMatch} emptyTitle="Nenhuma partida ao vivo." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} />
+              <FootballSection title="Jogos de Hoje" icon={CalendarDays} matches={derived.today} onOpen={openMatch} emptyTitle="Nenhum jogo hoje." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} />
+              <FootballSection title="Proximos Jogos" icon={Clock3} matches={derived.upcoming} onOpen={openMatch} emptyTitle="Nenhum proximo jogo." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} />
+              <FootballSection title="Ultimos Resultados" icon={CheckCircle2} matches={derived.results} onOpen={openMatch} emptyTitle="Nenhum resultado." favoriteKeys={favoriteKeys} onFavorite={favoriteMatch} />
+              <FootballRightPanel data={data} />
             </>
           ) : null}
         </main>
-
-        <div className="hidden lg:sticky lg:top-[var(--bds-space-24)] lg:block">
-          <FootballRightPanel data={data} derived={derived} onOpen={openMatch} />
-        </div>
-      </div>
-
-      <div className="lg:hidden">
-        <FootballRightPanel data={data} derived={derived} onOpen={openMatch} />
       </div>
     </section>
   )

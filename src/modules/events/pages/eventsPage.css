@@ -744,3 +744,19 @@
 .bds-events-highlight::after {
   filter: none;
 }
+
+/* Hotfix UI Polish 1.2 - final hero deglow */
+.bds-events-hero,
+.bds-events-highlight {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 7%, var(--bds-color-border));
+  box-shadow: none;
+}
+
+.bds-events-hero::before,
+.bds-events-hero::after,
+.bds-events-highlight::before,
+.bds-events-highlight::after {
+  box-shadow: none;
+  filter: none;
+  opacity: 0.1;
+}

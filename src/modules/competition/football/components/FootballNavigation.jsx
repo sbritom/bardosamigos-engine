@@ -30,7 +30,7 @@ export function FootballExperienceBar({
 }) {
   return (
     <section
-      className="flex flex-wrap items-center justify-between gap-[var(--bds-space-12)] border-b border-[color-mix(in_srgb,var(--bds-color-border)_76%,transparent)] pb-[var(--bds-space-12)]"
+      className="flex flex-wrap items-center justify-between gap-[var(--bds-space-12)] border-b border-[color-mix(in_srgb,var(--bds-color-border)_60%,transparent)] pb-[var(--bds-space-12)]"
       aria-label="Busca e sincronizacao"
     >
       <div className="flex min-w-max items-center gap-[var(--bds-space-10)]">
@@ -47,7 +47,7 @@ export function FootballExperienceBar({
         </div>
       </div>
 
-      <div className="relative min-w-[min(100%,22rem)] flex-1 rounded-full border border-[color-mix(in_srgb,var(--bds-color-border)_82%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_62%,transparent)] px-[var(--bds-space-16)] py-[var(--bds-space-10)] transition duration-[var(--bds-transition-fast)] focus-within:border-[var(--bds-color-primary-hover)]">
+      <div className="relative min-w-[min(100%,30rem)] flex-1 rounded-full border border-[color-mix(in_srgb,var(--bds-color-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_52%,transparent)] px-[var(--bds-space-16)] py-[var(--bds-space-10)] transition focus-within:border-[var(--bds-color-primary-hover)]">
         <label htmlFor="football-search" className="sr-only">Buscar na central</label>
         <div className="flex items-center gap-[var(--bds-space-10)]">
           <Search size={18} className="shrink-0 text-[var(--bds-color-text-muted)]" aria-hidden="true" />
@@ -56,7 +56,7 @@ export function FootballExperienceBar({
             type="search"
             value={searchTerm}
             onChange={(event) => onSearch(event.target.value)}
-            placeholder="Pesquisar competicoes, times..."
+            placeholder="Pesquisar times, competições ou partidas..."
             autoComplete="off"
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-[var(--bds-color-text)] outline-none placeholder:text-[var(--bds-color-text-muted)]"
           />
@@ -76,7 +76,7 @@ export function FootballExperienceBar({
       <button
         type="button"
         onClick={onRefresh}
-        className="flex min-w-max items-center gap-[var(--bds-space-8)] rounded-full bg-[color-mix(in_srgb,var(--bds-color-surface)_50%,transparent)] px-[var(--bds-space-12)] py-[var(--bds-space-8)] text-xs text-[var(--bds-color-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_24%,transparent)] hover:text-[var(--bds-color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
+        className="flex min-w-max items-center gap-[var(--bds-space-8)] rounded-full bg-[color-mix(in_srgb,var(--bds-color-surface)_42%,transparent)] px-[var(--bds-space-12)] py-[var(--bds-space-8)] text-xs text-[var(--bds-color-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_18%,transparent)] hover:text-[var(--bds-color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
         aria-label="Atualizar central"
       >
         <RefreshCw size={14} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />

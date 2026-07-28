@@ -716,3 +716,30 @@
 .bar-radio-listener-player::after {
   filter: none;
 }
+
+/* Hotfix UI Polish 1.2 - radio spacing and hero deglow */
+.bar-radio-page {
+  padding-top: var(--bds-space-16);
+}
+
+.bar-radio-page-header {
+  margin-bottom: var(--bds-space-24);
+  box-shadow: none;
+}
+
+.bar-radio-listener-player {
+  margin-top: var(--bds-space-8);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--bds-color-surface) 82%, transparent), var(--bds-color-background));
+  box-shadow: none;
+}
+
+.bar-radio-listener-player:hover {
+  box-shadow: none;
+}
+
+.bar-radio-listener-player::before,
+.bar-radio-listener-player::after {
+  box-shadow: none;
+  filter: none;
+}

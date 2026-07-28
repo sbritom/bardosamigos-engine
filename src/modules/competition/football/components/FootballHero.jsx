@@ -1,7 +1,7 @@
-import { Activity, CalendarDays, CheckCircle2, Clock3, Radio, Trophy } from 'lucide-react'
-import { formatBrazilDate, getRelativeBrazilDayLabel } from '../../../../core/time'
+import { CalendarDays, CheckCircle2, Clock3, MapPin, Radio, Trophy } from 'lucide-react'
 import { FootballEmptyState, FootballStatusBadge } from './FootballCommon'
-import { formatFootballScore, getFootballMatchTime, getFootballStageLabel } from '../utils/footballCenterUtils'
+import { FootballLiveValue } from './FootballLiveMotion'
+import { formatFootballScore, getFootballMatchTime } from '../utils/footballCenterUtils'
 
 function FootballHeroTeam({ name, crest, align = 'left', onClick }) {
   return (
@@ -9,58 +9,44 @@ function FootballHeroTeam({ name, crest, align = 'left', onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Abrir pagina de ${name || 'time'}`}
-      className={`group flex min-w-0 items-center gap-[var(--bds-space-10)] rounded-[var(--bds-radius-sm)] text-left transition duration-[var(--bds-transition-fast)] hover:text-[var(--bds-color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}
+      className={`group flex min-w-0 items-center gap-[var(--bds-space-10)] rounded-[var(--bds-radius-sm)] text-left transition hover:text-[var(--bds-color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}
     >
-      <span className="flex h-14 w-14 shrink-0 items-center justify-center drop-shadow-sm transition duration-[var(--bds-transition-fast)] group-hover:scale-[1.04] sm:h-16 sm:w-16">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center drop-shadow-sm transition sm:h-14 sm:w-14">
         {crest ? <img src={crest} alt="" className="h-full w-full object-contain" /> : <Trophy size={28} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
       </span>
-      <strong className="truncate text-base font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text)] sm:text-lg">
+      <strong className="truncate text-base font-bold text-[var(--bds-color-text)] sm:text-lg">
         {name || 'Time a definir'}
       </strong>
     </button>
   )
 }
 
-function HeroMetric({ label, value, icon: Icon }) {
-  return (
-    <div className="flex min-w-0 items-center gap-[var(--bds-space-8)] border-l border-[color-mix(in_srgb,var(--bds-color-border)_64%,transparent)] pl-[var(--bds-space-10)] first:border-l-0 first:pl-0">
-      <Icon size={15} className="shrink-0 text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
-      <span className="min-w-0">
-        <strong className="block truncate text-sm font-black tabular-nums text-[var(--bds-color-text)]">{value}</strong>
-        <span className="block truncate text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text-muted)]">{label}</span>
-      </span>
-    </div>
-  )
-}
-
-export function FootballHero({ match, stats, onOpen, onTeam }) {
+export function FootballHero({ match, onOpen, onTeam }) {
   if (!match) {
     return (
-      <section className="border-y border-[color-mix(in_srgb,var(--bds-color-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_28%,transparent)] px-[var(--bds-space-16)] py-[var(--bds-space-18)]">
-        <FootballEmptyState compact title="Central pronta para a proxima rodada" description="Assim que houver uma partida sincronizada, o destaque sera atualizado aqui." />
+      <section className="border-y border-[color-mix(in_srgb,var(--bds-color-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_28%,transparent)] px-[var(--bds-space-16)] py-[var(--bds-space-12)]">
+        <FootballEmptyState compact title="Nenhuma partida em destaque" />
       </section>
     )
   }
 
-  const stageLabel = getFootballStageLabel(match.stage)
-  const roundLabel = match.round?.name || stageLabel || 'Rodada atual'
-  const dateLabel = match.startsAt ? `${getRelativeBrazilDayLabel(match.startsAt)} - ${formatBrazilDate(match.startsAt)}` : 'Data a definir'
+  const timeLabel = getFootballMatchTime(match) || 'Horário a definir'
+  const placeLabel = [match.venue, match.city].filter(Boolean).join(' - ') || match.country || 'Local a definir'
+  const scoreLabel = formatFootballScore(match)
 
   return (
-    <section className="relative overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_72%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--bds-color-surface)_72%,transparent),color-mix(in_srgb,var(--bds-color-background)_88%,transparent))] shadow-none">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0,color-mix(in_srgb,var(--bds-color-primary)_24%,transparent),transparent_48%)] opacity-[var(--bds-opacity-subtle)]" aria-hidden="true" />
-
-      <div className="relative grid gap-[var(--bds-space-14)] px-[var(--bds-space-16)] py-[var(--bds-space-16)]">
-        <div className="flex flex-wrap items-center justify-between gap-[var(--bds-space-10)]">
-          <div className="min-w-0">
-            <p className="truncate text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">
-              {match.competitionName || 'Central do Futebol'}
-            </p>
-            <h1 className="mt-[var(--bds-space-3)] truncate text-lg font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text)] sm:text-xl">
-              {roundLabel}
-            </h1>
+    <section key={match.id} className="bds-football-hero-motion relative grid min-h-[210px] overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_58%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] shadow-none sm:min-h-[230px]">
+      <div className="grid content-center gap-[var(--bds-space-12)] px-[var(--bds-space-16)] py-[var(--bds-space-12)]">
+        <div className="flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
+          <p className="truncate text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">
+            {match.competitionName || 'Central do Futebol'}
+          </p>
+          <div className="flex items-center gap-[var(--bds-space-8)]">
+            <FootballStatusBadge match={match} />
+            <FootballLiveValue as="span" value={timeLabel} className="bds-football-time-value text-xs font-black tabular-nums text-[var(--bds-color-text-secondary)]">
+              {timeLabel}
+            </FootballLiveValue>
           </div>
-          <FootballStatusBadge match={match} />
         </div>
 
         <div className="grid w-full items-center gap-[var(--bds-space-12)] text-left md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
@@ -68,20 +54,23 @@ export function FootballHero({ match, stats, onOpen, onTeam }) {
           <button
             type="button"
             onClick={() => onOpen(match.id)}
-            className="mx-auto flex min-w-28 flex-col items-center justify-center rounded-[var(--bds-radius-sm)] border border-[color-mix(in_srgb,var(--bds-color-border)_76%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-background)_54%,transparent)] px-[var(--bds-space-16)] py-[var(--bds-space-8)] transition duration-[var(--bds-transition-fast)] hover:border-[var(--bds-color-primary-hover)] hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_16%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
+            className="mx-auto flex min-w-28 flex-col items-center justify-center rounded-[var(--bds-radius-sm)] border border-[color-mix(in_srgb,var(--bds-color-border)_62%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-background)_46%,transparent)] px-[var(--bds-space-14)] py-[var(--bds-space-8)] transition hover:border-[color-mix(in_srgb,var(--bds-color-primary-hover)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
           >
-            <strong className="text-3xl font-black tabular-nums leading-none text-[var(--bds-color-text)] sm:text-4xl">{formatFootballScore(match)}</strong>
-            <span className="mt-[var(--bds-space-4)] text-xs font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">{getFootballMatchTime(match)}</span>
+            <FootballLiveValue
+              as="strong"
+              value={scoreLabel}
+              highlight={match.hasScore}
+              className="bds-football-score-value text-2xl font-black tabular-nums leading-none text-[var(--bds-color-text)] sm:text-3xl"
+            >
+              {scoreLabel}
+            </FootballLiveValue>
           </button>
           <FootballHeroTeam name={match.awayTeam} crest={match.awayCrest} align="right" onClick={() => onTeam(match.awayTeam)} />
         </div>
 
-        <div className="grid gap-[var(--bds-space-10)] border-t border-[color-mix(in_srgb,var(--bds-color-border)_64%,transparent)] pt-[var(--bds-space-12)] sm:grid-cols-2 xl:grid-cols-5">
-          <HeroMetric icon={CalendarDays} label="Data" value={dateLabel} />
-          <HeroMetric icon={Activity} label="Jogos" value={stats?.total ?? 0} />
-          <HeroMetric icon={Radio} label="Ao vivo" value={stats?.live ?? 0} />
-          <HeroMetric icon={Clock3} label="Proximas" value={stats?.upcoming ?? 0} />
-          <HeroMetric icon={CheckCircle2} label="Finalizadas" value={stats?.finished ?? 0} />
+        <div className="flex items-center justify-center gap-[var(--bds-space-6)] text-xs font-bold text-[var(--bds-color-text-secondary)]">
+          <MapPin size={13} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
+          <span className="truncate">{placeLabel}</span>
         </div>
       </div>
     </section>
@@ -90,26 +79,26 @@ export function FootballHero({ match, stats, onOpen, onTeam }) {
 
 export function FootballSummaryCards({ stats, onSelect, cards: customCards }) {
   const cards = customCards || [
-    { id: 'all', label: 'Monitorados', value: stats.total, icon: Activity },
     { id: 'live', label: 'Ao vivo', value: stats.live, icon: Radio },
     { id: 'today', label: 'Hoje', value: stats.today, icon: CalendarDays },
-    { id: 'finished', label: 'Finalizados', value: stats.finished, icon: CheckCircle2 },
     { id: 'week', label: 'Proximos', value: stats.upcoming, icon: Clock3 },
-    { id: 'all', label: 'Competicoes', value: stats.competitions, icon: Trophy },
+    { id: 'finished', label: 'Finalizados', value: stats.finished, icon: CheckCircle2 },
   ]
 
   return (
-    <div className="grid overflow-hidden rounded-[var(--bds-radius-sm)] border-y border-[color-mix(in_srgb,var(--bds-color-border)_68%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_24%,transparent)] sm:grid-cols-2 lg:grid-cols-6">
+    <div className="grid gap-[var(--bds-space-5)] border-y border-[color-mix(in_srgb,var(--bds-color-border)_52%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_12%,transparent)] px-[var(--bds-space-8)] py-[var(--bds-space-6)] sm:grid-cols-4">
       {cards.map(({ id, label, value, icon: Icon }) => (
         <button
           key={label}
           type="button"
           onClick={() => onSelect(id)}
-          className="flex min-h-12 items-center justify-center gap-[var(--bds-space-8)] border-b border-r border-[color-mix(in_srgb,var(--bds-color-border)_52%,transparent)] px-[var(--bds-space-8)] py-[var(--bds-space-7)] text-center transition duration-[var(--bds-transition-fast)] hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_14%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
+          className="grid min-h-12 place-items-center rounded-[var(--bds-radius-xs)] px-[var(--bds-space-8)] py-[var(--bds-space-4)] text-center text-xs font-bold text-[var(--bds-color-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_8%,transparent)] hover:text-[var(--bds-color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
         >
-          <Icon size={14} className="shrink-0 text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
-          <strong className="text-xl font-black tabular-nums leading-none text-[var(--bds-color-text)]">{value}</strong>
-          <span className="text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text-secondary)]">{label}</span>
+          <span className="flex items-center gap-[var(--bds-space-5)] text-[var(--bds-font-micro)] uppercase tracking-[var(--bds-letter-overline)]">
+            <Icon size={12} className="shrink-0 text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
+            {label}
+          </span>
+          <strong className="text-lg tabular-nums text-[var(--bds-color-text)]">{value}</strong>
         </button>
       ))}
     </div>

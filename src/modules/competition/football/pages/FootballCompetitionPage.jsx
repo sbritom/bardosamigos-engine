@@ -10,6 +10,7 @@ import { FootballSection } from '../components/FootballSection'
 import { FootballDrawer, FootballSidebar } from '../components/FootballSidebar'
 import { FOOTBALL_COMPETITION_FILTERS, FOOTBALL_FOCUSED_VIEWS } from '../constants/footballCenterConstants'
 import { footballMatchBelongsToCompetition, getFootballUpcomingMatches, isFootballFavoriteMatch } from '../utils/footballCenterUtils'
+import './footballMotion.css'
 
 export default function FootballCompetitionPage({
   config,
@@ -65,7 +66,7 @@ export default function FootballCompetitionPage({
   }
 
   return (
-    <section className="space-y-[var(--bds-space-32)]">
+    <section className="bds-football-page space-y-[var(--bds-space-32)]">
       <FootballDrawer open={drawerOpen} onClose={onDrawerClose} {...sidebarProps} />
       <FootballBreadcrumb activeCompetition={config.id} onHome={onHome} onFootball={onFootball} />
       <FootballExperienceBar searchTerm={searchTerm} onSearch={onSearch} onClear={onClearSearch} lastUpdatedAt={data.lastUpdatedAt} totalMatches={competitionMatches.length} />

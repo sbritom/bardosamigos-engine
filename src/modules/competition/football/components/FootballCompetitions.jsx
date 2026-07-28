@@ -110,7 +110,7 @@ function FootballCompetitionCard({ competition, favorited, selected, onFavorite,
       aria-pressed={selected}
       onClick={onSelect}
       onKeyDown={handleKeyDown}
-      className={`group flex min-h-24 cursor-pointer flex-col rounded-[var(--bds-radius-sm)] border bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] p-[var(--bds-space-10)] shadow-none transition duration-[var(--bds-transition-fast)] hover:border-[var(--bds-color-primary-hover)] hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${selected ? 'border-[var(--bds-color-primary-hover)] shadow-[inset_0_2px_0_var(--bds-color-primary-hover)]' : 'border-[color-mix(in_srgb,var(--bds-color-border)_62%,transparent)]'}`}
+      className={`group flex min-h-24 cursor-pointer flex-col rounded-[var(--bds-radius-sm)] border bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] p-[var(--bds-space-10)] shadow-none transition hover:border-[var(--bds-color-primary-hover)] hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${selected ? 'border-[var(--bds-color-primary-hover)] shadow-[inset_0_2px_0_var(--bds-color-primary-hover)]' : 'border-[color-mix(in_srgb,var(--bds-color-border)_62%,transparent)]'}`}
     >
       <div className="flex items-start gap-[var(--bds-space-12)]">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center drop-shadow-sm">

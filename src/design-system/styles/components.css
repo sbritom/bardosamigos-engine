@@ -5469,3 +5469,64 @@ article[class*="shadow-[var(--bds-shadow-hero)]"] {
 )::after {
   filter: none;
 }
+
+/* Hotfix UI Polish 1.2 - final hero deglow */
+:where(
+  .bds-hero-card,
+  .bds-home-shell .bds-hero-card,
+  .bds-home-shell .bds-hero-v2,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-page-header,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__header,
+  .tv-platform__player-section,
+  .bds-barstudio-app-header,
+  section[class*="shadow-[var(--bds-shadow-hero)]"],
+  div[class*="shadow-[var(--bds-shadow-hero)]"],
+  article[class*="shadow-[var(--bds-shadow-hero)]"]
+) {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 7%, var(--bds-color-border));
+  box-shadow: none !important;
+  filter: none;
+}
+
+:where(
+  .bds-hero-card,
+  .bds-home-shell .bds-hero-v2,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__player-section
+)::before,
+:where(
+  .bds-hero-card,
+  .bds-home-shell .bds-hero-v2,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__player-section
+)::after {
+  box-shadow: none !important;
+  filter: none;
+  opacity: 0.12;
+}
+
+:where(
+  .bds-hero-card:hover,
+  .bds-home-shell .bds-hero-card:hover,
+  .bds-home-shell .bds-hero-v2:hover,
+  .bds-release-hero:hover,
+  .bds-community-hero:hover,
+  .bds-events-hero:hover,
+  .bar-radio-listener-player:hover,
+  .tv-platform__player-section:hover
+) {
+  box-shadow: none !important;
+}
