@@ -8,7 +8,7 @@ const PAGE_SIZE = 6
 
 function NewsCover({ item }) {
   if (item.image) {
-    return <img src={item.image} alt="" className="h-40 w-full rounded-xl object-cover" loading="lazy" />
+    return <img src={item.image} alt={`Imagem da noticia: ${item.title}`} className="h-40 w-full rounded-xl object-cover" loading="lazy" />
   }
 
   return (

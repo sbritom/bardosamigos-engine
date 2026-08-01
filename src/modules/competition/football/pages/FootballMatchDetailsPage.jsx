@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Shield } from 'lucide-react'
 import { Badge, Button, Card, EmptyState, Loading, StatCard } from '../../../../design-system'
 import { formatBrazilFullDateTime } from '../../../../core/time'
 import { getFootballMatchDetails } from '../../services/footballCenterService'
@@ -11,7 +12,7 @@ function score(match) {
 function TeamBlock({ name, crest }) {
   return (
     <div className="min-w-0 text-center">
-      {crest ? <img src={crest} alt="" className="mx-auto h-20 w-20 object-contain" loading="lazy" /> : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--radius)] border border-[var(--bds-color-primary-hover)] bg-[var(--bds-color-background)] text-[var(--bds-color-primary-hover)]">BDA</div>}
+      {crest ? <img src={crest} alt="" className="mx-auto h-20 w-20 object-contain" loading="lazy" /> : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--radius)] border border-[var(--bds-color-primary-hover)] bg-[var(--bds-color-background)] text-[var(--bds-color-primary-hover)]"><Shield size={28} aria-hidden="true" /></div>}
       <h2 className="mt-3 truncate text-2xl font-black">{name}</h2>
     </div>
   )

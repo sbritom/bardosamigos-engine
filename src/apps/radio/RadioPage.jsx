@@ -187,7 +187,7 @@ export default function RadioPage() {
           {hasCover ? (
             <img
               src={coverUrl}
-              alt=""
+              alt={`Capa de ${metadata.track}`}
               className="bar-radio-cover-image"
               onError={() => setFailedCover(coverUrl)}
             />

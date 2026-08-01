@@ -3,7 +3,7 @@ import { ActionButton } from './ActionButton'
 import { CardHeader } from './CardHeader'
 import { StatusBadge } from './StatusBadge'
 
-function MediaBlock({ src, alt = '', fallback = 'BDA', className }) {
+function MediaBlock({ src, alt = '', fallback = '', className }) {
   if (src) return <img src={src} alt={alt} className={classNames('bds-media-block__image', className)} loading="lazy" />
   return <div className={classNames('bds-media-block__fallback', className)}>{fallback}</div>
 }
@@ -49,12 +49,12 @@ export function MatchCard({ homeTeam, awayTeam, homeCrest, awayCrest, competitio
       </div>
       <div className="bds-match-card__teams">
         <div className="bds-match-card__team">
-          <MediaBlock src={homeCrest} alt={homeTeam} fallback={(homeTeam || 'BDA').slice(0, 3).toUpperCase()} />
+          <MediaBlock src={homeCrest} alt={homeTeam} fallback={homeTeam ? homeTeam.slice(0, 3).toUpperCase() : ''} />
           <span>{homeTeam}</span>
         </div>
         <strong className="bds-match-card__score">{score}</strong>
         <div className="bds-match-card__team bds-match-card__team--away">
-          <MediaBlock src={awayCrest} alt={awayTeam} fallback={(awayTeam || 'BDA').slice(0, 3).toUpperCase()} />
+          <MediaBlock src={awayCrest} alt={awayTeam} fallback={awayTeam ? awayTeam.slice(0, 3).toUpperCase() : ''} />
           <span>{awayTeam}</span>
         </div>
       </div>

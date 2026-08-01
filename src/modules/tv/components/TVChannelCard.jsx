@@ -6,9 +6,9 @@ export function TVChannelCard({ channel, active = false, onSelect }) {
 
   return (
     <Card as="article" className={`tv-channel-card${active ? ' tv-channel-card--active' : ''}`}>
-      <button type="button" className="tv-channel-card__media" onClick={() => onSelect(channel)}>
+      <button type="button" className="tv-channel-card__media" onClick={() => onSelect(channel)} aria-label={`Assistir ${channel.name}`}>
         {channel.logo ? (
-          <img src={channel.logo} alt="" loading="lazy" />
+          <img src={channel.logo} alt={`Logo do canal ${channel.name}`} loading="lazy" />
         ) : (
           <span>{channel.name.slice(0, 2).toUpperCase()}</span>
         )}

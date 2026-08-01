@@ -18,36 +18,50 @@ import {
 
 import HomePage from "../../apps/portal/pages/HomePage";
 import PluginPage from "../../shared/layout/PluginPage";
-import {
-  ChampionshipsPage,
-  MatchesPage,
-  MatchResultsPage,
-  RoundsPage,
-  SeasonsPage,
-  TeamsPage,
-} from "../../modules/competition/admin";
-import CompetitionPredictionsPage from "../../modules/competition/predictions/pages/CompetitionPredictionsPage";
-import MyPredictionsPage from "../../modules/competition/predictions/pages/MyPredictionsPage";
-import MyPredictionResultPage from "../../modules/competition/predictions/pages/MyPredictionResultPage";
-import CompetitionRankingPage from "../../modules/competition/ranking/pages/CompetitionRankingPage";
-import FootballCenterPage from "../../modules/competition/football/pages/FootballCenterPage";
-import FootballMatchDetailsPage from "../../modules/competition/football/pages/FootballMatchDetailsPage";
-import FootballTeamPage from "../../modules/competition/football/pages/FootballTeamPage";
-import NewsPage from "../../modules/news/pages/NewsPage";
-import CommunityPage from "../../modules/community/pages/CommunityPage";
-import TVPage from "../../modules/tv/pages/TVPage";
-import { TVManager } from "../../modules/tv/admin";
-import { RadioAdminPage, RadioPage, XatPreviewPage } from "../../apps/radio";
-import BarStudioPage from "../../modules/barstudio/pages/BarStudioPage";
-import DesignerPage from "../../modules/barstudio/designer/pages/DesignerPage";
-import GamesPage from "../../modules/games/pages/GamesPage";
-import BarCoinsPage from "../../modules/barcoins/pages/BarCoinsPage";
-import EventsPage from "../../modules/events/pages/EventsPage";
-import EventsAdminPage from "../../modules/events/admin/pages/EventsAdminPage";
-import ManualPage from "../../modules/manual/pages/ManualPage";
-import AdminPage from "../../modules/admin/pages/AdminPage";
 
 const FullScreenChat = React.lazy(() => import("../../modules/chat/pages/FullScreenChat"));
+const TVPage = React.lazy(() => import("../../modules/tv/pages/TVPage"));
+const RadioPage = React.lazy(() => import("../../apps/radio/RadioPage"));
+const XatPreviewPage = React.lazy(() => import("../../apps/radio/XatPreviewPage"));
+const RadioAdminPage = React.lazy(() => import("../../apps/radio/admin/RadioAdminPage"));
+const FootballCenterPage = React.lazy(() => import("../../modules/competition/football/pages/FootballCenterPage"));
+const FootballMatchDetailsPage = React.lazy(() => import("../../modules/competition/football/pages/FootballMatchDetailsPage"));
+const FootballTeamPage = React.lazy(() => import("../../modules/competition/football/pages/FootballTeamPage"));
+const NewsPage = React.lazy(() => import("../../modules/news/pages/NewsPage"));
+const CommunityPage = React.lazy(() => import("../../modules/community/pages/CommunityPage"));
+const BarStudioPage = React.lazy(() => import("../../modules/barstudio/pages/BarStudioPage"));
+const DesignerPage = React.lazy(() => import("../../modules/barstudio/designer/pages/DesignerPage"));
+const GamesPage = React.lazy(() => import("../../modules/games/pages/GamesPage"));
+const BarCoinsPage = React.lazy(() => import("../../modules/barcoins/pages/BarCoinsPage"));
+const EventsPage = React.lazy(() => import("../../modules/events/pages/EventsPage"));
+const EventsAdminPage = React.lazy(() => import("../../modules/events/admin/pages/EventsAdminPage"));
+const ManualPage = React.lazy(() => import("../../modules/manual/pages/ManualPage"));
+const AdminPage = React.lazy(() => import("../../modules/admin/pages/AdminPage"));
+const TVManager = React.lazy(() =>
+  import("../../modules/tv/admin/TVManager").then((module) => ({ default: module.TVManager })),
+);
+const ChampionshipsPage = React.lazy(() => import("../../modules/competition/admin/pages/ChampionshipsPage"));
+const SeasonsPage = React.lazy(() => import("../../modules/competition/admin/pages/SeasonsPage"));
+const RoundsPage = React.lazy(() => import("../../modules/competition/admin/pages/RoundsPage"));
+const TeamsPage = React.lazy(() => import("../../modules/competition/admin/pages/TeamsPage"));
+const MatchesPage = React.lazy(() => import("../../modules/competition/admin/pages/MatchesPage"));
+const MatchResultsPage = React.lazy(() => import("../../modules/competition/admin/pages/MatchResultsPage"));
+const CompetitionPredictionsPage = React.lazy(() =>
+  import("../../modules/competition/predictions/pages/CompetitionPredictionsPage"),
+);
+const MyPredictionsPage = React.lazy(() => import("../../modules/competition/predictions/pages/MyPredictionsPage"));
+const MyPredictionResultPage = React.lazy(() =>
+  import("../../modules/competition/predictions/pages/MyPredictionResultPage"),
+);
+const CompetitionRankingPage = React.lazy(() => import("../../modules/competition/ranking/pages/CompetitionRankingPage"));
+
+function LazyPluginPage({ component: Component, title, description, ...props }) {
+  return (
+    <React.Suspense fallback={<PluginPage title={title} description={description || `Carregando ${title}...`} />}>
+      <Component {...props} />
+    </React.Suspense>
+  );
+}
 
 export const plugins = [
   {
@@ -65,7 +79,7 @@ export const plugins = [
     path: "/tv",
     icon: Tv,
     menu: true,
-    element: <TVPage />,
+    element: <LazyPluginPage component={TVPage} title="TV" />,
   },
 
     {
@@ -74,7 +88,7 @@ export const plugins = [
     path: "/radio",
     icon: Radio,
     menu: true,
-    element: <RadioPage />,
+    element: <LazyPluginPage component={RadioPage} title="Rádio" />,
   },
 
   {
@@ -83,7 +97,7 @@ export const plugins = [
     path: "/radio/xat",
     icon: Radio,
     menu: false,
-    element: <XatPreviewPage />,
+    element: <LazyPluginPage component={XatPreviewPage} title="Radio xat" />,
   },
 
   {
@@ -92,7 +106,7 @@ export const plugins = [
     path: "/radio/admin",
     icon: Shield,
     menu: false,
-    element: <RadioAdminPage />,
+    element: <LazyPluginPage component={RadioAdminPage} title="Radio Admin" />,
   },
 
   {
@@ -101,7 +115,7 @@ export const plugins = [
     path: "/football/*",
     icon: Trophy,
     menu: true,
-    element: <FootballCenterPage />,
+    element: <LazyPluginPage component={FootballCenterPage} title="Futebol" />,
   },
 
   {
@@ -110,7 +124,7 @@ export const plugins = [
     path: "/football/jogos/:matchId",
     icon: Trophy,
     menu: false,
-    element: <FootballMatchDetailsPage />,
+    element: <LazyPluginPage component={FootballMatchDetailsPage} title="Detalhes da Partida" />,
   },
 
   {
@@ -119,7 +133,7 @@ export const plugins = [
     path: "/football/times/:teamId",
     icon: Trophy,
     menu: false,
-    element: <FootballTeamPage />,
+    element: <LazyPluginPage component={FootballTeamPage} title="Time" />,
   },
 
   {
@@ -143,7 +157,7 @@ export const plugins = [
     path: "/news",
     icon: Newspaper,
     menu: true,
-    element: <NewsPage />,
+    element: <LazyPluginPage component={NewsPage} title="Notícias" />,
   },
 
     {
@@ -152,7 +166,7 @@ export const plugins = [
     path: "/tools",
     icon: Wrench,
     menu: true,
-    element: <BarStudioPage />,
+    element: <LazyPluginPage component={BarStudioPage} title="BarStudio" />,
   },
 
   {
@@ -161,7 +175,7 @@ export const plugins = [
     path: "/barstudio/designer",
     icon: Wrench,
     menu: false,
-    element: <DesignerPage />,
+    element: <LazyPluginPage component={DesignerPage} title="Designer Pro" />,
   },
 
     {
@@ -170,7 +184,7 @@ export const plugins = [
     path: "/brincadeiras",
     icon: Gamepad2,
     menu: true,
-    element: <GamesPage />,
+    element: <LazyPluginPage component={GamesPage} title="Brincadeiras" />,
   },
 
   {
@@ -179,7 +193,7 @@ export const plugins = [
     path: "/games",
     icon: Gamepad2,
     menu: false,
-    element: <GamesPage />,
+    element: <LazyPluginPage component={GamesPage} title="Brincadeiras" />,
   },
 
   {
@@ -188,7 +202,7 @@ export const plugins = [
     path: "/community",
     icon: Users,
     menu: true,
-    element: <CommunityPage />,
+    element: <LazyPluginPage component={CommunityPage} title="Comunidade" />,
   },
 
     {
@@ -197,7 +211,7 @@ export const plugins = [
     path: "/barcoins",
     icon: Coins,
     menu: true,
-    element: <BarCoinsPage />,
+    element: <LazyPluginPage component={BarCoinsPage} title="BarCoins" />,
   },
 
     {
@@ -206,7 +220,7 @@ export const plugins = [
     path: "/events",
     icon: CalendarDays,
     menu: true,
-    element: <EventsPage />,
+    element: <LazyPluginPage component={EventsPage} title="Eventos" />,
   },
 
   {
@@ -215,7 +229,7 @@ export const plugins = [
     path: "/events/admin",
     icon: Shield,
     menu: false,
-    element: <EventsAdminPage />,
+    element: <LazyPluginPage component={EventsAdminPage} title="Eventos Admin" />,
   },
 
   {
@@ -224,7 +238,7 @@ export const plugins = [
     path: "/manual",
     icon: BookOpen,
     menu: true,
-    element: <ManualPage />,
+    element: <LazyPluginPage component={ManualPage} title="Manual" />,
   },
 
   {
@@ -233,7 +247,7 @@ export const plugins = [
     path: "/admin",
     icon: Shield,
     menu: false,
-    element: <AdminPage />,
+    element: <LazyPluginPage component={AdminPage} title="Admin" />,
   },
 
   {
@@ -242,7 +256,7 @@ export const plugins = [
     path: "/admin/tv",
     icon: Tv,
     menu: false,
-    element: <TVManager section="dashboard" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager" section="dashboard" />,
   },
 
   {
@@ -251,7 +265,7 @@ export const plugins = [
     path: "/admin/tv/categories",
     icon: Tv,
     menu: false,
-    element: <TVManager section="categories" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager Categorias" section="categories" />,
   },
 
   {
@@ -260,7 +274,7 @@ export const plugins = [
     path: "/admin/tv/channels",
     icon: Tv,
     menu: false,
-    element: <TVManager section="channels" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager Canais" section="channels" />,
   },
 
   {
@@ -269,7 +283,7 @@ export const plugins = [
     path: "/admin/tv/featured",
     icon: Tv,
     menu: false,
-    element: <TVManager section="featured" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager Destaques" section="featured" />,
   },
 
   {
@@ -278,7 +292,7 @@ export const plugins = [
     path: "/admin/tv/settings",
     icon: Tv,
     menu: false,
-    element: <TVManager section="settings" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager Configurações" section="settings" />,
   },
 
   {
@@ -287,7 +301,7 @@ export const plugins = [
     path: "/admin/tv/import",
     icon: Tv,
     menu: false,
-    element: <TVManager section="import" />,
+    element: <LazyPluginPage component={TVManager} title="TV Manager Importação" section="import" />,
   },
 
   {
@@ -309,7 +323,7 @@ export const plugins = [
     path: "/admin/competition/campeonatos",
     icon: Shield,
     menu: false,
-    element: <ChampionshipsPage />,
+    element: <LazyPluginPage component={ChampionshipsPage} title="Admin Competition" />,
   },
 
   {
@@ -318,7 +332,7 @@ export const plugins = [
     path: "/admin/competition/temporadas",
     icon: Shield,
     menu: false,
-    element: <SeasonsPage />,
+    element: <LazyPluginPage component={SeasonsPage} title="Admin Competition Temporadas" />,
   },
 
   {
@@ -327,7 +341,7 @@ export const plugins = [
     path: "/admin/competition/rodadas",
     icon: Shield,
     menu: false,
-    element: <RoundsPage />,
+    element: <LazyPluginPage component={RoundsPage} title="Admin Competition Rodadas" />,
   },
 
   {
@@ -336,7 +350,7 @@ export const plugins = [
     path: "/admin/competition/times",
     icon: Shield,
     menu: false,
-    element: <TeamsPage />,
+    element: <LazyPluginPage component={TeamsPage} title="Admin Competition Times" />,
   },
 
   {
@@ -345,7 +359,7 @@ export const plugins = [
     path: "/admin/competition/jogos",
     icon: Shield,
     menu: false,
-    element: <MatchesPage />,
+    element: <LazyPluginPage component={MatchesPage} title="Admin Competition Jogos" />,
   },
 
   {
@@ -354,7 +368,7 @@ export const plugins = [
     path: "/admin/competition/resultados",
     icon: Shield,
     menu: false,
-    element: <MatchResultsPage />,
+    element: <LazyPluginPage component={MatchResultsPage} title="Admin Competition Resultados" />,
   },
 
   {
@@ -363,7 +377,7 @@ export const plugins = [
     path: "/meus-palpites/resultados",
     icon: Trophy,
     menu: false,
-    element: <MyPredictionResultPage />,
+    element: <LazyPluginPage component={MyPredictionResultPage} title="Meus Palpites" />,
   },
 
   {
@@ -372,7 +386,7 @@ export const plugins = [
     path: "/palpites",
     icon: Trophy,
     menu: true,
-    element: <CompetitionPredictionsPage />,
+    element: <LazyPluginPage component={CompetitionPredictionsPage} title="Palpites" />,
   },
 
   {
@@ -381,7 +395,7 @@ export const plugins = [
     path: "/meus-palpites",
     icon: Trophy,
     menu: true,
-    element: <MyPredictionsPage />,
+    element: <LazyPluginPage component={MyPredictionsPage} title="Meus Palpites" />,
   },
 
   {
@@ -390,7 +404,7 @@ export const plugins = [
     path: "/competition/ranking",
     icon: Trophy,
     menu: true,
-    element: <CompetitionRankingPage />,
+    element: <LazyPluginPage component={CompetitionRankingPage} title="Ranking" />,
   },
 ];
 

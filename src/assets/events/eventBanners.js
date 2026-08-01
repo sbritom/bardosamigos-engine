@@ -1,4 +1,4 @@
-import rankingBanner from './ranking-banner.png'
-import bingoBanner from './bingo-banner.png'
+import rankingBanner from './ranking-banner.webp'
+import bingoBanner from './bingo-banner.webp'
 
 export { rankingBanner, bingoBanner }

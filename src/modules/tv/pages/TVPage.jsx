@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Maximize2, RadioTower, SearchX, Tv } from 'lucide-react'
-import { Alert, Badge } from '../../../design-system'
+import { Badge } from '../../../design-system'
 import {
   TVChannelCard,
   TVEmptyState,
@@ -80,12 +80,6 @@ function TVPlatformContent() {
         </div>
         <Badge>{channelCount} CANAIS</Badge>
       </header>
-
-      {channels.error && (
-        <Alert status="warning" title="TV temporariamente indisponivel">
-          A pagina continua acessivel enquanto a conexao com o catalogo e restabelecida.
-        </Alert>
-      )}
 
       <section className="tv-platform__player-section" ref={playerRef}>
         <TVPlayer

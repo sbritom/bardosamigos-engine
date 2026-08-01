@@ -2,10 +2,12 @@ import { Outlet } from "react-router-dom";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
+import PortalSeo from "./seo/PortalSeo";
 
 export default function AppShell() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      <PortalSeo />
 
       <Header />
 

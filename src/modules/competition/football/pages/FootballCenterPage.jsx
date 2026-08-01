@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, CheckCircle2, Clock3, Heart, Radio } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, Radio } from 'lucide-react'
 import { EmptyState } from '../../../../design-system'
 import { FootballHero, FootballSummaryCards } from '../components/FootballHero'
 import { FootballBreadcrumb, FootballExperienceBar } from '../components/FootballNavigation'

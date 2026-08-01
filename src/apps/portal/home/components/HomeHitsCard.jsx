@@ -60,7 +60,7 @@ function HomeHitItem({ hit }) {
     <>
       <span className="bds-home-hits-position">{getPositionLabel(hit.position)}</span>
       <span className="bds-home-hits-cover" aria-hidden="true">
-        {hit.cover ? <img src={hit.cover} alt="" loading="lazy" /> : <Music2 size={16} />}
+        {hit.cover ? <img src={hit.cover} alt={`Capa de ${hit.title}`} loading="lazy" /> : <Music2 size={16} />}
       </span>
       <span className="bds-home-hits-track">
         <strong>{hit.title}</strong>

@@ -13,6 +13,7 @@ import {
 } from '../../../../core/time'
 import { getSportsStatusLabel, translateCompetition, translateCountry } from '../../../../core/sports'
 import { listCurrentFootballMatches } from '../../../../modules/competition/services/footballMatchQueryService'
+import { getLiveMatchCenterPriority } from '../../../../modules/competition/services/liveMatchCenterService'
 import { listHomeEvents } from '../../../../modules/events/services/eventsService'
 import {
   hasDisplayableMatchTeams,
