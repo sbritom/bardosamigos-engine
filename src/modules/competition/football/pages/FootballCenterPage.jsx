@@ -68,23 +68,23 @@ function FootballStandingsPanel({ matches }) {
           <table className="w-full text-left text-xs">
             <thead className="text-[var(--bds-font-micro)] uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text-muted)]">
               <tr>
-                <th scope="col" className="py-[var(--bds-space-5)] pl-[var(--bds-space-8)]">#</th>
-                <th scope="col" className="py-[var(--bds-space-5)]">Clube</th>
-                <th scope="col" className="py-[var(--bds-space-5)] text-right">Pts</th>
-                <th scope="col" className="py-[var(--bds-space-5)] text-right">J</th>
-                <th scope="col" className="py-[var(--bds-space-5)] pr-[var(--bds-space-8)] text-right">SG</th>
+                <th scope="col" className="py-[var(--bds-space-4)] pl-[var(--bds-space-8)]">#</th>
+                <th scope="col" className="py-[var(--bds-space-4)]">Clube</th>
+                <th scope="col" className="py-[var(--bds-space-4)] text-right">Pts</th>
+                <th scope="col" className="py-[var(--bds-space-4)] text-right">J</th>
+                <th scope="col" className="py-[var(--bds-space-4)] pr-[var(--bds-space-8)] text-right">SG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[color-mix(in_srgb,var(--bds-color-border)_42%,transparent)]">
               {rows.map((row) => (
                 <tr key={row.name} className="text-[var(--bds-color-text-secondary)]">
-                  <td className="py-[var(--bds-space-5)] pl-[var(--bds-space-8)] font-black tabular-nums text-[var(--bds-color-primary-hover)]">{row.position}</td>
-                  <td className="min-w-0 py-[var(--bds-space-5)]">
+                  <td className="py-[var(--bds-space-4)] pl-[var(--bds-space-8)] font-black tabular-nums text-[var(--bds-color-primary-hover)]">{row.position}</td>
+                  <td className="min-w-0 py-[var(--bds-space-4)]">
                     <span className="truncate font-black text-[var(--bds-color-text)]">{row.name}</span>
                   </td>
-                  <td className="py-[var(--bds-space-5)] text-right font-black tabular-nums text-[var(--bds-color-text)]">{row.points}</td>
-                  <td className="py-[var(--bds-space-5)] text-right tabular-nums">{row.played}</td>
-                  <td className="py-[var(--bds-space-5)] pr-[var(--bds-space-8)] text-right tabular-nums">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
+                  <td className="py-[var(--bds-space-4)] text-right font-black tabular-nums text-[var(--bds-color-text)]">{row.points}</td>
+                  <td className="py-[var(--bds-space-4)] text-right tabular-nums">{row.played}</td>
+                  <td className="py-[var(--bds-space-4)] pr-[var(--bds-space-8)] text-right tabular-nums">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
                 </tr>
               ))}
             </tbody>
@@ -251,26 +251,7 @@ export default function FootballCenterPage() {
       <FootballHero match={derived.hero} onOpen={openMatch} onTeam={openTeamByName} teams={data.teams || []} favoriteKeys={favoriteKeys} onFavoriteTeam={favoriteTeam} />
 
       <PortalWorkspace
-        className="bds-football-workspace"
-        header={{
-          eyebrow: 'Central de Futebol',
-          title: activeView.title,
-          description: activeView.description,
-          search: (
-            <WorkspaceSearch
-              label="Pesquisar futebol"
-              placeholder="Pesquisar times, competicoes ou partidas..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          ),
-          actions: (
-            <Button variant="secondary" onClick={() => load({ syncFirst: true })}>
-              <RefreshCw size={14} aria-hidden="true" />
-              Atualizar
-            </Button>
-          ),
-        }}
+        className="bds-football-workspace bds-portal-workspace--compact"
         sidebar={{
           title: 'Futebol',
           items: workspaceItems,
@@ -280,7 +261,24 @@ export default function FootballCenterPage() {
             setSearchTerm('')
           },
         }}
-        content={{ title: activeView.title, description: activeView.description }}
+        content={{
+          title: activeView.title,
+          description: activeView.description,
+          actions: (
+            <>
+              <WorkspaceSearch
+                label="Pesquisar futebol"
+                placeholder="Pesquisar..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+              <Button variant="secondary" onClick={() => load({ syncFirst: true })}>
+                <RefreshCw size={14} aria-hidden="true" />
+                Atualizar
+              </Button>
+            </>
+          ),
+        }}
       >
         {renderWorkspaceContent()}
       </PortalWorkspace>

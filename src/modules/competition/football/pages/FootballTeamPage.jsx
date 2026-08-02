@@ -4,6 +4,7 @@ import { Badge, Button, Card, EmptyState, Loading, StatCard, Table } from '../..
 import { formatBrazilFullDateTime } from '../../../../core/time'
 import { getSportsStatusLabel } from '../../../../core/sports'
 import { getFootballTeamDetails, toggleFootballFavorite } from '../../services/footballCenterService'
+import { FootballCrest } from '../components/FootballCrest'
 
 function score(match) {
   return match.hasScore ? `${match.homeScore} x ${match.awayScore}` : 'VS'
@@ -76,7 +77,9 @@ export default function FootballTeamPage() {
       <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            {crest && <img src={crest} alt="" className="h-20 w-20 object-contain" loading="lazy" />}
+            <span className="block h-20 w-20 shrink-0">
+              <FootballCrest src={crest} name={team.name} iconSize={28} />
+            </span>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Equipe</p>
               <h1 className="truncate text-3xl font-black">{team.name}</h1>

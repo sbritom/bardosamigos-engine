@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CalendarDays, Clock3, Shield, Trophy } from 'lucide-react'
+import { CalendarDays, Clock3, Trophy } from 'lucide-react'
 import { Button, Card, EmptyState, Loading, StatCard } from '../../../../design-system'
 import { formatBrazilFullDateTime, isLiveStatus } from '../../../../core/time'
 import { FootballStatusBadge } from '../components/FootballCommon'
 import { FootballLiveValue } from '../components/FootballLiveMotion'
+import { FootballCrest } from '../components/FootballCrest'
 import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime } from '../utils/footballCenterUtils'
 import { getFootballMatchDetails } from '../../services/footballCenterService'
 
@@ -24,7 +25,9 @@ const STAT_PRIORITY = ['shots', 'shotsOnTarget', 'corners', 'fouls', 'cards', 'p
 function TeamBlock({ name, crest }) {
   return (
     <div className="min-w-0 text-center">
-      {crest ? <img src={crest} alt="" className="mx-auto h-20 w-20 object-contain" loading="lazy" /> : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--radius)] border border-[var(--bds-color-primary-hover)] bg-[var(--bds-color-background)] text-[var(--bds-color-primary-hover)]"><Shield size={28} aria-hidden="true" /></div>}
+      <span className="mx-auto block h-20 w-20">
+        <FootballCrest src={crest} name={name} iconSize={28} />
+      </span>
       <h2 className="mt-3 truncate text-xl font-black sm:text-2xl">{name}</h2>
     </div>
   )

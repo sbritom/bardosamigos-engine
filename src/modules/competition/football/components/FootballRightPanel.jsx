@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
-import { BarChart3, ListOrdered, Shield } from 'lucide-react'
+import { BarChart3, ListOrdered } from 'lucide-react'
 import { Button, EmptyState } from '../../../../design-system'
 import { calculateStandings } from '../../services/footballCenterService'
 import { FOOTBALL_COMPETITION_NAV } from '../constants/footballCenterConstants'
 import { footballMatchBelongsToCompetition } from '../utils/footballCenterUtils'
+import { FootballCrest } from './FootballCrest'
 
 const BRASILEIRAO_NAV_ITEM = FOOTBALL_COMPETITION_NAV.find((item) => item.id === 'BSA')
 
-function MiniTeamMark({ crest }) {
+function MiniTeamMark({ crest, name = '' }) {
   return (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center drop-shadow-sm">
-      {crest ? <img src={crest} alt="" className="h-full w-full object-contain" loading="lazy" /> : <Shield size={12} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+      <FootballCrest src={crest} name={name} iconSize={12} />
     </span>
   )
 }
@@ -58,7 +59,7 @@ function BrasileiraoStandingsPanel({ matches }) {
                   <td className="py-[var(--bds-space-5)] font-black tabular-nums text-[var(--bds-color-primary-hover)]">{row.position}</td>
                   <td className="min-w-0 py-[var(--bds-space-5)]">
                     <div className="flex min-w-0 items-center gap-[var(--bds-space-6)]">
-                      <MiniTeamMark crest={row.crest} />
+                      <MiniTeamMark crest={row.crest} name={row.name} />
                       <span className="truncate font-black text-[var(--bds-color-text)]">{row.name}</span>
                     </div>
                   </td>

@@ -1,0 +1,100 @@
+.bds-round-crop-controls,
+.bds-round-crop-control-group,
+.bds-round-crop-options,
+.bds-round-crop-field,
+.bds-round-crop-range {
+  display: grid;
+  gap: var(--bds-space-8);
+}
+
+.bds-round-crop-control-group + .bds-round-crop-control-group {
+  border-top: 1px solid var(--bds-color-border);
+  padding-top: var(--bds-space-12);
+}
+
+.bds-round-crop-control-group + .bds-image-decoration {
+  border-top: 1px solid var(--bds-color-border);
+  padding-top: var(--bds-space-12);
+}
+
+.bds-round-crop-control-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bds-space-8);
+}
+
+.bds-round-crop-control-title strong,
+.bds-round-crop-toggle span {
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-caption);
+  font-weight: 800;
+}
+
+.bds-round-crop-control-title button {
+  border: 0;
+  background: transparent;
+  color: var(--bds-color-primary-hover);
+  cursor: pointer;
+  padding: var(--bds-space-4);
+  font-size: var(--bds-font-small);
+  font-weight: 800;
+}
+
+.bds-round-crop-toggle {
+  display: flex;
+  min-height: var(--bds-space-40);
+  align-items: center;
+  gap: var(--bds-space-8);
+  cursor: pointer;
+}
+
+.bds-round-crop-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bds-color-primary);
+}
+
+.bds-round-crop-options {
+  border-left: 2px solid var(--bds-color-border);
+  padding-left: var(--bds-space-12);
+}
+
+.bds-round-crop-field > span,
+.bds-round-crop-range > span {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 800;
+}
+
+.bds-round-crop-range > div,
+.bds-round-crop-thickness {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) 68px auto;
+  align-items: center;
+  gap: var(--bds-space-6);
+}
+
+.bds-round-crop-range input[type='range'],
+.bds-round-crop-thickness input[type='range'] {
+  width: 100%;
+  accent-color: var(--bds-color-primary);
+}
+
+.bds-round-crop-range small,
+.bds-round-crop-thickness small {
+  min-width: 28px;
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+}
+
+@media (max-width: 560px) {
+  .bds-round-crop-options {
+    padding-left: var(--bds-space-8);
+  }
+
+  .bds-round-crop-range > div,
+  .bds-round-crop-thickness {
+    grid-template-columns: minmax(70px, 1fr) 62px auto;
+  }
+}

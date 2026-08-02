@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, Flame, Globe2, Laptop, Music, Newspaper, Play, Trophy } from 'lucide-react'
-import { Button, EmptyState } from '../../../design-system'
+import { Button } from '../../../design-system'
 import { PortalWorkspace, WorkspaceEmptyState, WorkspaceSearch, WorkspaceSkeleton } from '../../../shared/workspace'
 import { StatusPill } from '../../../apps/portal/home/components/StatusPill'
 import { listNewsPageContent } from '../../../apps/portal/home/services/homeContentService'
@@ -195,38 +195,15 @@ export default function NewsPage() {
     setSelectedArticle(null)
   }
 
-  if (loading) {
-    return (
-      <main className="mx-auto max-w-[1600px] px-4 pb-6">
-        <WorkspaceSkeleton rows={6} />
-      </main>
-    )
-  }
-
   return (
     <main className="mx-auto max-w-[1600px] px-4 pb-6">
       <PortalWorkspace
+        className="bds-portal-workspace--compact"
         hero={{
           eyebrow: 'Conteudo oficial',
           title: 'Noticias',
           subtitle: 'Acompanhe os principais destaques publicados para a comunidade.',
           action: <Button onClick={() => { window.location.href = '/' }}>Voltar para Home</Button>,
-        }}
-        header={{
-          eyebrow: 'Notícias',
-          title: activeTitle,
-          description: activeDescription,
-          search: (
-            <WorkspaceSearch
-              label="Pesquisar noticias"
-              onChange={(event) => {
-                setSearch(event.target.value)
-                setSelectedArticle(null)
-              }}
-              placeholder="Buscar noticias"
-              value={search}
-            />
-          ),
         }}
         sidebar={{
           title: 'Noticias',
@@ -234,23 +211,37 @@ export default function NewsPage() {
           selectedId: activeView,
           onSelect: selectView,
         }}
-        content={{ title: activeTitle, description: activeDescription }}
+        content={{
+          title: activeTitle,
+          description: activeDescription,
+          actions: (
+            <WorkspaceSearch
+              label="Pesquisar noticias"
+              onChange={(event) => {
+                setSearch(event.target.value)
+                setSelectedArticle(null)
+              }}
+              placeholder="Pesquisar..."
+              value={search}
+            />
+          ),
+        }}
       >
-        {error ? (
+        {loading ? <WorkspaceSkeleton rows={6} /> : null}
+
+        {!loading && error ? (
           <div className="rounded-[var(--bds-radius-md)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-[var(--bds-space-12)] text-sm text-[var(--bds-color-text-secondary)]">
             Exibindo conteudo local enquanto a fonte principal fica indisponivel.
           </div>
         ) : null}
 
-        {selectedArticle ? (
+        {!loading && (selectedArticle ? (
           <NewsReader item={selectedArticle} onBack={() => setSelectedArticle(null)} />
         ) : activeView === 'featured' ? (
           <FeaturedNews items={viewNews} onOpen={openArticle} />
         ) : (
           <NewsList items={viewNews} onOpen={openArticle} emptyTitle={search ? 'Nenhuma noticia encontrada.' : 'Nenhuma noticia nesta categoria.'} />
-        )}
-
-        {!news.length ? <EmptyState title="Nenhuma noticia disponivel" /> : null}
+        ))}
       </PortalWorkspace>
     </main>
   )

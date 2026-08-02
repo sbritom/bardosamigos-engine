@@ -406,11 +406,7 @@ export default function EventsPage() {
       <HeroCard className="bds-events-hero" title="EVENTOS DO BAR" subtitle={HERO_TEXT} />
 
       <PortalWorkspace
-        header={{
-          eyebrow: 'Eventos',
-          title: activeTitle,
-          description: selectedEventDetail ? 'Detalhes abertos no workspace.' : 'Navegue pelos eventos do Bar dos Amigos sem sair da pagina.',
-        }}
+        className="bds-portal-workspace--compact"
         sidebar={{
           title: 'Eventos',
           items: sidebarItems,

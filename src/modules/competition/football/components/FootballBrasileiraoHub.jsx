@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
-import { CalendarDays, CheckCircle2, Clock3, ListOrdered, Shield, Trophy } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, ListOrdered, Trophy } from 'lucide-react'
 import { Button } from '../../../../design-system'
 import { calculateStandings } from '../../services/footballCenterService'
 import { isFinishedStatus, isLiveStatus, nowUtcIso } from '../../../../core/time'
 import { FootballStatusBadge } from './FootballCommon'
 import { FootballLiveValue } from './FootballLiveMotion'
+import { FootballCrest } from './FootballCrest'
 import { formatFootballScore, getFootballMatchTime, isFootballMatchToday } from '../utils/footballCenterUtils'
 
-function MiniCrest({ crest }) {
+function MiniCrest({ crest, name = '' }) {
   return (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center drop-shadow-sm">
-      {crest ? <img src={crest} alt="" className="h-full w-full object-contain" loading="lazy" /> : <Shield size={12} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+      <FootballCrest src={crest} name={name} iconSize={12} />
     </span>
   )
 }
@@ -48,26 +49,26 @@ function BrasileiraoTable({ matches }) {
         <table className="w-full text-left text-xs">
           <thead className="text-[var(--bds-font-micro)] uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-text-muted)]">
             <tr>
-              <th scope="col" className="py-[var(--bds-space-5)] pl-[var(--bds-space-8)]">#</th>
-              <th scope="col" className="py-[var(--bds-space-5)]">Clube</th>
-              <th scope="col" className="py-[var(--bds-space-5)] text-right">Pts</th>
-              <th scope="col" className="py-[var(--bds-space-5)] text-right">J</th>
-              <th scope="col" className="py-[var(--bds-space-5)] pr-[var(--bds-space-8)] text-right">SG</th>
+              <th scope="col" className="py-[var(--bds-space-4)] pl-[var(--bds-space-8)]">#</th>
+              <th scope="col" className="py-[var(--bds-space-4)]">Clube</th>
+              <th scope="col" className="py-[var(--bds-space-4)] text-right">Pts</th>
+              <th scope="col" className="py-[var(--bds-space-4)] text-right">J</th>
+              <th scope="col" className="py-[var(--bds-space-4)] pr-[var(--bds-space-8)] text-right">SG</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[color-mix(in_srgb,var(--bds-color-border)_42%,transparent)]">
             {visibleRows.map((row) => (
               <tr key={row.name} className={`text-[var(--bds-color-text-secondary)] ${getZoneClass(row.position, rows.length)}`}>
-                <td className="py-[var(--bds-space-5)] pl-[var(--bds-space-8)] font-black tabular-nums text-[var(--bds-color-primary-hover)]">{row.position}</td>
-                <td className="min-w-0 py-[var(--bds-space-5)]">
+                <td className="py-[var(--bds-space-4)] pl-[var(--bds-space-8)] font-black tabular-nums text-[var(--bds-color-primary-hover)]">{row.position}</td>
+                <td className="min-w-0 py-[var(--bds-space-4)]">
                   <div className="flex min-w-0 items-center gap-[var(--bds-space-6)]">
-                    <MiniCrest crest={row.crest} />
+                    <MiniCrest crest={row.crest} name={row.name} />
                     <span className="truncate font-black text-[var(--bds-color-text)]">{row.name}</span>
                   </div>
                 </td>
-                <td className="py-[var(--bds-space-5)] text-right font-black tabular-nums text-[var(--bds-color-text)]">{row.points}</td>
-                <td className="py-[var(--bds-space-5)] text-right tabular-nums">{row.played}</td>
-                <td className="py-[var(--bds-space-5)] pr-[var(--bds-space-8)] text-right tabular-nums">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
+                <td className="py-[var(--bds-space-4)] text-right font-black tabular-nums text-[var(--bds-color-text)]">{row.points}</td>
+                <td className="py-[var(--bds-space-4)] text-right tabular-nums">{row.played}</td>
+                <td className="py-[var(--bds-space-4)] pr-[var(--bds-space-8)] text-right tabular-nums">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
               </tr>
             ))}
           </tbody>
@@ -85,17 +86,17 @@ function MatchLine({ match, onOpen }) {
     <button
       type="button"
       onClick={() => onOpen(match.id)}
-      className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-[var(--bds-space-6)] border-b border-[color-mix(in_srgb,var(--bds-color-border)_38%,transparent)] px-[var(--bds-space-8)] py-[var(--bds-space-5)] text-left transition last:border-b-0 hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_auto] sm:gap-[var(--bds-space-7)]"
+      className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-[var(--bds-space-6)] border-b border-[color-mix(in_srgb,var(--bds-color-border)_38%,transparent)] px-[var(--bds-space-8)] py-[var(--bds-space-4)] text-left transition last:border-b-0 hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_auto] sm:gap-[var(--bds-space-7)]"
     >
       <span className="flex min-w-0 items-center gap-[var(--bds-space-6)]">
-        <MiniCrest crest={match.homeCrest} />
+        <MiniCrest crest={match.homeCrest} name={match.homeTeam} />
         <span className="truncate text-sm font-bold text-[var(--bds-color-text)]">{match.homeTeam}</span>
       </span>
       <FootballLiveValue as="strong" value={formatFootballScore(match)} highlight={match.hasScore} className="bds-football-score-value text-center text-base font-black tabular-nums text-[var(--bds-color-text)]">
         {formatFootballScore(match)}
       </FootballLiveValue>
       <span className="col-span-2 flex min-w-0 items-center gap-[var(--bds-space-6)] sm:col-span-1 sm:flex-row-reverse sm:text-right">
-        <MiniCrest crest={match.awayCrest} />
+        <MiniCrest crest={match.awayCrest} name={match.awayTeam} />
         <span className="truncate text-sm font-bold text-[var(--bds-color-text)]">{match.awayTeam}</span>
       </span>
       <span className="min-w-0">
@@ -139,7 +140,7 @@ export function FootballBrasileiraoHub({ matches, onOpen }) {
   if (!matches.length) return null
 
   return (
-    <section className="space-y-[var(--bds-space-10)] rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_52%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_16%,transparent)] p-[var(--bds-space-12)] shadow-none" aria-label="Hub do Brasileirao Serie A">
+    <section className="space-y-[var(--bds-space-8)] rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_52%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_16%,transparent)] p-[var(--bds-space-10)] shadow-none" aria-label="Hub do Brasileirao Serie A">
       <div className="flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
         <div className="min-w-0">
           <p className="text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">Competicao principal</p>

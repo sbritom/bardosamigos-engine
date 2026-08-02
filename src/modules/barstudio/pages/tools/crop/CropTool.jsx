@@ -1,134 +1,181 @@
-import { useEffect, useState } from 'react'
-
-import CropCanvas, { CANVAS_SIZE, drawCircularImage } from './CropCanvas'
+import { Scissors } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  canvasToBlob,
+  copyImageBlob,
+  downloadBlob,
+  EXPORT_FORMATS,
+  EXPORT_QUALITY,
+  ImageExportPanel,
+  ImagePreviewCanvas,
+  ImageToolLayout,
+  ImageUpload,
+  loadImageFile,
+  renderImagePreview,
+  revokeLoadedImage,
+} from '../../../image-tools'
 import CropControls from './CropControls'
-import CropResult from './CropResult'
-import CropUpload from './CropUpload'
+import { CROP_PREVIEW_SIZE, getCropExportSize, INITIAL_CROP_SETTINGS } from './cropConfig'
+import './cropTool.css'
 
-const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
 const INITIAL_OFFSET = { x: 0, y: 0 }
-const INITIAL_ZOOM = 1
 
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(file)
-    const image = new Image()
-
-    image.onload = () => resolve({ image, objectUrl })
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      reject(new Error('Não foi possível carregar a imagem.'))
-    }
-    image.src = objectUrl
-  })
+function createInitialSettings() {
+  return {
+    border: { ...INITIAL_CROP_SETTINGS.border },
+    shadow: { ...INITIAL_CROP_SETTINGS.shadow },
+  }
 }
 
-function CropTool() {
+function createFilename(name, extension) {
+  const base = String(name || 'imagem').replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '') || 'imagem'
+  return `${base}-redonda.${extension}`
+}
+
+function getRenderConfig(image, outputSize, zoom, position, settings, format, quality) {
+  return {
+    image,
+    outputWidth: outputSize,
+    outputHeight: outputSize,
+    zoom,
+    position,
+    shape: 'circle',
+    fit: 'cover',
+    border: settings.border,
+    shadow: settings.shadow,
+    background: { type: 'transparent' },
+    format,
+    quality,
+    decorationBaseSize: 360,
+  }
+}
+
+export default function CropTool() {
+  const currentImageRef = useRef(null)
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
+  const [format, setFormat] = useState('png')
   const [image, setImage] = useState(null)
   const [offset, setOffset] = useState(INITIAL_OFFSET)
-  const [result, setResult] = useState('')
-  const [zoom, setZoom] = useState(INITIAL_ZOOM)
+  const [quality, setQuality] = useState('original')
+  const [settings, setSettings] = useState(createInitialSettings)
+  const [zoom, setZoom] = useState(1)
 
-  useEffect(() => () => {
-    if (image?.src) {
-      URL.revokeObjectURL(image.src)
-    }
+  useEffect(() => {
+    currentImageRef.current = image
   }, [image])
 
-  const resetAdjustments = () => {
+  useEffect(() => () => revokeLoadedImage(currentImageRef.current), [])
+
+  const resetEditor = () => {
     setOffset(INITIAL_OFFSET)
-    setZoom(INITIAL_ZOOM)
+    setSettings(createInitialSettings())
+    setZoom(1)
   }
 
   const handleFileSelect = async (file) => {
-    if (!file) {
-      return
-    }
-
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setError('Use uma imagem PNG, JPG, JPEG ou WEBP.')
-      return
-    }
-
+    setError('')
+    setFeedback('')
     try {
-      const loaded = await loadImage(file)
-
-      if (image?.src) {
-        URL.revokeObjectURL(image.src)
-      }
-
-      setImage({ element: loaded.image, name: file.name, src: loaded.objectUrl })
-      setResult('')
-      setError('')
-      setFeedback('Imagem carregada. Ajuste o enquadramento para cortar.')
-      resetAdjustments()
+      setBusy(true)
+      const loaded = await loadImageFile(file)
+      revokeLoadedImage(currentImageRef.current)
+      currentImageRef.current = loaded
+      setImage(loaded)
+      resetEditor()
+      setFeedback('Imagem carregada. O preview já está pronto para ajustar.')
     } catch (loadError) {
       setError(loadError.message)
-      setFeedback('')
+    } finally {
+      setBusy(false)
     }
   }
 
-  const handleCrop = () => {
-    if (!image?.element) {
-      return
-    }
-
+  const renderExport = async (targetFormat = format) => {
+    if (!image?.element) throw new Error('Selecione uma imagem antes de exportar.')
     const canvas = document.createElement('canvas')
-    canvas.width = CANVAS_SIZE
-    canvas.height = CANVAS_SIZE
-    drawCircularImage(canvas, image.element, zoom, offset)
-    setResult(canvas.toDataURL('image/png'))
-    setFeedback('Corte concluído com sucesso.')
+    renderImagePreview(canvas, getRenderConfig(image.element, getCropExportSize(image.element, quality), zoom, offset, settings, targetFormat, quality))
+    const formatConfig = EXPORT_FORMATS[targetFormat]
+    return canvasToBlob(canvas, formatConfig.mime, EXPORT_QUALITY[quality].value)
   }
 
-  const handleNewCrop = () => {
-    setResult('')
+  const runExport = async (action) => {
+    setError('')
+    setFeedback('')
+    try {
+      setBusy(true)
+      await action()
+    } catch (exportError) {
+      setError(exportError.message || 'Não foi possível exportar a imagem.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleDownload = () => runExport(async () => {
+    const blob = await renderExport()
+    const formatConfig = EXPORT_FORMATS[format]
+    downloadBlob(blob, createFilename(image.name, formatConfig.extension))
+    setFeedback('Download iniciado.')
+  })
+
+  const handleCopy = () => runExport(async () => {
+    const blob = await renderExport('png')
+    await copyImageBlob(blob)
+    setFeedback('Imagem copiada para a área de transferência.')
+  })
+
+  const handleNewImage = () => {
+    revokeLoadedImage(currentImageRef.current)
+    currentImageRef.current = null
     setImage(null)
     setError('')
     setFeedback('')
-    resetAdjustments()
+    resetEditor()
   }
 
   return (
-    <div className="bds-barstudio-crop-tool">
-      <header className="bds-barstudio-crop-header">
-        <span>⭕</span>
-        <div>
-          <h1>Cortar Foto Redonda</h1>
-          <p>Recorte imagens em formato circular com alta qualidade.</p>
-        </div>
-      </header>
-
-      {!image ? (
-        <CropUpload error={error} onFileSelect={handleFileSelect} />
-      ) : (
-        <div className="bds-barstudio-crop-editor">
-          <CropCanvas image={image.element} offset={offset} onOffsetChange={setOffset} zoom={zoom} />
-          <CropControls
-            onCenter={() => {
-              setOffset(INITIAL_OFFSET)
-              setFeedback('Imagem centralizada.')
-            }}
-            onCrop={handleCrop}
-            onReset={() => {
-              resetAdjustments()
-              setFeedback('Ajustes restaurados.')
-            }}
-            onZoomChange={setZoom}
-            zoom={zoom}
-          />
-          {feedback ? <p className="bds-barstudio-crop-feedback" role="status">{feedback}</p> : null}
-          <CropResult
-            image={result}
-            onDownload={() => setFeedback('Download iniciado.')}
-            onNewCrop={handleNewCrop}
-          />
-        </div>
-      )}
-    </div>
+    <ImageToolLayout
+      icon={Scissors}
+      title="Cortar Foto Redonda"
+      description="Crie uma imagem circular com fundo transparente e exporte no formato desejado."
+      error={error}
+      feedback={feedback}
+      upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
+      settings={image ? (
+        <CropControls
+          onCenter={() => { setOffset(INITIAL_OFFSET); setFeedback('Imagem centralizada.') }}
+          onSettingsChange={setSettings}
+          onZoomChange={setZoom}
+          settings={settings}
+          zoom={zoom}
+        />
+      ) : null}
+      preview={image ? (
+        <ImagePreviewCanvas
+          {...getRenderConfig(image.element, CROP_PREVIEW_SIZE, zoom, offset, settings, format, quality)}
+          help="Arraste a imagem ou use as setas do teclado para ajustar o enquadramento."
+          onError={(previewError) => setError(previewError.message)}
+          onPositionChange={setOffset}
+          onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1) }}
+          onZoomChange={setZoom}
+          surfaceBackground="checker"
+        />
+      ) : null}
+      exportPanel={image ? (
+        <ImageExportPanel
+          busy={busy}
+          format={format}
+          onClear={() => { resetEditor(); setFeedback('Ajustes restaurados.') }}
+          onCopy={handleCopy}
+          onDownload={handleDownload}
+          onFormatChange={setFormat}
+          onNewImage={handleNewImage}
+          onQualityChange={setQuality}
+          quality={quality}
+        />
+      ) : null}
+    />
   )
 }
-
-export default CropTool

@@ -1,7 +1,8 @@
-import { Heart, Search, Shield } from 'lucide-react'
+import { Heart, Search } from 'lucide-react'
 import { Badge, Button } from '../../../../design-system'
 import { FootballEmptyState, FootballPanel } from './FootballCommon'
 import { FootballMatchCard } from './FootballMatchCard'
+import { FootballCrest } from './FootballCrest'
 
 export function FootballSearchResults({ query, teams, competitions, matches, favoriteKeys, onTeam, onFavoriteTeam, onOpen, onFavoriteMatch, onClear }) {
   if (!query) return null
@@ -20,7 +21,7 @@ export function FootballSearchResults({ query, teams, competitions, matches, fav
               return (
                 <div key={team.id} className="flex items-center gap-[var(--bds-space-10)] rounded-[var(--bds-radius-sm)] border border-[color-mix(in_srgb,var(--bds-color-border)_44%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_14%,transparent)] px-[var(--bds-space-10)] py-[var(--bds-space-8)] shadow-none">
                   <button type="button" onClick={() => onTeam(team)} className="flex min-w-0 flex-1 items-center gap-[var(--bds-space-8)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]">
-                    {team.crest ? <img src={team.crest} alt="" className="h-9 w-9 object-contain" /> : <Shield size={20} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
+                    <span className="h-9 w-9 shrink-0"><FootballCrest src={team.crest} name={team.name} iconSize={20} /></span>
                     <span className="truncate text-sm font-bold text-[var(--bds-color-text)]">{team.name}</span>
                   </button>
                   <button type="button" onClick={() => onFavoriteTeam(team)} aria-pressed={favorited} aria-label={favorited ? `Remover ${team.name} dos favoritos` : `Favoritar ${team.name}`} className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${favorited ? 'border-[var(--bds-color-primary-hover)] bg-[color-mix(in_srgb,var(--bds-color-primary)_24%,transparent)] text-[var(--bds-color-primary-hover)]' : 'border-[var(--bds-color-border)] text-[var(--bds-color-text-secondary)] hover:text-[var(--bds-color-text)]'}`}>

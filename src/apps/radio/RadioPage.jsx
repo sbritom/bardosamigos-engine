@@ -175,13 +175,6 @@ export default function RadioPage() {
         onWaiting={() => setConnecting(true)}
       />
 
-      <header className="bar-radio-page-header">
-        <div className="bar-radio-page-title">
-          <Radio size={24} />
-          <h1>R&Aacute;DIO DO BAR</h1>
-        </div>
-      </header>
-
       <section className="bar-radio-listener-player" aria-label="Player da Radio Bar dos Amigos">
         <div className="bar-radio-cover-panel">
           {hasCover ? (
@@ -236,23 +229,21 @@ export default function RadioPage() {
               />
               <span>{volume}%</span>
             </label>
+
+            <button className="bar-radio-request-button" type="button" onClick={() => {
+              setRequestFeedback("");
+              setRequestFeedbackTone("info");
+              setRequestModalOpen(true);
+            }}>
+              <Music2 size={18} />
+              PEDIR M&Uacute;SICA
+            </button>
           </div>
 
           {isUnavailable && (
             <p className="bar-radio-soft-alert">{playerError || metadataError}</p>
           )}
         </div>
-      </section>
-
-      <section className="bar-radio-request-block">
-        <button className="bar-radio-request-button" type="button" onClick={() => {
-          setRequestFeedback("");
-          setRequestFeedbackTone("info");
-          setRequestModalOpen(true);
-        }}>
-          <Music2 size={18} />
-          PEDIR M&Uacute;SICA
-        </button>
       </section>
 
       {requestModalOpen && (

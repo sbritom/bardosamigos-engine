@@ -1,11 +1,12 @@
 .bds-personalization-page {
-  width: min(1180px, calc(100% - 32px));
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 32px 0 48px;
 }
 
 .bds-personalization-hero {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .bds-personalization-hero__icon {
@@ -212,7 +213,6 @@
 
 @media (max-width: 768px) {
   .bds-personalization-page {
-    width: min(100% - 24px, 1180px);
     padding-top: 24px;
   }
 

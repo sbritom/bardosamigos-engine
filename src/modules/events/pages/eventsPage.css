@@ -1,14 +1,15 @@
 .bds-events-page {
   display: grid;
-  gap: var(--bds-space-24);
-  width: min(100% - var(--bds-space-32), 1480px);
+  gap: var(--bds-space-16);
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   padding-bottom: var(--bds-space-32);
 }
 
 .bds-events-hero {
   overflow: hidden;
-  min-height: 168px;
+  min-height: 136px;
   border-color: color-mix(in srgb, var(--bds-color-border) 72%, transparent);
   background:
     radial-gradient(circle at 16% 20%, color-mix(in srgb, color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent) 22%, transparent), transparent 34%),
@@ -683,7 +684,7 @@
   }
 
   .bds-events-hero {
-    min-height: 170px;
+    min-height: 136px;
   }
 
   .bds-events-card--featured .bds-events-card__image,

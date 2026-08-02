@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Bell, LayoutDashboard, Monitor, Radio, Settings, Star, Trophy, Tv, UserRound } from "lucide-react"
 import { Button, FeatureCard, StatusBadge } from "../../../design-system"
-import { PortalWorkspace, WorkspaceEmptyState, WorkspaceSection } from "../../../shared/workspace"
+import { PortalWorkspace, WorkspaceEmptyState } from "../../../shared/workspace"
 import {
   MyFootballPanel,
   PersonalizationShell,
@@ -207,9 +207,7 @@ export default function ProfilePage() {
         }}
         content={{ title: view.title, description: view.description }}
       >
-        <WorkspaceSection>
-          {renderContent()}
-        </WorkspaceSection>
+        {renderContent()}
       </PortalWorkspace>
     </PersonalizationShell>
   )

@@ -1,0 +1,194 @@
+.bds-remove-bg-controls,
+.bds-remove-bg-group,
+.bds-remove-bg-field,
+.bds-remove-bg-range {
+  display: grid;
+  gap: var(--bds-space-8);
+}
+
+.bds-remove-bg-group {
+  border-top: 1px solid var(--bds-color-border);
+  padding-top: var(--bds-space-12);
+}
+
+.bds-remove-bg-group > strong,
+.bds-remove-bg-field > span,
+.bds-remove-bg-range > span,
+.bds-remove-bg-toggle span {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: 800;
+}
+
+.bds-remove-bg-range > div {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 68px auto;
+  align-items: center;
+  gap: var(--bds-space-6);
+}
+
+.bds-remove-bg-range input[type='range'] {
+  width: 100%;
+  accent-color: var(--bds-color-primary);
+}
+
+.bds-remove-bg-range small {
+  min-width: 34px;
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+}
+
+.bds-remove-bg-toggle {
+  display: flex;
+  min-height: var(--bds-space-40);
+  align-items: center;
+  gap: var(--bds-space-8);
+  cursor: pointer;
+}
+
+.bds-remove-bg-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bds-color-primary);
+}
+
+.bds-remove-bg-backgrounds,
+.bds-remove-bg-preview__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bds-space-6);
+}
+
+.bds-remove-bg-backgrounds button,
+.bds-remove-bg-preview__modes button,
+.bds-remove-bg-group-title button {
+  display: inline-flex;
+  min-height: var(--bds-space-32);
+  align-items: center;
+  justify-content: center;
+  gap: var(--bds-space-4);
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-sm);
+  background: var(--bds-color-background);
+  color: var(--bds-color-text-secondary);
+  cursor: pointer;
+  padding: 0 var(--bds-space-8);
+  font-size: var(--bds-font-small);
+  font-weight: 800;
+  transition: 180ms ease;
+}
+
+.bds-remove-bg-backgrounds button:hover,
+.bds-remove-bg-preview__modes button:hover:not(:disabled),
+.bds-remove-bg-group-title button:hover,
+.bds-remove-bg-backgrounds button.is-selected,
+.bds-remove-bg-preview__modes button.is-selected {
+  border-color: var(--bds-color-primary-hover);
+  color: var(--bds-color-text);
+}
+
+.bds-remove-bg-backgrounds button.is-selected,
+.bds-remove-bg-preview__modes button.is-selected {
+  background: color-mix(in srgb, var(--bds-color-primary) 16%, var(--bds-color-background));
+}
+
+.bds-remove-bg-preview__modes button:disabled {
+  cursor: not-allowed;
+  opacity: var(--bds-opacity-disabled);
+}
+
+.bds-remove-bg-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bds-space-8);
+}
+
+.bds-remove-bg-group-title > span {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--bds-space-6);
+}
+
+.bds-remove-bg-group-title strong {
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-caption);
+}
+
+.bds-remove-bg-preview {
+  display: grid;
+  gap: var(--bds-space-10);
+}
+
+.bds-remove-bg-processing {
+  margin: 0;
+  color: var(--bds-color-primary-hover);
+  font-size: var(--bds-font-caption);
+  font-weight: 800;
+}
+
+.bds-remove-bg-info {
+  display: grid;
+  gap: var(--bds-space-8);
+  border-top: 1px solid var(--bds-color-border);
+  padding-top: var(--bds-space-12);
+}
+
+.bds-remove-bg-info dl {
+  display: grid;
+  gap: var(--bds-space-6);
+  margin: 0;
+}
+
+.bds-remove-bg-info dl > div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: var(--bds-space-8);
+}
+
+.bds-remove-bg-info dt,
+.bds-remove-bg-info dd,
+.bds-remove-bg-info p {
+  margin: 0;
+  font-size: var(--bds-font-small);
+}
+
+.bds-remove-bg-info dt {
+  color: var(--bds-color-text-secondary);
+  font-weight: 800;
+}
+
+.bds-remove-bg-info dd {
+  overflow: hidden;
+  color: var(--bds-color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bds-remove-bg-info p {
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-remove-bg-info p.is-export {
+  color: var(--bds-color-success);
+}
+
+@media (max-width: 560px) {
+  .bds-remove-bg-range > div {
+    grid-template-columns: minmax(70px, 1fr) 62px auto;
+  }
+
+  .bds-remove-bg-backgrounds button,
+  .bds-remove-bg-preview__modes button {
+    flex: 1 1 calc(50% - var(--bds-space-6));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bds-remove-bg-backgrounds button,
+  .bds-remove-bg-preview__modes button,
+  .bds-remove-bg-group-title button {
+    transition: none;
+  }
+}

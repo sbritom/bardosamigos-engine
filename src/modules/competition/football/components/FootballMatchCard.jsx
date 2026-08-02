@@ -1,15 +1,16 @@
 import { memo } from 'react'
-import { Shield, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { isLiveStatus } from '../../../../core/time'
 import { FootballStatusBadge } from './FootballCommon'
 import { FootballLiveValue } from './FootballLiveMotion'
+import { FootballCrest } from './FootballCrest'
 import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime } from '../utils/footballCenterUtils'
 
 function FootballMatchTeam({ name, crest, align = 'left' }) {
   return (
     <span className={`flex min-w-0 items-center gap-[var(--bds-space-8)] ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center drop-shadow-sm sm:h-10 sm:w-10">
-        {crest ? <img src={crest} alt="" className="h-full w-full object-contain" loading="lazy" /> : <Shield size={20} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
+        <FootballCrest src={crest} name={name} iconSize={20} />
       </span>
       <span className="truncate text-base font-bold leading-tight text-[var(--bds-color-text)]">{name || 'Time'}</span>
     </span>
@@ -58,7 +59,7 @@ export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen
   const live = isLiveStatus(display.value) || isLiveStatus(match?.status)
 
   return (
-    <article className={`bds-football-match-row group relative grid min-h-[4.5rem] border-b border-[color-mix(in_srgb,var(--bds-color-border)_46%,transparent)] bg-transparent transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] ${live ? 'bds-football-match-row--live' : ''} ${favorited ? 'shadow-[inset_2px_0_0_var(--bds-color-primary-hover)]' : ''}`}>
+    <article className={`bds-football-match-row group relative grid min-h-[4rem] border-b border-[color-mix(in_srgb,var(--bds-color-border)_46%,transparent)] bg-transparent transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] ${live ? 'bds-football-match-row--live' : ''} ${favorited ? 'shadow-[inset_2px_0_0_var(--bds-color-primary-hover)]' : ''}`}>
       {onFavorite ? (
         <button
           type="button"
@@ -75,7 +76,7 @@ export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen
         type="button"
         onClick={() => onOpen(match.id)}
         aria-label={`Abrir ${match.homeTeam} contra ${match.awayTeam}`}
-        className="grid w-full items-center gap-[var(--bds-space-8)] px-[var(--bds-space-10)] py-[var(--bds-space-7)] pl-[var(--bds-space-32)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] md:grid-cols-[minmax(0,1fr)_minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,12rem)]"
+        className="grid w-full items-center gap-[var(--bds-space-6)] px-[var(--bds-space-10)] py-[var(--bds-space-5)] pl-[var(--bds-space-32)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] md:grid-cols-[minmax(0,1fr)_minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,12rem)]"
       >
         <FootballMatchTeam name={match.homeTeam} crest={match.homeCrest} />
 

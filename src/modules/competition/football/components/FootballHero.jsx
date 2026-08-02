@@ -1,8 +1,13 @@
-import { CalendarDays, CheckCircle2, Clock3, Radio, Trophy } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, Radio } from 'lucide-react'
 import { isLiveStatus } from '../../../../core/time'
 import { FootballEmptyState, FootballStatusBadge } from './FootballCommon'
 import { FootballLiveValue } from './FootballLiveMotion'
+import { FootballCrest } from './FootballCrest'
 import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime, getFootballStageLabel } from '../utils/footballCenterUtils'
+
+function getCompetitionDisplayName(value) {
+  return String(value || '').replace(/\s*-\s*sincroniza(?:c|ç)(?:a|ã)o\b.*$/i, '').trim()
+}
 
 function FootballHeroTeam({ name, crest, align = 'left', onClick }) {
   return (
@@ -12,8 +17,8 @@ function FootballHeroTeam({ name, crest, align = 'left', onClick }) {
       aria-label={`Abrir pagina de ${name || 'time'}`}
       className={`group flex min-w-0 items-center gap-[var(--bds-space-10)] rounded-[var(--bds-radius-sm)] text-left transition hover:text-[var(--bds-color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)] ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center drop-shadow-sm transition sm:h-14 sm:w-14">
-        {crest ? <img src={crest} alt="" className="h-full w-full object-contain" /> : <Trophy size={28} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />}
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center transition sm:h-14 sm:w-14">
+        <FootballCrest src={crest} name={name} iconSize={28} loading="eager" />
       </span>
       <strong className="truncate text-base font-bold text-[var(--bds-color-text)] sm:text-lg">
         {name || 'Time a definir'}
@@ -36,13 +41,14 @@ export function FootballHero({ match, onOpen, onTeam }) {
   const timeLabel = live ? getFootballMatchMinute(match) : getFootballMatchTime(match) || 'Horario a definir'
   const scoreLabel = formatFootballScore(match)
   const roundLabel = match.round?.name || getFootballStageLabel(match.stage) || ''
+  const competitionLabel = getCompetitionDisplayName(match.competitionName)
 
   return (
-    <section key={match.id} className="bds-football-hero-motion relative grid min-h-[170px] overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_58%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] shadow-none sm:min-h-[190px]">
-      <div className="grid content-center gap-[var(--bds-space-12)] px-[var(--bds-space-16)] py-[var(--bds-space-12)]">
+    <section key={match.id} className="bds-football-hero-motion relative grid min-h-[136px] overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_58%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] shadow-none sm:min-h-[148px]">
+      <div className="grid content-center gap-[var(--bds-space-10)] px-[var(--bds-space-16)] py-[var(--bds-space-10)]">
         <div className="flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
           <p className="truncate text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">
-            {[match.competitionName, roundLabel].filter(Boolean).join(' - ') || 'Central do Futebol'}
+            {[competitionLabel, roundLabel].filter(Boolean).join(' - ') || 'Central do Futebol'}
           </p>
           <div className="flex items-center gap-[var(--bds-space-8)]">
             <FootballStatusBadge match={match} />

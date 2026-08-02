@@ -4,28 +4,6 @@
   color: var(--bds-color-text);
 }
 
-.bar-radio-page-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-}
-
-.bar-radio-page-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--bds-color-primary-hover);
-}
-
-.bar-radio-page-title h1 {
-  margin: 0;
-  font-size: clamp(1.75rem, 3vw, 2.6rem);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: 0;
-}
-
 .bar-radio-listener-player {
   display: grid;
   grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
@@ -192,12 +170,6 @@
   border-radius: 8px;
   color: var(--bds-color-primary-hover) !important;
   background: rgba(5, 108, 242, 0.08);
-}
-
-.bar-radio-request-block {
-  display: flex;
-  justify-content: center;
-  margin-top: 18px;
 }
 
 .bar-radio-request-button {
@@ -457,24 +429,6 @@
   gap: var(--bds-space-16);
 }
 
-.bar-radio-page-header {
-  margin-bottom: 0;
-}
-
-.bar-radio-page-title {
-  gap: var(--bds-space-8);
-  color: var(--bds-color-text);
-}
-
-.bar-radio-page-title svg {
-  color: var(--bds-color-primary-hover);
-}
-
-.bar-radio-page-title h1 {
-  font-size: clamp(var(--bds-font-title), 2vw, var(--bds-font-h3));
-  letter-spacing: var(--bds-letter-overline);
-}
-
 .bar-radio-listener-player {
   gap: clamp(var(--bds-space-16), 3vw, var(--bds-space-32));
   padding: clamp(var(--bds-space-16), 3vw, var(--bds-space-24));
@@ -555,10 +509,6 @@
   border-radius: var(--bds-radius-sm);
   background: color-mix(in srgb, var(--bds-color-primary) 10%, transparent);
   box-shadow: none;
-}
-
-.bar-radio-request-block {
-  margin-top: 0;
 }
 
 .bar-radio-request-button {
@@ -661,7 +611,6 @@
 .bar-radio-listener-player,
 .bar-radio-cover-panel,
 .bar-radio-soft-alert,
-.bar-radio-request-block,
 .bar-radio-request-panel,
 .bar-radio-volume-control,
 .bar-radio-request-form label,
@@ -706,7 +655,6 @@
 }
 
 /* Hotfix UI Polish 1.1 - hero surface normalization */
-.bar-radio-page-header,
 .bar-radio-listener-player {
   border-color: color-mix(in srgb, var(--bds-color-primary-hover) 8%, var(--bds-color-border));
   box-shadow: 0 6px 18px color-mix(in srgb, var(--bds-color-background) 24%, transparent);
@@ -720,11 +668,6 @@
 /* Hotfix UI Polish 1.2 - radio spacing and hero deglow */
 .bar-radio-page {
   padding-top: var(--bds-space-16);
-}
-
-.bar-radio-page-header {
-  margin-bottom: var(--bds-space-24);
-  box-shadow: none;
 }
 
 .bar-radio-listener-player {
@@ -746,11 +689,9 @@
 
 /* V1.1.0 - Premium Cards 1.0 */
 :where(
-  .bar-radio-page-header,
   .bar-radio-listener-player,
   .bar-radio-cover-panel,
   .bar-radio-soft-alert,
-  .bar-radio-request-block,
   .bar-radio-request-panel,
   .bar-radio-volume-control,
   .bar-radio-request-form label,
@@ -768,7 +709,6 @@
 
 :where(
   .bar-radio-listener-player,
-  .bar-radio-request-block,
   .bar-radio-request-panel,
   .bar-radio-volume-control,
   .bar-radio-request-form label

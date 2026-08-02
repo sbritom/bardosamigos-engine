@@ -22,8 +22,8 @@ export function FootballStatusBadge({ status, match, children }) {
 
 export function FootballPanel({ title, eyebrow, icon: Icon = Trophy, children, action, className = '' }) {
   return (
-    <section className={`bds-football-section-motion border-t border-[color-mix(in_srgb,var(--bds-color-border)_54%,transparent)] pt-[var(--bds-space-10)] ${className}`}>
-      <div className="mb-[var(--bds-space-7)] flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
+    <section className={`bds-football-section-motion border-t border-[color-mix(in_srgb,var(--bds-color-border)_54%,transparent)] pt-[var(--bds-space-8)] ${className}`}>
+      <div className="mb-[var(--bds-space-6)] flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
         <div className="flex items-center gap-[var(--bds-space-7)]">
           <span className="flex h-6 w-6 items-center justify-center text-[var(--bds-color-primary-hover)]"><Icon size={14} aria-hidden="true" /></span>
           <div>

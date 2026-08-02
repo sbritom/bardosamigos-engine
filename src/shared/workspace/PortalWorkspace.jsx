@@ -1,5 +1,5 @@
 import { isValidElement, useId, useState } from "react"
-import { ChevronDown, Search } from "lucide-react"
+import { ChevronDown, Inbox, Search } from "lucide-react"
 import { HeroCard, StatusBadge, classNames } from "../../design-system"
 import "./PortalWorkspace.css"
 
@@ -19,7 +19,7 @@ function renderHero(hero) {
 export function WorkspaceSearch({
   value,
   onChange,
-  placeholder = "Buscar...",
+  placeholder = "Pesquisar...",
   label = "Buscar no workspace",
   disabled = false,
   className,
@@ -155,9 +155,11 @@ export function WorkspaceSection({ title, description, action, children, classNa
 }
 
 export function WorkspaceEmptyState({ icon, title = "Nada para mostrar.", description, action, className }) {
+  const EmptyIcon = icon || Inbox
+
   return (
     <div className={classNames("bds-workspace-empty", className)} role="status">
-      {icon && <div className="bds-workspace-empty__icon">{renderIcon(icon, 22)}</div>}
+      <div className="bds-workspace-empty__icon">{renderIcon(EmptyIcon, 22)}</div>
       <h3>{title}</h3>
       {description && <p>{description}</p>}
       {action}

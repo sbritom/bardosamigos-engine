@@ -1,33 +1,13 @@
-function CropControls({ onCenter, onCrop, onReset, onZoomChange, zoom }) {
+import { ImageDecorationControls, ImageRangeField } from '../../../image-tools'
+
+export default function CropControls({ zoom, onZoomChange, settings, onSettingsChange, onCenter }) {
   return (
-    <section className="bds-barstudio-crop-controls" aria-label="Controles do recorte">
-      <div className="bds-barstudio-crop-controls__header">
-        <strong>Ajustes do recorte</strong>
-        <span>Use zoom e posição para enquadrar a imagem.</span>
+    <div className="bds-round-crop-controls">
+      <div className="bds-round-crop-control-group">
+        <div className="bds-round-crop-control-title"><strong>Enquadramento</strong><button onClick={onCenter} type="button">Centralizar</button></div>
+        <ImageRangeField label="Zoom" min={1} max={3} step={0.05} value={zoom} onChange={onZoomChange} suffix={`${Math.round(zoom * 100)}%`} />
       </div>
-      <label className="bds-barstudio-crop-zoom">
-        <span>Zoom</span>
-        <div>
-          <span aria-hidden="true">−</span>
-          <input
-            aria-label="Zoom da imagem"
-            max="3"
-            min="1"
-            onChange={(event) => onZoomChange(Number(event.target.value))}
-            step="0.05"
-            type="range"
-            value={zoom}
-          />
-          <span aria-hidden="true">+</span>
-        </div>
-      </label>
-      <div className="bds-barstudio-crop-actions">
-        <button onClick={onCenter} type="button">Centralizar</button>
-        <button onClick={onReset} type="button">Restaurar</button>
-        <button className="is-primary" onClick={onCrop} type="button">Cortar</button>
-      </div>
-    </section>
+      <ImageDecorationControls settings={settings} onSettingsChange={onSettingsChange} />
+    </div>
   )
 }
-
-export default CropControls
