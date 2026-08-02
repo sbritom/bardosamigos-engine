@@ -1,7 +1,8 @@
-import { CalendarDays, CheckCircle2, Clock3, MapPin, Radio, Trophy } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, Radio, Trophy } from 'lucide-react'
+import { isLiveStatus } from '../../../../core/time'
 import { FootballEmptyState, FootballStatusBadge } from './FootballCommon'
 import { FootballLiveValue } from './FootballLiveMotion'
-import { formatFootballScore, getFootballMatchTime } from '../utils/footballCenterUtils'
+import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime, getFootballStageLabel } from '../utils/footballCenterUtils'
 
 function FootballHeroTeam({ name, crest, align = 'left', onClick }) {
   return (
@@ -30,22 +31,26 @@ export function FootballHero({ match, onOpen, onTeam }) {
     )
   }
 
-  const timeLabel = getFootballMatchTime(match) || 'Horário a definir'
-  const placeLabel = [match.venue, match.city].filter(Boolean).join(' - ') || match.country || 'Local a definir'
+  const display = getFootballMatchDisplayStatus(match)
+  const live = isLiveStatus(display.value) || isLiveStatus(match?.status)
+  const timeLabel = live ? getFootballMatchMinute(match) : getFootballMatchTime(match) || 'Horario a definir'
   const scoreLabel = formatFootballScore(match)
+  const roundLabel = match.round?.name || getFootballStageLabel(match.stage) || ''
 
   return (
-    <section key={match.id} className="bds-football-hero-motion relative grid min-h-[210px] overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_58%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] shadow-none sm:min-h-[230px]">
+    <section key={match.id} className="bds-football-hero-motion relative grid min-h-[170px] overflow-hidden rounded-[var(--bds-radius-md)] border border-[color-mix(in_srgb,var(--bds-color-border)_58%,transparent)] bg-[color-mix(in_srgb,var(--bds-color-surface)_34%,transparent)] shadow-none sm:min-h-[190px]">
       <div className="grid content-center gap-[var(--bds-space-12)] px-[var(--bds-space-16)] py-[var(--bds-space-12)]">
         <div className="flex flex-wrap items-center justify-between gap-[var(--bds-space-8)]">
           <p className="truncate text-[var(--bds-font-micro)] font-black uppercase tracking-[var(--bds-letter-overline)] text-[var(--bds-color-primary-hover)]">
-            {match.competitionName || 'Central do Futebol'}
+            {[match.competitionName, roundLabel].filter(Boolean).join(' - ') || 'Central do Futebol'}
           </p>
           <div className="flex items-center gap-[var(--bds-space-8)]">
             <FootballStatusBadge match={match} />
-            <FootballLiveValue as="span" value={timeLabel} className="bds-football-time-value text-xs font-black tabular-nums text-[var(--bds-color-text-secondary)]">
-              {timeLabel}
-            </FootballLiveValue>
+            {timeLabel ? (
+              <FootballLiveValue as="span" value={timeLabel} className={`bds-football-time-value text-xs font-black tabular-nums ${live ? 'bds-football-minute-value text-[var(--bds-color-danger)]' : 'text-[var(--bds-color-text-secondary)]'}`}>
+                {timeLabel}
+              </FootballLiveValue>
+            ) : null}
           </div>
         </div>
 
@@ -60,17 +65,12 @@ export function FootballHero({ match, onOpen, onTeam }) {
               as="strong"
               value={scoreLabel}
               highlight={match.hasScore}
-              className="bds-football-score-value text-2xl font-black tabular-nums leading-none text-[var(--bds-color-text)] sm:text-3xl"
+              className="bds-football-score-value text-[2rem] font-black tabular-nums leading-none text-[var(--bds-color-text)] sm:text-[2.45rem]"
             >
               {scoreLabel}
             </FootballLiveValue>
           </button>
           <FootballHeroTeam name={match.awayTeam} crest={match.awayCrest} align="right" onClick={() => onTeam(match.awayTeam)} />
-        </div>
-
-        <div className="flex items-center justify-center gap-[var(--bds-space-6)] text-xs font-bold text-[var(--bds-color-text-secondary)]">
-          <MapPin size={13} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
-          <span className="truncate">{placeLabel}</span>
         </div>
       </div>
     </section>

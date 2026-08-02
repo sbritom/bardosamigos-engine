@@ -1,0 +1,227 @@
+.bds-personalization-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.bds-personalization-hero {
+  margin-bottom: 24px;
+}
+
+.bds-personalization-hero__icon {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  place-items: center;
+  color: var(--bds-color-primary);
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-lg);
+  background: var(--bds-color-surface);
+}
+
+.bds-personalization-hero .bds-hero-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bds-personalization-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.bds-personalization-main,
+.bds-personalization-side,
+.bds-my-football__sections {
+  display: grid;
+  gap: 16px;
+}
+
+.bds-personalization-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bds-personalization-grid--preferences {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bds-personalization-card,
+.bds-personalization-profile {
+  min-width: 0;
+}
+
+.bds-personalization-profile__content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.bds-personalization-profile__content h2 {
+  margin: 0;
+  color: var(--bds-color-text);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.bds-personalization-profile__content p {
+  margin: 4px 0 0;
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-personalization-profile__summary {
+  max-width: 560px;
+}
+
+.bds-personalization-muted,
+.bds-personalization-empty {
+  color: var(--bds-color-text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.bds-favorite-list,
+.bds-settings-options {
+  display: grid;
+  gap: 8px;
+}
+
+.bds-favorite-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-md);
+  background: color-mix(in srgb, var(--bds-color-surface) 82%, transparent);
+  color: var(--bds-color-text);
+  padding: 10px 12px;
+  text-align: left;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.bds-favorite-toggle:hover,
+.bds-favorite-toggle--selected {
+  border-color: color-mix(in srgb, var(--bds-color-primary) 44%, var(--bds-color-border));
+  background: color-mix(in srgb, var(--bds-color-primary) 10%, var(--bds-color-surface));
+}
+
+.bds-favorite-toggle:focus-visible {
+  outline: 2px solid var(--bds-color-primary);
+  outline-offset: 2px;
+}
+
+.bds-favorite-toggle__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--bds-color-primary);
+}
+
+.bds-favorite-toggle strong,
+.bds-favorite-toggle small {
+  display: block;
+}
+
+.bds-favorite-toggle strong {
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.bds-favorite-toggle small {
+  margin-top: 2px;
+  color: var(--bds-color-text-secondary);
+  font-size: 0.78rem;
+}
+
+.bds-my-football__section {
+  display: grid;
+  gap: 8px;
+}
+
+.bds-my-football__section h3 {
+  margin: 0;
+  color: var(--bds-color-text);
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.bds-my-football-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--bds-color-border);
+  padding: 8px 0;
+}
+
+.bds-my-football-row:last-child {
+  border-bottom: 0;
+}
+
+.bds-my-football-row__teams {
+  min-width: 0;
+}
+
+.bds-my-football-row__teams strong,
+.bds-my-football-row__teams span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bds-my-football-row__teams strong {
+  color: var(--bds-color-text);
+  font-size: 0.88rem;
+}
+
+.bds-my-football-row__teams span {
+  color: var(--bds-color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.bds-my-football-row__score {
+  color: var(--bds-color-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bds-settings-options span {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-pill);
+  color: var(--bds-color-text-secondary);
+  padding: 6px 10px;
+  font-size: 0.84rem;
+}
+
+@media (max-width: 1024px) {
+  .bds-personalization-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bds-personalization-side {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .bds-personalization-page {
+    width: min(100% - 24px, 1180px);
+    padding-top: 24px;
+  }
+
+  .bds-personalization-grid,
+  .bds-personalization-grid--preferences {
+    grid-template-columns: 1fr;
+  }
+
+  .bds-personalization-profile__content {
+    align-items: flex-start;
+  }
+}

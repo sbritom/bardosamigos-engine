@@ -21,6 +21,19 @@ export function getFootballMatchTime(match) {
   }).format(new Date(match.startsAt))
 }
 
+export function getFootballMatchMinute(match) {
+  const metadata = match?.metadata || {}
+  const raw = metadata.raw || {}
+  const explicitMinute = metadata.minute || metadata.elapsed || metadata.matchMinute || raw.minute || raw.elapsed
+  const numericMinute = Number.parseInt(String(explicitMinute || '').replace(/\D/g, ''), 10)
+  if (Number.isFinite(numericMinute) && numericMinute > 0) return `${numericMinute}'`
+
+  if (!isLiveStatus(match?.status) || !match?.startsAt) return ''
+  const elapsed = Math.floor((Date.now() - new Date(match.startsAt).getTime()) / 60000)
+  if (!Number.isFinite(elapsed) || elapsed <= 0) return ''
+  return `${Math.min(elapsed, 120)}'`
+}
+
 export function isFootballMatchToday(match, now) {
   return Boolean(match?.startsAt) && getBrazilDateKey(match.startsAt) === getBrazilDateKey(now)
 }
@@ -128,8 +141,10 @@ export function getFootballMatchDisplayStatus(match) {
   if (['PENALTY_SHOOTOUT', 'PENALTIES', 'PENALTIS'].includes(value)) return { value, label: 'PÊNALTIS' }
   if (['POSTPONED', 'SUSPENDED', 'ADIADO'].includes(value)) return { value, label: 'ADIADO' }
   if (['CANCELED', 'CANCELLED', 'CANCELADO'].includes(value)) return { value, label: 'CANCELADO' }
-  if (isFinishedStatus(match?.status)) return { value: match.status, label: 'FINALIZADO' }
-  return { value: match?.status, label: getSportsStatusLabel(match?.status) }
+  if (isFinishedStatus(match?.status)) return { value: match.status, label: 'ENCERRADO' }
+  const fallbackLabel = String(getSportsStatusLabel(match?.status) || '').toUpperCase()
+  if (fallbackLabel.includes('AGEND') || ['TIMED', 'SCHEDULED'].includes(value)) return { value: match?.status, label: 'AGENDADO' }
+  return { value: match?.status, label: fallbackLabel || 'AGENDADO' }
 }
 
 export function getFootballStageLabel(value) {

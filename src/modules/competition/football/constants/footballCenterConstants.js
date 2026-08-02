@@ -15,7 +15,7 @@ import {
 export const FOOTBALL_FILTERS = [
   { id: 'all', label: 'Todos', icon: LayoutGrid },
   { id: 'today', label: 'Hoje', icon: CalendarDays },
-  { id: 'tomorrow', label: 'Amanhã', icon: Clock3 },
+  { id: 'tomorrow', label: 'Amanha', icon: Clock3 },
   { id: 'week', label: 'Esta semana', icon: CalendarDays },
   { id: 'live', label: 'Ao Vivo', icon: Radio },
   { id: 'finished', label: 'Finalizados', icon: CheckCircle2 },
@@ -26,15 +26,17 @@ export const FOOTBALL_COMPETITION_FILTERS = [
   { id: 'all', label: 'Todos', icon: LayoutGrid },
   { id: 'today', label: 'Hoje', icon: CalendarDays },
   { id: 'live', label: 'Ao Vivo', icon: Radio },
-  { id: 'upcoming', label: 'Próximos', icon: Clock3 },
+  { id: 'upcoming', label: 'Proximos', icon: Clock3 },
   { id: 'results', label: 'Resultados', icon: CheckCircle2 },
   { id: 'favorites', label: 'Favoritos', icon: Heart },
 ]
 
 export const FOOTBALL_COMPETITION_NAV = [
-  { id: 'WC', slug: 'world-cup', label: 'Copa do Mundo', icon: Globe2, codes: ['wc'], patterns: ['copa do mundo', 'world cup'] },
-  { id: 'BSA', slug: 'brasileirao', label: 'Brasileirão', icon: Shield, codes: ['bsa'], patterns: ['brasileir', 'série a brasil'] },
+  { id: 'BSA', slug: 'brasileirao', label: 'Brasileirao', icon: Shield, codes: ['bsa'], patterns: ['brasileir', 'serie a brasil', 'série a brasil'] },
+  { id: 'CDB', slug: 'copa-do-brasil', label: 'Copa do Brasil', icon: Trophy, codes: ['cdb', 'copa_do_brasil'], patterns: ['copa do brasil'] },
   { id: 'CLI', slug: 'libertadores', label: 'Libertadores', icon: Trophy, codes: ['cli'], patterns: ['libertadores'] },
+  { id: 'CSA', slug: 'sul-americana', label: 'Sul-Americana', icon: Trophy, codes: ['csa', 'sudamericana'], patterns: ['sul-americana', 'sul americana', 'sudamericana'] },
+  { id: 'WC', slug: 'world-cup', label: 'Copa do Mundo', icon: Globe2, codes: ['wc'], patterns: ['copa do mundo', 'world cup'] },
   { id: 'CL', slug: 'champions', label: 'Champions League', icon: Star, codes: ['cl'], patterns: ['champions'] },
   { id: 'PL', slug: 'premier-league', label: 'Premier League', icon: Flag, codes: ['pl'], patterns: ['premier'] },
   { id: 'PD', slug: 'la-liga', label: 'La Liga', icon: Flag, codes: ['pd'], patterns: ['la liga', 'primera division'] },
@@ -47,21 +49,21 @@ export const FOOTBALL_WORLD_CUP_STAGES = ['Grupos', '16 avos', 'Oitavas', 'Quart
 
 export const FOOTBALL_FOCUSED_VIEWS = {
   today: { title: 'Jogos de Hoje', eyebrow: 'Agenda do dia', icon: CalendarDays },
-  tomorrow: { title: 'Jogos de Amanhã', eyebrow: 'Próxima agenda', icon: Clock3 },
-  week: { title: 'Esta Semana', eyebrow: 'Próximos sete dias', icon: CalendarDays },
+  tomorrow: { title: 'Jogos de Amanha', eyebrow: 'Proxima agenda', icon: Clock3 },
+  week: { title: 'Esta Semana', eyebrow: 'Proximos sete dias', icon: CalendarDays },
   live: { title: 'Ao Vivo', eyebrow: 'Em andamento', icon: Radio },
   finished: { title: 'Finalizados', eyebrow: 'Placares confirmados', icon: CheckCircle2 },
-  results: { title: 'Últimos Resultados', eyebrow: 'Placares confirmados', icon: CheckCircle2 },
-  upcoming: { title: 'Próximos Jogos', eyebrow: 'Agenda da competição', icon: Clock3 },
-  favorites: { title: 'Favoritos', eyebrow: 'Sua seleção', icon: Heart },
+  results: { title: 'Ultimos Resultados', eyebrow: 'Placares confirmados', icon: CheckCircle2 },
+  upcoming: { title: 'Proximos Jogos', eyebrow: 'Agenda da competicao', icon: Clock3 },
+  favorites: { title: 'Favoritos', eyebrow: 'Sua selecao', icon: Heart },
 }
 
 export const FOOTBALL_STATUS_LEGEND = [
   { status: 'AO_VIVO', label: 'AO VIVO' },
   { status: 'FINALIZADO', label: 'FINALIZADO' },
   { status: 'INTERVALO', label: 'INTERVALO' },
-  { status: 'EXTRA_TIME', label: 'PRORROGAÇÃO' },
-  { status: 'PENALTY_SHOOTOUT', label: 'PÊNALTIS' },
+  { status: 'EXTRA_TIME', label: 'PRORROGACAO' },
+  { status: 'PENALTY_SHOOTOUT', label: 'PENALTIS' },
   { status: 'ADIADO', label: 'ADIADO' },
   { status: 'CANCELADO', label: 'CANCELADO' },
 ]

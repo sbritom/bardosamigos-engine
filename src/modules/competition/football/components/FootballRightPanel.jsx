@@ -49,9 +49,7 @@ function BrasileiraoStandingsPanel({ matches }) {
                 <th scope="col" className="pb-[var(--bds-space-7)]">Time</th>
                 <th scope="col" className="pb-[var(--bds-space-7)] text-right">Pts</th>
                 <th scope="col" className="pb-[var(--bds-space-7)] text-right">J</th>
-                <th scope="col" className="hidden pb-[var(--bds-space-7)] text-right sm:table-cell">V</th>
-                <th scope="col" className="hidden pb-[var(--bds-space-7)] text-right sm:table-cell">E</th>
-                <th scope="col" className="hidden pb-[var(--bds-space-7)] text-right sm:table-cell">D</th>
+                <th scope="col" className="pb-[var(--bds-space-7)] text-right">SG</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[color-mix(in_srgb,var(--bds-color-border)_50%,transparent)]">
@@ -66,9 +64,7 @@ function BrasileiraoStandingsPanel({ matches }) {
                   </td>
                   <td className="py-[var(--bds-space-5)] text-right font-black tabular-nums text-[var(--bds-color-text)]">{row.points}</td>
                   <td className="py-[var(--bds-space-5)] text-right tabular-nums">{row.played}</td>
-                  <td className="hidden py-[var(--bds-space-5)] text-right tabular-nums sm:table-cell">{row.wins}</td>
-                  <td className="hidden py-[var(--bds-space-5)] text-right tabular-nums sm:table-cell">{row.draws}</td>
-                  <td className="hidden py-[var(--bds-space-5)] text-right tabular-nums sm:table-cell">{row.losses}</td>
+                  <td className="py-[var(--bds-space-5)] text-right tabular-nums">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
                 </tr>
               ))}
             </tbody>

@@ -3,7 +3,7 @@ import { Shield, Star } from 'lucide-react'
 import { isLiveStatus } from '../../../../core/time'
 import { FootballStatusBadge } from './FootballCommon'
 import { FootballLiveValue } from './FootballLiveMotion'
-import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchTime } from '../utils/footballCenterUtils'
+import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime } from '../utils/footballCenterUtils'
 
 function FootballMatchTeam({ name, crest, align = 'left' }) {
   return (
@@ -16,27 +16,10 @@ function FootballMatchTeam({ name, crest, align = 'left' }) {
   )
 }
 
-function getMatchMinute(match) {
-  const metadata = match?.metadata || {}
-  const raw = metadata.raw || {}
-  const explicitMinute = metadata.minute || metadata.elapsed || metadata.matchMinute || raw.minute || raw.elapsed
-  const numericMinute = Number.parseInt(String(explicitMinute || '').replace(/\D/g, ''), 10)
-  if (Number.isFinite(numericMinute) && numericMinute > 0) return `${numericMinute}'`
-
-  if (!isLiveStatus(match?.status) || !match?.startsAt) return ''
-  const elapsed = Math.floor((Date.now() - new Date(match.startsAt).getTime()) / 60000)
-  if (!Number.isFinite(elapsed) || elapsed <= 0) return ''
-  return `${Math.min(elapsed, 120)}'`
-}
-
 function getTimeLabel(match) {
   const display = getFootballMatchDisplayStatus(match)
-  if (isLiveStatus(display.value) || isLiveStatus(match?.status)) return getMatchMinute(match)
+  if (isLiveStatus(display.value) || isLiveStatus(match?.status)) return getFootballMatchMinute(match)
   return getFootballMatchTime(match)
-}
-
-function getPlaceLabel(match) {
-  return match?.venue || match?.stadium || ''
 }
 
 function getMatchRenderSignature(match) {
@@ -70,11 +53,12 @@ function getMatchRenderSignature(match) {
 
 export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen, favorited = false, onFavorite }) {
   const timeLabel = getTimeLabel(match)
-  const placeLabel = getPlaceLabel(match)
   const scoreLabel = formatFootballScore(match)
+  const display = getFootballMatchDisplayStatus(match)
+  const live = isLiveStatus(display.value) || isLiveStatus(match?.status)
 
   return (
-    <article className={`bds-football-match-row group relative grid min-h-[4.5rem] border-b border-[color-mix(in_srgb,var(--bds-color-border)_46%,transparent)] bg-transparent transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] ${favorited ? 'shadow-[inset_2px_0_0_var(--bds-color-primary-hover)]' : ''}`}>
+    <article className={`bds-football-match-row group relative grid min-h-[4.5rem] border-b border-[color-mix(in_srgb,var(--bds-color-border)_46%,transparent)] bg-transparent transition hover:bg-[color-mix(in_srgb,var(--bds-color-primary)_6%,transparent)] ${live ? 'bds-football-match-row--live' : ''} ${favorited ? 'shadow-[inset_2px_0_0_var(--bds-color-primary-hover)]' : ''}`}>
       {onFavorite ? (
         <button
           type="button"
@@ -100,7 +84,7 @@ export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen
             as="strong"
             value={scoreLabel}
             highlight={match.hasScore}
-            className="bds-football-score-value text-[1.35rem] font-black tabular-nums leading-none text-[var(--bds-color-text)] transition-colors group-hover:text-[var(--bds-color-primary-hover)] sm:text-2xl"
+            className="bds-football-score-value text-[1.5rem] font-black tabular-nums leading-none text-[var(--bds-color-text)] transition-colors group-hover:text-[var(--bds-color-primary-hover)] sm:text-[1.7rem]"
           >
             {scoreLabel}
           </FootballLiveValue>
@@ -109,7 +93,7 @@ export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen
               <FootballLiveValue
                 as="span"
                 value={timeLabel}
-                className="bds-football-time-value text-xs font-black tabular-nums text-[var(--bds-color-text-secondary)]"
+                className={`bds-football-time-value text-xs font-black tabular-nums ${live ? 'bds-football-minute-value text-[var(--bds-color-danger)]' : 'text-[var(--bds-color-text-secondary)]'}`}
               >
                 {timeLabel}
               </FootballLiveValue>
@@ -123,7 +107,6 @@ export const FootballMatchCard = memo(function FootballMatchCard({ match, onOpen
 
         <span className="min-w-0 text-xs font-bold leading-tight text-[var(--bds-color-text-secondary)] md:text-right">
           <span className="block truncate">{match.competitionName || 'Competicao'}</span>
-          {placeLabel ? <span className="mt-[var(--bds-space-3)] block truncate text-[var(--bds-color-text-muted)]">{placeLabel}</span> : null}
         </span>
       </button>
     </article>

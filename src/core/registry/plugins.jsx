@@ -14,6 +14,9 @@ import {
   Shield,
   MessageCircle,
   BookOpen,
+  UserRound,
+  Sparkles,
+  Settings,
 } from "lucide-react";
 
 import HomePage from "../../apps/portal/pages/HomePage";
@@ -54,6 +57,9 @@ const MyPredictionResultPage = React.lazy(() =>
   import("../../modules/competition/predictions/pages/MyPredictionResultPage"),
 );
 const CompetitionRankingPage = React.lazy(() => import("../../modules/competition/ranking/pages/CompetitionRankingPage"));
+const ProfilePage = React.lazy(() => import("../../modules/personalization/pages/ProfilePage"));
+const ForYouPage = React.lazy(() => import("../../modules/personalization/pages/ForYouPage"));
+const SettingsPage = React.lazy(() => import("../../modules/personalization/pages/SettingsPage"));
 
 function LazyPluginPage({ component: Component, title, description, ...props }) {
   return (
@@ -203,6 +209,33 @@ export const plugins = [
     icon: Users,
     menu: true,
     element: <LazyPluginPage component={CommunityPage} title="Comunidade" />,
+  },
+
+  {
+    id: "profile",
+    title: "Perfil",
+    path: "/profile",
+    icon: UserRound,
+    menu: false,
+    element: <LazyPluginPage component={ProfilePage} title="Perfil" />,
+  },
+
+  {
+    id: "for-you",
+    title: "Para Voce",
+    path: "/for-you",
+    icon: Sparkles,
+    menu: false,
+    element: <LazyPluginPage component={ForYouPage} title="Para Voce" />,
+  },
+
+  {
+    id: "settings",
+    title: "Configuracoes",
+    path: "/settings",
+    icon: Settings,
+    menu: false,
+    element: <LazyPluginPage component={SettingsPage} title="Configuracoes" />,
   },
 
     {

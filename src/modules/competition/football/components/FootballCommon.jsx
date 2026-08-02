@@ -11,7 +11,7 @@ export function FootballStatusBadge({ status, match, children }) {
   const live = isLiveStatus(display.value) || String(label || '').toUpperCase().startsWith('AO VIVO')
 
   return (
-    <Badge className={`bds-football-status-motion ${getFootballStatusTone(display.value)} inline-flex items-center gap-[var(--bds-space-4)] rounded-[var(--bds-radius-xs)] bg-[color-mix(in_srgb,currentColor_7%,transparent)] px-[var(--bds-space-6)] py-[var(--bds-space-2)] text-[var(--bds-font-micro)] font-bold uppercase tracking-[var(--bds-letter-overline)] shadow-none`}>
+    <Badge className={`bds-football-status-motion ${live ? 'bds-football-status-motion--live' : ''} ${getFootballStatusTone(display.value)} inline-flex items-center gap-[var(--bds-space-4)] rounded-[var(--bds-radius-xs)] bg-[color-mix(in_srgb,currentColor_6%,transparent)] px-[var(--bds-space-6)] py-[var(--bds-space-2)] text-[var(--bds-font-micro)] font-bold uppercase tracking-[var(--bds-letter-overline)] shadow-none`}>
       {live ? <span className="bds-football-live-dot" aria-hidden="true" /> : null}
       <FootballLiveValue as="span" value={`${display.value || ''}:${label || ''}`} ariaLive="polite">
         {label}

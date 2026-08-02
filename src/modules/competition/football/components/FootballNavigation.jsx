@@ -23,8 +23,6 @@ export function FootballExperienceBar({
   searchTerm,
   onSearch,
   onClear,
-  lastUpdatedAt,
-  totalMatches,
   onOpenMenu,
   onRefresh,
 }) {
@@ -80,8 +78,7 @@ export function FootballExperienceBar({
         aria-label="Atualizar central"
       >
         <RefreshCw size={14} className="text-[var(--bds-color-primary-hover)]" aria-hidden="true" />
-        <span>{totalMatches} jogos</span>
-        <span className="hidden sm:inline">- {lastUpdatedAt || 'Atualizacao recente'}</span>
+        <span>Atualizar</span>
       </button>
 
       <button

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, ImageIcon, Sparkles } from 'lucide-react'
+import { CheckCircle2, Clock3, FileText, Gift, PartyPopper, ScrollText, Sparkles, Star, Trophy } from 'lucide-react'
 import { bingoBanner, rankingBanner } from '../../../assets/events/eventBanners'
-import { EmptyState, HeroCard, SectionHeader } from '../../../design-system'
+import { Button, EmptyState, HeroCard } from '../../../design-system'
+import { PortalWorkspace, WorkspaceEmptyState, WorkspaceSkeleton } from '../../../shared/workspace'
 import {
   formatEventDate,
   getEventRecurrenceLabel,
@@ -10,7 +11,6 @@ import {
   getEventType,
   getParticipationRule,
   isFeaturedEvent,
-  isRecurringEvent,
   listPublishedEvents,
 } from '../services/eventsService'
 import { EventCard } from './EventCard'
@@ -18,46 +18,46 @@ import { EventDetails } from './EventDetails'
 import { EventHighlightBanner } from './EventHighlightBanner'
 import './eventsPage.css'
 
-const HERO_TEXT = 'Bingos, brincadeiras e momentos especiais. Confira o que vem por aí e não fique de fora.'
+const HERO_TEXT = 'Bingos, brincadeiras e momentos especiais. Confira o que vem por ai e nao fique de fora.'
 
 const ACTIVE_EVENT_HIGHLIGHT = {
   slug: 'ranking-de-barcoins',
   eyebrow: 'Evento em destaque',
-  title: '🏆 RANKING DE BARCOINS',
-  description: 'Colete BarCoins durante 30 dias e dispute grandes premiações.',
-  period: '23/07/2026 → 23/08/2026',
-  prizeLabel: 'Premiação',
-  prizes: ['🥇 2.000 xats', '🥈 1.500 xats', '🥉 1.000 xats'],
+  title: 'Ranking de BarCoins',
+  description: 'Colete BarCoins durante 30 dias e dispute grandes premiacoes.',
+  period: '23/07/2026 -> 23/08/2026',
+  prizeLabel: 'Premiacao',
+  prizes: ['1o 2.000 xats', '2o 1.500 xats', '3o 1.000 xats'],
   actionLabel: 'Ver Regulamento',
 }
 
 const EVENT_LIST_PRESETS = [
   {
     id: 'configured-ranking-de-barcoins',
-    title: '🏆 Ranking de BarCoins',
+    title: 'Ranking de BarCoins',
     slug: 'ranking-de-barcoins',
-    description: 'Colete BarCoins, acompanhe sua posição e dispute a premiação especial do Bar dos Amigos.',
+    description: 'Colete BarCoins, acompanhe sua posicao e dispute a premiacao especial do Bar dos Amigos.',
     status: 'published',
     location: 'xat.com/BarDosAmigos',
     banner: rankingBanner,
     metadata: {
-      type: 'Competição',
-      timeLabel: '23/07/2026 → 23/08/2026',
+      type: 'Competicao',
+      timeLabel: '23/07/2026 -> 23/08/2026',
       summary: 'Evento de 30 dias valendo xats para os melhores colocados.',
     },
   },
   {
     id: 'configured-bingo-do-bar-dos-amigos',
-    title: '🎉 Bingo do Bar dos Amigos',
+    title: 'Bingo do Bar dos Amigos',
     slug: 'bingo-do-bar-dos-amigos',
-    description: 'Participe do bingo, siga as instruções da equipe e concorra aos prêmios preparados para a comunidade.',
+    description: 'Participe do bingo, siga as instrucoes da equipe e concorra aos premios preparados para a comunidade.',
     status: 'published',
     location: 'xat.com/BarDosAmigos',
     banner: bingoBanner,
     metadata: {
       type: 'Bingo',
       timeLabel: '20:30',
-      summary: 'Bingo oficial do Bar dos Amigos com configuração preparada para edição futura.',
+      summary: 'Bingo oficial do Bar dos Amigos com configuracao preparada para edicao futura.',
     },
   },
 ]
@@ -67,13 +67,13 @@ const BINGO_DETAIL = {
   banner: bingoBanner,
   status: 'active',
   period: '20:30',
-  prizes: 'Configuração preparada para edição futura.',
-  howToParticipate: 'Aguarde o início do bingo e siga todas as instruções da equipe.',
+  prizes: 'Configuracao preparada para edicao futura.',
+  howToParticipate: 'Aguarde o inicio do bingo e siga todas as instrucoes da equipe.',
   rules: [
     'Apenas 1 conta por participante.',
-    'O vencedor deverá responder dentro do tempo informado.',
-    'Contas alternativas não poderão receber premiação.',
-    'Em caso de fraude ou descumprimento das regras, o prêmio será cancelado.',
+    'O vencedor devera responder dentro do tempo informado.',
+    'Contas alternativas nao poderao receber premiacao.',
+    'Em caso de fraude ou descumprimento das regras, o premio sera cancelado.',
   ],
 }
 
@@ -82,19 +82,19 @@ const EVENT_DETAIL_PRESETS = {
     title: 'Ranking de BarCoins',
     banner: rankingBanner,
     status: 'active',
-    period: '23/07/2026 → 23/08/2026',
-    prizes: ['🥇 2.000 xats', '🥈 1.500 xats', '🥉 1.000 xats'],
-    howToParticipate: 'Colete BarCoins participando das atividades do Bar dos Amigos durante todo o período do evento.',
+    period: '23/07/2026 -> 23/08/2026',
+    prizes: ['1o 2.000 xats', '2o 1.500 xats', '3o 1.000 xats'],
+    howToParticipate: 'Colete BarCoins participando das atividades do Bar dos Amigos durante todo o periodo do evento.',
     rules: [
       'Apenas 1 conta por participante.',
-      'Proibido utilizar scripts, bots ou qualquer tipo de automação.',
-      'Necessário estar ativo no xat.com/BarDosAmigos.',
-      'As BarCoins são pessoais e intransferíveis.',
-      'Fraudes ou tentativa de manipulação resultarão em desclassificação.',
-      'A decisão da equipe do Bar dos Amigos é soberana.',
+      'Proibido utilizar scripts, bots ou qualquer tipo de automacao.',
+      'Necessario estar ativo no xat.com/BarDosAmigos.',
+      'As BarCoins sao pessoais e intransferiveis.',
+      'Fraudes ou tentativa de manipulacao resultarao em desclassificacao.',
+      'A decisao da equipe do Bar dos Amigos e soberana.',
     ],
     rankingTitle: 'Ranking Oficial',
-    ranking: 'O Ranking de BarCoins é contabilizado automaticamente pelo EVOX Bot.\n\nPara consultar sua posição ou acompanhar a classificação oficial, utilize os comandos disponíveis do EVOX Bot diretamente na sala xat.com/BarDosAmigos.',
+    ranking: 'O Ranking de BarCoins e contabilizado automaticamente pelo EVOX Bot.\n\nPara consultar sua posicao ou acompanhar a classificacao oficial, utilize os comandos disponiveis do EVOX Bot diretamente na sala xat.com/BarDosAmigos.',
   },
   'bingo-do-bar-dos-amigos': BINGO_DETAIL,
   'bingos-e-brincadeiras-do-bar': BINGO_DETAIL,
@@ -144,7 +144,7 @@ function buildEventDetail(event = {}) {
   const date = event.dateLabel || formatEventDate(event.starts_at || event.startsAt)
   const time = getEventTimeLabel(event)
   const recurrence = getEventRecurrenceLabel(event)
-  const period = preset.period || [recurrence || date, time].filter(Boolean).join(' - ') || 'Período a definir'
+  const period = preset.period || [recurrence || date, time].filter(Boolean).join(' - ') || 'Periodo a definir'
   const participationRule = getParticipationRule(event)
   const summary = getEventSummary(event)
   const type = getEventType(event)
@@ -157,23 +157,144 @@ function buildEventDetail(event = {}) {
     banner: preset.banner || event.banner || event.metadata?.banner || null,
     status: preset.status || getDetailStatus(event),
     period,
-    howToParticipate: preset.howToParticipate || participationRule || 'Acompanhe as instruções da equipe do Bar dos Amigos.',
-    prizes: preset.prizes || 'Premiação será informada pela equipe.',
-    rules: preset.rules || ['Respeite as orientações da equipe.', 'A participação deve seguir as regras do Bar dos Amigos.'],
+    howToParticipate: preset.howToParticipate || participationRule || 'Acompanhe as instrucoes da equipe do Bar dos Amigos.',
+    prizes: preset.prizes || 'Premiacao sera informada pela equipe.',
+    rules: preset.rules || ['Respeite as orientacoes da equipe.', 'A participacao deve seguir as regras do Bar dos Amigos.'],
     rankingTitle: preset.rankingTitle || event.metadata?.rankingTitle || null,
     ranking: preset.ranking || event.metadata?.ranking || null,
     type,
   }
 }
 
-function EventsEmptyState() {
+function isRankingEvent(event = {}) {
+  return normalizePresetKey(`${event.slug || ''} ${event.title || ''}`).includes('ranking')
+}
+
+function isBingoEvent(event = {}) {
+  return normalizePresetKey(`${event.slug || ''} ${event.title || ''} ${getEventType(event) || ''}`).includes('bingo')
+}
+
+function isEventActive(event = {}) {
+  return getDetailStatus(event) === 'active'
+}
+
+function isEventUpcoming(event = {}) {
+  const startsAt = new Date(event.starts_at || event.startsAt || 0).getTime()
+  return getDetailStatus(event) === 'upcoming' || (Number.isFinite(startsAt) && startsAt > Date.now())
+}
+
+function isEventEnded(event = {}) {
+  return getDetailStatus(event) === 'ended'
+}
+
+function EventGrid({ events, onSelect, emptyTitle }) {
+  if (!events.length) return <WorkspaceEmptyState title={emptyTitle} />
+
   return (
-    <div className="bds-events-empty">
-      <EmptyState
-        icon={<CalendarDays size={36} />}
-        title="Nenhum evento programado no momento."
-        description="Fique de olho. Em breve teremos novidades por aqui."
-      />
+    <div className="bds-events-grid">
+      {events.map((event) => <EventCard key={event.id || event.slug} event={event} onSelect={onSelect} />)}
+    </div>
+  )
+}
+
+function CompactEventList({ events, onSelect, emptyTitle, mode = 'upcoming' }) {
+  if (!events.length) return <WorkspaceEmptyState title={emptyTitle} />
+
+  return (
+    <div className="grid gap-[var(--bds-space-8)]">
+      {events.map((event) => {
+        const detail = buildEventDetail(event)
+        const time = getEventTimeLabel(event)
+        const result = event.metadata?.result || event.metadata?.winner || ''
+        return (
+          <button
+            key={event.id || event.slug}
+            type="button"
+            onClick={() => onSelect(event)}
+            className="flex flex-wrap items-center justify-between gap-[var(--bds-space-10)] rounded-[var(--bds-radius-md)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-[var(--bds-space-12)] text-left transition hover:border-[var(--bds-color-primary-hover)] hover:bg-[var(--bds-color-background-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
+          >
+            <span className="grid min-w-0 gap-[var(--bds-space-4)]">
+              <strong className="truncate text-[var(--bds-color-text)]">{detail.title}</strong>
+              <small className="text-[var(--bds-color-text-secondary)]">{mode === 'ended' ? detail.period : [detail.period, time].filter(Boolean).join(' - ')}</small>
+              {mode === 'ended' && result ? <small className="text-[var(--bds-color-text-secondary)]">{result}</small> : null}
+            </span>
+            <span className="bds-events-status bds-events-status--active">{detail.status === 'ended' ? 'Encerrado' : detail.status === 'upcoming' ? 'Em breve' : 'Ativo'}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function RankingPanel({ event, onOpen }) {
+  if (!event) return <WorkspaceEmptyState title="Nenhum ranking disponivel." />
+  const detail = buildEventDetail(event)
+
+  return (
+    <div className="grid gap-[var(--bds-space-14)]">
+      <EventCard event={event} featured onSelect={onOpen} />
+      <section className="bds-events-detail__section">
+        <h3><Trophy size={18} />Periodo</h3>
+        <div className="bds-events-detail__body"><p>{detail.period}</p></div>
+      </section>
+      <section className="bds-events-detail__section">
+        <h3><Gift size={18} />Premiacao</h3>
+        <div className="bds-events-detail__body">
+          {Array.isArray(detail.prizes) ? <ul>{detail.prizes.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{detail.prizes}</p>}
+        </div>
+      </section>
+      <section className="bds-events-detail__section">
+        <h3><ScrollText size={18} />Regras principais</h3>
+        <div className="bds-events-detail__body">
+          {Array.isArray(detail.rules) ? <ul>{detail.rules.slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul> : <p>{detail.rules}</p>}
+        </div>
+      </section>
+      <Button onClick={() => onOpen(event)}>Ver Regulamento</Button>
+    </div>
+  )
+}
+
+function BingoPanel({ events, onOpen }) {
+  if (!events.length) return <WorkspaceEmptyState title="Nenhum bingo disponivel." />
+
+  return (
+    <div className="bds-events-grid">
+      {events.map((event) => {
+        const detail = buildEventDetail(event)
+        return (
+          <article key={event.id || event.slug} className="bds-events-card">
+            <EventCard event={event} onSelect={onOpen} />
+            <div className="bds-events-detail__body">
+              <p>{detail.period}</p>
+              {Array.isArray(detail.rules) ? <ul>{detail.rules.slice(0, 3).map((rule) => <li key={rule}>{rule}</li>)}</ul> : null}
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
+function RegulationsPanel({ events, onOpen }) {
+  const regulations = events
+    .map((event) => ({ event, detail: buildEventDetail(event) }))
+    .filter(({ detail }) => detail.rules)
+
+  if (!regulations.length) return <WorkspaceEmptyState title="Nenhum regulamento disponivel." />
+
+  return (
+    <div className="grid gap-[var(--bds-space-10)]">
+      {regulations.map(({ event, detail }) => (
+        <button
+          key={event.id || event.slug}
+          type="button"
+          onClick={() => onOpen(event)}
+          className="rounded-[var(--bds-radius-md)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-[var(--bds-space-12)] text-left transition hover:border-[var(--bds-color-primary-hover)] hover:bg-[var(--bds-color-background-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bds-color-primary-hover)]"
+        >
+          <strong className="block text-[var(--bds-color-text)]">{detail.title}</strong>
+          <span className="mt-[var(--bds-space-4)] block text-sm text-[var(--bds-color-text-secondary)]">Abrir regulamento no workspace</span>
+        </button>
+      ))}
     </div>
   )
 }
@@ -181,6 +302,7 @@ function EventsEmptyState() {
 export default function EventsPage() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeView, setActiveView] = useState('featured')
   const [selectedEvent, setSelectedEvent] = useState(null)
 
   useEffect(() => {
@@ -208,73 +330,101 @@ export default function EventsPage() {
   }, [])
 
   const displayEvents = useMemo(() => mergeConfiguredEvents(events), [events])
-  const featuredEvent = useMemo(() => displayEvents.find(isFeaturedEvent) || null, [displayEvents])
-  const recurringEvents = useMemo(
-    () => displayEvents.filter((event) => event.id !== featuredEvent?.id && isRecurringEvent(event)),
-    [displayEvents, featuredEvent],
-  )
-  const regularEvents = useMemo(
-    () => displayEvents.filter((event) => event.id !== featuredEvent?.id && !isRecurringEvent(event)),
-    [displayEvents, featuredEvent],
-  )
   const highlightEvent = useMemo(
     () => displayEvents.find((event) => event.slug === ACTIVE_EVENT_HIGHLIGHT.slug) || null,
     [displayEvents],
   )
+  const featuredEvents = useMemo(() => {
+    const featured = displayEvents.filter(isFeaturedEvent)
+    if (highlightEvent && !featured.some((event) => event.id === highlightEvent.id || event.slug === highlightEvent.slug)) return [highlightEvent, ...featured]
+    return featured
+  }, [displayEvents, highlightEvent])
+  const rankingEvent = useMemo(() => displayEvents.find(isRankingEvent) || null, [displayEvents])
+  const bingoEvents = useMemo(() => displayEvents.filter(isBingoEvent), [displayEvents])
+  const activeEvents = useMemo(() => displayEvents.filter(isEventActive), [displayEvents])
+  const upcomingEvents = useMemo(() => displayEvents.filter(isEventUpcoming), [displayEvents])
+  const endedEvents = useMemo(() => displayEvents.filter(isEventEnded), [displayEvents])
   const selectedEventDetail = useMemo(() => (selectedEvent ? buildEventDetail(selectedEvent) : null), [selectedEvent])
+
+  function openEvent(event) {
+    setSelectedEvent(event)
+  }
+
+  function closeEvent() {
+    setSelectedEvent(null)
+  }
+
+  function selectView(item) {
+    setActiveView(item.id)
+    setSelectedEvent(null)
+  }
+
+  function renderWorkspaceContent() {
+    if (selectedEventDetail) return <EventDetails event={selectedEventDetail} onBack={closeEvent} />
+    if (loading) return <WorkspaceSkeleton rows={5} />
+    if (!displayEvents.length) return <WorkspaceEmptyState title="Nenhum evento disponivel." />
+
+    if (activeView === 'featured') {
+      return (
+        <div className="grid gap-[var(--bds-space-16)]">
+          {highlightEvent ? <EventHighlightBanner highlight={ACTIVE_EVENT_HIGHLIGHT} event={highlightEvent} onOpen={openEvent} /> : null}
+          <EventGrid events={featuredEvents} onSelect={openEvent} emptyTitle="Nenhum evento em destaque." />
+        </div>
+      )
+    }
+
+    if (activeView === 'ranking') return <RankingPanel event={rankingEvent} onOpen={openEvent} />
+    if (activeView === 'bingo') return <BingoPanel events={bingoEvents} onOpen={openEvent} />
+    if (activeView === 'active') return <EventGrid events={activeEvents} onSelect={openEvent} emptyTitle="Nenhum evento ativo." />
+    if (activeView === 'upcoming') return <CompactEventList events={upcomingEvents} onSelect={openEvent} emptyTitle="Nenhum proximo evento." />
+    if (activeView === 'ended') return <CompactEventList events={endedEvents} onSelect={openEvent} emptyTitle="Nenhum evento encerrado." mode="ended" />
+    return <RegulationsPanel events={displayEvents} onOpen={openEvent} />
+  }
+
+  const activeTitle = selectedEventDetail ? selectedEventDetail.title : {
+    featured: 'Destaques',
+    ranking: 'Ranking BarCoins',
+    bingo: 'Bingos',
+    active: 'Eventos Ativos',
+    upcoming: 'Proximos Eventos',
+    ended: 'Eventos Encerrados',
+    rules: 'Regulamentos',
+  }[activeView]
+
+  const sidebarItems = [
+    { id: 'featured', icon: Star, name: 'Destaques', badge: featuredEvents.length || undefined },
+    { id: 'ranking', icon: Trophy, name: 'Ranking BarCoins', badge: rankingEvent ? 1 : undefined, status: rankingEvent ? 'ATIVO' : undefined },
+    { id: 'bingo', icon: PartyPopper, name: 'Bingos', badge: bingoEvents.length || undefined },
+    { id: 'active', icon: Sparkles, name: 'Eventos Ativos', badge: activeEvents.length || undefined },
+    { id: 'upcoming', icon: Clock3, name: 'Proximos Eventos', badge: upcomingEvents.length || undefined },
+    { id: 'ended', icon: CheckCircle2, name: 'Eventos Encerrados', badge: endedEvents.length || undefined },
+    { id: 'rules', icon: FileText, name: 'Regulamentos', badge: displayEvents.length || undefined },
+  ]
 
   return (
     <main className="bds-events-page">
       <HeroCard className="bds-events-hero" title="EVENTOS DO BAR" subtitle={HERO_TEXT} />
 
-      {selectedEventDetail ? (
-        <EventDetails event={selectedEventDetail} onBack={() => setSelectedEvent(null)} />
-      ) : loading ? (
-        <section className="bds-events-section" aria-live="polite">
-          <div className="bds-events-loading">
-            <Sparkles size={22} />
-            <span>Carregando eventos...</span>
-          </div>
-        </section>
-      ) : displayEvents.length === 0 ? (
-        <EventsEmptyState />
-      ) : (
-        <>
-          <EventHighlightBanner highlight={ACTIVE_EVENT_HIGHLIGHT} event={highlightEvent} onOpen={setSelectedEvent} />
+      <PortalWorkspace
+        header={{
+          eyebrow: 'Eventos',
+          title: activeTitle,
+          description: selectedEventDetail ? 'Detalhes abertos no workspace.' : 'Navegue pelos eventos do Bar dos Amigos sem sair da pagina.',
+        }}
+        sidebar={{
+          title: 'Eventos',
+          items: sidebarItems,
+          selectedId: activeView,
+          onSelect: selectView,
+        }}
+        content={{ title: activeTitle, description: selectedEventDetail ? 'Detalhes do evento selecionado.' : 'Conteudo organizado pela sidebar.' }}
+      >
+        {renderWorkspaceContent()}
+      </PortalWorkspace>
 
-          {featuredEvent && (
-            <section className="bds-events-section">
-              <SectionHeader eyebrow="Destaque" title="Evento em destaque" />
-              <EventCard event={featuredEvent} featured onSelect={setSelectedEvent} />
-            </section>
-          )}
-
-          {regularEvents.length > 0 && (
-            <section className="bds-events-section">
-              <SectionHeader eyebrow="Agenda" title="Próximos eventos" />
-              <div className="bds-events-grid">
-                {regularEvents.map((event) => <EventCard key={event.id} event={event} onSelect={setSelectedEvent} />)}
-              </div>
-            </section>
-          )}
-
-          {recurringEvents.length > 0 && (
-            <section className="bds-events-section">
-              <SectionHeader eyebrow="Recorrentes" title="Eventos recorrentes" />
-              <div className="bds-events-grid bds-events-grid--compact">
-                {recurringEvents.map((event) => <EventCard key={event.id} event={event} onSelect={setSelectedEvent} />)}
-              </div>
-            </section>
-          )}
-        </>
-      )}
-
-      {!selectedEventDetail && !loading && displayEvents.length > 0 && regularEvents.length === 0 && recurringEvents.length === 0 && !featuredEvent && (
-        <section className="bds-events-section">
-          <div className="bds-events-note">
-            <ImageIcon size={20} />
-            <span>Eventos publicados encontrados, mas sem informações suficientes para exibição detalhada.</span>
-          </div>
+      {!loading && displayEvents.length > 0 && !activeEvents.length && !upcomingEvents.length && !endedEvents.length && (
+        <section className="sr-only">
+          <EmptyState title="Eventos disponiveis" />
         </section>
       )}
     </main>
