@@ -144,7 +144,7 @@
   line-height: 1;
   padding: 0 12px;
   white-space: nowrap;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+  transition: border-color var(--bds-transition-normal), background var(--bds-transition-normal), color var(--bds-transition-normal);
 }
 
 .tv-platform__nowbar button:hover,
@@ -208,7 +208,7 @@
   padding: 0;
   border-color: var(--bds-color-border);
   background: var(--bds-color-surface);
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  transition: border-color var(--bds-transition-normal), background var(--bds-transition-normal), transform var(--bds-transition-normal);
 }
 
 .tv-channel-card:hover {
@@ -220,7 +220,7 @@
 .tv-channel-card--active,
 .tv-channel-card--active:hover {
   border-color: var(--bds-color-primary-hover);
-  box-shadow: inset 0 0 0 1px var(--bds-color-glow);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
 }
 
 .tv-channel-card__media {
@@ -255,7 +255,7 @@
   color: var(--bds-color-text);
   background: rgba(1, 10, 38, 0.5);
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity var(--bds-transition-normal);
 }
 
 .tv-channel-card__media:hover .tv-channel-card__play,
@@ -362,11 +362,11 @@
 .tv-search,
 .tv-admin-manager nav button {
   transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease,
-    opacity 160ms ease;
+    border-color var(--bds-transition-normal),
+    background-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal),
+    opacity var(--bds-transition-normal);
 }
 
 .tv-platform__nowbar button:focus-visible,
@@ -650,4 +650,97 @@
 
 .tv-platform__player-section:hover {
   box-shadow: none;
+}
+
+/* V1.1.0 - Premium Cards 1.0 */
+:where(
+  .tv-platform__header,
+  .tv-platform__player-section,
+  .tv-platform__controls,
+  .tv-platform__categories,
+  .tv-section,
+  .tv-sidebar,
+  .tv-channel-card,
+  .tv-empty-state,
+  .tv-platform__loading
+) {
+  border-color: var(--bds-card-border-premium, var(--bds-color-border));
+  border-radius: var(--bds-radius-lg);
+  background-color: var(--bds-card-surface-premium, var(--bds-color-surface));
+  box-shadow: var(--bds-card-shadow-premium, var(--bds-shadow-level-1));
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal);
+}
+
+:where(.tv-channel-card, .tv-section, .tv-sidebar):where(:hover, :focus-within) {
+  border-color: var(--bds-card-border-premium-hover, var(--bds-color-border));
+  box-shadow: var(--bds-card-shadow-premium-hover, var(--bds-shadow-hover));
+}
+
+:where(
+  .tv-channel-card--active,
+  .tv-channel-card__play,
+  .tv-channel-card__media:focus-visible
+) {
+  box-shadow: none !important;
+}
+
+/* V1.1.0 - Premium Typography 2.0 */
+:where(.tv-platform, .tv-section, .tv-channel-card, .tv-sidebar) {
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-text);
+  font-weight: var(--bds-font-weight-regular);
+  line-height: var(--bds-line-normal);
+}
+
+:where(.tv-platform h1, .tv-platform h2, .tv-platform h3, .tv-channel-card__title) {
+  font-weight: var(--bds-font-weight-strong);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-tight);
+}
+
+:where(.tv-platform p, .tv-channel-card__description, .tv-empty-state, .tv-platform__meta) {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+:where(.tv-channel-card__meta, .tv-channel-card__status, .tv-platform__kicker) {
+  font-size: var(--bds-font-micro);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-tight);
+  text-transform: uppercase;
+}
+
+:where(.tv-platform button, .tv-platform input) {
+  font-family: var(--bds-font-family);
+}
+
+:where(.tv-platform button) {
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-semibold);
+  line-height: var(--bds-line-compact);
+}
+
+/* V1.1.0 - Visual Premium Complete */
+:where(.tv-platform button, .tv-platform input) {
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    color var(--bds-transition-normal),
+    opacity var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal);
+}
+
+:where(.tv-platform button:focus-visible, .tv-platform input:focus, .tv-search:focus-within) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
+}
+
+:where(.tv-channel-card--active, .tv-channel-card__status) {
+  box-shadow: none !important;
 }

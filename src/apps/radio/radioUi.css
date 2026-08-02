@@ -35,7 +35,7 @@
   border: 1px solid var(--bds-color-border);
   border-radius: 8px;
   background:
-    radial-gradient(circle at 20% 15%, var(--bds-color-glow), transparent 34%),
+    radial-gradient(circle at 20% 15%, color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent), transparent 34%),
     linear-gradient(135deg, rgba(1, 10, 38, 0.98), rgba(2, 17, 64, 0.96));
   box-shadow: var(--bds-shadow-level-2);
   overflow: hidden;
@@ -147,7 +147,7 @@
   color: var(--bds-color-primary-text);
   background: linear-gradient(180deg, var(--bds-color-primary-hover), var(--bds-color-primary));
   box-shadow: 0 16px 38px rgba(5, 108, 242, 0.22);
-  transition: transform 160ms ease, filter 160ms ease;
+  transition: transform var(--bds-transition-normal), filter var(--bds-transition-normal);
 }
 
 .bar-radio-play-button:hover:not(:disabled) {
@@ -288,7 +288,7 @@
   color: var(--bds-color-text);
   font-size: 0.92rem;
   font-weight: 850;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: border-color var(--bds-transition-normal), box-shadow var(--bds-transition-normal), background var(--bds-transition-normal);
 }
 
 .bar-radio-request-form label span {
@@ -420,11 +420,11 @@
 .bar-radio-request-header button,
 .bar-radio-request-actions button {
   transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease,
-    opacity 160ms ease;
+    border-color var(--bds-transition-normal),
+    background-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal),
+    opacity var(--bds-transition-normal);
 }
 
 .bar-radio-play-button:focus-visible,
@@ -742,4 +742,104 @@
 .bar-radio-listener-player::after {
   box-shadow: none;
   filter: none;
+}
+
+/* V1.1.0 - Premium Cards 1.0 */
+:where(
+  .bar-radio-page-header,
+  .bar-radio-listener-player,
+  .bar-radio-cover-panel,
+  .bar-radio-soft-alert,
+  .bar-radio-request-block,
+  .bar-radio-request-panel,
+  .bar-radio-volume-control,
+  .bar-radio-request-form label,
+  .bar-radio-request-feedback
+) {
+  border-color: var(--bds-card-border-premium, var(--bds-color-border));
+  border-radius: var(--bds-radius-lg);
+  background-color: var(--bds-card-surface-premium, var(--bds-color-surface));
+  box-shadow: var(--bds-card-shadow-premium, var(--bds-shadow-level-1));
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal);
+}
+
+:where(
+  .bar-radio-listener-player,
+  .bar-radio-request-block,
+  .bar-radio-request-panel,
+  .bar-radio-volume-control,
+  .bar-radio-request-form label
+):where(:hover, :focus-within) {
+  border-color: var(--bds-card-border-premium-hover, var(--bds-color-border));
+  box-shadow: var(--bds-card-shadow-premium-hover, var(--bds-shadow-hover));
+}
+
+:where(
+  .bar-radio-play-button,
+  .bar-radio-request-button,
+  .bar-radio-request-header button,
+  .bar-radio-request-actions button
+) {
+  box-shadow: none !important;
+}
+
+/* V1.1.0 - Premium Typography 2.0 */
+:where(.bar-radio-page, .bar-radio-listener-player, .bar-radio-request-panel) {
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-text);
+  font-weight: var(--bds-font-weight-regular);
+  line-height: var(--bds-line-normal);
+}
+
+:where(.bar-radio-page h1, .bar-radio-page h2, .bar-radio-page h3, .bar-radio-current-title) {
+  font-weight: var(--bds-font-weight-strong);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-tight);
+}
+
+:where(.bar-radio-page p, .bar-radio-meta, .bar-radio-program, .bar-radio-request-help) {
+  color: var(--bds-color-text-secondary);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+:where(.bar-radio-kicker, .bar-radio-status, .bar-radio-request-status) {
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-compact);
+  text-transform: uppercase;
+}
+
+:where(.bar-radio-page button, .bar-radio-page input, .bar-radio-page textarea, .bar-radio-page label) {
+  font-family: var(--bds-font-family);
+}
+
+:where(.bar-radio-page button) {
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-semibold);
+  line-height: var(--bds-line-compact);
+}
+
+/* V1.1.0 - Visual Premium Complete */
+:where(.bar-radio-page button, .bar-radio-page input, .bar-radio-page textarea) {
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    color var(--bds-transition-normal),
+    opacity var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal);
+}
+
+:where(
+  .bar-radio-page input:focus,
+  .bar-radio-page textarea:focus,
+  .bar-radio-page button:focus-visible,
+  .bar-radio-volume-control:focus-within
+) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
 }

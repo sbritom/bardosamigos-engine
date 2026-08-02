@@ -2234,7 +2234,7 @@
   width: var(--bds-space-64);
   height: var(--bds-space-64);
   object-fit: contain;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.34));
+  filter: none;
 }
 
 .bds-home-shell .bds-live-hero-team-name {
@@ -2438,7 +2438,7 @@
   width: var(--bds-space-64);
   height: var(--bds-space-64);
   object-fit: contain;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.32));
+  filter: none;
 }
 
 .bds-hero-v2-team strong {
@@ -3429,7 +3429,7 @@
 
 body.bds-designer-active [data-designer-id] {
   cursor: pointer;
-  transition: outline-color 160ms ease, box-shadow 160ms ease;
+  transition: outline-color var(--bds-transition-normal), box-shadow var(--bds-transition-normal);
 }
 
 body.bds-designer-active [data-designer-id] svg {
@@ -3538,7 +3538,7 @@ body.bds-designer-preview .bds-designer-selected {
 }
 
 /* =========================================================
-   MXCAST PLAYER — RÁDIO BAR DOS AMIGOS
+   MXCAST PLAYER â€” RÃDIO BAR DOS AMIGOS
    ========================================================= */
 
 .bds-mxcast-player {
@@ -3790,7 +3790,7 @@ body.bds-designer-preview .bds-designer-selected {
 .bds-top-header__brand-title {
   color: var(--bds-color-text);
   font-weight: 950;
-  text-shadow: 0 0 24px rgba(5, 108, 242, 0.12);
+  text-shadow: none;
 }
 
 .bds-top-header__brand-title span,
@@ -4045,7 +4045,7 @@ body.bds-designer-preview .bds-designer-selected {
   color: var(--bds-color-text);
   font-weight: 950;
   letter-spacing: 0.01em;
-  text-shadow: 0 0 18px rgba(5, 108, 242, 0.08);
+  text-shadow: none;
 }
 
 .bds-section-header__eyebrow,
@@ -4187,7 +4187,7 @@ body.bds-designer-preview .bds-designer-selected {
 .bds-home-shell .bds-match-card__team span {
   color: var(--bds-color-text);
   font-weight: 950;
-  text-shadow: 0 0 16px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
+  text-shadow: none;
 }
 
 .bds-home-shell .bds-card-header__eyebrow,
@@ -4240,7 +4240,7 @@ body.bds-designer-preview .bds-designer-selected {
 .bds-home-shell .bds-stats-card > strong {
   color: var(--bds-color-text);
   font-weight: 950;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--bds-color-primary-hover) 6%, transparent);
+  text-shadow: none;
 }
 
 .bds-home-shell .bds-home-hero-crest,
@@ -4376,7 +4376,7 @@ body.bds-designer-preview .bds-designer-selected {
 /* Sprint Home 6.3 - premium events banner, scoped to Home community module */
 .bds-home-shell [data-designer-id="community"] .bds-card-header__title {
   letter-spacing: 0.04em;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--bds-color-primary-hover) 16%, transparent);
+  text-shadow: none;
 }
 
 .bds-home-shell [data-designer-id="community"] .bds-home-community-note {
@@ -5065,15 +5065,15 @@ body.bds-designer-preview .bds-designer-selected {
   transform: translateY(calc(var(--bds-space-4) * -1));
   border-color: var(--bds-color-primary);
   background: var(--bds-color-background);
-  box-shadow: 0 0 0 var(--bds-space-4) var(--bds-color-glow), var(--bds-shadow-level-1);
+  box-shadow: var(--bds-card-shadow-premium-hover);
 }
 
 .bds-barstudio-crop-upload:focus-visible,
 .bds-barstudio-crop-actions button:focus-visible,
 .bds-barstudio-crop-actions a:focus-visible,
 .bds-barstudio-crop-canvas:focus-visible {
-  outline: var(--bds-space-4) solid var(--bds-color-glow);
-  outline-offset: var(--bds-space-4);
+  outline: 2px solid color-mix(in srgb, var(--bds-color-primary-hover) 76%, var(--bds-color-text));
+  outline-offset: 3px;
 }
 
 .bds-barstudio-crop-upload__content {
@@ -5189,12 +5189,12 @@ body.bds-designer-preview .bds-designer-selected {
 .bds-barstudio-crop-actions button,
 .bds-barstudio-crop-actions a {
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease,
-    opacity 160ms ease;
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal),
+    opacity var(--bds-transition-normal);
 }
 
 .bds-action-button:focus-visible,
@@ -5278,9 +5278,9 @@ body.bds-designer-preview .bds-designer-selected {
 .bds-barstudio-search,
 .bds-barstudio-crop-zoom {
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
+    border-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    background-color var(--bds-transition-normal);
 }
 
 .bds-home-tv-search:focus-within,
@@ -5529,4 +5529,751 @@ article[class*="shadow-[var(--bds-shadow-hero)]"] {
   .tv-platform__player-section:hover
 ) {
   box-shadow: none !important;
+}
+
+/* V1.1.0 - Premium Cards 1.0: unified visual finish only */
+:root {
+  --bds-card-border-premium: color-mix(in srgb, var(--bds-color-primary-hover) 8%, var(--bds-color-border));
+  --bds-card-border-premium-hover: color-mix(in srgb, var(--bds-color-primary-hover) 14%, var(--bds-color-border));
+  --bds-card-surface-premium: color-mix(in srgb, var(--bds-color-surface) 82%, var(--bds-color-background));
+  --bds-card-surface-premium-hover: color-mix(in srgb, var(--bds-color-surface-alt) 22%, var(--bds-card-surface-premium));
+  --bds-card-shadow-premium: var(--bds-shadow-level-1);
+  --bds-card-shadow-premium-hover: var(--bds-shadow-hover);
+}
+
+:where(
+  .bds-panel,
+  .bds-card,
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-tv-stage,
+  .bds-chat-frame,
+  .bds-home-card-list,
+  .bds-home-empty,
+  .bds-home-radio-card,
+  .bds-home-radio-status,
+  .bds-home-tool-card,
+  .bds-home-community-note,
+  .bds-home-result-box,
+  .bds-home-hits-state,
+  .bds-barstudio-app-header,
+  .bds-barstudio-sidebar,
+  .bds-barstudio-workspace,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-barstudio-crop-controls__panel,
+  .bds-barstudio-crop-result,
+  .bds-community-hero,
+  .bds-community-card,
+  .bds-community-event-card,
+  .bds-community-events-grid,
+  .bds-community-panel
+) {
+  border-color: var(--bds-card-border-premium);
+  border-width: 1px;
+  border-radius: var(--bds-radius-lg);
+  background-color: var(--bds-card-surface-premium);
+  box-shadow: var(--bds-card-shadow-premium);
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal);
+}
+
+:where(
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-community-event-card
+):where(:hover, :focus-within) {
+  border-color: var(--bds-card-border-premium-hover);
+  background-color: var(--bds-card-surface-premium-hover);
+  box-shadow: var(--bds-card-shadow-premium-hover);
+}
+
+:where(
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-community-event-card
+):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bds-color-primary-hover) 78%, var(--bds-color-text));
+  outline-offset: 3px;
+  box-shadow: var(--bds-card-shadow-premium-hover);
+}
+
+:where(
+  .bds-card-header__icon,
+  .bds-media-block__fallback,
+  .bds-home-hero-crest,
+  .bds-home-hero-score,
+  .bds-home-match-score,
+  .bds-status-badge,
+  .bds-live-indicator,
+  .bds-metric-chip,
+  .bds-stat-badge,
+  .bds-home-hits-cover,
+  .bds-home-tv-channel,
+  .bds-home-tv-channel-button
+) {
+  box-shadow: none !important;
+}
+
+:where(
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-community-event-card
+)::before,
+:where(
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-community-event-card
+)::after {
+  box-shadow: none !important;
+  filter: none;
+}
+
+:where(
+  [class*="shadow-[var(--bds-shadow"],
+  [class*="shadow-[0_0"],
+  [class*="shadow-[0_10"],
+  [class*="shadow-[0_12"],
+  [class*="shadow-[0_14"],
+  [class*="shadow-[0_16"],
+  [class*="shadow-[0_20"],
+  [class*="shadow-[0_24"]
+) {
+  box-shadow: var(--bds-card-shadow-premium) !important;
+}
+
+/* V1.1.0 - Premium Typography 2.0: visual hierarchy only */
+:where(
+  .bds-home-shell,
+  .bds-community-page,
+  .bds-barstudio-shell,
+  .bds-football-page,
+  .bds-events-page,
+  .events-admin-page,
+  .radio-admin-page,
+  .bar-radio-page,
+  .bar-radio-engine,
+  .bar-xat-page,
+  .tv-platform,
+  .tv-manager
+) {
+  color: var(--bds-color-text);
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-text);
+  font-weight: var(--bds-font-weight-regular);
+  line-height: var(--bds-line-normal);
+  text-rendering: optimizeLegibility;
+}
+
+:where(
+  .bds-hero-card__eyebrow,
+  .bds-card-header__eyebrow,
+  .bds-section-header__eyebrow,
+  .bds-home-section-kicker,
+  .bds-home-radio-kicker,
+  .bds-home-tv-meta,
+  .bds-football-section-kicker,
+  .bds-events-card__meta,
+  .bds-events-detail__label,
+  .events-admin-label,
+  .radio-admin-label,
+  .bar-radio-kicker,
+  .tv-channel-card__meta,
+  .tv-admin-label
+) {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-compact);
+  text-transform: uppercase;
+}
+
+:where(
+  .bds-hero-card__title,
+  .bds-release-hero h1,
+  .bds-community-hero h1,
+  .bds-events-hero h1,
+  .bar-radio-page-header h1,
+  .bar-radio-hero h1,
+  .tv-platform__header h1,
+  .bds-barstudio-app-header h1
+) {
+  color: var(--bds-color-text);
+  font-weight: var(--bds-font-weight-strong);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-tight);
+}
+
+:where(
+  .bds-card-header__title,
+  .bds-section-header__title,
+  .bds-home-card-title,
+  .bds-home-tool-card strong,
+  .bds-home-radio-main strong,
+  .bds-home-hits-title,
+  .bds-news-card h3,
+  .bds-match-card__team span,
+  .bds-stats-card > strong,
+  .bds-events-card h2,
+  .bds-events-detail h2,
+  .events-admin-panel h2,
+  .events-admin-event-card h3,
+  .radio-admin-panel h2,
+  .radio-request-card h3,
+  .bar-radio-panel h2,
+  .bar-radio-track-card h3,
+  .tv-section h2,
+  .tv-channel-card h3,
+  .tv-admin-panel h2,
+  .bds-football-section-title,
+  .bds-football-match-team
+) {
+  color: var(--bds-color-text);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-tight);
+  text-shadow: none;
+}
+
+:where(
+  .bds-card-header__subtitle,
+  .bds-section-header__subtitle,
+  .bds-hero-card__description,
+  .bds-home-card-subtitle,
+  .bds-home-empty,
+  .bds-home-tv-description,
+  .bds-home-radio-status,
+  .bds-news-card p,
+  .bds-match-card__meta,
+  .bds-home-hits-artist,
+  .bds-community-card p,
+  .bds-events-card p,
+  .bds-events-detail p,
+  .events-admin-muted,
+  .events-admin-empty,
+  .radio-admin-muted,
+  .radio-admin-empty,
+  .bar-radio-muted,
+  .bar-radio-empty,
+  .tv-empty-state,
+  .tv-channel-card p,
+  .tv-admin-empty,
+  .bds-football-empty-motion,
+  .bds-football-match-meta
+) {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+:where(
+  .bds-action-button,
+  .bds-button,
+  .bds-home-request-button,
+  .bds-home-tv-channel-button,
+  .bds-home-radio-request-actions button,
+  .bds-barstudio-crop-actions button,
+  .bds-barstudio-crop-actions a,
+  .events-admin-button,
+  .radio-admin-button,
+  .bar-radio-button,
+  .tv-admin-button,
+  .tv-platform button
+) {
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-semibold);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-compact);
+}
+
+:where(
+  .bds-status-badge,
+  .bds-live-indicator,
+  .bds-metric-chip,
+  .bds-stat-badge,
+  .bds-badge,
+  .bds-home-tv-badge,
+  .bds-events-status,
+  .events-admin-badge,
+  .radio-admin-badge,
+  .bar-radio-badge,
+  .tv-channel-card__status,
+  .tv-admin-badge,
+  .bds-football-status-badge
+) {
+  font-size: var(--bds-font-micro);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-tight);
+  text-transform: uppercase;
+}
+
+:where(
+  input,
+  select,
+  textarea
+) {
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+:where(
+  input::placeholder,
+  textarea::placeholder
+) {
+  color: var(--bds-color-text-muted);
+  font-weight: var(--bds-font-weight-regular);
+}
+
+:where(
+  label,
+  .bds-label,
+  .events-admin-form label,
+  .radio-admin-form label,
+  .bar-radio-request-form label,
+  .tv-admin-form label
+) {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-semibold);
+  line-height: var(--bds-line-compact);
+}
+
+:where(
+  a,
+  .bds-link,
+  .bds-section-header__link,
+  .bds-home-card-link,
+  .bds-events-link,
+  .tv-platform__link
+) {
+  font-weight: var(--bds-font-weight-semibold);
+  text-underline-offset: 3px;
+}
+
+/* V1.1.0 - Visual Premium Complete: controls, forms, tables, motion and icons */
+:where(
+  .bds-action-button,
+  .bds-button,
+  .bds-home-request-button,
+  .bds-home-tv-channel-button,
+  .bds-home-tv-categories button,
+  .bds-home-radio-request-actions button,
+  .bds-home-radio-request-header button,
+  .bds-barstudio-sidebar-item,
+  .bds-barstudio-crop-actions button,
+  .bds-barstudio-crop-actions a,
+  .events-admin-button,
+  .events-admin-icon-button,
+  .radio-admin-header button,
+  .radio-admin-login-form button,
+  .radio-admin-actions button,
+  .radio-admin-track button,
+  .radio-admin-log-tabs button,
+  .radio-request-card__actions button,
+  .bar-radio-button,
+  .bar-radio-request-button,
+  .bar-radio-request-actions button,
+  .tv-platform__nowbar button,
+  .tv-platform__categories button,
+  .tv-admin-row-actions button,
+  .tv-admin-form__actions button,
+  .tv-admin-actions button,
+  .bds-football-page button
+) {
+  min-height: var(--bds-control-height-sm);
+  border-radius: var(--bds-radius-md);
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-semibold);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-compact);
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    color var(--bds-transition-normal),
+    opacity var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal),
+    transform var(--bds-transition-normal);
+}
+
+:where(
+  .bds-action-button,
+  .bds-button,
+  .events-admin-button,
+  .radio-admin-login-form button,
+  .radio-admin-actions button,
+  .bar-radio-button,
+  .bar-radio-request-button,
+  .tv-admin-form__actions button,
+  .tv-admin-actions button
+) {
+  min-height: var(--bds-control-height);
+}
+
+:where(
+  .bds-action-button:hover,
+  .bds-button:hover,
+  .bds-home-request-button:hover,
+  .bds-home-tv-channel-button:hover,
+  .bds-home-tv-categories button:hover,
+  .bds-home-radio-request-actions button:hover,
+  .bds-barstudio-sidebar-item:hover,
+  .bds-barstudio-crop-actions button:hover,
+  .bds-barstudio-crop-actions a:hover,
+  .events-admin-button:hover,
+  .events-admin-icon-button:hover,
+  .radio-admin-header button:hover,
+  .radio-admin-login-form button:hover,
+  .radio-admin-actions button:hover,
+  .radio-admin-track button:hover,
+  .radio-admin-log-tabs button:hover,
+  .radio-request-card__actions button:hover,
+  .bar-radio-button:hover,
+  .bar-radio-request-button:hover,
+  .bar-radio-request-actions button:hover,
+  .tv-platform__nowbar button:hover,
+  .tv-platform__categories button:hover,
+  .tv-admin-row-actions button:hover,
+  .tv-admin-form__actions button:hover,
+  .tv-admin-actions button:hover,
+  .bds-football-page button:hover
+):not(:disabled) {
+  box-shadow: var(--bds-card-shadow-premium-hover);
+  transform: translateY(-1px);
+}
+
+:where(
+  .bds-action-button:disabled,
+  .bds-button:disabled,
+  button:disabled,
+  [aria-disabled="true"]
+) {
+  opacity: var(--bds-opacity-disabled);
+  transform: none;
+  box-shadow: none !important;
+}
+
+:where(
+  input,
+  select,
+  textarea,
+  .bar-radio-input,
+  .bar-radio-select,
+  .bar-radio-textarea,
+  .bar-radio-request-form input,
+  .bar-radio-request-form textarea,
+  .radio-admin-login-form input,
+  .events-admin-login__form input,
+  .events-admin-form input,
+  .events-admin-form select,
+  .events-admin-form textarea,
+  .tv-admin-form input,
+  .tv-admin-form select,
+  .tv-admin-form textarea
+) {
+  border-color: var(--bds-card-border-premium, var(--bds-color-border));
+  border-radius: var(--bds-radius-md);
+  background-color: color-mix(in srgb, var(--bds-color-surface) 72%, var(--bds-color-background));
+  color: var(--bds-color-text);
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal),
+    color var(--bds-transition-normal),
+    box-shadow var(--bds-transition-normal);
+}
+
+:where(
+  input:focus,
+  select:focus,
+  textarea:focus,
+  .bar-radio-input:focus,
+  .bar-radio-select:focus,
+  .bar-radio-textarea:focus,
+  .bar-radio-request-form input:focus,
+  .bar-radio-request-form textarea:focus,
+  .radio-admin-login-form input:focus,
+  .events-admin-login__form input:focus,
+  .events-admin-form input:focus,
+  .events-admin-form select:focus,
+  .events-admin-form textarea:focus,
+  .tv-admin-form input:focus,
+  .tv-admin-form select:focus,
+  .tv-admin-form textarea:focus
+) {
+  border-color: color-mix(in srgb, var(--bds-color-primary-hover) 42%, var(--bds-color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bds-color-primary-hover) 10%, transparent);
+  outline: none;
+}
+
+:where(
+  input:disabled,
+  select:disabled,
+  textarea:disabled
+) {
+  opacity: var(--bds-opacity-disabled);
+}
+
+:where(
+  .bds-hero-card,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-page-header,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__header,
+  .tv-platform__player-section,
+  .bds-barstudio-app-header,
+  .bds-football-hero-motion
+) {
+  border-color: var(--bds-card-border-premium, var(--bds-color-border));
+  border-radius: var(--bds-radius-hero);
+  box-shadow: var(--bds-card-shadow-premium) !important;
+  filter: none;
+}
+
+:where(
+  .bds-hero-card,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-page-header,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__header,
+  .tv-platform__player-section,
+  .bds-barstudio-app-header,
+  .bds-football-hero-motion
+)::before,
+:where(
+  .bds-hero-card,
+  .bds-release-hero,
+  .bds-community-hero,
+  .bds-events-hero,
+  .bar-radio-page-header,
+  .bar-radio-listener-player,
+  .bar-radio-hero,
+  .tv-platform__header,
+  .tv-platform__player-section,
+  .bds-barstudio-app-header,
+  .bds-football-hero-motion
+)::after {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+:where(
+  table,
+  .bds-table,
+  .bar-radio-table,
+  .tv-admin-table,
+  .events-admin-table,
+  .bds-football-table
+) {
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--bds-color-text);
+  font-family: var(--bds-font-family);
+}
+
+:where(
+  th,
+  .bar-radio-table th,
+  .tv-admin-table th,
+  .events-admin-table th,
+  .bds-football-table th
+) {
+  color: var(--bds-color-text-secondary);
+  font-size: var(--bds-font-micro);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-tight);
+  text-transform: uppercase;
+}
+
+:where(
+  td,
+  .bar-radio-table td,
+  .tv-admin-table td,
+  .events-admin-table td,
+  .bds-football-table td
+) {
+  color: var(--bds-color-text);
+  font-size: var(--bds-font-caption);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+:where(
+  tr,
+  .bar-radio-table tr,
+  .tv-admin-table tr,
+  .events-admin-table tr,
+  .bds-football-table tr
+) {
+  transition:
+    background-color var(--bds-transition-normal),
+    border-color var(--bds-transition-normal);
+}
+
+:where(
+  tbody tr:hover,
+  .bar-radio-table tbody tr:hover,
+  .tv-admin-table tbody tr:hover,
+  .events-admin-table tbody tr:hover,
+  .bds-football-table tbody tr:hover
+) {
+  background-color: color-mix(in srgb, var(--bds-color-primary-hover) 7%, transparent);
+}
+
+:where(
+  svg,
+  .bds-card-header__icon,
+  .bds-section-header__icon,
+  .bds-action-button svg,
+  .bds-button svg,
+  button svg,
+  a svg
+) {
+  flex-shrink: 0;
+  stroke-width: 2;
+  vertical-align: middle;
+}
+
+:where(
+  .bds-action-button svg,
+  .bds-button svg,
+  button svg,
+  a svg
+) {
+  width: 1em;
+  height: 1em;
+}
+
+:where(
+  *,
+  *::before,
+  *::after
+) {
+  transition-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    *,
+    *::before,
+    *::after
+  ) {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+:where(
+  .bds-card-header__title,
+  .bds-section-header__title,
+  .bds-hero-card__title,
+  .bds-home-shell .bds-card-header__title,
+  .bds-home-shell .bds-home-tool-card strong,
+  .bds-home-shell .bds-home-radio-main strong,
+  .bds-home-shell .bds-news-card h3,
+  .bds-home-shell .bds-match-card__team span,
+  .bds-community-hero__content h1,
+  .bds-release-player strong,
+  .bds-release-list strong,
+  .bds-release-radio-player h3
+) {
+  text-shadow: none !important;
+}
+
+:where(
+  .bds-top-header__icon-button,
+  .bds-card-header__icon,
+  .bds-section-header__icon,
+  .bds-status-badge,
+  .bds-live-indicator,
+  .bds-metric-chip,
+  .bds-stat-badge,
+  .bds-media-block__fallback,
+  .bds-home-hero-crest,
+  .bds-home-hero-score,
+  .bds-home-match-score
+) {
+  filter: none !important;
+  text-shadow: none !important;
 }
