@@ -1,5 +1,10 @@
 .bds-football-page {
   scroll-behavior: smooth;
+  font-family: var(--bds-font-family);
+  font-size: var(--bds-font-text);
+  font-weight: var(--bds-font-weight-regular);
+  line-height: var(--bds-line-normal);
+  color: var(--bds-color-text);
 }
 
 .bds-football-page :where(button, summary, input, .bds-football-match-row, .bds-football-status-motion, .bds-football-live-value) {
@@ -7,8 +12,23 @@
   transition-timing-function: ease;
 }
 
+.bds-football-hero-motion,
+.bds-football-section-motion,
+.bds-football-match-row,
+.bds-football-empty-motion,
+.bds-football-skeleton,
+.bds-football-page details,
+.bds-football-page summary {
+  border-color: var(--bds-card-border-premium, var(--bds-color-border)) !important;
+  background-color: rgba(25, 52, 80, .66) !important;
+  box-shadow: var(--bds-card-shadow-premium, none) !important;
+}
+
 .bds-football-hero-motion {
   animation: bds-football-fade var(--bds-transition-normal) both;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(75, 134, 244, .14), transparent 42%),
+    linear-gradient(145deg, rgba(31, 67, 103, .78), rgba(16, 36, 59, .90)) !important;
 }
 
 .bds-football-section-motion {
@@ -18,27 +38,24 @@
 .bds-football-match-row {
   animation: bds-football-row-in 180ms ease both;
   cursor: pointer;
+  background: rgba(19, 43, 69, .58) !important;
 }
 
-.bds-football-match-row:nth-child(2) {
-  animation-delay: 18ms;
+.bds-football-match-row:hover,
+.bds-football-section-motion:hover,
+.bds-football-page details:hover,
+.bds-football-page summary:hover {
+  border-color: var(--bds-card-border-premium-hover, rgba(121, 169, 255, .28)) !important;
+  background-color: rgba(34, 67, 101, .74) !important;
+  box-shadow: var(--bds-card-shadow-premium-hover, none) !important;
 }
 
-.bds-football-match-row:nth-child(3) {
-  animation-delay: 36ms;
-}
+.bds-football-match-row:nth-child(2) { animation-delay: 18ms; }
+.bds-football-match-row:nth-child(3) { animation-delay: 36ms; }
+.bds-football-match-row:nth-child(4) { animation-delay: 54ms; }
+.bds-football-match-row:nth-child(5) { animation-delay: 72ms; }
 
-.bds-football-match-row:nth-child(4) {
-  animation-delay: 54ms;
-}
-
-.bds-football-match-row:nth-child(5) {
-  animation-delay: 72ms;
-}
-
-.bds-football-empty-motion {
-  animation: bds-football-fade 180ms ease both;
-}
+.bds-football-empty-motion { animation: bds-football-fade 180ms ease both; color: #AFC2D6; }
 
 .bds-football-live-value {
   display: inline-flex;
@@ -48,25 +65,12 @@
   transition-property: color, background-color, border-color, opacity, text-shadow;
 }
 
-.bds-football-live-value[data-live-changing="true"] {
-  animation: bds-football-value-fade 150ms ease both;
-}
+.bds-football-live-value[data-live-changing="true"] { animation: bds-football-value-fade 150ms ease both; }
+.bds-football-live-value[data-goal-pulse="true"] { animation: bds-football-goal-pulse 2000ms ease both; }
+.bds-football-live-value[data-live-changing="true"][data-goal-pulse="true"] { animation: bds-football-value-fade 150ms ease both, bds-football-goal-pulse 2000ms ease both; }
 
-.bds-football-live-value[data-goal-pulse="true"] {
-  animation: bds-football-goal-pulse 2000ms ease both;
-}
-
-.bds-football-live-value[data-live-changing="true"][data-goal-pulse="true"] {
-  animation: bds-football-value-fade 150ms ease both, bds-football-goal-pulse 2000ms ease both;
-}
-
-.bds-football-score-value {
-  min-inline-size: 4.8rem;
-}
-
-.bds-football-time-value {
-  min-inline-size: 2.4rem;
-}
+.bds-football-score-value { min-inline-size: 4.8rem; }
+.bds-football-time-value { min-inline-size: 2.4rem; }
 
 .bds-football-status-motion {
   min-block-size: 1.35rem;
@@ -74,48 +78,97 @@
 }
 
 .bds-football-minute-value {
-  border-radius: var(--bds-radius-xs);
-  background: color-mix(in srgb, var(--bds-color-danger) 8%, transparent);
-  padding: 0.08rem 0.36rem;
+  border-radius: var(--bds-radius-sm);
+  background: rgba(255, 98, 98, .08);
+  padding: .08rem .36rem;
 }
 
 .bds-football-status-motion--live {
-  border-color: color-mix(in srgb, var(--bds-color-danger) 72%, transparent) !important;
-  background: color-mix(in srgb, var(--bds-color-danger) 7%, transparent) !important;
+  border-color: rgba(255, 98, 98, .34) !important;
+  background: rgba(255, 98, 98, .08) !important;
+  color: #FF8B8B !important;
 }
 
 .bds-football-match-row--live {
-  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--bds-color-danger) 72%, transparent) !important;
+  box-shadow: inset 2px 0 0 rgba(255, 98, 98, .65) !important;
 }
 
 .bds-football-live-dot {
-  inline-size: 0.42rem;
-  block-size: 0.42rem;
+  inline-size: .42rem;
+  block-size: .42rem;
   flex: none;
   border-radius: 999px;
   background: var(--bds-color-danger);
   animation: none;
 }
 
-.bds-football-timeline-row {
-  min-block-size: 2.25rem;
-}
-
-.bds-football-timeline-minute {
-  inline-size: 2.35rem;
-  flex: none;
-}
+.bds-football-timeline-row { min-block-size: 2.25rem; }
+.bds-football-timeline-minute { inline-size: 2.35rem; flex: none; }
 
 .bds-football-timeline-mark {
   inline-size: 2.35rem;
   flex: none;
-  border-radius: var(--bds-radius-xs);
-  background: color-mix(in srgb, var(--bds-color-primary) 10%, transparent);
-  color: var(--bds-color-text-secondary);
+  border-radius: var(--bds-radius-sm);
+  background: rgba(75, 134, 244, .10);
+  color: #AFC2D6;
   font-size: var(--bds-font-micro);
   font-weight: var(--bds-font-weight-bold);
   line-height: 1.35;
 }
+
+.bds-football-page :where(h1, h2, h3, .bds-football-section-title, .bds-football-match-team) {
+  color: #F4F8FF;
+  font-weight: var(--bds-font-weight-strong);
+  letter-spacing: var(--bds-letter-none);
+  line-height: var(--bds-line-tight);
+  text-shadow: none;
+}
+
+.bds-football-page :where(p, .bds-football-match-meta, .bds-football-empty-motion, .bds-football-table-meta) {
+  color: #AFC2D6;
+  font-size: var(--bds-font-small);
+  font-weight: var(--bds-font-weight-medium);
+  line-height: var(--bds-line-normal);
+}
+
+.bds-football-page :where(.bds-football-section-kicker, .bds-football-status-motion, .bds-football-status-badge, .bds-football-live-value, .bds-football-table th) {
+  font-size: var(--bds-font-micro);
+  font-weight: var(--bds-font-weight-bold);
+  letter-spacing: var(--bds-letter-overline);
+  line-height: var(--bds-line-tight);
+  text-transform: uppercase;
+}
+
+.bds-football-page table {
+  border-color: rgba(190, 216, 240, .10);
+}
+
+.bds-football-page thead {
+  color: #8FA8C2;
+}
+
+.bds-football-page tbody tr {
+  border-color: rgba(190, 216, 240, .08);
+}
+
+.bds-football-page tbody tr:hover {
+  background: rgba(75, 134, 244, .06);
+}
+
+.bds-football-page :where(button, input, select, textarea, label) { font-family: var(--bds-font-family); }
+.bds-football-page :where(button) { font-size: var(--bds-font-caption); font-weight: var(--bds-font-weight-semibold); line-height: var(--bds-line-compact); }
+
+.bds-football-page :where(button, input, select, textarea, summary, .bds-football-match-row, .bds-football-section-motion) {
+  transition: background-color var(--bds-transition-normal), border-color var(--bds-transition-normal), color var(--bds-transition-normal), opacity var(--bds-transition-normal), box-shadow var(--bds-transition-normal), transform var(--bds-transition-normal);
+}
+
+.bds-football-page :where(button:focus-visible, input:focus, select:focus, textarea:focus, summary:focus-visible) {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(75, 134, 244, .08);
+}
+
+.bds-football-page :where(.bds-football-match-row, .bds-football-section-motion):hover { transform: none; }
 
 .bds-football-accordion-content {
   overflow: hidden;
@@ -125,81 +178,23 @@
   transition: max-height 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
-details[open] > .bds-football-accordion-content {
-  opacity: 1;
-  max-height: 32rem;
-  transform: translateY(0);
-}
+details[open] > .bds-football-accordion-content { opacity: 1; max-height: 32rem; transform: translateY(0); }
 
-.bds-football-skeleton {
-  position: relative;
-  overflow: hidden;
-}
-
+.bds-football-skeleton { position: relative; overflow: hidden; }
 .bds-football-skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--bds-color-text) 3%, transparent),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
   animation: bds-football-shimmer 2.8s ease infinite;
 }
 
-@keyframes bds-football-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes bds-football-row-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes bds-football-value-fade {
-  from {
-    opacity: 0.58;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes bds-football-goal-pulse {
-  0% {
-    color: var(--bds-color-text);
-    text-shadow: none;
-  }
-  12%,
-  70% {
-    color: var(--bds-color-primary-hover);
-    text-shadow: none;
-  }
-  100% {
-    color: var(--bds-color-text);
-    text-shadow: none;
-  }
-}
-
-@keyframes bds-football-shimmer {
-  to {
-    transform: translateX(100%);
-  }
-}
+@keyframes bds-football-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bds-football-row-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes bds-football-value-fade { from { opacity: .58; } to { opacity: 1; } }
+@keyframes bds-football-goal-pulse { 0% { color: var(--bds-color-text); } 12%, 70% { color: #8BB5FF; } 100% { color: var(--bds-color-text); } }
+@keyframes bds-football-shimmer { to { transform: translateX(100%); } }
 
 @media (prefers-reduced-motion: reduce) {
   .bds-football-page,
@@ -210,110 +205,4 @@ details[open] > .bds-football-accordion-content {
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
   }
-}
-
-/* V1.1.0 - Premium Cards 1.0 */
-.bds-football-page :where(
-  .bds-football-hero-motion,
-  .bds-football-section-motion,
-  .bds-football-match-row,
-  .bds-football-empty-motion,
-  .bds-football-skeleton,
-  details,
-  summary
-) {
-  border-color: var(--bds-card-border-premium, var(--bds-color-border)) !important;
-  box-shadow: var(--bds-card-shadow-premium, var(--bds-shadow-level-1)) !important;
-  transition:
-    background-color var(--bds-transition-normal),
-    border-color var(--bds-transition-normal),
-    box-shadow var(--bds-transition-normal),
-    transform var(--bds-transition-normal);
-}
-
-.bds-football-page :where(
-  .bds-football-hero-motion,
-  .bds-football-section-motion,
-  .bds-football-match-row,
-  details,
-  summary
-):where(:hover, :focus-within) {
-  border-color: var(--bds-card-border-premium-hover, var(--bds-color-border)) !important;
-  box-shadow: var(--bds-card-shadow-premium-hover, var(--bds-shadow-hover)) !important;
-}
-
-.bds-football-page :where(
-  .bds-football-status-motion,
-  .bds-football-live-value,
-  .bds-football-score-value,
-  .bds-football-live-dot
-) {
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-/* V1.1.0 - Premium Typography 2.0 */
-.bds-football-page {
-  font-family: var(--bds-font-family);
-  font-size: var(--bds-font-text);
-  font-weight: var(--bds-font-weight-regular);
-  line-height: var(--bds-line-normal);
-}
-
-.bds-football-page :where(h1, h2, h3, .bds-football-section-title, .bds-football-match-team) {
-  color: var(--bds-color-text);
-  font-weight: var(--bds-font-weight-strong);
-  letter-spacing: var(--bds-letter-none);
-  line-height: var(--bds-line-tight);
-  text-shadow: none;
-}
-
-.bds-football-page :where(p, .bds-football-match-meta, .bds-football-empty-motion, .bds-football-table-meta) {
-  color: var(--bds-color-text-secondary);
-  font-size: var(--bds-font-small);
-  font-weight: var(--bds-font-weight-medium);
-  line-height: var(--bds-line-normal);
-}
-
-.bds-football-page :where(
-  .bds-football-section-kicker,
-  .bds-football-status-motion,
-  .bds-football-status-badge,
-  .bds-football-live-value,
-  .bds-football-table th
-) {
-  font-size: var(--bds-font-micro);
-  font-weight: var(--bds-font-weight-bold);
-  letter-spacing: var(--bds-letter-overline);
-  line-height: var(--bds-line-tight);
-  text-transform: uppercase;
-}
-
-.bds-football-page :where(button, input, select, textarea, label) {
-  font-family: var(--bds-font-family);
-}
-
-.bds-football-page :where(button) {
-  font-size: var(--bds-font-caption);
-  font-weight: var(--bds-font-weight-semibold);
-  line-height: var(--bds-line-compact);
-}
-
-/* V1.1.0 - Visual Premium Complete */
-.bds-football-page :where(button, input, select, textarea, summary, .bds-football-match-row, .bds-football-section-motion) {
-  transition:
-    background-color var(--bds-transition-normal),
-    border-color var(--bds-transition-normal),
-    color var(--bds-transition-normal),
-    opacity var(--bds-transition-normal),
-    box-shadow var(--bds-transition-normal),
-    transform var(--bds-transition-normal);
-}
-
-.bds-football-page :where(button:focus-visible, input:focus, select:focus, textarea:focus, summary:focus-visible) {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bds-color-primary-hover) 12%, transparent);
-}
-
-.bds-football-page :where(.bds-football-match-row, .bds-football-section-motion):hover {
-  transform: none;
 }
