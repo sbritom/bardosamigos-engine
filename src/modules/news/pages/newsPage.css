@@ -1,0 +1,77 @@
+.news-page { color: var(--bds-color-text); }
+
+.news-page__card,
+.news-page__notice,
+.news-page__reader {
+  border: 1px solid var(--bds-card-border-premium, var(--bds-color-border));
+  border-radius: var(--bds-radius-lg);
+  background: rgba(25, 52, 80, .66);
+  box-shadow: var(--bds-card-shadow-premium, none);
+}
+
+.news-page__card {
+  cursor: pointer;
+  transition: border-color var(--bds-transition-normal), background-color var(--bds-transition-normal), box-shadow var(--bds-transition-normal), transform var(--bds-transition-normal);
+}
+
+.news-page__card:hover {
+  border-color: var(--bds-card-border-premium-hover, rgba(121, 169, 255, .28));
+  background: rgba(34, 67, 101, .78);
+  box-shadow: var(--bds-card-shadow-premium-hover, none);
+  transform: translateY(-1px);
+}
+
+.news-page__card:focus-visible {
+  outline: 2px solid var(--bds-color-primary-hover);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(75, 134, 244, .08);
+}
+
+.news-page__card--featured {
+  background: linear-gradient(145deg, rgba(34, 70, 106, .78), rgba(20, 44, 70, .82));
+}
+
+.news-page__cover {
+  overflow: hidden;
+  border: 1px solid rgba(190, 216, 240, .10);
+  border-radius: var(--bds-radius-md);
+  background: #0D2035;
+}
+
+.news-page__cover--fallback {
+  background: radial-gradient(circle at 50% 40%, rgba(75, 134, 244, .14), transparent 50%), #0D2035;
+  color: #9CC0FF;
+}
+
+.news-page__title,
+.news-page__reader-title {
+  color: #F4F8FF;
+  font-weight: var(--bds-font-weight-strong);
+}
+
+.news-page__meta,
+.news-page__summary,
+.news-page__reader-copy {
+  color: #AFC2D6;
+}
+
+.news-page__notice {
+  color: #AFC2D6;
+  background: rgba(19, 43, 69, .58);
+}
+
+.news-page__reader {
+  padding: clamp(14px, 2vw, 22px);
+  background: linear-gradient(145deg, rgba(31, 67, 103, .68), rgba(16, 36, 59, .84));
+}
+
+.news-page__workspace .bds-portal-workspace__hero,
+.news-page__workspace .bds-portal-workspace__sidebar,
+.news-page__workspace .bds-portal-workspace__content {
+  border-color: rgba(190, 216, 240, .11);
+}
+
+@media (max-width: 640px) {
+  .news-page { padding-inline: 12px; }
+  .news-page__reader { padding: 12px; }
+}
