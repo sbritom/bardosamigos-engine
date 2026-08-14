@@ -160,6 +160,158 @@ body {
   box-shadow: var(--bds-card-shadow-premium-hover);
 }
 
+/* Home dashboard finish */
+.bds-home-shell {
+  padding-top: clamp(18px, 2.2vw, 32px);
+}
+
+.bds-home-shell .bds-dashboard-grid {
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+.bds-home-shell .bds-feature-card,
+.bds-home-shell .bds-hero-card {
+  overflow: hidden;
+}
+
+.bds-home-shell .bds-card-header {
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(190, 216, 240, .10);
+}
+
+.bds-home-shell .bds-card-header__icon {
+  border-color: rgba(190, 216, 240, .16);
+  background: rgba(75, 134, 244, .12);
+  color: #8BB5FF;
+}
+
+.bds-home-shell .bds-card-header__title,
+.bds-home-shell .bds-section-header__title,
+.bds-home-shell .bds-hero-card__title {
+  color: #F7FAFF;
+}
+
+.bds-home-shell .bds-card-header__subtitle,
+.bds-home-shell .bds-section-header__description,
+.bds-home-shell .bds-hero-card__subtitle {
+  color: #B8CADC;
+}
+
+.bds-home-shell .bds-hero-v2 {
+  position: relative;
+  isolation: isolate;
+  min-height: 250px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(75, 134, 244, .16), transparent 42%),
+    linear-gradient(145deg, rgba(31, 67, 103, .88), rgba(16, 36, 59, .92));
+}
+
+.bds-home-shell .bds-hero-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(255,255,255,.015), transparent 30%, transparent 70%, rgba(255,255,255,.015));
+  pointer-events: none;
+}
+
+.bds-home-shell .bds-hero-v2-crest {
+  border-color: rgba(190, 216, 240, .16);
+  background: rgba(14, 31, 50, .54);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.bds-home-shell .bds-hero-v2-score {
+  color: #FFFFFF;
+  text-shadow: none;
+}
+
+.bds-home-shell .bds-hero-v2-meta,
+.bds-home-shell .bds-hero-v2-info {
+  color: #B8CADC;
+}
+
+.bds-home-shell .bds-home-tv-stage,
+.bds-home-shell .bds-chat-frame {
+  border-color: rgba(190, 216, 240, .12);
+  background: rgba(10, 26, 43, .52);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.bds-home-shell .bds-home-tv-iframe {
+  background: #0A1A2B;
+}
+
+.bds-home-shell .bds-home-match-row,
+.bds-home-shell .bds-home-news-row,
+.bds-home-shell .bds-home-hits-item,
+.bds-home-shell .bds-home-tool-card {
+  border-color: rgba(190, 216, 240, .11);
+  background: rgba(19, 43, 69, .60);
+  box-shadow: none;
+}
+
+.bds-home-shell .bds-home-match-row:hover,
+.bds-home-shell .bds-home-news-row:hover,
+.bds-home-shell .bds-home-hits-item:hover,
+.bds-home-shell .bds-home-tool-card:hover {
+  border-color: rgba(121, 169, 255, .28);
+  background: rgba(31, 67, 103, .70);
+  box-shadow: none;
+}
+
+.bds-home-shell .bds-home-hits-position {
+  color: #8BB5FF;
+}
+
+.bds-home-shell .bds-home-hits-track strong,
+.bds-home-shell .bds-home-tool-card strong,
+.bds-home-shell .bds-home-news-row h3,
+.bds-home-shell .bds-match-card__team span {
+  color: #F4F8FF;
+}
+
+.bds-home-shell .bds-home-hits-track span,
+.bds-home-shell .bds-home-hits-duration,
+.bds-home-shell .bds-home-tool-card span,
+.bds-home-shell .bds-news-card__meta,
+.bds-home-shell .bds-match-card__footer {
+  color: #AFC2D6;
+}
+
+.bds-home-shell .bds-home-empty,
+.bds-home-shell .bds-home-hits-state,
+.bds-home-shell .bds-home-tv-no-results {
+  border-color: rgba(190, 216, 240, .10);
+  background: rgba(16, 36, 59, .54);
+  color: #AFC2D6;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note {
+  border-color: rgba(190, 216, 240, .12);
+  background-color: rgba(16, 36, 59, .70);
+  background-blend-mode: soft-light;
+  box-shadow: none;
+}
+
+.bds-home-shell .bds-action-button--primary {
+  border-color: rgba(121, 169, 255, .36);
+  background: linear-gradient(180deg, #4B86F4, #2B63C6);
+}
+
+.bds-home-shell .bds-action-button--secondary,
+.bds-home-shell .bds-action-button--outline {
+  border-color: rgba(190, 216, 240, .15);
+  background: rgba(31, 67, 103, .46);
+  color: #DDE8F5;
+}
+
+.bds-home-shell .bds-action-button:hover {
+  border-color: rgba(121, 169, 255, .34);
+  filter: none;
+}
+
 @media (max-width: 720px) {
   .bds-mxcast-player {
     padding-block: 8px;
@@ -168,5 +320,17 @@ body {
   .bds-mxcast-player__iframe {
     min-height: 86px;
     border-radius: var(--bds-radius-md);
+  }
+
+  .bds-home-shell {
+    padding-top: 14px;
+  }
+
+  .bds-home-shell .bds-dashboard-grid {
+    gap: 14px;
+  }
+
+  .bds-home-shell .bds-hero-v2 {
+    min-height: 220px;
   }
 }
