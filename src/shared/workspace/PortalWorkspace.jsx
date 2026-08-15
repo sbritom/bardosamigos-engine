@@ -72,9 +72,10 @@ export function WorkspaceSidebar({
 }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
+  const accessibleLabel = ariaLabel || title || "Navegacao"
 
   return (
-    <aside className={classNames("bds-workspace-sidebar", open && "is-open", className)} aria-label={ariaLabel || title}>
+    <aside className={classNames("bds-workspace-sidebar", open && "is-open", className)} aria-label={accessibleLabel}>
       <button
         aria-controls={panelId}
         aria-expanded={open}
@@ -82,14 +83,22 @@ export function WorkspaceSidebar({
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <span>{title}</span>
+        <span>{title || accessibleLabel}</span>
         <ChevronDown size={16} aria-hidden="true" />
       </button>
 
-      <nav className="bds-workspace-sidebar__panel" id={panelId} aria-label={ariaLabel || title}>
-        <h2>{title}</h2>
+      <nav className="bds-workspace-sidebar__panel" id={panelId} aria-label={accessibleLabel}>
+        {title ? <h2>{title}</h2> : null}
         <div className="bds-workspace-sidebar__list" role="list">
           {items.map((item) => {
+            if (item.groupLabel) {
+              return (
+                <div className="bds-workspace-sidebar__group-label" key={item.id} role="presentation">
+                  {item.name}
+                </div>
+              )
+            }
+
             const selected = item.selected ?? item.id === selectedId
             return (
               <button
