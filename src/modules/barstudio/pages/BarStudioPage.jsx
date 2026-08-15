@@ -37,17 +37,24 @@ const availableTools = sidebarSections.flatMap((section) =>
 )
 
 const sidebarItems = [
-  ...availableTools.map((tool) => ({
+  { id: 'group-images', name: 'Imagens', groupLabel: true },
+  ...sidebarSections[0].tools.map((tool) => ({
     id: tool.id,
     icon: tool.icon,
     name: tool.title,
-    description: tool.section,
   })),
+  { id: 'group-colors', name: 'Cores', groupLabel: true },
+  ...sidebarSections[1].tools.map((tool) => ({
+    id: tool.id,
+    icon: tool.icon,
+    name: tool.title,
+  })),
+  { id: 'group-upcoming', name: 'Em breve', groupLabel: true },
   ...upcomingTools.map((tool) => ({
     id: tool.id,
     icon: tool.icon,
     name: tool.title,
-    description: 'Em breve',
+    badge: 'Em breve',
     disabled: true,
   })),
 ]
@@ -82,7 +89,9 @@ export default function BarStudioPage() {
           className: 'bds-barstudio-header',
         }}
         sidebar={{
-          title: 'Ferramentas',
+          title: '',
+          ariaLabel: 'Ferramentas do BarStudio',
+          className: 'bds-barstudio-sidebar',
           items: sidebarItems,
           selectedId: activeToolId,
           onSelect: (item) => setActiveToolId(item.id),
