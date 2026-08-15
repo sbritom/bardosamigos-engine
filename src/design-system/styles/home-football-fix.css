@@ -1,0 +1,77 @@
+.bds-home-match-row .bds-match-card__teams {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--bds-space-16);
+  margin-top: var(--bds-space-12);
+}
+
+.bds-home-match-row .bds-match-card__team {
+  gap: var(--bds-space-10);
+}
+
+.bds-home-match-row .bds-match-card__team > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bds-home-match-row .bds-media-block__image,
+.bds-home-match-row .bds-media-block__fallback {
+  display: flex;
+  width: var(--bds-space-40);
+  height: var(--bds-space-40);
+  flex: 0 0 var(--bds-space-40);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--bds-radius-md);
+  object-fit: contain;
+  object-position: center;
+}
+
+.bds-home-match-row .bds-media-block__image {
+  padding: var(--bds-space-4);
+  border: 1px solid var(--bds-color-border);
+  background: var(--bds-color-background-secondary);
+}
+
+.bds-home-match-row .bds-match-card__score {
+  min-width: 76px;
+  padding: var(--bds-space-8) var(--bds-space-12);
+  border: 1px solid var(--bds-color-border);
+  border-radius: var(--bds-radius-lg);
+  background: var(--bds-color-surface);
+  color: var(--bds-color-primary);
+  font-size: var(--bds-font-h3);
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.bds-home-match-row .bds-match-card__footer {
+  margin-top: var(--bds-space-10);
+}
+
+@media (max-width: 560px) {
+  .bds-home-match-row .bds-match-card__teams {
+    gap: var(--bds-space-8);
+  }
+
+  .bds-home-match-row .bds-match-card__team {
+    gap: var(--bds-space-6);
+    font-size: var(--bds-font-small);
+  }
+
+  .bds-home-match-row .bds-media-block__image,
+  .bds-home-match-row .bds-media-block__fallback {
+    width: var(--bds-space-32);
+    height: var(--bds-space-32);
+    flex-basis: var(--bds-space-32);
+  }
+
+  .bds-home-match-row .bds-match-card__score {
+    min-width: 62px;
+    padding-inline: var(--bds-space-8);
+    font-size: var(--bds-font-title);
+  }
+}
