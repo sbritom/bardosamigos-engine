@@ -1,43 +1,45 @@
 import { Music2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { FeatureCard } from '../../../../design-system'
 
 const HIT_LIMIT = 5
+const ITUNES_SEARCH_ENDPOINT = 'https://itunes.apple.com/search'
 
 const FALLBACK_HITS = [
   {
-    id: 'fallback-dai-dai',
+    id: 'fallback-jetski',
     position: 1,
-    title: 'Dai Dai',
-    artist: 'Shakira e Burna Boy',
-    youtubeUrl: 'https://www.youtube.com/results?search_query=Shakira+Dai+Dai+Burna+Boy',
+    title: 'JETSKI',
+    artist: 'PEDRO SAMPAIO, Melody e MC MENO K',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=JETSKI+PEDRO+SAMPAIO+Melody+MC+MENO+K',
   },
   {
-    id: 'fallback-peao-todo-tatuado',
+    id: 'fallback-sequencia-feiticeira',
     position: 2,
-    title: 'Peão Todo Tatuado',
-    artist: 'Mariana Fagundes e Jeninho',
-    youtubeUrl: 'https://www.youtube.com/results?search_query=Peao+Todo+Tatuado+Mariana+Fagundes+Jeninho',
+    title: 'SEQUÊNCIA FEITICEIRA',
+    artist: 'PEDRO SAMPAIO, MC GW, Mc Jhey e MC Rodrigo do CN',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=SEQUENCIA+FEITICEIRA+PEDRO+SAMPAIO',
+  },
+  {
+    id: 'fallback-p-do-pecado',
+    position: 3,
+    title: 'P do Pecado (Ao Vivo)',
+    artist: 'Grupo Menos É Mais e Simone Mendes',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=P+do+Pecado+Grupo+Menos+E+Mais+Simone+Mendes',
+  },
+  {
+    id: 'fallback-eu-me-apaixonei',
+    position: 4,
+    title: 'Eu Me Apaixonei',
+    artist: 'Vitinho Imperador',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Eu+Me+Apaixonei+Vitinho+Imperador',
   },
   {
     id: 'fallback-carnivoro',
-    position: 3,
+    position: 5,
     title: 'Carnívoro',
     artist: 'MC Jacaré, MC Negão Original, MC Lele JP e DJ Japa NK',
     youtubeUrl: 'https://www.youtube.com/results?search_query=Carnivoro+MC+Jacare+MC+Negao+Original+MC+Lele+JP+DJ+Japa+NK',
-  },
-  {
-    id: 'fallback-cuida-do-pet',
-    position: 4,
-    title: 'Cuida do Pet',
-    artist: 'MC Willian, MC Iguinho CT, Oldilla e Aaron Modesto',
-    youtubeUrl: 'https://www.youtube.com/results?search_query=Cuida+do+Pet+MC+Willian+MC+Iguinho+CT+Oldilla+Aaron+Modesto',
-  },
-  {
-    id: 'fallback-pau-pra-toda-obra',
-    position: 5,
-    title: 'Pau Pra Toda Obra',
-    artist: 'MC IG, MC Jacaré, MC Lele JP e MC Ryan SP',
-    youtubeUrl: 'https://www.youtube.com/results?search_query=Pau+Pra+Toda+Obra+MC+IG+MC+Jacare+MC+Lele+JP+MC+Ryan+SP',
   },
 ]
 
@@ -79,6 +81,45 @@ function normalizeHit(track = {}, index = 0) {
   }
 }
 
+function upgradeArtwork(url = '') {
+  if (!url) return ''
+  return url.replace(/100x100bb\.(jpg|png)$/i, '300x300bb.$1')
+}
+
+async function findArtworkForHit(hit, signal) {
+  if (hit.cover) return hit.cover
+
+  const term = `${hit.title} ${hit.artist}`.replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim()
+  const params = new URLSearchParams({
+    term,
+    media: 'music',
+    entity: 'song',
+    country: 'BR',
+    limit: '5',
+  })
+
+  try {
+    const response = await fetch(`${ITUNES_SEARCH_ENDPOINT}?${params.toString()}`, { signal })
+    if (!response.ok) return ''
+
+    const payload = await response.json()
+    const results = Array.isArray(payload?.results) ? payload.results : []
+    const normalizedTitle = hit.title.toLocaleLowerCase('pt-BR').replace(/\s*\(.*?\)\s*/g, '').trim()
+
+    const closest = results.find((item) => {
+      const trackName = String(item.trackName || '').toLocaleLowerCase('pt-BR')
+      return normalizedTitle && (trackName.includes(normalizedTitle) || normalizedTitle.includes(trackName))
+    }) || results[0]
+
+    return upgradeArtwork(closest?.artworkUrl100 || closest?.artworkUrl60 || '')
+  } catch (error) {
+    if (error?.name !== 'AbortError') {
+      console.warn('[HomeHitsCard] Nao foi possivel carregar capa real.', hit.title, error)
+    }
+    return ''
+  }
+}
+
 function HomeHitsState({ type }) {
   const stateText = {
     empty: 'Nenhum hit disponivel no momento.',
@@ -98,7 +139,7 @@ function HomeHitItem({ hit }) {
     <>
       <span className="bds-home-hits-position">{getPositionLabel(hit.position)}</span>
       <span className="bds-home-hits-cover" aria-hidden="true">
-        {hit.cover ? <img src={hit.cover} alt={`Capa de ${hit.title}`} loading="lazy" /> : <Music2 size={16} />}
+        {hit.cover ? <img src={hit.cover} alt="" loading="lazy" /> : <Music2 size={16} />}
       </span>
       <span className="bds-home-hits-track">
         <strong>{hit.title}</strong>
@@ -121,7 +162,35 @@ function HomeHitItem({ hit }) {
 
 export function HomeHitsCard({ hits = [], loading = false, error = null }) {
   const sourceHits = Array.isArray(hits) && hits.length ? hits : FALLBACK_HITS
-  const safeHits = sourceHits.map(normalizeHit).slice(0, HIT_LIMIT)
+  const normalizedHits = useMemo(() => sourceHits.map(normalizeHit).slice(0, HIT_LIMIT), [sourceHits])
+  const [artworkById, setArtworkById] = useState({})
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let active = true
+
+    async function hydrateArtwork() {
+      const entries = await Promise.all(normalizedHits.map(async (hit) => {
+        const artwork = await findArtworkForHit(hit, controller.signal)
+        return [hit.id, artwork]
+      }))
+
+      if (active) {
+        setArtworkById(Object.fromEntries(entries.filter(([, artwork]) => Boolean(artwork))))
+      }
+    }
+
+    hydrateArtwork()
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [normalizedHits])
+
+  const safeHits = normalizedHits.map((hit) => ({
+    ...hit,
+    cover: hit.cover || artworkById[hit.id] || '',
+  }))
 
   return (
     <FeatureCard
