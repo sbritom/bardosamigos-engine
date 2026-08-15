@@ -6,6 +6,7 @@ import CropTool from './tools/crop/CropTool'
 import RemoveBackgroundTool from './tools/remove-background/RemoveBackgroundTool'
 import AvatarTool from './tools/avatar/AvatarTool'
 import ConvertImageTool from './tools/convert/ConvertImageTool'
+import GradientsTool from './tools/gradients/GradientsTool'
 
 const sidebarSections = [
   {
@@ -21,13 +22,13 @@ const sidebarSections = [
     title: 'Cores',
     tools: [
       { id: 'color-generator', title: 'Gerador de Cores', icon: Sparkles, available: true },
+      { id: 'gradients', title: 'Gradientes', icon: Wand2, available: true },
     ],
   },
 ]
 
 const upcomingTools = [
   { id: 'palettes', title: 'Paletas', icon: Palette },
-  { id: 'gradients', title: 'Gradientes', icon: Wand2 },
   { id: 'extract-colors', title: 'Extrair Cores', icon: Pipette },
   { id: 'resize', title: 'Redimensionar', icon: Image },
 ]
@@ -116,6 +117,8 @@ export default function BarStudioPage() {
           <AvatarTool />
         ) : activeTool?.id === 'convert' ? (
           <ConvertImageTool />
+        ) : activeTool?.id === 'gradients' ? (
+          <GradientsTool />
         ) : activeTool ? (
           <ToolPlaceholder tool={activeTool} />
         ) : (
