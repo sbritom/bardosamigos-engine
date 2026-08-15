@@ -93,6 +93,15 @@ body {
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* Same spacing approved for music covers, now on the featured scoreboard. */
+.bds-home-shell .bds-hero-v2-team {
+  gap: 14px;
+}
+
+.bds-home-shell .bds-hero-v2-team-name {
+  margin-inline: 2px;
+}
+
 .bds-home-shell .bds-home-match-row,
 .bds-home-shell .bds-home-news-row,
 .bds-home-shell .bds-home-hits-item,
