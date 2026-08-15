@@ -1,10 +1,30 @@
+import { useEffect, useState } from 'react'
 import { classNames } from '../utils'
 import { ActionButton } from './ActionButton'
 import { CardHeader } from './CardHeader'
 import { StatusBadge } from './StatusBadge'
 
 function MediaBlock({ src, alt = '', fallback = '', className }) {
-  if (src) return <img src={src} alt={alt} className={classNames('bds-media-block__image', className)} loading="lazy" />
+  const [failedSrc, setFailedSrc] = useState('')
+
+  useEffect(() => {
+    setFailedSrc('')
+  }, [src])
+
+  const shouldShowImage = Boolean(src && failedSrc !== src)
+
+  if (shouldShowImage) {
+    return (
+      <img
+        src={src}
+        alt={alt}
+        className={classNames('bds-media-block__image', className)}
+        loading="lazy"
+        onError={() => setFailedSrc(src)}
+      />
+    )
+  }
+
   return <div className={classNames('bds-media-block__fallback', className)}>{fallback}</div>
 }
 
