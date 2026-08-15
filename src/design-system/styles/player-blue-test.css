@@ -1,0 +1,107 @@
+/* Temporary visual test: extend the MXCast player blue (#0B3D91) across the portal. */
+:root {
+  --player-blue: #0B3D91;
+  --player-blue-dark: #072A66;
+  --player-blue-deep: #061E49;
+  --player-blue-soft: #164FA8;
+  --player-blue-border: rgba(89, 141, 219, .24);
+}
+
+body {
+  background-color: var(--player-blue-deep);
+}
+
+.bds-radio-strip,
+.bds-top-header {
+  border-color: var(--player-blue-border);
+  background: linear-gradient(180deg, rgba(11, 61, 145, .96), rgba(7, 42, 102, .94));
+}
+
+.bds-top-header__brand-icon,
+.bds-top-header__nav-link,
+.bds-top-header__mobile-link,
+.bds-top-header__icon-button {
+  border-color: rgba(89, 141, 219, .22);
+  background: rgba(6, 30, 73, .54);
+}
+
+.bds-top-header__nav-link:hover,
+.bds-top-header__mobile-link:hover,
+.bds-top-header__icon-button:hover {
+  border-color: rgba(113, 166, 242, .42);
+  background: rgba(22, 79, 168, .36);
+}
+
+.bds-top-header__nav-link--active,
+.bds-top-header__mobile-link--active,
+.bds-top-header__icon-button--active {
+  border-color: rgba(126, 178, 250, .52);
+  background: linear-gradient(180deg, #164FA8, #0B3D91);
+}
+
+:where(
+  .bds-panel,
+  .bds-card,
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-tv-stage,
+  .bds-chat-frame,
+  .bds-home-card-list,
+  .bds-home-empty,
+  .bds-home-radio-card,
+  .bds-home-radio-status,
+  .bds-home-tool-card,
+  .bds-home-community-note,
+  .bds-home-result-box,
+  .bds-home-hits-state
+) {
+  border-color: rgba(89, 141, 219, .18);
+  background: rgba(7, 42, 102, .66);
+}
+
+.bds-home-shell .bds-hero-v2 {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(62, 126, 224, .20), transparent 44%),
+    linear-gradient(145deg, rgba(11, 61, 145, .88), rgba(6, 30, 73, .94));
+}
+
+.bds-home-shell .bds-home-match-row,
+.bds-home-shell .bds-home-news-row,
+.bds-home-shell .bds-home-hits-item,
+.bds-home-shell .bds-home-tool-card,
+.bds-home-shell .bds-home-empty,
+.bds-home-shell .bds-home-hits-state,
+.bds-home-shell .bds-home-tv-no-results {
+  border-color: rgba(89, 141, 219, .16);
+  background: rgba(6, 30, 73, .58);
+}
+
+.bds-home-shell .bds-home-match-row:hover,
+.bds-home-shell .bds-home-news-row:hover,
+.bds-home-shell .bds-home-hits-item:hover,
+.bds-home-shell .bds-home-tool-card:hover {
+  border-color: rgba(113, 166, 242, .34);
+  background: rgba(11, 61, 145, .70);
+}
+
+.bds-action-button--primary,
+.bds-home-shell .bds-action-button--primary {
+  border-color: rgba(126, 178, 250, .48);
+  background: linear-gradient(180deg, #164FA8, #0B3D91);
+}
+
+.bds-action-button--secondary,
+.bds-action-button--outline,
+.bds-home-shell .bds-action-button--secondary,
+.bds-home-shell .bds-action-button--outline {
+  border-color: rgba(89, 141, 219, .22);
+  background: rgba(7, 42, 102, .56);
+}
