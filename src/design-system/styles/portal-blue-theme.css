@@ -104,6 +104,15 @@ body {
   background: rgba(6, 30, 73, .58);
 }
 
+/* Keep the Hits card height intact while giving cover art more breathing room. */
+.bds-home-shell .bds-home-hits-item {
+  column-gap: 14px;
+}
+
+.bds-home-shell .bds-home-hits-track {
+  padding-left: 2px;
+}
+
 .bds-home-shell .bds-home-match-row:hover,
 .bds-home-shell .bds-home-news-row:hover,
 .bds-home-shell .bds-home-hits-item:hover,
