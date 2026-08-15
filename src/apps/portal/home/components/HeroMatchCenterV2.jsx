@@ -33,7 +33,7 @@ function TeamBlock({ name, label, src, side }) {
           <span aria-hidden="true">{fallbackLabel}</span>
         )}
       </div>
-      <strong data-designer-id={`hero.${side}Name`} data-designer-label={`Hero / Nome ${side === 'home' ? 'Mandante' : 'Visitante'}`}>{displayName}</strong>
+      <strong className="bds-hero-v2-team-name" data-designer-id={`hero.${side}Name`} data-designer-label={`Hero / Nome ${side === 'home' ? 'Mandante' : 'Visitante'}`}>{displayName}</strong>
     </div>
   )
 }
