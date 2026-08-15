@@ -31,6 +31,8 @@ export default function Header() {
 
   return (
     <>
+      <RadioBar />
+
       <header className="bds-top-header" data-designer-id="header" data-designer-label="Header">
         <Container>
           <div className="bds-top-header__bar">
@@ -109,8 +111,6 @@ export default function Header() {
           </nav>
         </Container>
       </header>
-
-      <RadioBar />
     </>
   )
 }
