@@ -1,3 +1,5 @@
+@import './nameflagPreview.css';
+
 .bds-gradients-tool { display:grid; gap:16px; }
 .bds-gradients-tool__tabs { display:flex; flex-wrap:wrap; gap:8px; }
 .bds-gradients-tool__tabs button,.bds-gradients-tool__code-header button { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid rgba(89,141,219,.18); border-radius:999px; background:rgba(6,30,73,.48); color:var(--bds-color-text-secondary); padding:9px 14px; font:inherit; font-weight:800; cursor:pointer; }
