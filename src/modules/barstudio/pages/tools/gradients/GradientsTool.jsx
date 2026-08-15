@@ -2,153 +2,36 @@ import { Clipboard, Flag, Plus, Sparkles, Trash2, Waves } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import './gradientsTool.css'
 
-const MODES = [
-  { id: 'namecolor', label: 'Namecolor', icon: Sparkles },
-  { id: 'namewave', label: 'Namewave', icon: Waves },
-  { id: 'nameflag', label: 'Nameflag', icon: Flag },
-]
+const MODES=[{id:'namecolor',label:'Namecolor',icon:Sparkles},{id:'namewave',label:'Namewave',icon:Waves},{id:'nameflag',label:'Nameflag',icon:Flag}]
+const WAVE_SPEEDS=[{id:'default',label:'Padrão',code:'',seconds:2.8},{id:'o2',label:'Rápido',code:'o2',seconds:2.1},{id:'o3',label:'Muito rápido',code:'o3',seconds:1.35},{id:'f1',label:'Lento',code:'f1',seconds:3.8},{id:'f3',label:'Mais lento',code:'f3',seconds:4.8},{id:'f4',label:'Muito lento',code:'f4',seconds:6},{id:'o0',label:'Parado',code:'o0',seconds:0}]
+const FLAG_SPEEDS=[{id:'default',label:'Padrão',code:''},{id:'f1',label:'Lento',code:'f1'},{id:'f3',label:'Mais lento',code:'f3'},{id:'f4',label:'Muito lento',code:'f4'}]
+const FLAGS=[['br','🇧🇷','Brasil'],['us','🇺🇸','Estados Unidos'],['pt','🇵🇹','Portugal'],['es','🇪🇸','Espanha'],['ar','🇦🇷','Argentina'],['mx','🇲🇽','México'],['gb','🇬🇧','Reino Unido'],['fr','🇫🇷','França'],['de','🇩🇪','Alemanha'],['it','🇮🇹','Itália'],['ca','🇨🇦','Canadá'],['jp','🇯🇵','Japão']]
+const DEFAULT_WAVE_COLORS=['F45','FFBAED','E854AF']
+const cleanHex=(v,f)=>String(v||'').replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase()||f
+const cssColor=(v,f)=>{const n=cleanHex(v,f);return `#${n.length===3?n:n.padEnd(6,'0').slice(0,6)}`}
+const gradColor=(v)=>cssColor(v,'FFFFFF')
 
-const WAVE_SPEEDS = [
-  { id: 'default', label: 'Padrão', code: '', seconds: 2.8 },
-  { id: 'o2', label: 'Rápido', code: 'o2', seconds: 2.1 },
-  { id: 'o3', label: 'Muito rápido', code: 'o3', seconds: 1.35 },
-  { id: 'f1', label: 'Lento', code: 'f1', seconds: 3.8 },
-  { id: 'f3', label: 'Mais lento', code: 'f3', seconds: 4.8 },
-  { id: 'f4', label: 'Muito lento', code: 'f4', seconds: 6 },
-  { id: 'o0', label: 'Parado', code: 'o0', seconds: 0 },
-]
-
-const DEFAULT_WAVE_COLORS = ['F45', 'FFBAED', 'E854AF']
-
-function normalizeHex(value, fallback) {
-  const cleaned = String(value || '').replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase()
-  return cleaned || fallback
-}
-
-function normalizeGradientColor(value, fallback = 'FFFFFF') {
-  const cleaned = String(value || '').replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase()
-  return cleaned || fallback
-}
-
-function colorValue(value, fallback) {
-  const normalized = normalizeHex(value, fallback)
-  if (normalized.length === 3) return `#${normalized}`
-  return `#${normalized.padEnd(6, '0').slice(0, 6)}`
-}
-
-function gradientCssColor(value) {
-  const normalized = normalizeGradientColor(value)
-  if (normalized.length === 3) return `#${normalized}`
-  return `#${normalized.padEnd(6, '0').slice(0, 6)}`
-}
-
-export default function GradientsTool() {
-  const [mode, setMode] = useState('namecolor')
-  const [text, setText] = useState('BarDosAmigos')
-  const [nameColor, setNameColor] = useState('FF0000')
-  const [glowEnabled, setGlowEnabled] = useState(false)
-  const [glowColor, setGlowColor] = useState('000001')
-  const [waveGlowEnabled, setWaveGlowEnabled] = useState(true)
-  const [waveGlowColor, setWaveGlowColor] = useState('590539')
-  const [waveColors, setWaveColors] = useState(DEFAULT_WAVE_COLORS)
-  const [waveRotation, setWaveRotation] = useState(45)
-  const [waveShift, setWaveShift] = useState(0)
-  const [waveSpeed, setWaveSpeed] = useState('default')
-  const [copied, setCopied] = useState(false)
-
-  const generatedCode = useMemo(() => {
-    if (mode === 'namecolor') return `(glow#${glowEnabled ? normalizeHex(glowColor, '000001') : '0'}#${normalizeHex(nameColor, 'FF0000')})`
-    if (mode === 'namewave') {
-      const glow = waveGlowEnabled ? normalizeHex(waveGlowColor, '590539') : '0'
-      const colors = waveColors.slice(0, 15).map((color) => normalizeGradientColor(color)).join('#')
-      const rotation = Number(waveRotation) ? `#r${Math.max(0, Math.min(360, Number(waveRotation)))}` : ''
-      const shift = Number(waveShift) ? `#s${Math.max(-99, Math.min(99, Number(waveShift)))}` : ''
-      const speed = WAVE_SPEEDS.find((item) => item.id === waveSpeed)?.code
-      return `(glow#${glow}#grad#${colors}${rotation}${shift}${speed ? `#${speed}` : ''})`
-    }
-    return 'Código do Nameflag será gerado aqui.'
-  }, [glowColor, glowEnabled, mode, nameColor, waveColors, waveGlowColor, waveGlowEnabled, waveRotation, waveShift, waveSpeed])
-
-  const waveAnimation = WAVE_SPEEDS.find((item) => item.id === waveSpeed) || WAVE_SPEEDS[0]
-  const previewStyle = mode === 'namecolor'
-    ? { color: colorValue(nameColor, 'FF0000'), textShadow: glowEnabled ? `0 0 7px ${colorValue(glowColor, '000001')}, 0 0 14px ${colorValue(glowColor, '000001')}` : 'none' }
-    : mode === 'namewave'
-      ? {
-          '--bds-namewave-gradient': `linear-gradient(${Number(waveRotation) || 0}deg, ${waveColors.map(gradientCssColor).join(', ')})`,
-          '--bds-namewave-speed': waveAnimation.seconds ? `${waveAnimation.seconds}s` : '0s',
-          '--bds-namewave-shift': `${Number(waveShift) || 0}%`,
-          '--bds-namewave-glow': waveGlowEnabled ? colorValue(waveGlowColor, '590539') : 'transparent',
-        }
-      : undefined
-
-  const updateWaveColor = (index, value) => setWaveColors((current) => current.map((color, i) => i === index ? value : color))
-  const addWaveColor = () => setWaveColors((current) => current.length >= 15 ? current : [...current, 'FFFFFF'])
-  const removeWaveColor = (index) => setWaveColors((current) => current.length <= 2 ? current : current.filter((_, i) => i !== index))
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedCode)
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 1400)
-  }
-
-  return (
-    <section className="bds-gradients-tool">
-      <div className="bds-gradients-tool__tabs" role="tablist" aria-label="Opções do Gerador de Cores">
-        {MODES.map((item) => {
-          const Icon = item.icon
-          return <button aria-selected={mode === item.id} className={mode === item.id ? 'is-active' : ''} key={item.id} onClick={() => setMode(item.id)} role="tab" type="button"><Icon size={16} aria-hidden="true" />{item.label}</button>
-        })}
-      </div>
-
-      <div className="bds-gradients-tool__grid">
-        <div className="bds-gradients-tool__controls">
-          <label className="bds-gradients-tool__field"><span>Texto do preview</span><input maxLength={60} onChange={(event) => setText(event.target.value)} placeholder="Digite um nome ou texto" type="text" value={text} /></label>
-
-          {mode === 'namecolor' ? (
-            <section className="bds-gradients-tool__settings">
-              <div className="bds-gradients-tool__setting-title"><strong>Namecolor</strong><small>Cor do texto</small></div>
-              <label className="bds-gradients-tool__color-field"><input aria-label="Selecionar Namecolor" type="color" value={colorValue(nameColor, 'FF0000')} onChange={(event) => setNameColor(event.target.value.slice(1).toUpperCase())} /><span>#</span><input aria-label="Código hexadecimal do Namecolor" maxLength={6} value={nameColor} onChange={(event) => setNameColor(event.target.value.replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase())} /></label>
-              <div className="bds-gradients-tool__setting-title bds-gradients-tool__setting-title--row"><div><strong>Nameglow</strong><small>{glowEnabled ? 'Ativado' : 'Sem brilho'}</small></div><label className="bds-gradients-tool__switch"><input checked={glowEnabled} onChange={(event) => setGlowEnabled(event.target.checked)} type="checkbox" /><span aria-hidden="true" /></label></div>
-              {glowEnabled ? <label className="bds-gradients-tool__color-field"><input aria-label="Selecionar Nameglow" type="color" value={colorValue(glowColor, '000001')} onChange={(event) => setGlowColor(event.target.value.slice(1).toUpperCase())} /><span>#</span><input aria-label="Código hexadecimal do Nameglow" maxLength={6} value={glowColor} onChange={(event) => setGlowColor(event.target.value.replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase())} /></label> : null}
-            </section>
-          ) : mode === 'namewave' ? (
-            <section className="bds-gradients-tool__settings bds-gradients-tool__settings--compact">
-              <div className="bds-gradients-tool__compact-row">
-                <span className="bds-gradients-tool__compact-label">Cores</span>
-                <div className="bds-gradients-tool__color-dots">
-                  {waveColors.map((color, index) => (
-                    <div className="bds-gradients-tool__color-dot-wrap" key={`${index}-${color}`}>
-                      <input aria-label={`Cor ${index + 1}`} className="bds-gradients-tool__color-dot" type="color" value={gradientCssColor(color)} onChange={(event) => updateWaveColor(index, event.target.value.slice(1).toUpperCase())} />
-                      <button aria-label={`Remover cor ${index + 1}`} className="bds-gradients-tool__dot-remove" disabled={waveColors.length <= 2} onClick={() => removeWaveColor(index)} type="button"><Trash2 size={10} /></button>
-                    </div>
-                  ))}
-                  <button aria-label="Adicionar cor" className="bds-gradients-tool__dot-add" disabled={waveColors.length >= 15} onClick={addWaveColor} type="button"><Plus size={18} /></button>
-                </div>
-              </div>
-
-              <div className="bds-gradients-tool__compact-row">
-                <span className="bds-gradients-tool__compact-label">Nameglow</span>
-                <label className="bds-gradients-tool__switch"><input checked={waveGlowEnabled} onChange={(event) => setWaveGlowEnabled(event.target.checked)} type="checkbox" /><span aria-hidden="true" /></label>
-                {waveGlowEnabled ? <label className="bds-gradients-tool__mini-color"><input aria-label="Cor do Nameglow" type="color" value={colorValue(waveGlowColor, '590539')} onChange={(event) => setWaveGlowColor(event.target.value.slice(1).toUpperCase())} /><input aria-label="HEX do Nameglow" maxLength={6} value={waveGlowColor} onChange={(event) => setWaveGlowColor(event.target.value.replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase())} /></label> : <small>0</small>}
-              </div>
-
-              <div className="bds-gradients-tool__compact-controls">
-                <label><span>Velocidade</span><select value={waveSpeed} onChange={(event) => setWaveSpeed(event.target.value)}>{WAVE_SPEEDS.map((speed) => <option key={speed.id} value={speed.id}>{speed.label} · {speed.id === 'default' ? 'o1' : speed.code}</option>)}</select></label>
-                <label><span>Rotação</span><div className="bds-gradients-tool__number"><input max="360" min="0" onChange={(event) => setWaveRotation(event.target.value)} type="number" value={waveRotation} /><em>°</em></div></label>
-                <label><span>Deslocamento</span><div className="bds-gradients-tool__number"><input max="99" min="-99" onChange={(event) => setWaveShift(event.target.value)} type="number" value={waveShift} /><em>s</em></div></label>
-              </div>
-
-              <div className="bds-gradients-tool__color-codes">
-                {waveColors.map((color, index) => <label key={`hex-${index}`}><span>{index + 1}</span><input aria-label={`HEX da cor ${index + 1}`} maxLength={6} value={color} onChange={(event) => updateWaveColor(index, event.target.value.replace(/[^0-9a-f]/gi, '').slice(0, 6).toUpperCase())} /></label>)}
-              </div>
-            </section>
-          ) : <div className="bds-gradients-tool__placeholder"><strong>Configurações de Nameflag</strong><p>Os controles específicos deste gerador serão adicionados na próxima etapa.</p></div>}
-        </div>
-
-        <div className="bds-gradients-tool__preview-column">
-          <section className="bds-gradients-tool__preview" aria-label="Preview"><span>Preview</span><div className={mode === 'namewave' ? `bds-gradients-tool__namewave-preview ${waveSpeed === 'o0' ? 'is-static' : ''}` : ''} style={previewStyle}>{text || 'Seu texto'}</div></section>
-          <section className="bds-gradients-tool__code" aria-label="Código gerado"><div className="bds-gradients-tool__code-header"><span>Código gerado</span><button onClick={handleCopy} type="button"><Clipboard size={15} aria-hidden="true" />{copied ? 'Copiado' : 'Copiar'}</button></div><code>{generatedCode}</code></section>
-        </div>
-      </div>
-    </section>
-  )
+export default function GradientsTool(){
+ const[mode,setMode]=useState('namecolor'),[text,setText]=useState('BarDosAmigos'),[nameColor,setNameColor]=useState('FF0000'),[glowEnabled,setGlowEnabled]=useState(false),[glowColor,setGlowColor]=useState('000001')
+ const[waveGlowEnabled,setWaveGlowEnabled]=useState(true),[waveGlowColor,setWaveGlowColor]=useState('590539'),[waveColors,setWaveColors]=useState(DEFAULT_WAVE_COLORS),[waveRotation,setWaveRotation]=useState(45),[waveShift,setWaveShift]=useState(0),[waveSpeed,setWaveSpeed]=useState('default')
+ const[flagCode,setFlagCode]=useState('br'),[flagGlow,setFlagGlow]=useState('000001'),[flagGlowEnabled,setFlagGlowEnabled]=useState(true),[flagMotion,setFlagMotion]=useState('r'),[flagReverse,setFlagReverse]=useState(false),[flagSpeed,setFlagSpeed]=useState('default'),[flagGrowth,setFlagGrowth]=useState('default'),[flagCycle,setFlagCycle]=useState('default'),[copied,setCopied]=useState(false)
+ const generatedCode=useMemo(()=>{
+  if(mode==='namecolor')return `(glow#${glowEnabled?cleanHex(glowColor,'000001'):'0'}#${cleanHex(nameColor,'FF0000')})`
+  if(mode==='namewave'){const g=waveGlowEnabled?cleanHex(waveGlowColor,'590539'):'0',colors=waveColors.slice(0,15).map(c=>cleanHex(c,'FFFFFF')).join('#'),r=Number(waveRotation)?`#r${Math.max(0,Math.min(360,Number(waveRotation)))}`:'',s=Number(waveShift)?`#s${Math.max(-99,Math.min(99,Number(waveShift)))}`:'',sp=WAVE_SPEEDS.find(x=>x.id===waveSpeed)?.code;return `(glow#${g}#grad#${colors}${r}${s}${sp?`#${sp}`:''})`}
+  const extras=[]; if(flagMotion)extras.push(flagMotion); if(flagReverse)extras.push('d'); const sp=FLAG_SPEEDS.find(x=>x.id===flagSpeed)?.code;if(sp)extras.push(sp);if(flagGrowth!=='default')extras.push(flagGrowth);if(flagCycle!=='default')extras.push(flagCycle)
+  return `(glow#${flagGlowEnabled?cleanHex(flagGlow,'000001'):'0'}#flag#${flagCode.toLowerCase()}${extras.map(x=>`#${x}`).join('')})`
+ },[mode,glowEnabled,glowColor,nameColor,waveGlowEnabled,waveGlowColor,waveColors,waveRotation,waveShift,waveSpeed,flagCode,flagGlow,flagGlowEnabled,flagMotion,flagReverse,flagSpeed,flagGrowth,flagCycle])
+ const waveAnim=WAVE_SPEEDS.find(x=>x.id===waveSpeed)||WAVE_SPEEDS[0], selectedFlag=FLAGS.find(x=>x[0]===flagCode)||FLAGS[0]
+ const previewStyle=mode==='namecolor'?{color:cssColor(nameColor,'FF0000'),textShadow:glowEnabled?`0 0 7px ${cssColor(glowColor,'000001')},0 0 14px ${cssColor(glowColor,'000001')}`:'none'}:mode==='namewave'?{'--bds-namewave-gradient':`linear-gradient(${Number(waveRotation)||0}deg,${waveColors.map(gradColor).join(',')})`,'--bds-namewave-speed':waveAnim.seconds?`${waveAnim.seconds}s`:'0s','--bds-namewave-shift':`${Number(waveShift)||0}%`,'--bds-namewave-glow':waveGlowEnabled?cssColor(waveGlowColor,'590539'):'transparent'}:undefined
+ const updateWaveColor=(i,v)=>setWaveColors(a=>a.map((c,n)=>n===i?v:c)),addWaveColor=()=>setWaveColors(a=>a.length>=15?a:[...a,'FFFFFF']),removeWaveColor=i=>setWaveColors(a=>a.length<=2?a:a.filter((_,n)=>n!==i))
+ const copy=async()=>{await navigator.clipboard.writeText(generatedCode);setCopied(true);setTimeout(()=>setCopied(false),1400)}
+ return <section className="bds-gradients-tool">
+  <div className="bds-gradients-tool__tabs" role="tablist">{MODES.map(x=>{const I=x.icon;return <button className={mode===x.id?'is-active':''} key={x.id} onClick={()=>setMode(x.id)} type="button"><I size={16}/>{x.label}</button>})}</div>
+  <div className="bds-gradients-tool__grid"><div className="bds-gradients-tool__controls">
+   <label className="bds-gradients-tool__field"><span>Texto do preview</span><input maxLength={60} onChange={e=>setText(e.target.value)} value={text}/></label>
+   {mode==='namecolor'?<section className="bds-gradients-tool__settings"><div className="bds-gradients-tool__setting-title"><strong>Namecolor</strong><small>Cor do texto</small></div><label className="bds-gradients-tool__color-field"><input type="color" value={cssColor(nameColor,'FF0000')} onChange={e=>setNameColor(e.target.value.slice(1).toUpperCase())}/><span>#</span><input maxLength={6} value={nameColor} onChange={e=>setNameColor(e.target.value.replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase())}/></label><div className="bds-gradients-tool__setting-title bds-gradients-tool__setting-title--row"><div><strong>Nameglow</strong><small>{glowEnabled?'Ativado':'Sem brilho'}</small></div><label className="bds-gradients-tool__switch"><input checked={glowEnabled} onChange={e=>setGlowEnabled(e.target.checked)} type="checkbox"/><span/></label></div>{glowEnabled?<label className="bds-gradients-tool__color-field"><input type="color" value={cssColor(glowColor,'000001')} onChange={e=>setGlowColor(e.target.value.slice(1).toUpperCase())}/><span>#</span><input maxLength={6} value={glowColor} onChange={e=>setGlowColor(e.target.value.replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase())}/></label>:null}</section>
+   :mode==='namewave'?<section className="bds-gradients-tool__settings bds-gradients-tool__settings--compact"><div className="bds-gradients-tool__compact-row"><span className="bds-gradients-tool__compact-label">Cores</span><div className="bds-gradients-tool__color-dots">{waveColors.map((c,i)=><div className="bds-gradients-tool__color-dot-wrap" key={i}><input className="bds-gradients-tool__color-dot" type="color" value={gradColor(c)} onChange={e=>updateWaveColor(i,e.target.value.slice(1).toUpperCase())}/><button className="bds-gradients-tool__dot-remove" disabled={waveColors.length<=2} onClick={()=>removeWaveColor(i)} type="button"><Trash2 size={10}/></button></div>)}<button className="bds-gradients-tool__dot-add" disabled={waveColors.length>=15} onClick={addWaveColor} type="button"><Plus size={18}/></button></div></div><div className="bds-gradients-tool__compact-row"><span className="bds-gradients-tool__compact-label">Nameglow</span><label className="bds-gradients-tool__switch"><input checked={waveGlowEnabled} onChange={e=>setWaveGlowEnabled(e.target.checked)} type="checkbox"/><span/></label>{waveGlowEnabled?<label className="bds-gradients-tool__mini-color"><input type="color" value={cssColor(waveGlowColor,'590539')} onChange={e=>setWaveGlowColor(e.target.value.slice(1).toUpperCase())}/><input maxLength={6} value={waveGlowColor} onChange={e=>setWaveGlowColor(e.target.value.replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase())}/></label>:<small>0</small>}</div><div className="bds-gradients-tool__compact-controls"><label><span>Velocidade</span><select value={waveSpeed} onChange={e=>setWaveSpeed(e.target.value)}>{WAVE_SPEEDS.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label><label><span>Rotação</span><div className="bds-gradients-tool__number"><input max="360" min="0" type="number" value={waveRotation} onChange={e=>setWaveRotation(e.target.value)}/><em>°</em></div></label><label><span>Deslocamento</span><div className="bds-gradients-tool__number"><input max="99" min="-99" type="number" value={waveShift} onChange={e=>setWaveShift(e.target.value)}/><em>s</em></div></label></div><div className="bds-gradients-tool__color-codes">{waveColors.map((c,i)=><label key={i}><span>{i+1}</span><input maxLength={6} value={c} onChange={e=>updateWaveColor(i,e.target.value.replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase())}/></label>)}</div></section>
+   :<section className="bds-gradients-tool__settings bds-gradients-tool__settings--compact"><div className="bds-gradients-tool__compact-row"><span className="bds-gradients-tool__compact-label">Bandeira</span><select className="bds-gradients-tool__flag-select" value={flagCode} onChange={e=>setFlagCode(e.target.value)}>{FLAGS.map(f=><option key={f[0]} value={f[0]}>{f[1]} {f[2]}</option>)}</select></div><div className="bds-gradients-tool__compact-row"><span className="bds-gradients-tool__compact-label">Nameglow</span><label className="bds-gradients-tool__switch"><input checked={flagGlowEnabled} onChange={e=>setFlagGlowEnabled(e.target.checked)} type="checkbox"/><span/></label>{flagGlowEnabled?<label className="bds-gradients-tool__mini-color"><input type="color" value={cssColor(flagGlow,'000001')} onChange={e=>setFlagGlow(e.target.value.slice(1).toUpperCase())}/><input maxLength={6} value={flagGlow} onChange={e=>setFlagGlow(e.target.value.replace(/[^0-9a-f]/gi,'').slice(0,6).toUpperCase())}/></label>:<small>0</small>}</div><div className="bds-gradients-tool__flag-options"><div><span>Movimento</span><div className="bds-gradients-tool__choice-row">{[['r','Rotação'],['e','Expandir'],['u','Vertical']].map(x=><button className={flagMotion===x[0]?'is-active':''} key={x[0]} onClick={()=>setFlagMotion(x[0])} type="button">{x[1]}</button>)}</div></div><div><span>Direção</span><label className="bds-gradients-tool__switch-line"><span>Inverter</span><label className="bds-gradients-tool__switch"><input checked={flagReverse} onChange={e=>setFlagReverse(e.target.checked)} type="checkbox"/><span/></label></label></div><div><span>Velocidade</span><div className="bds-gradients-tool__choice-row">{FLAG_SPEEDS.map(x=><button className={flagSpeed===x.id?'is-active':''} key={x.id} onClick={()=>setFlagSpeed(x.id)} type="button">{x.label}</button>)}</div></div><div><span>Crescimento</span><div className="bds-gradients-tool__choice-row">{['default','g1','g3','g4'].map(x=><button className={flagGrowth===x?'is-active':''} key={x} onClick={()=>setFlagGrowth(x)} type="button">{x==='default'?'Padrão':x}</button>)}</div></div><div><span>Ciclo</span><div className="bds-gradients-tool__choice-row">{['default','c1','c3','c4'].map(x=><button className={flagCycle===x?'is-active':''} key={x} onClick={()=>setFlagCycle(x)} type="button">{x==='default'?'Padrão':x}</button>)}</div></div></div></section>}
+  </div><div className="bds-gradients-tool__preview-column"><section className="bds-gradients-tool__preview"><span>Preview</span>{mode==='nameflag'?<div className={`bds-gradients-tool__flag-preview motion-${flagMotion} ${flagReverse?'is-reverse':''}`} style={{textShadow:flagGlowEnabled?`0 0 8px ${cssColor(flagGlow,'000001')}`:'none'}}><span className="bds-gradients-tool__flag-fill">{selectedFlag[1]}</span>{text||'Seu texto'}</div>:<div className={mode==='namewave'?`bds-gradients-tool__namewave-preview ${waveSpeed==='o0'?'is-static':''}`:''} style={previewStyle}>{text||'Seu texto'}</div>}</section><section className="bds-gradients-tool__code"><div className="bds-gradients-tool__code-header"><span>Código gerado</span><button onClick={copy} type="button"><Clipboard size={15}/>{copied?'Copiado':'Copiar'}</button></div><code>{generatedCode}</code></section></div></div>
+ </section>
 }
