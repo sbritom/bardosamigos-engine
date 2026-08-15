@@ -113,6 +113,16 @@ body {
   padding-left: 2px;
 }
 
+/* Same breathing room for football crests and team names. */
+.bds-home-shell .bds-home-match-row .bds-match-card__team {
+  gap: 14px;
+}
+
+.bds-home-shell .bds-home-match-row .bds-media-block__image,
+.bds-home-shell .bds-home-match-row .bds-media-block__fallback {
+  flex: 0 0 auto;
+}
+
 .bds-home-shell .bds-home-match-row:hover,
 .bds-home-shell .bds-home-news-row:hover,
 .bds-home-shell .bds-home-hits-item:hover,
