@@ -75,11 +75,12 @@ export default function BarStudioPage() {
 
   return (
     <PortalWorkspace
-      className="bds-portal-workspace--compact"
-      hero={{
+      className="bds-portal-workspace--compact bds-barstudio-workspace"
+      header={{
         eyebrow: 'Ferramentas criativas',
         title: 'BarStudio',
-        subtitle: 'Central criativa do Bar dos Amigos.',
+        description: 'Central criativa do Bar dos Amigos.',
+        className: 'bds-barstudio-header',
       }}
       sidebar={{
         title: 'Ferramentas',
