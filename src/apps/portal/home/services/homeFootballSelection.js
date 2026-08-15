@@ -22,7 +22,6 @@ const TEAM_PLACEHOLDER_NAMES = new Set([
   'a confirmar',
   'definir',
 ])
-const RECENT_FINISHED_HOURS = 48
 
 function getMatchDateValue(match = {}) {
   return match.startsAt || match.starts_at || match.utcDate || match.utc_date
@@ -36,6 +35,25 @@ function byMatchTimeDescending(left, right) {
   return getUtcTimestamp(getMatchDateValue(right)) - getUtcTimestamp(getMatchDateValue(left))
 }
 
+function getPreviousBrazilDateKey(now = nowUtcIso()) {
+  const today = getBrazilDateKey(now)
+  if (!today) return ''
+
+  const timestamp = Date.parse(`${today}T00:00:00Z`)
+  if (!Number.isFinite(timestamp)) return ''
+
+  return new Date(timestamp - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+}
+
+function getMatchBrazilDateKey(match = {}) {
+  return getBrazilDateKey(getMatchDateValue(match))
+    || match.localDateIso
+    || match.local_date_iso
+    || match.localDate
+    || match.local_date
+    || ''
+}
+
 export function hasDisplayableTeamName(value) {
   const normalized = String(value || '').trim().toLowerCase()
   return Boolean(normalized && !TEAM_PLACEHOLDER_NAMES.has(normalized))
@@ -47,22 +65,17 @@ export function hasDisplayableMatchTeams(match = {}) {
 }
 
 export function isHomeFootballMatchToday(match = {}, now = nowUtcIso()) {
-  const matchDate = getBrazilDateKey(getMatchDateValue(match))
-    || match.localDateIso
-    || match.local_date_iso
-    || match.localDate
-    || match.local_date
+  const matchDate = getMatchBrazilDateKey(match)
   const today = getBrazilDateKey(now)
 
   return Boolean(matchDate && today && matchDate === today)
 }
 
-function isRecentFinishedHomeMatch(match = {}, now = nowUtcIso()) {
-  const status = match.standardStatus || match.status
-  if (!isFinishedStatus(status)) return false
+function isHomeFootballMatchYesterday(match = {}, now = nowUtcIso()) {
+  const matchDate = getMatchBrazilDateKey(match)
+  const yesterday = getPreviousBrazilDateKey(now)
 
-  const elapsedMs = getUtcTimestamp(now) - getUtcTimestamp(getMatchDateValue(match))
-  return elapsedMs >= 0 && elapsedMs <= RECENT_FINISHED_HOURS * 60 * 60 * 1000
+  return Boolean(matchDate && yesterday && matchDate === yesterday)
 }
 
 export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIso(), limit = 3) {
@@ -76,14 +89,22 @@ export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIs
     })
   }
 
+  // 1. Sempre prioriza uma partida realmente ao vivo.
   pushGroup(displayableMatches
     .filter((match) => isLiveStatus(match.standardStatus || match.status))
-    .sort(byMatchTimeAscending))
+    .sort(byMatchTimeDescending))
 
+  // 2. Se nao houver ao vivo suficiente, mostra o placar final mais recente de hoje.
   pushGroup(displayableMatches
     .filter((match) => isHomeFootballMatchToday(match, now) && isFinishedStatus(match.standardStatus || match.status))
     .sort(byMatchTimeDescending))
 
+  // 3. Depois, o placar final mais recente de ontem.
+  pushGroup(displayableMatches
+    .filter((match) => isHomeFootballMatchYesterday(match, now) && isFinishedStatus(match.standardStatus || match.status))
+    .sort(byMatchTimeDescending))
+
+  // 4. Apenas se nao houver resultado recente, usa uma partida de hoje ainda nao iniciada.
   pushGroup(displayableMatches
     .filter((match) => {
       const status = match.standardStatus || match.status
@@ -91,10 +112,7 @@ export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIs
     })
     .sort(byMatchTimeAscending))
 
-  pushGroup(displayableMatches
-    .filter((match) => !isHomeFootballMatchToday(match, now) && isRecentFinishedHomeMatch(match, now))
-    .sort(byMatchTimeDescending))
-
+  // 5. Ultimo fallback: proxima partida futura disponivel.
   pushGroup(displayableMatches
     .filter((match) => {
       const status = match.standardStatus || match.status
