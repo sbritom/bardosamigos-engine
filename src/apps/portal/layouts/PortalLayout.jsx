@@ -4,7 +4,7 @@ import HomePage from "../pages/HomePage";
 
 export default function PortalLayout() {
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="min-h-screen bg-transparent text-[var(--text)]">
       <Header />
       <HomePage />
       <Footer />
