@@ -3,6 +3,44 @@ import { FeatureCard } from '../../../../design-system'
 
 const HIT_LIMIT = 5
 
+const FALLBACK_HITS = [
+  {
+    id: 'fallback-dai-dai',
+    position: 1,
+    title: 'Dai Dai',
+    artist: 'Shakira e Burna Boy',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Shakira+Dai+Dai+Burna+Boy',
+  },
+  {
+    id: 'fallback-peao-todo-tatuado',
+    position: 2,
+    title: 'Peão Todo Tatuado',
+    artist: 'Mariana Fagundes e Jeninho',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Peao+Todo+Tatuado+Mariana+Fagundes+Jeninho',
+  },
+  {
+    id: 'fallback-carnivoro',
+    position: 3,
+    title: 'Carnívoro',
+    artist: 'MC Jacaré, MC Negão Original, MC Lele JP e DJ Japa NK',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Carnivoro+MC+Jacare+MC+Negao+Original+MC+Lele+JP+DJ+Japa+NK',
+  },
+  {
+    id: 'fallback-cuida-do-pet',
+    position: 4,
+    title: 'Cuida do Pet',
+    artist: 'MC Willian, MC Iguinho CT, Oldilla e Aaron Modesto',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Cuida+do+Pet+MC+Willian+MC+Iguinho+CT+Oldilla+Aaron+Modesto',
+  },
+  {
+    id: 'fallback-pau-pra-toda-obra',
+    position: 5,
+    title: 'Pau Pra Toda Obra',
+    artist: 'MC IG, MC Jacaré, MC Lele JP e MC Ryan SP',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Pau+Pra+Toda+Obra+MC+IG+MC+Jacare+MC+Lele+JP+MC+Ryan+SP',
+  },
+]
+
 function getHitCover(track = {}) {
   return track.cover || track.albumCover || track.album_cover || track.thumbnail || track.image || ''
 }
@@ -82,7 +120,8 @@ function HomeHitItem({ hit }) {
 }
 
 export function HomeHitsCard({ hits = [], loading = false, error = null }) {
-  const safeHits = Array.isArray(hits) ? hits.map(normalizeHit).slice(0, HIT_LIMIT) : []
+  const sourceHits = Array.isArray(hits) && hits.length ? hits : FALLBACK_HITS
+  const safeHits = sourceHits.map(normalizeHit).slice(0, HIT_LIMIT)
 
   return (
     <FeatureCard
@@ -93,9 +132,9 @@ export function HomeHitsCard({ hits = [], loading = false, error = null }) {
     >
       <div className="bds-home-hits-list" data-designer-id="radio.topSongs" data-designer-label="Hits do Momento / Lista">
         {loading ? <HomeHitsState type="loading" /> : null}
-        {!loading && error ? <HomeHitsState type="error" /> : null}
-        {!loading && !error && safeHits.length ? safeHits.map((hit) => <HomeHitItem key={hit.id} hit={hit} />) : null}
-        {!loading && !error && !safeHits.length ? <HomeHitsState type="empty" /> : null}
+        {!loading && error && !safeHits.length ? <HomeHitsState type="error" /> : null}
+        {!loading && safeHits.length ? safeHits.map((hit) => <HomeHitItem key={hit.id} hit={hit} />) : null}
+        {!loading && !safeHits.length ? <HomeHitsState type="empty" /> : null}
       </div>
     </FeatureCard>
   )
