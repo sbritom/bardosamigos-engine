@@ -334,3 +334,25 @@ body {
     min-height: 220px;
   }
 }
+
+/* Portal background image */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 24, 42, .82),
+      rgba(10, 30, 50, .90)
+    ),
+    url("/backgrounds/portal-bg.webp") center top / cover fixed no-repeat;
+  color: var(--bds-color-text);
+}
+
+#root {
+  background: transparent;
+}
