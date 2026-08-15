@@ -1,4 +1,4 @@
-import { Scissors } from 'lucide-react'
+import { Clipboard, Scissors, UploadCloud } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import {
   canvasToBlob,
@@ -14,6 +14,7 @@ import {
   renderImagePreview,
   revokeLoadedImage,
 } from '../../../image-tools'
+import { useStorage } from '../../../storage'
 import CropControls from './CropControls'
 import { CROP_PREVIEW_SIZE, getCropExportSize, INITIAL_CROP_SETTINGS } from './cropConfig'
 import './cropTool.css'
@@ -52,10 +53,12 @@ function getRenderConfig(image, outputSize, zoom, position, settings, format, qu
 
 export default function CropTool() {
   const currentImageRef = useRef(null)
+  const { upload } = useStorage()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [feedback, setFeedback] = useState('')
   const [format, setFormat] = useState('png')
+  const [hostedUrl, setHostedUrl] = useState('')
   const [image, setImage] = useState(null)
   const [offset, setOffset] = useState(INITIAL_OFFSET)
   const [quality, setQuality] = useState('original')
@@ -72,11 +75,13 @@ export default function CropTool() {
     setOffset(INITIAL_OFFSET)
     setSettings(createInitialSettings())
     setZoom(1)
+    setHostedUrl('')
   }
 
   const handleFileSelect = async (file) => {
     setError('')
     setFeedback('')
+    setHostedUrl('')
     try {
       setBusy(true)
       const loaded = await loadImageFile(file)
@@ -126,6 +131,22 @@ export default function CropTool() {
     setFeedback('Imagem copiada para a área de transferência.')
   })
 
+  const handleHost = () => runExport(async () => {
+    const blob = await renderExport()
+    const formatConfig = EXPORT_FORMATS[format]
+    const filename = createFilename(image.name, formatConfig.extension)
+    const file = new File([blob], filename, { type: formatConfig.mime })
+    const asset = await upload(file)
+    setHostedUrl(asset.publicUrl || asset.directUrl || '')
+    setFeedback('Imagem hospedada. O link direto está pronto para copiar.')
+  })
+
+  const handleCopyLink = () => runExport(async () => {
+    if (!hostedUrl) throw new Error('Hospede a imagem antes de copiar o link.')
+    await navigator.clipboard.writeText(hostedUrl)
+    setFeedback('Link copiado para a área de transferência.')
+  })
+
   const handleNewImage = () => {
     revokeLoadedImage(currentImageRef.current)
     currentImageRef.current = null
@@ -135,19 +156,26 @@ export default function CropTool() {
     resetEditor()
   }
 
+  const hostingActions = (
+    <>
+      <button disabled={busy} onClick={handleHost} type="button"><UploadCloud size={16} />{hostedUrl ? 'Hospedar novamente' : 'Hospedar'}</button>
+      <button disabled={busy || !hostedUrl} onClick={handleCopyLink} type="button"><Clipboard size={16} />Copiar link</button>
+    </>
+  )
+
   return (
     <ImageToolLayout
       icon={Scissors}
       title="Cortar Foto Redonda"
-      description="Crie uma imagem circular com fundo transparente e exporte no formato desejado."
+      description="Crie uma imagem circular com fundo transparente e exporte ou hospede sem sair da ferramenta."
       error={error}
       feedback={feedback}
       upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
       settings={image ? (
         <CropControls
           onCenter={() => { setOffset(INITIAL_OFFSET); setFeedback('Imagem centralizada.') }}
-          onSettingsChange={setSettings}
-          onZoomChange={setZoom}
+          onSettingsChange={(nextSettings) => { setSettings(nextSettings); setHostedUrl('') }}
+          onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
           settings={settings}
           zoom={zoom}
         />
@@ -157,22 +185,23 @@ export default function CropTool() {
           {...getRenderConfig(image.element, CROP_PREVIEW_SIZE, zoom, offset, settings, format, quality)}
           help="Arraste a imagem ou use as setas do teclado para ajustar o enquadramento."
           onError={(previewError) => setError(previewError.message)}
-          onPositionChange={setOffset}
-          onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1) }}
-          onZoomChange={setZoom}
+          onPositionChange={(nextOffset) => { setOffset(nextOffset); setHostedUrl('') }}
+          onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1); setHostedUrl('') }}
+          onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
           surfaceBackground="checker"
         />
       ) : null}
       exportPanel={image ? (
         <ImageExportPanel
           busy={busy}
+          extraActions={hostingActions}
           format={format}
           onClear={() => { resetEditor(); setFeedback('Ajustes restaurados.') }}
           onCopy={handleCopy}
           onDownload={handleDownload}
-          onFormatChange={setFormat}
+          onFormatChange={(nextFormat) => { setFormat(nextFormat); setHostedUrl('') }}
           onNewImage={handleNewImage}
-          onQualityChange={setQuality}
+          onQualityChange={(nextQuality) => { setQuality(nextQuality); setHostedUrl('') }}
           quality={quality}
         />
       ) : null}
