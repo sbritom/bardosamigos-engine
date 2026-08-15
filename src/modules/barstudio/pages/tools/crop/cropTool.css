@@ -88,6 +88,104 @@
   font-size: var(--bds-font-small);
 }
 
+/* Compact workflow: upload -> ajustes -> preview -> finalizar */
+.bds-round-crop-tool {
+  gap: 12px;
+}
+
+.bds-round-crop-tool .bds-image-tool__header {
+  padding-bottom: 10px;
+}
+
+.bds-round-crop-tool .bds-image-tool__header-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.bds-round-crop-tool .bds-image-upload {
+  min-height: 92px;
+  border-radius: 14px;
+  background: rgba(6, 30, 73, .38);
+}
+
+.bds-round-crop-tool .bds-image-upload.is-compact {
+  min-height: 62px;
+  padding: 10px 12px;
+}
+
+.bds-round-crop-tool .bds-image-tool__workspace {
+  grid-template-columns: minmax(230px, .68fr) minmax(360px, 1.32fr);
+  gap: 10px;
+}
+
+.bds-round-crop-tool .bds-image-tool__section {
+  gap: 10px;
+  border-color: rgba(89, 141, 219, .14);
+  border-radius: 14px;
+  background: rgba(6, 30, 73, .38);
+  box-shadow: none;
+  padding: 12px;
+}
+
+.bds-round-crop-tool .bds-image-tool__section-header h3 {
+  font-size: 13px;
+  letter-spacing: .01em;
+}
+
+.bds-round-crop-tool .bds-image-tool__settings {
+  align-self: stretch;
+}
+
+.bds-round-crop-tool .bds-round-crop-controls {
+  gap: 10px;
+}
+
+.bds-round-crop-tool .bds-round-crop-control-group + .bds-round-crop-control-group,
+.bds-round-crop-tool .bds-round-crop-control-group + .bds-image-decoration {
+  padding-top: 10px;
+  border-top-color: rgba(89, 141, 219, .1);
+}
+
+.bds-round-crop-tool .bds-image-tool__preview {
+  min-height: 100%;
+}
+
+.bds-round-crop-tool .bds-image-tool__export {
+  margin-top: 2px;
+}
+
+.bds-round-crop-tool .bds-image-export {
+  gap: 8px;
+}
+
+.bds-round-crop-tool .bds-image-export__actions {
+  gap: 7px;
+}
+
+.bds-round-crop-tool .bds-image-export__actions button {
+  min-height: 36px;
+  border-radius: 9px;
+  padding-inline: 11px;
+}
+
+.bds-round-crop-tool .bds-round-crop-host,
+.bds-round-crop-tool .bds-round-crop-copy-link {
+  border-color: rgba(126, 178, 250, .35);
+  background: rgba(11, 61, 145, .62);
+  color: #fff;
+}
+
+.bds-round-crop-tool .bds-round-crop-copy-link:disabled {
+  background: rgba(4, 20, 49, .42);
+  color: var(--bds-color-text-secondary);
+}
+
+@media (max-width: 760px) {
+  .bds-round-crop-tool .bds-image-tool__workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 560px) {
   .bds-round-crop-options {
     padding-left: var(--bds-space-8);
