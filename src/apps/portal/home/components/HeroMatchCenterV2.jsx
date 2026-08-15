@@ -1,4 +1,5 @@
 import { CalendarDays, MapPin, Trophy } from 'lucide-react'
+import { useState } from 'react'
 import { EmptyState, HeroCard, StatusBadge } from '../../../../design-system'
 import { formatBrazilDateTime, nowUtcIso } from '../../../../core/time'
 import { getLiveMatchCenter } from '../../../../modules/competition/services/liveMatchCenterService'
@@ -15,11 +16,22 @@ function formatDateTime(value) {
 function TeamBlock({ name, label, src, side }) {
   const displayName = name || 'Time'
   const fallbackLabel = label || displayName.slice(0, 3).toUpperCase()
+  const [failedSrc, setFailedSrc] = useState('')
+  const shouldShowImage = Boolean(src && failedSrc !== src)
 
   return (
     <div className={`bds-hero-v2-team bds-hero-v2-team--${side}`} data-designer-id={`hero.${side}Team`} data-designer-label={`Hero / ${side === 'home' ? 'Time Mandante' : 'Time Visitante'}`}>
       <div className="bds-hero-v2-crest" data-designer-id={`hero.${side}Crest`} data-designer-label={`Hero / Escudo ${side === 'home' ? 'Mandante' : 'Visitante'}`}>
-        {src ? <img src={src} alt="" loading="lazy" /> : fallbackLabel}
+        {shouldShowImage ? (
+          <img
+            src={src}
+            alt={`Escudo ${displayName}`}
+            loading="lazy"
+            onError={() => setFailedSrc(src)}
+          />
+        ) : (
+          <span aria-hidden="true">{fallbackLabel}</span>
+        )}
       </div>
       <strong data-designer-id={`hero.${side}Name`} data-designer-label={`Hero / Nome ${side === 'home' ? 'Mandante' : 'Visitante'}`}>{displayName}</strong>
     </div>
