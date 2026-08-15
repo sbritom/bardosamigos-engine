@@ -5,6 +5,10 @@ import {
   isLiveStatus,
   nowUtcIso,
 } from '../../../../core/time/timeService.js'
+import {
+  getLiveMatchCenterPriority,
+  sortLiveMatchCenterMatches,
+} from '../../../../modules/competition/services/liveMatchCenterService.js'
 
 const TEAM_PLACEHOLDER_NAMES = new Set([
   'mandante',
@@ -89,34 +93,26 @@ export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIs
     })
   }
 
-  // 1. Sempre prioriza uma partida realmente ao vivo.
-  pushGroup(displayableMatches
-    .filter((match) => isLiveStatus(match.standardStatus || match.status))
-    .sort(byMatchTimeDescending))
+  // Mantem a Home com a mesma prioridade usada pelo Hero:
+  // ao vivo -> resultado recente -> proxima partida.
+  pushGroup(sortLiveMatchCenterMatches(displayableMatches, now)
+    .filter((match) => getLiveMatchCenterPriority(match, now) <= 2))
 
-  // 2. Se nao houver ao vivo suficiente, mostra o placar final mais recente de hoje.
+  // Fallback visual para preencher o card caso a janela principal nao tenha 3 jogos.
   pushGroup(displayableMatches
     .filter((match) => isHomeFootballMatchToday(match, now) && isFinishedStatus(match.standardStatus || match.status))
     .sort(byMatchTimeDescending))
 
-  // 3. Depois, o placar final mais recente de ontem.
   pushGroup(displayableMatches
     .filter((match) => isHomeFootballMatchYesterday(match, now) && isFinishedStatus(match.standardStatus || match.status))
     .sort(byMatchTimeDescending))
 
-  // 4. Apenas se nao houver resultado recente, usa uma partida de hoje ainda nao iniciada.
   pushGroup(displayableMatches
     .filter((match) => {
       const status = match.standardStatus || match.status
-      return isHomeFootballMatchToday(match, now) && !isLiveStatus(status) && !isFinishedStatus(status)
-    })
-    .sort(byMatchTimeAscending))
-
-  // 5. Ultimo fallback: proxima partida futura disponivel.
-  pushGroup(displayableMatches
-    .filter((match) => {
-      const status = match.standardStatus || match.status
-      return !isLiveStatus(status) && !isFinishedStatus(status) && getUtcTimestamp(getMatchDateValue(match)) >= getUtcTimestamp(now)
+      return !isLiveStatus(status)
+        && !isFinishedStatus(status)
+        && getUtcTimestamp(getMatchDateValue(match)) >= getUtcTimestamp(now)
     })
     .sort(byMatchTimeAscending))
 
