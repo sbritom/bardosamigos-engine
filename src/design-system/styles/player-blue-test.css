@@ -11,10 +11,16 @@ body {
   background-color: var(--player-blue-deep);
 }
 
-.bds-radio-strip,
-.bds-top-header {
+.bds-radio-strip {
   border-color: var(--player-blue-border);
   background: linear-gradient(180deg, rgba(11, 61, 145, .96), rgba(7, 42, 102, .94));
+}
+
+.bds-top-header {
+  border-color: rgba(89, 141, 219, .20);
+  background: linear-gradient(180deg, rgba(11, 61, 145, .52), rgba(6, 30, 73, .64));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .bds-top-header__brand-icon,
