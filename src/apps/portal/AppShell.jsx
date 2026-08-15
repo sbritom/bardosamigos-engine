@@ -6,7 +6,7 @@ import PortalSeo from "./seo/PortalSeo";
 
 export default function AppShell() {
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="min-h-screen bg-transparent text-[var(--text)]">
       <PortalSeo />
 
       <Header />
@@ -18,7 +18,6 @@ export default function AppShell() {
       </div>
 
       <Footer />
-
     </div>
   );
 }
