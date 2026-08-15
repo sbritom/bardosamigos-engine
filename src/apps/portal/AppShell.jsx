@@ -5,7 +5,7 @@ import Footer from "./layouts/Footer";
 import PortalSeo from "./seo/PortalSeo";
 
 const portalBackground = {
-  backgroundImage: 'linear-gradient(180deg, rgba(8,24,42,.62), rgba(10,30,50,.76)), url("/backgrounds/portal-bg.webp")',
+  backgroundImage: 'linear-gradient(180deg, rgba(7,25,42,.72), rgba(11,31,51,.82)), url("/backgrounds/portal-bg.webp")',
   backgroundPosition: 'center top',
   backgroundSize: 'cover',
   backgroundRepeat: 'no-repeat',
