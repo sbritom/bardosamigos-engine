@@ -89,7 +89,7 @@ export default function CropTool() {
       currentImageRef.current = loaded
       setImage(loaded)
       resetEditor()
-      setFeedback('Imagem carregada. O preview já está pronto para ajustar.')
+      setFeedback('Imagem pronta para ajustar.')
     } catch (loadError) {
       setError(loadError.message)
     } finally {
@@ -128,7 +128,7 @@ export default function CropTool() {
   const handleCopy = () => runExport(async () => {
     const blob = await renderExport('png')
     await copyImageBlob(blob)
-    setFeedback('Imagem copiada para a área de transferência.')
+    setFeedback('Imagem copiada.')
   })
 
   const handleHost = () => runExport(async () => {
@@ -138,13 +138,13 @@ export default function CropTool() {
     const file = new File([blob], filename, { type: formatConfig.mime })
     const asset = await upload(file)
     setHostedUrl(asset.publicUrl || asset.directUrl || '')
-    setFeedback('Imagem hospedada. O link direto está pronto para copiar.')
+    setFeedback('Imagem hospedada. O link está pronto.')
   })
 
   const handleCopyLink = () => runExport(async () => {
     if (!hostedUrl) throw new Error('Hospede a imagem antes de copiar o link.')
     await navigator.clipboard.writeText(hostedUrl)
-    setFeedback('Link copiado para a área de transferência.')
+    setFeedback('Link copiado.')
   })
 
   const handleNewImage = () => {
@@ -158,16 +158,17 @@ export default function CropTool() {
 
   const hostingActions = (
     <>
-      <button disabled={busy} onClick={handleHost} type="button"><UploadCloud size={16} />{hostedUrl ? 'Hospedar novamente' : 'Hospedar'}</button>
-      <button disabled={busy || !hostedUrl} onClick={handleCopyLink} type="button"><Clipboard size={16} />Copiar link</button>
+      <button className="bds-round-crop-host" disabled={busy} onClick={handleHost} type="button"><UploadCloud size={16} />{hostedUrl ? 'Hospedar novamente' : 'Hospedar'}</button>
+      <button className="bds-round-crop-copy-link" disabled={busy || !hostedUrl} onClick={handleCopyLink} type="button"><Clipboard size={16} />Copiar link</button>
     </>
   )
 
   return (
     <ImageToolLayout
+      className="bds-round-crop-tool"
       icon={Scissors}
       title="Cortar Foto Redonda"
-      description="Crie uma imagem circular com fundo transparente e exporte ou hospede sem sair da ferramenta."
+      description="Envie, ajuste e finalize sua imagem circular no mesmo lugar."
       error={error}
       feedback={feedback}
       upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
@@ -183,7 +184,7 @@ export default function CropTool() {
       preview={image ? (
         <ImagePreviewCanvas
           {...getRenderConfig(image.element, CROP_PREVIEW_SIZE, zoom, offset, settings, format, quality)}
-          help="Arraste a imagem ou use as setas do teclado para ajustar o enquadramento."
+          help="Arraste a imagem para ajustar o enquadramento."
           onError={(previewError) => setError(previewError.message)}
           onPositionChange={(nextOffset) => { setOffset(nextOffset); setHostedUrl('') }}
           onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1); setHostedUrl('') }}
@@ -191,6 +192,7 @@ export default function CropTool() {
           surfaceBackground="checker"
         />
       ) : null}
+      exportTitle="Finalizar"
       exportPanel={image ? (
         <ImageExportPanel
           busy={busy}
