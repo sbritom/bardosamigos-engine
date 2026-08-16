@@ -1,3 +1,4 @@
+import { FilesetResolver, ImageSegmenter } from '@mediapipe/tasks-vision'
 import { BackgroundRemovalProvider } from './BackgroundRemovalProvider'
 
 const QUALITY_LIMITS = {
@@ -6,12 +7,38 @@ const QUALITY_LIMITS = {
   maximum: Number.POSITIVE_INFINITY,
 }
 
+const MEDIAPIPE_VERSION = '0.10.35'
+const WASM_PATH = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`
+const SELFIE_MODEL = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite'
+let segmenterPromise = null
+
 function getScaledSize(image, quality) {
   const width = image.naturalWidth || image.width
   const height = image.naturalHeight || image.height
   const limit = QUALITY_LIMITS[quality] || QUALITY_LIMITS.high
   const scale = Number.isFinite(limit) ? Math.min(1, limit / Math.max(width, height)) : 1
   return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) }
+}
+
+async function getPersonSegmenter() {
+  if (!segmenterPromise) {
+    segmenterPromise = (async () => {
+      const vision = await FilesetResolver.forVisionTasks(WASM_PATH)
+      return ImageSegmenter.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: SELFIE_MODEL,
+          delegate: 'CPU',
+        },
+        runningMode: 'IMAGE',
+        outputCategoryMask: true,
+        outputConfidenceMasks: true,
+      })
+    })().catch((error) => {
+      segmenterPromise = null
+      throw error
+    })
+  }
+  return segmenterPromise
 }
 
 function sampleCorner(data, width, height, startX, startY, sampleSize) {
@@ -98,6 +125,38 @@ function removeConnectedBackground(imageData, smoothing) {
   }
 }
 
+function applyPersonMask(canvas, segmentation, smoothing) {
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+  const confidenceMask = segmentation.confidenceMasks?.[1]
+  const confidence = confidenceMask?.getAsFloat32Array?.()
+  const categories = segmentation.categoryMask?.getAsUint8Array?.()
+  const pixelCount = canvas.width * canvas.height
+
+  if ((!confidence || confidence.length !== pixelCount) && (!categories || categories.length !== pixelCount)) return false
+
+  let foregroundPixels = 0
+  const softness = Math.max(0.035, Math.min(0.22, (Number(smoothing) || 0) / 180))
+  const lower = 0.5 - softness
+  const upper = 0.5 + softness
+
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    const score = confidence ? confidence[pixel] : (categories[pixel] === 1 ? 1 : 0)
+    if (score >= 0.5) foregroundPixels += 1
+    const normalized = score <= lower ? 0 : score >= upper ? 1 : (score - lower) / (upper - lower)
+    const smooth = normalized * normalized * (3 - 2 * normalized)
+    const alphaIndex = pixel * 4 + 3
+    imageData.data[alphaIndex] = Math.round(imageData.data[alphaIndex] * smooth)
+  }
+
+  const foregroundRatio = foregroundPixels / pixelCount
+  if (foregroundRatio < 0.008 || foregroundRatio > 0.96) return false
+
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.putImageData(imageData, 0, 0)
+  return true
+}
+
 function cropTransparentBounds(source) {
   const context = source.getContext('2d')
   const { width, height } = source
@@ -132,7 +191,7 @@ function cropTransparentBounds(source) {
 
 export class LocalBackgroundRemovalProvider extends BackgroundRemovalProvider {
   constructor() {
-    super({ id: 'local-color-edge', name: 'Processamento local' })
+    super({ id: 'local-ai-segmentation', name: 'Segmentação local por IA' })
   }
 
   async process(image, { quality = 'high', smoothing = 20, autoCrop = true } = {}) {
@@ -143,11 +202,26 @@ export class LocalBackgroundRemovalProvider extends BackgroundRemovalProvider {
     canvas.height = size.height
     const context = canvas.getContext('2d', { willReadFrequently: true })
     context.drawImage(image, 0, 0, size.width, size.height)
-    const imageData = context.getImageData(0, 0, size.width, size.height)
-    removeConnectedBackground(imageData, smoothing)
-    context.clearRect(0, 0, size.width, size.height)
-    context.putImageData(imageData, 0, 0)
+
+    let usedAi = false
+    try {
+      const segmenter = await getPersonSegmenter()
+      const segmentation = segmenter.segment(canvas)
+      usedAi = applyPersonMask(canvas, segmentation, smoothing)
+      segmentation.categoryMask?.close?.()
+      segmentation.confidenceMasks?.forEach?.((mask) => mask?.close?.())
+    } catch (error) {
+      console.warn('[BarStudio] Segmentação por IA indisponível; usando removedor por cor.', error)
+    }
+
+    if (!usedAi) {
+      const imageData = context.getImageData(0, 0, size.width, size.height)
+      removeConnectedBackground(imageData, smoothing)
+      context.clearRect(0, 0, size.width, size.height)
+      context.putImageData(imageData, 0, 0)
+    }
+
     const result = autoCrop ? cropTransparentBounds(canvas) : canvas
-    return { canvas: result, width: result.width, height: result.height, providerId: this.id }
+    return { canvas: result, width: result.width, height: result.height, providerId: this.id, usedAi }
   }
 }
