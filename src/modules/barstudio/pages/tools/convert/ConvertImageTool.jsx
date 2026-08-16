@@ -50,24 +50,12 @@ export default function ConvertImageTool() {
     isCanvasFormatSupported('avif').then(setAvifSupported).catch(() => setAvifSupported(false))
   }, [])
 
-  useEffect(() => {
-    imageRef.current = image
-  }, [image])
-
+  useEffect(() => { imageRef.current = image }, [image])
   useEffect(() => () => revokeLoadedImage(imageRef.current), [])
 
-  const resetView = () => {
-    setPosition(INITIAL_POSITION)
-    setZoom(1)
-  }
-
+  const resetView = () => { setPosition(INITIAL_POSITION); setZoom(1) }
   const resetSettings = () => {
-    setFormat('png')
-    setQuality('original')
-    setBackgroundMode('white')
-    setCustomBackground('#056CF2')
-    setExportInfo(null)
-    resetView()
+    setFormat('png'); setQuality('original'); setBackgroundMode('white'); setCustomBackground('#056CF2'); setExportInfo(null); resetView()
   }
 
   const background = useMemo(() => format === 'jpg'
@@ -92,21 +80,12 @@ export default function ConvertImageTool() {
   }, [background, format, image, quality])
 
   const handleFileSelect = async (file) => {
-    setBusy(true)
-    setError('')
-    setFeedback('')
+    setBusy(true); setError(''); setFeedback('')
     try {
       const loaded = await loadImageFile(file, { types: CONVERTER_IMAGE_TYPES, formatMessage: CONVERTER_FORMAT_MESSAGE })
-      revokeLoadedImage(imageRef.current)
-      imageRef.current = loaded
-      setImage(loaded)
-      resetSettings()
+      revokeLoadedImage(imageRef.current); imageRef.current = loaded; setImage(loaded); resetSettings()
       setFeedback('Imagem carregada. Escolha o formato de destino.')
-    } catch (loadError) {
-      setError(loadError.message)
-    } finally {
-      setBusy(false)
-    }
+    } catch (loadError) { setError(loadError.message) } finally { setBusy(false) }
   }
 
   const renderConversion = async (targetFormat = format) => {
@@ -118,16 +97,10 @@ export default function ConvertImageTool() {
   }
 
   const runExport = async (action) => {
-    setBusy(true)
-    setError('')
-    setFeedback('')
-    try {
-      await action()
-    } catch (conversionError) {
-      setError(conversionError.message || 'Não foi possível converter a imagem.')
-    } finally {
-      setBusy(false)
-    }
+    setBusy(true); setError(''); setFeedback('')
+    try { await action() }
+    catch (conversionError) { setError(conversionError.message || 'Não foi possível converter a imagem.') }
+    finally { setBusy(false) }
   }
 
   const handleDownload = () => runExport(async () => {
@@ -148,14 +121,7 @@ export default function ConvertImageTool() {
 
   const handleNewImage = () => {
     estimateGenerationRef.current += 1
-    revokeLoadedImage(imageRef.current)
-    imageRef.current = null
-    setImage(null)
-    setEstimatedSize(null)
-    setEstimating(false)
-    setError('')
-    setFeedback('')
-    resetSettings()
+    revokeLoadedImage(imageRef.current); imageRef.current = null; setImage(null); setEstimatedSize(null); setEstimating(false); setError(''); setFeedback(''); resetSettings()
   }
 
   const previewDimensions = image?.element ? getImagePreviewDimensions(image.element) : null
@@ -164,14 +130,17 @@ export default function ConvertImageTool() {
 
   return (
     <ImageToolLayout
+      className={`bds-convert-tool ${image ? 'has-image' : 'is-empty'}`}
       icon={RefreshCw}
       title="Converter Imagem"
       description="Converta imagens entre formatos diretamente no navegador, preservando a resolução original."
+      hideHeader
+      hideSectionHeaders
       error={error}
       feedback={feedback}
       upload={<ImageUpload accept={CONVERTER_IMAGE_ACCEPT} compact={Boolean(image)} filename={image?.name} help="PNG, JPG, JPEG, WEBP, AVIF ou SVG, até 20 MB." onFileSelect={handleFileSelect} preview={image?.src} />}
       settings={image ? <ConvertImageControls avifSupported={avifSupported} backgroundMode={backgroundMode} customBackground={customBackground} format={format} onBackgroundModeChange={setBackgroundMode} onCenter={() => setPosition(INITIAL_POSITION)} onCustomBackgroundChange={setCustomBackground} onFormatChange={setFormat} onQualityChange={setQuality} onReset={resetView} onZoomChange={setZoom} quality={quality} showBackground={showBackground} zoom={zoom} /> : null}
-      preview={image ? <><ImagePreviewCanvas background={background} edgeInset={0} fit="stretch" format={format} image={image.element} interactionMode="view" onError={(previewError) => setError(previewError.message)} onPositionChange={setPosition} onReset={resetView} onZoomChange={setZoom} outputHeight={previewDimensions.height} outputWidth={previewDimensions.width} position={position} quality="high" shape="square" surfaceBackground="checker" zoom={zoom} /><ConvertImageInfo estimatedSize={estimatedSize} estimating={estimating} exportInfo={exportInfo} format={format} image={image} /></> : null}
+      preview={image ? <div className="bds-convert-preview"><ImagePreviewCanvas background={background} edgeInset={0} fit="stretch" format={format} image={image.element} interactionMode="view" onError={(previewError) => setError(previewError.message)} onPositionChange={setPosition} onReset={resetView} onZoomChange={setZoom} outputHeight={previewDimensions.height} outputWidth={previewDimensions.width} position={position} quality="high" shape="square" surfaceBackground="checker" zoom={zoom} /><ConvertImageInfo estimatedSize={estimatedSize} estimating={estimating} exportInfo={exportInfo} format={format} image={image} /></div> : null}
       exportPanel={image ? <ImageExportPanel busy={busy || estimating} copyDisabled={!copySupported} format={format} onClear={() => { resetSettings(); setFeedback('Configurações restauradas.') }} onCopy={handleCopy} onDownload={handleDownload} onFormatChange={setFormat} onNewImage={handleNewImage} onQualityChange={setQuality} quality={quality} showFormat={false} showQuality={false} /> : null}
     />
   )
