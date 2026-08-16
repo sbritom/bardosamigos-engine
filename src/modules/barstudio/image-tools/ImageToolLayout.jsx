@@ -13,16 +13,18 @@ function ToolSection({ title, description, children, className = '' }) {
   )
 }
 
-export default function ImageToolLayout({ icon: Icon, title, description, upload, settings, preview, exportPanel, exportTitle = 'Exportação', error, feedback, className = '' }) {
+export default function ImageToolLayout({ icon: Icon, title, description, upload, settings, preview, exportPanel, exportTitle = 'Exportação', error, feedback, className = '', hideHeader = false }) {
   return (
     <div className={`bds-image-tool ${className}`.trim()}>
-      <header className="bds-image-tool__header">
-        {Icon && <span className="bds-image-tool__header-icon"><Icon size={20} aria-hidden="true" /></span>}
-        <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-      </header>
+      {!hideHeader && (
+        <header className="bds-image-tool__header">
+          {Icon && <span className="bds-image-tool__header-icon"><Icon size={20} aria-hidden="true" /></span>}
+          <div>
+            <h2>{title}</h2>
+            <p>{description}</p>
+          </div>
+        </header>
+      )}
 
       {error && <p className="bds-image-tool__message is-error" role="alert">{error}</p>}
       {feedback && <p className="bds-image-tool__message is-success" role="status">{feedback}</p>}
