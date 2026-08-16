@@ -38,9 +38,7 @@ async function copyText(text) {
     await globalThis.navigator.clipboard.writeText(text)
     return
   }
-
   if (!globalThis.document) throw new Error('A cópia automática não está disponível neste navegador.')
-
   const textarea = document.createElement('textarea')
   textarea.value = text
   textarea.setAttribute('readonly', '')
@@ -52,10 +50,8 @@ async function copyText(text) {
   textarea.focus()
   textarea.select()
   textarea.setSelectionRange(0, textarea.value.length)
-
   const copied = document.execCommand?.('copy')
   document.body.removeChild(textarea)
-
   if (!copied) throw new Error('Não foi possível copiar automaticamente. Selecione o link e copie manualmente.')
 }
 
@@ -91,13 +87,8 @@ export default function CropTool() {
   const [settings, setSettings] = useState(createInitialSettings)
   const [zoom, setZoom] = useState(1)
 
-  useEffect(() => {
-    currentImageRef.current = image
-  }, [image])
-
-  useEffect(() => () => {
-    if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
-  }, [])
+  useEffect(() => { currentImageRef.current = image }, [image])
+  useEffect(() => () => { if (currentImageRef.current) revokeLoadedImage(currentImageRef.current) }, [])
 
   function resetEditor() {
     setOffset(INITIAL_OFFSET)
@@ -107,20 +98,14 @@ export default function CropTool() {
   }
 
   async function handleFileSelect(file) {
-    setBusy(true)
-    setError('')
-    setFeedback('')
+    setBusy(true); setError(''); setFeedback('')
     try {
       const loaded = await loadImageFile(file)
       if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
       currentImageRef.current = loaded
       setImage(loaded)
       resetEditor()
-    } catch (loadError) {
-      setError(loadError.message)
-    } finally {
-      setBusy(false)
-    }
+    } catch (loadError) { setError(loadError.message) } finally { setBusy(false) }
   }
 
   async function createOutputBlob() {
@@ -134,40 +119,23 @@ export default function CropTool() {
   }
 
   async function handleDownload() {
-    setBusy(true)
-    setError('')
-    setFeedback('')
+    setBusy(true); setError(''); setFeedback('')
     try {
       const blob = await createOutputBlob()
       const extension = (EXPORT_FORMATS[format] || EXPORT_FORMATS.png).extension
       downloadBlob(blob, createFilename(image?.name, extension))
       setFeedback('Imagem baixada.')
-    } catch (actionError) {
-      setError(actionError.message)
-    } finally {
-      setBusy(false)
-    }
+    } catch (actionError) { setError(actionError.message) } finally { setBusy(false) }
   }
 
   async function handleCopy() {
-    setBusy(true)
-    setError('')
-    setFeedback('')
-    try {
-      const blob = await createOutputBlob()
-      await copyImageBlob(blob)
-      setFeedback('Imagem copiada.')
-    } catch (actionError) {
-      setError(actionError.message)
-    } finally {
-      setBusy(false)
-    }
+    setBusy(true); setError(''); setFeedback('')
+    try { await copyImageBlob(await createOutputBlob()); setFeedback('Imagem copiada.') }
+    catch (actionError) { setError(actionError.message) } finally { setBusy(false) }
   }
 
   async function handleHost() {
-    setBusy(true)
-    setError('')
-    setFeedback('')
+    setBusy(true); setError(''); setFeedback('')
     try {
       const blob = await createOutputBlob()
       const extension = (EXPORT_FORMATS[format] || EXPORT_FORMATS.png).extension
@@ -176,85 +144,66 @@ export default function CropTool() {
       if (!nextUrl) throw new Error('A hospedagem foi concluída, mas nenhum link público foi retornado.')
       setHostedUrl(nextUrl)
       setFeedback('Imagem hospedada. O link já está pronto para copiar.')
-    } catch (actionError) {
-      setError(actionError.message)
-    } finally {
-      setBusy(false)
-    }
+    } catch (actionError) { setError(actionError.message) } finally { setBusy(false) }
   }
 
   async function handleCopyLink() {
     if (!hostedUrl) return
     setError('')
-    try {
-      await copyText(hostedUrl)
-      setFeedback('Link copiado.')
-    } catch (actionError) {
-      setError(actionError.message)
-    }
+    try { await copyText(hostedUrl); setFeedback('Link copiado.') }
+    catch (actionError) { setError(actionError.message) }
   }
 
   function handleNewImage() {
     if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
     currentImageRef.current = null
-    setImage(null)
-    setError('')
-    setFeedback('')
-    resetEditor()
+    setImage(null); setError(''); setFeedback(''); resetEditor()
   }
 
-  const hostingActions = (
-    <>
-      <button className="bds-round-crop-host" disabled={busy} onClick={handleHost} type="button"><UploadCloud size={16} />{hostedUrl ? 'Hospedar novamente' : 'Hospedar'}</button>
-      <button className="bds-round-crop-copy-link" disabled={busy || !hostedUrl} onClick={handleCopyLink} type="button"><Clipboard size={16} />Copiar link</button>
-    </>
-  )
+  const hostingActions = <>
+    <button className="bds-round-crop-host" disabled={busy} onClick={handleHost} type="button"><UploadCloud size={16} />{hostedUrl ? 'Hospedar novamente' : 'Hospedar'}</button>
+    <button className="bds-round-crop-copy-link" disabled={busy || !hostedUrl} onClick={handleCopyLink} type="button"><Clipboard size={16} />Copiar link</button>
+  </>
 
   return (
     <ImageToolLayout
-      className="bds-round-crop-tool"
+      className={`bds-round-crop-tool ${image ? 'has-image' : 'is-empty'}`}
       icon={Scissors}
       title="Cortar Foto Redonda"
       description="Envie, ajuste e finalize sua imagem circular no mesmo lugar."
       hideHeader
+      hideSectionHeaders
       error={error}
       feedback={feedback}
       upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
-      settings={image ? (
-        <CropControls
-          onCenter={() => { setOffset(INITIAL_OFFSET); setFeedback('Imagem centralizada.') }}
-          onSettingsChange={(nextSettings) => { setSettings(nextSettings); setHostedUrl('') }}
-          onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
-          settings={settings}
-          zoom={zoom}
-        />
-      ) : null}
-      preview={image ? (
-        <ImagePreviewCanvas
-          {...getRenderConfig(image.element, CROP_PREVIEW_SIZE, zoom, offset, settings, format, quality)}
-          help="Arraste a imagem para ajustar o enquadramento."
-          onError={(previewError) => setError(previewError.message)}
-          onPositionChange={(nextOffset) => { setOffset(nextOffset); setHostedUrl('') }}
-          onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1); setHostedUrl('') }}
-          onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
-          surfaceBackground="checker"
-        />
-      ) : null}
-      exportTitle="Finalizar"
-      exportPanel={image ? (
-        <ImageExportPanel
-          busy={busy}
-          extraActions={hostingActions}
-          format={format}
-          onClear={() => { resetEditor(); setFeedback('Ajustes restaurados.') }}
-          onCopy={handleCopy}
-          onDownload={handleDownload}
-          onFormatChange={(nextFormat) => { setFormat(nextFormat); setHostedUrl('') }}
-          onNewImage={handleNewImage}
-          onQualityChange={(nextQuality) => { setQuality(nextQuality); setHostedUrl('') }}
-          quality={quality}
-        />
-      ) : null}
+      settings={image ? <CropControls
+        onCenter={() => { setOffset(INITIAL_OFFSET); setFeedback('Imagem centralizada.') }}
+        onSettingsChange={(nextSettings) => { setSettings(nextSettings); setHostedUrl('') }}
+        onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
+        settings={settings}
+        zoom={zoom}
+      /> : null}
+      preview={image ? <ImagePreviewCanvas
+        {...getRenderConfig(image.element, CROP_PREVIEW_SIZE, zoom, offset, settings, format, quality)}
+        help="Arraste a imagem para ajustar o enquadramento."
+        onError={(previewError) => setError(previewError.message)}
+        onPositionChange={(nextOffset) => { setOffset(nextOffset); setHostedUrl('') }}
+        onReset={() => { setOffset(INITIAL_OFFSET); setZoom(1); setHostedUrl('') }}
+        onZoomChange={(nextZoom) => { setZoom(nextZoom); setHostedUrl('') }}
+        surfaceBackground="checker"
+      /> : null}
+      exportPanel={image ? <ImageExportPanel
+        busy={busy}
+        extraActions={hostingActions}
+        format={format}
+        onClear={() => { resetEditor(); setFeedback('Ajustes restaurados.') }}
+        onCopy={handleCopy}
+        onDownload={handleDownload}
+        onFormatChange={(nextFormat) => { setFormat(nextFormat); setHostedUrl('') }}
+        onNewImage={handleNewImage}
+        onQualityChange={(nextQuality) => { setQuality(nextQuality); setHostedUrl('') }}
+        quality={quality}
+      /> : null}
     />
   )
 }
