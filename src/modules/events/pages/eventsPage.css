@@ -12,6 +12,21 @@
   color: var(--bds-color-text);
 }
 
+/* Eventos usa o workspace como um painel unico: sidebar e conteudo acompanham a mesma altura. */
+.bds-events-page .bds-portal-workspace__layout {
+  align-items: stretch;
+}
+
+.bds-events-page .bds-workspace-sidebar,
+.bds-events-page .bds-workspace-content {
+  height: 100%;
+}
+
+.bds-events-page .bds-workspace-sidebar {
+  position: relative;
+  top: auto;
+}
+
 .bds-events-hero,
 .bds-events-highlight,
 .bds-events-card,
@@ -185,6 +200,9 @@
 .bds-events-page :where(button, a):focus-visible { outline: 2px solid var(--bds-color-primary-hover); outline-offset: 3px; }
 
 @media (max-width: 800px) {
+  .bds-events-page .bds-portal-workspace__layout { align-items: start; }
+  .bds-events-page .bds-workspace-sidebar,
+  .bds-events-page .bds-workspace-content { height: auto; }
   .bds-events-highlight { grid-template-columns: 1fr; padding: var(--bds-space-18); }
   .bds-events-highlight__aside,
   .bds-events-highlight__prizes { justify-items: start; }
