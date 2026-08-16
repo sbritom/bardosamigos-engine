@@ -4,6 +4,7 @@ import { EmptyState, HeroCard, StatusBadge } from '../../../../design-system'
 import { formatBrazilDateTime, nowUtcIso } from '../../../../core/time'
 import { getLiveMatchCenter } from '../../../../modules/competition/services/liveMatchCenterService'
 import { useCountdown } from '../hooks/useCountdown'
+import './heroMatchCenterV2.css'
 
 function formatCountdown(remaining) {
   return remaining.label || `${String(remaining.hours).padStart(2, '0')}h ${String(remaining.minutes).padStart(2, '0')}m`
