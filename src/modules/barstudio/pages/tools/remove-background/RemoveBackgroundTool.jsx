@@ -82,61 +82,31 @@ export default function RemoveBackgroundTool() {
     return () => window.clearTimeout(timer)
   }, [autoCrop, image, processingQuality, smoothing])
 
-  const resetView = () => {
-    setOffset(INITIAL_OFFSET)
-    setZoom(1)
-  }
-
+  const resetView = () => { setOffset(INITIAL_OFFSET); setZoom(1) }
   const resetSettings = () => {
-    setAutoCrop(true)
-    setProcessingQuality('high')
-    setSmoothing(20)
-    setPreviewBackground('checker')
-    setCustomBackground('#7A7A7A')
-    setPreviewMode('comparison')
-    resetView()
-    setExportInfo(null)
+    setAutoCrop(true); setProcessingQuality('high'); setSmoothing(20); setPreviewBackground('checker')
+    setCustomBackground('#7A7A7A'); setPreviewMode('comparison'); resetView(); setExportInfo(null)
   }
 
   const handleFileSelect = async (file) => {
     processGenerationRef.current += 1
-    setBusy(true)
-    setError('')
-    setFeedback('')
+    setBusy(true); setError(''); setFeedback('')
     try {
       const loaded = await loadImageFile(file)
       revokeLoadedImage(imageRef.current)
       imageRef.current = loaded
-      setImage(loaded)
-      setProcessing(false)
-      clearResult()
-      resetSettings()
+      setImage(loaded); setProcessing(false); clearResult(); resetSettings()
       setFeedback('Imagem carregada. Removendo o fundo automaticamente.')
-    } catch (loadError) {
-      setError(loadError.message)
-    } finally {
-      setBusy(false)
-    }
+    } catch (loadError) { setError(loadError.message) } finally { setBusy(false) }
   }
 
   const processForExport = async (targetFormat) => {
     if (!image?.element) throw new Error('Selecione uma imagem antes de exportar.')
-    const processed = await backgroundRemovalProvider.process(image.element, {
-      quality: processingQuality,
-      smoothing,
-      autoCrop,
-    })
+    const processed = await backgroundRemovalProvider.process(image.element, { quality: processingQuality, smoothing, autoCrop })
     const canvas = document.createElement('canvas')
-    renderImagePreview(canvas, {
-      image: processed.canvas,
-      outputWidth: processed.width,
-      outputHeight: processed.height,
-      fit: 'stretch',
-      shape: 'square',
-      background: { type: 'transparent' },
-      edgeInset: 0,
-      format: targetFormat,
-      quality,
+    await renderImagePreview(canvas, {
+      image: processed.canvas, outputWidth: processed.width, outputHeight: processed.height, fit: 'stretch', shape: 'square',
+      background: { type: 'transparent' }, edgeInset: 0, format: targetFormat, quality,
     })
     const config = EXPORT_FORMATS[targetFormat]
     const blob = await canvasToBlob(canvas, config.mime, EXPORT_QUALITY[quality].value)
@@ -144,16 +114,8 @@ export default function RemoveBackgroundTool() {
   }
 
   const runExport = async (action) => {
-    setBusy(true)
-    setError('')
-    setFeedback('')
-    try {
-      await action()
-    } catch (exportError) {
-      setError(exportError.message || 'Não foi possível exportar a imagem.')
-    } finally {
-      setBusy(false)
-    }
+    setBusy(true); setError(''); setFeedback('')
+    try { await action() } catch (exportError) { setError(exportError.message || 'Não foi possível exportar a imagem.') } finally { setBusy(false) }
   }
 
   const handleDownload = () => runExport(async () => {
@@ -173,93 +135,48 @@ export default function RemoveBackgroundTool() {
 
   const handleNewImage = () => {
     processGenerationRef.current += 1
-    revokeLoadedImage(imageRef.current)
-    imageRef.current = null
-    setImage(null)
-    clearResult()
-    resetSettings()
-    setError('')
-    setFeedback('')
+    revokeLoadedImage(imageRef.current); imageRef.current = null; setImage(null); clearResult(); resetSettings(); setError(''); setFeedback('')
   }
 
   const previewItems = useMemo(() => image ? [
-    { id: 'original', label: 'Imagem original', image: image.element, ...getImagePreviewDimensions(image.element) },
-    ...(result?.canvas ? [{ id: 'result', label: 'Imagem sem fundo', image: result.canvas, ...getImagePreviewDimensions(result.canvas) }] : []),
+    { id: 'original', label: 'Original', image: image.element, ...getImagePreviewDimensions(image.element) },
+    ...(result?.canvas ? [{ id: 'result', label: 'Sem fundo', image: result.canvas, ...getImagePreviewDimensions(result.canvas) }] : []),
   ].map((item) => ({ ...item, outputWidth: item.width, outputHeight: item.height })) : [], [image, result])
 
   return (
     <ImageToolLayout
+      className={`bds-remove-bg-tool ${image ? 'has-image' : 'is-empty'}`}
       icon={WandSparkles}
       title="Remover Fundo"
       description="Remova fundos uniformes diretamente no navegador, sem enviar sua imagem para servidores externos."
+      hideHeader
+      hideSectionHeaders
       error={error}
       feedback={feedback}
       upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
-      settings={image ? (
-        <>
-          <RemoveBackgroundControls
-            autoCrop={autoCrop}
-            customBackground={customBackground}
-            onAutoCropChange={setAutoCrop}
-            onCustomBackgroundChange={setCustomBackground}
-            onCenter={() => setOffset(INITIAL_OFFSET)}
-            onPreviewBackgroundChange={setPreviewBackground}
-            onProcessingQualityChange={setProcessingQuality}
-            onResetZoom={() => setZoom(1)}
-            onSmoothingChange={setSmoothing}
-            onZoomChange={setZoom}
-            previewBackground={previewBackground}
-            processingQuality={processingQuality}
-            smoothing={smoothing}
-            zoom={zoom}
-          />
-          <RemoveBackgroundInfo exportInfo={exportInfo} image={image} result={result} />
-        </>
-      ) : null}
-      preview={image ? (
-        <div className="bds-remove-bg-preview">
-          <div className="bds-remove-bg-preview__modes" role="group" aria-label="Modo de visualização">
-            {[
-              ['original', 'Original'],
-              ['result', 'Resultado'],
-              ['comparison', 'Comparação'],
-            ].map(([value, label]) => <button aria-pressed={previewMode === value} className={previewMode === value ? 'is-selected' : ''} disabled={!result && value !== 'original'} key={value} onClick={() => setPreviewMode(value)} type="button">{label}</button>)}
-          </div>
-          {processing && <p className="bds-remove-bg-processing" role="status">Processando imagem...</p>}
-          <ImagePreviewCanvas
-            background={{ type: 'transparent' }}
-            customBackground={customBackground}
-            edgeInset={0}
-            fit="stretch"
-            interactionMode="view"
-            items={previewItems}
-            onError={(previewError) => setError(previewError.message)}
-            onPositionChange={setOffset}
-            onReset={resetView}
-            onZoomChange={setZoom}
-            position={offset}
-            previewMode={previewMode}
-            quality={processingQuality}
-            shape="square"
-            surfaceBackground={previewBackground}
-            zoom={zoom}
-          />
+      settings={image ? <div className="bds-remove-bg-settings"><RemoveBackgroundControls
+        autoCrop={autoCrop} customBackground={customBackground} onAutoCropChange={setAutoCrop}
+        onCustomBackgroundChange={setCustomBackground} onCenter={() => setOffset(INITIAL_OFFSET)}
+        onPreviewBackgroundChange={setPreviewBackground} onProcessingQualityChange={setProcessingQuality}
+        onResetZoom={() => setZoom(1)} onSmoothingChange={setSmoothing} onZoomChange={setZoom}
+        previewBackground={previewBackground} processingQuality={processingQuality} smoothing={smoothing} zoom={zoom}
+      /><RemoveBackgroundInfo exportInfo={exportInfo} image={image} result={result} /></div> : null}
+      preview={image ? <div className="bds-remove-bg-preview">
+        <div className="bds-remove-bg-preview__modes" role="group" aria-label="Modo de visualização">
+          {[["original", "Original"], ["result", "Resultado"], ["comparison", "Comparar"]].map(([value, label]) =>
+            <button aria-pressed={previewMode === value} className={previewMode === value ? 'is-selected' : ''} disabled={!result && value !== 'original'} key={value} onClick={() => setPreviewMode(value)} type="button">{label}</button>)}
         </div>
-      ) : null}
-      exportPanel={image ? (
-        <ImageExportPanel
-          busy={busy || processing}
-          extraActions={<button disabled={!result} onClick={() => setPreviewMode('comparison')} type="button"><Columns2 size={16} />Comparar original</button>}
-          format={format}
-          onClear={() => { resetSettings(); setFeedback('Ajustes restaurados.') }}
-          onCopy={handleCopy}
-          onDownload={handleDownload}
-          onFormatChange={setFormat}
-          onNewImage={handleNewImage}
-          onQualityChange={setQuality}
-          quality={quality}
-        />
-      ) : null}
+        {processing && <p className="bds-remove-bg-processing" role="status">Removendo fundo...</p>}
+        <ImagePreviewCanvas background={{ type: 'transparent' }} customBackground={customBackground} edgeInset={0} fit="stretch"
+          interactionMode="view" items={previewItems} onError={(previewError) => setError(previewError.message)}
+          onPositionChange={setOffset} onReset={resetView} onZoomChange={setZoom} position={offset} previewMode={previewMode}
+          quality={processingQuality} shape="square" surfaceBackground={previewBackground} zoom={zoom} />
+      </div> : null}
+      exportPanel={image ? <ImageExportPanel busy={busy || processing}
+        extraActions={<button disabled={!result} onClick={() => setPreviewMode('comparison')} type="button"><Columns2 size={16} />Comparar</button>}
+        format={format} onClear={() => { resetSettings(); setFeedback('Ajustes restaurados.') }} onCopy={handleCopy}
+        onDownload={handleDownload} onFormatChange={setFormat} onNewImage={handleNewImage}
+        onQualityChange={setQuality} quality={quality} /> : null}
     />
   )
 }
