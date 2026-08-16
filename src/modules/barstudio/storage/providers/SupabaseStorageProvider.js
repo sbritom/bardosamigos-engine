@@ -27,13 +27,15 @@ export default class SupabaseStorageProvider extends StorageProvider {
   toAsset(path, metadata = {}) {
     const normalizedPath = normalizeStorageId(path)
     const { data } = this.getBucket().getPublicUrl(normalizedPath)
+    const shareUrl = createShareUrl(normalizedPath)
+
     return createStorageAsset({
       id: normalizedPath,
       path: normalizedPath,
       name: normalizedPath.split('/').pop(),
-      publicUrl: data.publicUrl,
+      publicUrl: shareUrl,
       directUrl: data.publicUrl,
-      shareUrl: createShareUrl(normalizedPath),
+      shareUrl,
       ...metadata,
     })
   }
