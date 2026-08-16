@@ -8,6 +8,7 @@ import AvatarTool from './tools/avatar/AvatarTool'
 import ConvertImageTool from './tools/convert/ConvertImageTool'
 import GradientsTool from './tools/gradients/GradientsTool'
 import ExtractColorsTool from './tools/extract-colors/ExtractColorsTool'
+import PalettesTool from './tools/palettes/PalettesTool'
 
 const sidebarSections = [
   {
@@ -24,12 +25,12 @@ const sidebarSections = [
     tools: [
       { id: 'color-generator', title: 'Gerador de Cores', icon: Sparkles, available: true },
       { id: 'extract-colors', title: 'Extrair Cores', icon: Pipette, available: true },
+      { id: 'palettes', title: 'Paletas', icon: Palette, available: true },
     ],
   },
 ]
 
 const upcomingTools = [
-  { id: 'palettes', title: 'Paletas', icon: Palette },
   { id: 'resize', title: 'Redimensionar', icon: Image },
 ]
 
@@ -68,8 +69,9 @@ export default function BarStudioPage() {
               : activeTool?.id === 'convert' ? <ConvertImageTool />
                 : activeTool?.id === 'color-generator' ? <GradientsTool />
                   : activeTool?.id === 'extract-colors' ? <ExtractColorsTool />
-                    : activeTool ? <ToolPlaceholder tool={activeTool} />
-                      : <WorkspaceEmptyState icon={Sparkles} title="Bem-vindo ao BarStudio" description="Selecione uma ferramenta na barra lateral para comecar." />}
+                    : activeTool?.id === 'palettes' ? <PalettesTool />
+                      : activeTool ? <ToolPlaceholder tool={activeTool} />
+                        : <WorkspaceEmptyState icon={Sparkles} title="Bem-vindo ao BarStudio" description="Selecione uma ferramenta na barra lateral para comecar." />}
       </PortalWorkspace>
     </StorageContextProvider>
   )
