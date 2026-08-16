@@ -6,12 +6,18 @@ import { getLiveMatchCenter } from '../../../../modules/competition/services/liv
 import { useCountdown } from '../hooks/useCountdown'
 import './heroMatchCenterV2.css'
 
+const SCOREBOARD_BACKGROUND = '/backgrounds/football-scoreboard.png'
+
 function formatCountdown(remaining) {
   return remaining.label || `${String(remaining.hours).padStart(2, '0')}h ${String(remaining.minutes).padStart(2, '0')}m`
 }
 
 function formatDateTime(value) {
   return formatBrazilDateTime(value)
+}
+
+function ScoreboardBackground() {
+  return <img className="bds-hero-v2-background" src={SCOREBOARD_BACKGROUND} alt="" aria-hidden="true" />
 }
 
 function TeamBlock({ name, label, src, side }) {
@@ -24,12 +30,7 @@ function TeamBlock({ name, label, src, side }) {
     <div className={`bds-hero-v2-team bds-hero-v2-team--${side}`} data-designer-id={`hero.${side}Team`} data-designer-label={`Hero / ${side === 'home' ? 'Time Mandante' : 'Time Visitante'}`}>
       <div className="bds-hero-v2-crest" data-designer-id={`hero.${side}Crest`} data-designer-label={`Hero / Escudo ${side === 'home' ? 'Mandante' : 'Visitante'}`}>
         {shouldShowImage ? (
-          <img
-            src={src}
-            alt={`Escudo ${displayName}`}
-            loading="lazy"
-            onError={() => setFailedSrc(src)}
-          />
+          <img src={src} alt={`Escudo ${displayName}`} loading="lazy" onError={() => setFailedSrc(src)} />
         ) : (
           <span aria-hidden="true">{fallbackLabel}</span>
         )}
@@ -51,11 +52,9 @@ export function HeroMatchCenterV2({ liveMatchCenter }) {
   if (hero.isEmpty) {
     return (
       <HeroCard className="bds-hero-v2 bds-hero-v2--empty">
+        <ScoreboardBackground />
         <div className="bds-hero-v2-empty">
-          <EmptyState
-            title="Nenhuma partida disponivel"
-            description="Assim que houver jogos sincronizados, o destaque aparece aqui automaticamente."
-          />
+          <EmptyState title="Nenhuma partida disponivel" description="Assim que houver jogos sincronizados, o destaque aparece aqui automaticamente." />
         </div>
       </HeroCard>
     )
@@ -63,6 +62,7 @@ export function HeroMatchCenterV2({ liveMatchCenter }) {
 
   return (
     <HeroCard className="bds-hero-v2">
+      <ScoreboardBackground />
       <section className="bds-hero-v2-content" aria-label={`${hero.homeTeam} contra ${hero.awayTeam}`}>
         <div className="bds-hero-v2-match" data-designer-id="hero.match" data-designer-label="Hero / Confronto">
           <TeamBlock name={hero.homeTeam} label={hero.homeShield} src={hero.homeCrest} side="home" />
