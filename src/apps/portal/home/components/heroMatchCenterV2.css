@@ -1,14 +1,30 @@
 .bds-home-shell .bds-hero-card.bds-hero-v2 {
-  background:
-    linear-gradient(90deg, rgba(1, 10, 38, 0.82) 0%, rgba(1, 10, 38, 0.62) 48%, rgba(1, 10, 38, 0.82) 100%),
-    url('/backgrounds/football-scoreboard.png') center center / cover no-repeat;
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
+  background: rgba(6, 30, 73, .42);
 }
 
-.bds-home-shell .bds-hero-card.bds-hero-v2:hover {
-  background:
-    linear-gradient(90deg, rgba(1, 10, 38, 0.82) 0%, rgba(1, 10, 38, 0.62) 48%, rgba(1, 10, 38, 0.82) 100%),
-    url('/backgrounds/football-scoreboard.png') center center / cover no-repeat;
+.bds-home-shell .bds-hero-v2-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: .82;
+  pointer-events: none;
+}
+
+.bds-home-shell .bds-hero-card.bds-hero-v2::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, rgba(1, 10, 38, .34) 0%, rgba(1, 10, 38, .16) 48%, rgba(1, 10, 38, .34) 100%);
+  pointer-events: none;
 }
 
 .bds-home-shell .bds-hero-v2-content,
