@@ -95,27 +95,27 @@ export default function CropTool() {
     currentImageRef.current = image
   }, [image])
 
-  useEffect(() => () => revokeLoadedImage(currentImageRef.current), [])
+  useEffect(() => () => {
+    if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
+  }, [])
 
-  const resetEditor = () => {
+  function resetEditor() {
     setOffset(INITIAL_OFFSET)
     setSettings(createInitialSettings())
     setZoom(1)
     setHostedUrl('')
   }
 
-  const handleFileSelect = async (file) => {
+  async function handleFileSelect(file) {
+    setBusy(true)
     setError('')
     setFeedback('')
-    setHostedUrl('')
     try {
-      setBusy(true)
       const loaded = await loadImageFile(file)
-      revokeLoadedImage(currentImageRef.current)
+      if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
       currentImageRef.current = loaded
       setImage(loaded)
       resetEditor()
-      setFeedback('Imagem pronta para ajustar.')
     } catch (loadError) {
       setError(loadError.message)
     } finally {
@@ -123,58 +123,79 @@ export default function CropTool() {
     }
   }
 
-  const renderExport = async (targetFormat = format) => {
-    if (!image?.element) throw new Error('Selecione uma imagem antes de exportar.')
+  async function createOutputBlob() {
+    if (!image?.element) throw new Error('Selecione uma imagem primeiro.')
+    const outputSize = getCropExportSize(quality, image.width, image.height)
     const canvas = document.createElement('canvas')
-    renderImagePreview(canvas, getRenderConfig(image.element, getCropExportSize(image.element, quality), zoom, offset, settings, targetFormat, quality))
-    const formatConfig = EXPORT_FORMATS[targetFormat]
-    return canvasToBlob(canvas, formatConfig.mime, EXPORT_QUALITY[quality].value)
+    await renderImagePreview(canvas, getRenderConfig(image.element, outputSize, zoom, offset, settings, format, quality))
+    const formatConfig = EXPORT_FORMATS[format] || EXPORT_FORMATS.png
+    const qualityConfig = EXPORT_QUALITY[quality] || EXPORT_QUALITY.original
+    return canvasToBlob(canvas, formatConfig.mime, qualityConfig.canvasQuality)
   }
 
-  const runExport = async (action) => {
+  async function handleDownload() {
+    setBusy(true)
     setError('')
     setFeedback('')
     try {
-      setBusy(true)
-      await action()
-    } catch (exportError) {
-      setError(exportError.message || 'Não foi possível exportar a imagem.')
+      const blob = await createOutputBlob()
+      const extension = (EXPORT_FORMATS[format] || EXPORT_FORMATS.png).extension
+      downloadBlob(blob, createFilename(image?.name, extension))
+      setFeedback('Imagem baixada.')
+    } catch (actionError) {
+      setError(actionError.message)
     } finally {
       setBusy(false)
     }
   }
 
-  const handleDownload = () => runExport(async () => {
-    const blob = await renderExport()
-    const formatConfig = EXPORT_FORMATS[format]
-    downloadBlob(blob, createFilename(image.name, formatConfig.extension))
-    setFeedback('Download iniciado.')
-  })
+  async function handleCopy() {
+    setBusy(true)
+    setError('')
+    setFeedback('')
+    try {
+      const blob = await createOutputBlob()
+      await copyImageBlob(blob)
+      setFeedback('Imagem copiada.')
+    } catch (actionError) {
+      setError(actionError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
 
-  const handleCopy = () => runExport(async () => {
-    const blob = await renderExport('png')
-    await copyImageBlob(blob)
-    setFeedback('Imagem copiada.')
-  })
+  async function handleHost() {
+    setBusy(true)
+    setError('')
+    setFeedback('')
+    try {
+      const blob = await createOutputBlob()
+      const extension = (EXPORT_FORMATS[format] || EXPORT_FORMATS.png).extension
+      const asset = await upload(blob, { filename: createFilename(image?.name, extension) })
+      const nextUrl = asset.publicUrl || asset.shareUrl || asset.url || ''
+      if (!nextUrl) throw new Error('A hospedagem foi concluída, mas nenhum link público foi retornado.')
+      setHostedUrl(nextUrl)
+      setFeedback('Imagem hospedada. O link já está pronto para copiar.')
+    } catch (actionError) {
+      setError(actionError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
 
-  const handleHost = () => runExport(async () => {
-    const blob = await renderExport()
-    const formatConfig = EXPORT_FORMATS[format]
-    const filename = createFilename(image.name, formatConfig.extension)
-    const file = new File([blob], filename, { type: formatConfig.mime })
-    const asset = await upload(file)
-    setHostedUrl(asset.publicUrl || asset.directUrl || '')
-    setFeedback('Imagem hospedada. O link está pronto.')
-  })
+  async function handleCopyLink() {
+    if (!hostedUrl) return
+    setError('')
+    try {
+      await copyText(hostedUrl)
+      setFeedback('Link copiado.')
+    } catch (actionError) {
+      setError(actionError.message)
+    }
+  }
 
-  const handleCopyLink = () => runExport(async () => {
-    if (!hostedUrl) throw new Error('Hospede a imagem antes de copiar o link.')
-    await copyText(hostedUrl)
-    setFeedback('Link copiado.')
-  })
-
-  const handleNewImage = () => {
-    revokeLoadedImage(currentImageRef.current)
+  function handleNewImage() {
+    if (currentImageRef.current) revokeLoadedImage(currentImageRef.current)
     currentImageRef.current = null
     setImage(null)
     setError('')
@@ -195,6 +216,7 @@ export default function CropTool() {
       icon={Scissors}
       title="Cortar Foto Redonda"
       description="Envie, ajuste e finalize sua imagem circular no mesmo lugar."
+      hideHeader
       error={error}
       feedback={feedback}
       upload={<ImageUpload compact={Boolean(image)} filename={image?.name} onFileSelect={handleFileSelect} preview={image?.src} />}
