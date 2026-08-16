@@ -20,6 +20,7 @@ import { CROP_PREVIEW_SIZE, getCropExportSize, INITIAL_CROP_SETTINGS } from './c
 import './cropTool.css'
 
 const INITIAL_OFFSET = { x: 0, y: 0 }
+const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://radiobardosamigos.com.br').replace(/\/$/, '')
 
 function createInitialSettings() {
   return {
@@ -31,6 +32,13 @@ function createInitialSettings() {
 function createFilename(name, extension) {
   const base = String(name || 'imagem').replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '') || 'imagem'
   return `${base}-redonda.${extension}`
+}
+
+function createHostedShareUrl(asset) {
+  const source = String(asset?.path || asset?.name || asset?.id || '')
+  const filename = source.split('/').filter(Boolean).pop()
+  if (!filename) return ''
+  return `${PUBLIC_SITE_URL}/ft/bda/${encodeURIComponent(filename)}`
 }
 
 async function copyText(text) {
@@ -111,9 +119,8 @@ export default function CropTool() {
   async function createOutputBlob() {
     if (!image?.element) throw new Error('Selecione uma imagem primeiro.')
     const outputSize = getCropExportSize(image.element, quality)
-    if (!Number.isFinite(outputSize) || outputSize <= 0) throw new Error('Não foi possível calcular o tamanho da imagem.')
     const canvas = document.createElement('canvas')
-    renderImagePreview(canvas, getRenderConfig(image.element, outputSize, zoom, offset, settings, format, quality))
+    await renderImagePreview(canvas, getRenderConfig(image.element, outputSize, zoom, offset, settings, format, quality))
     const formatConfig = EXPORT_FORMATS[format] || EXPORT_FORMATS.png
     const qualityConfig = EXPORT_QUALITY[quality] || EXPORT_QUALITY.original
     return canvasToBlob(canvas, formatConfig.mime, qualityConfig.value)
@@ -141,8 +148,8 @@ export default function CropTool() {
       const blob = await createOutputBlob()
       const extension = (EXPORT_FORMATS[format] || EXPORT_FORMATS.png).extension
       const asset = await upload(blob, { filename: createFilename(image?.name, extension) })
-      const nextUrl = asset.publicUrl || asset.shareUrl || asset.url || ''
-      if (!nextUrl) throw new Error('A hospedagem foi concluída, mas nenhum link público foi retornado.')
+      const nextUrl = createHostedShareUrl(asset)
+      if (!nextUrl) throw new Error('A hospedagem foi concluída, mas não foi possível montar o link público.')
       setHostedUrl(nextUrl)
       setFeedback('Imagem hospedada. O link já está pronto para copiar.')
     } catch (actionError) { setError(actionError.message) } finally { setBusy(false) }
