@@ -15,6 +15,25 @@ export default async function handler(req, res) {
 
   const target = `${supabaseUrl}/storage/v1/object/public/${encodeURIComponent(bucket)}/barstudio/${encodeURIComponent(filename)}`
 
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
-  return res.redirect(307, target)
+  try {
+    const upstream = await fetch(target)
+    if (!upstream.ok) return res.status(upstream.status).end()
+
+    const contentType = upstream.headers.get('content-type') || 'application/octet-stream'
+    const contentLength = upstream.headers.get('content-length')
+    const etag = upstream.headers.get('etag')
+
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+    res.setHeader('X-Content-Type-Options', 'nosniff')
+    if (contentLength) res.setHeader('Content-Length', contentLength)
+    if (etag) res.setHeader('ETag', etag)
+
+    if (req.method === 'HEAD') return res.status(200).end()
+
+    const arrayBuffer = await upstream.arrayBuffer()
+    return res.status(200).send(Buffer.from(arrayBuffer))
+  } catch {
+    return res.status(502).end()
+  }
 }
