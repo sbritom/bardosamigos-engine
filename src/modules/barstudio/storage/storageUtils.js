@@ -60,9 +60,18 @@ export async function validateSvgFile(file) {
   return ''
 }
 
+function createShortStorageId() {
+  const bytes = new Uint8Array(7)
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes)
+    return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('').slice(0, 13)
+  }
+  return `${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`.replace(/[^a-f0-9]/gi, '').slice(0, 13).padEnd(13, '0')
+}
+
 export function createStoragePath(file, prefix = STORAGE_PREFIX) {
-  const identifier = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  return `${prefix}/${identifier}-${sanitizeStorageFilename(file.name)}`
+  const extension = getFileExtension(file?.name) || 'png'
+  return `${prefix}/${createShortStorageId()}.${extension}`
 }
 
 export function normalizeStorageId(value) {
@@ -86,7 +95,7 @@ export function mapStorageError(error) {
 
 export function buildStorageLinks(asset) {
   if (!asset?.publicUrl) return null
-  const url = asset.publicUrl
+  const url = asset.shareUrl || asset.publicUrl
   const alt = Array.from(String(asset.originalName || asset.name || 'Imagem'))
     .filter((character) => !'[]<>"\''.includes(character))
     .join('')
