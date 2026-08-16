@@ -110,12 +110,13 @@ export default function CropTool() {
 
   async function createOutputBlob() {
     if (!image?.element) throw new Error('Selecione uma imagem primeiro.')
-    const outputSize = getCropExportSize(quality, image.width, image.height)
+    const outputSize = getCropExportSize(image.element, quality)
+    if (!Number.isFinite(outputSize) || outputSize <= 0) throw new Error('Não foi possível calcular o tamanho da imagem.')
     const canvas = document.createElement('canvas')
-    await renderImagePreview(canvas, getRenderConfig(image.element, outputSize, zoom, offset, settings, format, quality))
+    renderImagePreview(canvas, getRenderConfig(image.element, outputSize, zoom, offset, settings, format, quality))
     const formatConfig = EXPORT_FORMATS[format] || EXPORT_FORMATS.png
     const qualityConfig = EXPORT_QUALITY[quality] || EXPORT_QUALITY.original
-    return canvasToBlob(canvas, formatConfig.mime, qualityConfig.canvasQuality)
+    return canvasToBlob(canvas, formatConfig.mime, qualityConfig.value)
   }
 
   async function handleDownload() {
