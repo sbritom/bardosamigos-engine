@@ -4,6 +4,13 @@ import { createStorageAsset } from '../storageTypes.js'
 import { createStoragePath, mapStorageError, normalizeStorageId } from '../storageUtils.js'
 import StorageProvider from './StorageProvider.js'
 
+const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://radiobardosamigos.com.br').replace(/\/$/, '')
+
+function createShareUrl(path) {
+  const filename = normalizeStorageId(path).split('/').pop()
+  return `${PUBLIC_SITE_URL}/ft/bda/${encodeURIComponent(filename)}`
+}
+
 export default class SupabaseStorageProvider extends StorageProvider {
   constructor({ client, bucket = STORAGE_BUCKET, prefix = STORAGE_PREFIX } = {}) {
     super({ name: 'primary', supportsDelete: true, supportsCancel: false })
@@ -26,6 +33,7 @@ export default class SupabaseStorageProvider extends StorageProvider {
       name: normalizedPath.split('/').pop(),
       publicUrl: data.publicUrl,
       directUrl: data.publicUrl,
+      shareUrl: createShareUrl(normalizedPath),
       ...metadata,
     })
   }
