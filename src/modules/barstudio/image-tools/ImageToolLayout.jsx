@@ -1,8 +1,8 @@
-function ToolSection({ title, description, children, className = '' }) {
+function ToolSection({ title, description, children, className = '', hideHeader = false }) {
   if (!children) return null
   return (
     <section className={`bds-image-tool__section ${className}`.trim()}>
-      {(title || description) && (
+      {!hideHeader && (title || description) && (
         <header className="bds-image-tool__section-header">
           {title && <h3>{title}</h3>}
           {description && <p>{description}</p>}
@@ -13,7 +13,7 @@ function ToolSection({ title, description, children, className = '' }) {
   )
 }
 
-export default function ImageToolLayout({ icon: Icon, title, description, upload, settings, preview, exportPanel, exportTitle = 'Exportação', error, feedback, className = '', hideHeader = false }) {
+export default function ImageToolLayout({ icon: Icon, title, description, upload, settings, preview, exportPanel, exportTitle = 'Exportação', error, feedback, className = '', hideHeader = false, hideSectionHeaders = false }) {
   return (
     <div className={`bds-image-tool ${className}`.trim()}>
       {!hideHeader && (
@@ -31,10 +31,10 @@ export default function ImageToolLayout({ icon: Icon, title, description, upload
 
       {upload}
       <div className="bds-image-tool__workspace">
-        <ToolSection title="Ajustes" className="bds-image-tool__settings">{settings}</ToolSection>
-        <ToolSection title="Preview" className="bds-image-tool__preview">{preview}</ToolSection>
+        <ToolSection title="Ajustes" hideHeader={hideSectionHeaders} className="bds-image-tool__settings">{settings}</ToolSection>
+        <ToolSection title="Preview" hideHeader={hideSectionHeaders} className="bds-image-tool__preview">{preview}</ToolSection>
       </div>
-      <ToolSection title={exportTitle} className="bds-image-tool__export">{exportPanel}</ToolSection>
+      <ToolSection title={exportTitle} hideHeader={hideSectionHeaders} className="bds-image-tool__export">{exportPanel}</ToolSection>
     </div>
   )
 }
