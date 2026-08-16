@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Image, Palette, Paintbrush, Pipette, RefreshCw, Scissors, Sparkles, UserCircle } from 'lucide-react'
-import { PortalWorkspace, WorkspaceEmptyState, WorkspaceSearch } from '../../../shared/workspace'
+import { PortalWorkspace, WorkspaceEmptyState } from '../../../shared/workspace'
 import { StorageContextProvider } from '../storage'
 import CropTool from './tools/crop/CropTool'
 import RemoveBackgroundTool from './tools/remove-background/RemoveBackgroundTool'
@@ -52,8 +52,6 @@ function ToolPlaceholder({ tool }) {
 export default function BarStudioPage() {
   const [activeToolId, setActiveToolId] = useState('')
   const activeTool = availableTools.find((tool) => tool.id === activeToolId) || null
-  const title = activeTool?.title || 'Ferramentas'
-  const description = activeTool ? `Ferramenta selecionada na categoria ${activeTool.section}.` : 'Selecione uma ferramenta na barra lateral para comecar.'
 
   return (
     <StorageContextProvider>
@@ -61,7 +59,7 @@ export default function BarStudioPage() {
         className="bds-portal-workspace--compact bds-barstudio-workspace"
         header={{ eyebrow: 'Ferramentas criativas', title: 'BarStudio', description: 'Central criativa do Bar dos Amigos.', className: 'bds-barstudio-header' }}
         sidebar={{ title: '', ariaLabel: 'Ferramentas do BarStudio', className: 'bds-barstudio-sidebar', items: sidebarItems, selectedId: activeToolId, onSelect: (item) => setActiveToolId(item.id) }}
-        content={{ title, description, actions: <WorkspaceSearch disabled label="Pesquisar ferramentas" placeholder="Pesquisar..." /> }}
+        content={activeTool ? {} : { title: 'Ferramentas', description: 'Selecione uma ferramenta na barra lateral para comecar.' }}
       >
         {activeTool?.id === 'crop' ? <CropTool />
           : activeTool?.id === 'remove-background' ? <RemoveBackgroundTool />
