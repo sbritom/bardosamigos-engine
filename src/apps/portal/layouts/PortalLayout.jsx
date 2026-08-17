@@ -8,6 +8,8 @@ const portalBackground = {
   backgroundSize: 'cover',
   backgroundRepeat: 'no-repeat',
   backgroundAttachment: 'fixed',
+  backgroundColor: '#151515',
+  backgroundBlendMode: 'luminosity',
 }
 
 export default function PortalLayout() {
