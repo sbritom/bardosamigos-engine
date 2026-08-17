@@ -1,22 +1,22 @@
 :root {
-  --bds-color-background: #0B1F33;
-  --bds-color-background-secondary: #102A43;
-  --bds-color-surface: rgba(23, 58, 90, .76);
-  --bds-color-surface-alt: rgba(28, 70, 107, .82);
-  --bds-color-surface-elevated: rgba(31, 76, 115, .86);
-  --bds-color-hover: rgba(38, 83, 123, .90);
-  --bds-color-border: rgba(123, 174, 219, .18);
-  --bds-color-glow: rgba(47, 120, 196, .14);
-  --bds-color-text: #F4F8FC;
-  --bds-color-text-secondary: #B8C9D8;
-  --bds-color-text-muted: #829CB3;
-  --bds-color-primary: #2F78C4;
-  --bds-color-primary-hover: #4A91D8;
-  --bds-color-primary-text: #FFFFFF;
-  --bds-color-success: #22C98A;
-  --bds-color-warning: #F5B942;
-  --bds-color-danger: #FF6262;
-  --bds-color-info: #4A91D8;
+  --bds-color-background: #080808;
+  --bds-color-background-secondary: #101010;
+  --bds-color-surface: rgba(20, 20, 20, .82);
+  --bds-color-surface-alt: rgba(27, 25, 19, .88);
+  --bds-color-surface-elevated: rgba(34, 31, 22, .92);
+  --bds-color-hover: rgba(48, 42, 25, .94);
+  --bds-color-border: rgba(212, 175, 55, .18);
+  --bds-color-glow: rgba(212, 175, 55, .14);
+  --bds-color-text: #F7F4EA;
+  --bds-color-text-secondary: #D3C9AA;
+  --bds-color-text-muted: #998E70;
+  --bds-color-primary: #D4AF37;
+  --bds-color-primary-hover: #F0C95A;
+  --bds-color-primary-text: #090909;
+  --bds-color-success: #5EC98A;
+  --bds-color-warning: #E2B84B;
+  --bds-color-danger: #E66A6A;
+  --bds-color-info: #D4AF37;
 
   --bds-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bds-font-display: 3rem;
@@ -60,12 +60,12 @@
   --bds-control-padding-x: 16px;
   --bds-control-padding-y: 10px;
 
-  --bds-shadow-level-1: 0 6px 18px rgba(4, 14, 28, .16);
-  --bds-shadow-level-2: 0 12px 30px rgba(4, 14, 28, .22);
-  --bds-shadow-level-3: 0 18px 46px rgba(4, 14, 28, .28);
-  --bds-shadow-hero: 0 14px 36px rgba(4, 14, 28, .24);
-  --bds-shadow-hover: 0 10px 26px rgba(4, 14, 28, .22);
-  --bds-shadow-modal: 0 24px 60px rgba(4, 14, 28, .38);
+  --bds-shadow-level-1: 0 6px 18px rgba(0, 0, 0, .28);
+  --bds-shadow-level-2: 0 12px 30px rgba(0, 0, 0, .34);
+  --bds-shadow-level-3: 0 18px 46px rgba(0, 0, 0, .42);
+  --bds-shadow-hero: 0 14px 36px rgba(0, 0, 0, .38);
+  --bds-shadow-hover: 0 10px 26px rgba(0, 0, 0, .36);
+  --bds-shadow-modal: 0 24px 60px rgba(0, 0, 0, .56);
 
   --bds-transition-fast: 180ms ease;
   --bds-transition-normal: 180ms ease;
