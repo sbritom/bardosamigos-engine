@@ -35,7 +35,10 @@ footer[data-designer-id="footer"]{
 }
 
 body{
-    background:var(--bds-color-background);
+    background:
+      radial-gradient(circle at 18% 0%, rgba(212,175,55,.08), transparent 28%),
+      radial-gradient(circle at 82% 12%, rgba(212,175,55,.045), transparent 24%),
+      linear-gradient(180deg, #0B0B0B 0%, #060606 100%);
     color:var(--bds-color-text);
     font-family:var(--bds-font-family, Inter, Arial, sans-serif);
     overflow-x:hidden;
