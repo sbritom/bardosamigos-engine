@@ -1,0 +1,176 @@
+/* Global black + gold theme override. Loaded last on purpose. */
+:root {
+  --bds-card-border-premium: rgba(212, 175, 55, .18);
+  --bds-card-border-premium-hover: rgba(240, 201, 90, .34);
+  --bds-card-surface-premium: rgba(18, 18, 18, .78);
+  --bds-card-surface-premium-hover: rgba(30, 27, 19, .90);
+}
+
+body {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(212,175,55,.08), transparent 30%),
+    radial-gradient(circle at 84% 10%, rgba(212,175,55,.045), transparent 26%),
+    linear-gradient(180deg, #0B0B0B 0%, #050505 100%) !important;
+}
+
+.bds-radio-strip,
+.bds-top-header {
+  border-color: rgba(212,175,55,.18) !important;
+  background: linear-gradient(180deg, rgba(20,20,20,.94), rgba(8,8,8,.96)) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.34) !important;
+}
+
+.bds-top-header__brand-icon {
+  border-color: rgba(212,175,55,.30) !important;
+  background: radial-gradient(circle at 50% 35%, rgba(212,175,55,.16), transparent 58%), rgba(15,15,15,.94) !important;
+  color: #F0C95A !important;
+}
+
+.bds-top-header__brand-title { color: #F7F4EA !important; }
+.bds-top-header__brand-title span { color: #D4AF37 !important; }
+
+.bds-top-header__nav-link,
+.bds-top-header__mobile-link,
+.bds-top-header__icon-button {
+  border-color: rgba(212,175,55,.14) !important;
+  background: rgba(10,10,10,.76) !important;
+  color: #D3C9AA !important;
+}
+
+.bds-top-header__nav-link:hover,
+.bds-top-header__mobile-link:hover,
+.bds-top-header__icon-button:hover {
+  border-color: rgba(240,201,90,.34) !important;
+  background: rgba(48,42,25,.72) !important;
+  color: #FFF8DF !important;
+}
+
+.bds-top-header__nav-link--active,
+.bds-top-header__mobile-link--active,
+.bds-top-header__icon-button--active {
+  border-color: rgba(240,201,90,.56) !important;
+  background: linear-gradient(180deg, #E5BD45, #A98019) !important;
+  color: #090909 !important;
+}
+
+:where(
+  .bds-panel,.bds-card,.bds-feature-card,.bds-hero-card,.bds-player-card,.bds-stats-card,.bds-match-card,.bds-news-card,
+  .bds-community-card,.bds-tool-card,.bds-home-card-full,.bds-home-tv-content,.bds-home-tv-stage,.bds-chat-frame,
+  .bds-home-card-list,.bds-home-empty,.bds-home-radio-card,.bds-home-radio-status,.bds-home-tool-card,.bds-home-community-note,
+  .bds-home-result-box,.bds-home-hits-state,.bds-workspace-sidebar,.bds-workspace-content,.bds-workspace-section,
+  .bds-events-highlight,.bds-events-card,.bds-events-detail,.bds-barstudio-tool-card,.bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,.bds-barstudio-crop-controls__panel,.bds-barstudio-crop-result
+) {
+  border-color: rgba(212,175,55,.16) !important;
+  background-color: rgba(16,16,16,.80) !important;
+  color: var(--bds-color-text) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.26) !important;
+}
+
+.bds-home-shell .bds-home-match-row,
+.bds-home-shell .bds-home-news-row,
+.bds-home-shell .bds-home-hits-item,
+.bds-home-shell .bds-home-tool-card,
+.bds-home-shell .bds-home-empty,
+.bds-home-shell .bds-home-hits-state,
+.bds-home-shell .bds-home-tv-no-results,
+.bds-workspace-sidebar__item {
+  border-color: rgba(212,175,55,.13) !important;
+  background: rgba(12,12,12,.72) !important;
+}
+
+.bds-home-shell .bds-home-match-row:hover,
+.bds-home-shell .bds-home-news-row:hover,
+.bds-home-shell .bds-home-hits-item:hover,
+.bds-home-shell .bds-home-tool-card:hover,
+.bds-workspace-sidebar__item:hover:not(:disabled) {
+  border-color: rgba(240,201,90,.30) !important;
+  background: rgba(43,37,20,.78) !important;
+}
+
+.bds-workspace-sidebar__item.is-selected {
+  border-color: rgba(240,201,90,.42) !important;
+  background: rgba(59,48,19,.78) !important;
+  box-shadow: inset 3px 0 0 #D4AF37 !important;
+}
+
+.bds-workspace-sidebar__item-icon,
+.bds-card-header__icon,
+.bds-section-header__icon,
+.bds-section-header__eyebrow,
+.bds-card-header__eyebrow {
+  color: #D4AF37 !important;
+}
+
+.bds-card-header__icon,
+.bds-section-header__icon {
+  border-color: rgba(212,175,55,.18) !important;
+  background: rgba(212,175,55,.08) !important;
+}
+
+.bds-action-button--primary,
+.bds-button--primary,
+.bds-home-shell .bds-action-button--primary {
+  border-color: rgba(240,201,90,.50) !important;
+  background: linear-gradient(180deg, #E7C14F, #B58A20) !important;
+  color: #080808 !important;
+}
+
+.bds-action-button--secondary,
+.bds-action-button--outline,
+.bds-home-shell .bds-action-button--secondary,
+.bds-home-shell .bds-action-button--outline,
+.bds-button:not(.bds-button--primary) {
+  border-color: rgba(212,175,55,.20) !important;
+  background: rgba(17,17,17,.82) !important;
+  color: #E3D8B8 !important;
+}
+
+/* Keep the football image, but tint the frame so it belongs to the new theme. */
+.bds-home-shell .bds-hero-v2 {
+  border-color: rgba(212,175,55,.22) !important;
+  background:
+    linear-gradient(145deg, rgba(7,7,7,.48), rgba(20,16,7,.46)),
+    url('/backgrounds/football-scoreboard.png') center 52% / cover no-repeat !important;
+  background-color: #090909 !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.32) !important;
+}
+
+.bds-home-shell .bds-hero-v2::before {
+  background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(212,175,55,.03) 35%, rgba(212,175,55,.03) 65%, rgba(0,0,0,.28)) !important;
+}
+
+.bds-home-shell .bds-hero-v2-crest {
+  border-color: rgba(212,175,55,.16) !important;
+  background: rgba(8,8,8,.46) !important;
+}
+
+.bds-barstudio-sidebar {
+  border-color: rgba(212,175,55,.16) !important;
+  background: linear-gradient(180deg, rgba(24,21,13,.72), rgba(8,8,8,.86)) !important;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__group-label { color: rgba(227,216,184,.72) !important; }
+.bds-barstudio-sidebar .bds-workspace-sidebar__item { background: rgba(10,10,10,.62) !important; }
+.bds-barstudio-sidebar .bds-workspace-sidebar__item-icon { color: #D4AF37 !important; }
+.bds-barstudio-sidebar .bds-workspace-sidebar__item.is-selected {
+  border-color: rgba(240,201,90,.40) !important;
+  background: rgba(66,52,17,.72) !important;
+  box-shadow: inset 3px 0 0 #D4AF37 !important;
+}
+
+footer[data-designer-id="footer"] {
+  border-color: rgba(212,175,55,.14) !important;
+  background: rgba(8,8,8,.92) !important;
+}
+
+.bds-events-page {
+  --events-surface: rgba(16,16,16,.80);
+  --events-surface-strong: rgba(31,27,18,.92);
+  --events-border: rgba(212,175,55,.16);
+  --events-border-hover: rgba(240,201,90,.34);
+}
+
+.bds-events-highlight__eyebrow,
+.bds-events-highlight__meta svg,
+.bds-events-card__meta svg { color: #D4AF37 !important; }
