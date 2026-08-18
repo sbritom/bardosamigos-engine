@@ -50,7 +50,6 @@ function NewsRow({ item, onOpen }) {
       <span className="news-page__row-copy">
         <NewsMeta item={item} />
         <strong>{item.title}</strong>
-        {getArticleSummary(item) ? <span>{getArticleSummary(item)}</span> : null}
       </span>
     </button>
   )
@@ -77,6 +76,7 @@ export default function NewsPage() {
   const [news, setNews] = useState([])
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [search, setSearch] = useState('')
+  const [showAll, setShowAll] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -106,6 +106,7 @@ export default function NewsPage() {
 
   const featured = filteredNews[0]
   const latest = filteredNews.slice(1)
+  const visibleLatest = showAll || search ? latest : latest.slice(0, 4)
 
   return (
     <main className="news-page">
@@ -123,13 +124,14 @@ export default function NewsPage() {
             value={search}
             onChange={(event) => {
               setSearch(event.target.value)
+              setShowAll(false)
               setSelectedArticle(null)
             }}
           />
         </label>
       </header>
 
-      {loading ? <WorkspaceSkeleton rows={6} /> : null}
+      {loading ? <WorkspaceSkeleton rows={4} /> : null}
       {!loading && error ? <div className="news-page__notice">Exibindo conteúdo local enquanto a fonte principal fica indisponível.</div> : null}
 
       {!loading && selectedArticle ? (
@@ -139,11 +141,18 @@ export default function NewsPage() {
           <FeaturedStory item={featured} onOpen={setSelectedArticle} />
           <div className="news-page__latest">
             <div className="news-page__section-heading">
-              <h2>Últimas notícias</h2>
-              <span>{filteredNews.length} matérias</span>
+              <div>
+                <h2>Últimas notícias</h2>
+                <span>{filteredNews.length} matérias disponíveis</span>
+              </div>
+              {!search && latest.length > 4 ? (
+                <Button variant="secondary" onClick={() => setShowAll((value) => !value)}>
+                  {showAll ? 'Mostrar menos' : 'Ver todas'}
+                </Button>
+              ) : null}
             </div>
-            <div className="news-page__list">
-              {latest.map((item) => <NewsRow key={item.id} item={item} onOpen={setSelectedArticle} />)}
+            <div className={`news-page__list ${showAll || search ? 'news-page__list--expanded' : ''}`}>
+              {visibleLatest.map((item) => <NewsRow key={item.id} item={item} onOpen={setSelectedArticle} />)}
             </div>
           </div>
         </section>
