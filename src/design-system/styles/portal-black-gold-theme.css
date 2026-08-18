@@ -2,8 +2,8 @@
 :root {
   --bds-card-border-premium: rgba(212, 175, 55, .18);
   --bds-card-border-premium-hover: rgba(240, 201, 90, .34);
-  --bds-card-surface-premium: rgba(18, 18, 18, .78);
-  --bds-card-surface-premium-hover: rgba(30, 27, 19, .90);
+  --bds-card-surface-premium: rgba(18, 18, 18, .58);
+  --bds-card-surface-premium-hover: rgba(30, 27, 19, .72);
 }
 
 body {
@@ -53,6 +53,7 @@ body {
   color: #090909 !important;
 }
 
+/* Cards only: translucent glass surface + rounded corners. */
 :where(
   .bds-panel,.bds-card,.bds-feature-card,.bds-hero-card,.bds-player-card,.bds-stats-card,.bds-match-card,.bds-news-card,
   .bds-community-card,.bds-tool-card,.bds-home-card-full,.bds-home-tv-content,.bds-home-tv-stage,.bds-chat-frame,
@@ -61,10 +62,13 @@ body {
   .bds-events-highlight,.bds-events-card,.bds-events-detail,.bds-barstudio-tool-card,.bds-barstudio-crop-upload,
   .bds-barstudio-crop-preview-card,.bds-barstudio-crop-controls__panel,.bds-barstudio-crop-result
 ) {
-  border-color: rgba(212,175,55,.16) !important;
-  background-color: rgba(16,16,16,.80) !important;
+  border-color: rgba(212,175,55,.18) !important;
+  background: rgba(12,12,12,.56) !important;
   color: var(--bds-color-text) !important;
-  box-shadow: 0 12px 30px rgba(0,0,0,.26) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
 }
 
 .bds-home-shell .bds-home-match-row,
@@ -76,7 +80,10 @@ body {
 .bds-home-shell .bds-home-tv-no-results,
 .bds-workspace-sidebar__item {
   border-color: rgba(212,175,55,.13) !important;
-  background: rgba(12,12,12,.72) !important;
+  background: rgba(10,10,10,.48) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 .bds-home-shell .bds-home-match-row:hover,
@@ -85,12 +92,12 @@ body {
 .bds-home-shell .bds-home-tool-card:hover,
 .bds-workspace-sidebar__item:hover:not(:disabled) {
   border-color: rgba(240,201,90,.30) !important;
-  background: rgba(43,37,20,.78) !important;
+  background: rgba(43,37,20,.64) !important;
 }
 
 .bds-workspace-sidebar__item.is-selected {
   border-color: rgba(240,201,90,.42) !important;
-  background: rgba(59,48,19,.78) !important;
+  background: rgba(59,48,19,.64) !important;
   box-shadow: inset 3px 0 0 #D4AF37 !important;
 }
 
@@ -122,7 +129,7 @@ body {
 .bds-home-shell .bds-action-button--outline,
 .bds-button:not(.bds-button--primary) {
   border-color: rgba(212,175,55,.20) !important;
-  background: rgba(17,17,17,.82) !important;
+  background: rgba(17,17,17,.72) !important;
   color: #E3D8B8 !important;
 }
 
@@ -133,11 +140,13 @@ body {
     linear-gradient(145deg, rgba(7,7,7,.48), rgba(20,16,7,.46)),
     url('/backgrounds/football-scoreboard.png') center 52% / cover no-repeat !important;
   background-color: #090909 !important;
+  border-radius: 18px !important;
   box-shadow: 0 14px 34px rgba(0,0,0,.32) !important;
 }
 
 .bds-home-shell .bds-hero-v2::before {
   background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(212,175,55,.03) 35%, rgba(212,175,55,.03) 65%, rgba(0,0,0,.28)) !important;
+  border-radius: inherit !important;
 }
 
 .bds-home-shell .bds-hero-v2-crest {
@@ -147,15 +156,18 @@ body {
 
 .bds-barstudio-sidebar {
   border-color: rgba(212,175,55,.16) !important;
-  background: linear-gradient(180deg, rgba(24,21,13,.72), rgba(8,8,8,.86)) !important;
+  background: rgba(12,12,12,.56) !important;
+  border-radius: 18px !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
 }
 
 .bds-barstudio-sidebar .bds-workspace-sidebar__group-label { color: rgba(227,216,184,.72) !important; }
-.bds-barstudio-sidebar .bds-workspace-sidebar__item { background: rgba(10,10,10,.62) !important; }
+.bds-barstudio-sidebar .bds-workspace-sidebar__item { background: rgba(10,10,10,.50) !important; }
 .bds-barstudio-sidebar .bds-workspace-sidebar__item-icon { color: #D4AF37 !important; }
 .bds-barstudio-sidebar .bds-workspace-sidebar__item.is-selected {
   border-color: rgba(240,201,90,.40) !important;
-  background: rgba(66,52,17,.72) !important;
+  background: rgba(66,52,17,.64) !important;
   box-shadow: inset 3px 0 0 #D4AF37 !important;
 }
 
@@ -165,8 +177,8 @@ footer[data-designer-id="footer"] {
 }
 
 .bds-events-page {
-  --events-surface: rgba(16,16,16,.80);
-  --events-surface-strong: rgba(31,27,18,.92);
+  --events-surface: rgba(12,12,12,.56);
+  --events-surface-strong: rgba(20,18,13,.68);
   --events-border: rgba(212,175,55,.16);
   --events-border-hover: rgba(240,201,90,.34);
 }
