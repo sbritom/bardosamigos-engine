@@ -217,7 +217,7 @@ export default function RadioPage() {
               {connecting ? <Loader2 size={28} className="bar-radio-spin-icon" /> : playing ? <Pause size={30} /> : <Play size={30} />}
             </button>
 
-            <label className="bar-radio-volume-control">
+            <label className="bar-radio-volume-control" title={`Volume ${volume}%`}>
               <Volume2 size={20} />
               <input
                 type="range"
@@ -226,8 +226,8 @@ export default function RadioPage() {
                 value={volume}
                 onChange={handleVolume}
                 aria-label="Volume da radio"
+                style={{ "--bar-radio-volume": `${volume}%` }}
               />
-              <span>{volume}%</span>
             </label>
 
             <button className="bar-radio-request-button" type="button" onClick={() => {
