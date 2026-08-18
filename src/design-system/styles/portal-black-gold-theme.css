@@ -53,51 +53,80 @@ body {
   color: #090909 !important;
 }
 
-/* Cards only: translucent glass surface + rounded corners. */
+/* Only the actual cards receive the glass/translucent treatment. */
 :where(
-  .bds-panel,.bds-card,.bds-feature-card,.bds-hero-card,.bds-player-card,.bds-stats-card,.bds-match-card,.bds-news-card,
-  .bds-community-card,.bds-tool-card,.bds-home-card-full,.bds-home-tv-content,.bds-home-tv-stage,.bds-chat-frame,
-  .bds-home-card-list,.bds-home-empty,.bds-home-radio-card,.bds-home-radio-status,.bds-home-tool-card,.bds-home-community-note,
-  .bds-home-result-box,.bds-home-hits-state,.bds-workspace-sidebar,.bds-workspace-content,.bds-workspace-section,
-  .bds-events-highlight,.bds-events-card,.bds-events-detail,.bds-barstudio-tool-card,.bds-barstudio-crop-upload,
-  .bds-barstudio-crop-preview-card,.bds-barstudio-crop-controls__panel,.bds-barstudio-crop-result
+  .bds-panel,
+  .bds-card,
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-events-highlight,
+  .bds-events-card,
+  .bds-events-detail,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-preview-card,
+  .bds-barstudio-crop-controls__panel,
+  .bds-barstudio-crop-result
 ) {
-  border-color: rgba(212,175,55,.18) !important;
-  background: rgba(12,12,12,.56) !important;
+  border: 1px solid rgba(212,175,55,.20) !important;
+  background: rgba(10,10,10,.46) !important;
   color: var(--bds-color-text) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 12px 30px rgba(0,0,0,.22) !important;
-  backdrop-filter: blur(14px) saturate(115%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.18) !important;
+  backdrop-filter: blur(16px) saturate(112%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(112%) !important;
+  overflow: hidden;
 }
 
+/* Small cards/list cards remain translucent too, with a slightly tighter radius. */
 .bds-home-shell .bds-home-match-row,
 .bds-home-shell .bds-home-news-row,
 .bds-home-shell .bds-home-hits-item,
-.bds-home-shell .bds-home-tool-card,
-.bds-home-shell .bds-home-empty,
-.bds-home-shell .bds-home-hits-state,
-.bds-home-shell .bds-home-tv-no-results,
-.bds-workspace-sidebar__item {
-  border-color: rgba(212,175,55,.13) !important;
-  background: rgba(10,10,10,.48) !important;
-  border-radius: 14px !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+.bds-home-shell .bds-home-tool-card {
+  border-color: rgba(212,175,55,.14) !important;
+  background: rgba(10,10,10,.40) !important;
+  border-radius: 15px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 }
 
 .bds-home-shell .bds-home-match-row:hover,
 .bds-home-shell .bds-home-news-row:hover,
 .bds-home-shell .bds-home-hits-item:hover,
-.bds-home-shell .bds-home-tool-card:hover,
+.bds-home-shell .bds-home-tool-card:hover {
+  border-color: rgba(240,201,90,.30) !important;
+  background: rgba(43,37,20,.54) !important;
+}
+
+/* Sidebar/menu items stay opaque: they are not cards. */
+.bds-workspace-sidebar,
+.bds-workspace-content,
+.bds-workspace-section {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.bds-workspace-sidebar__item {
+  border-color: rgba(212,175,55,.13) !important;
+  background: rgba(12,12,12,.82) !important;
+}
+
 .bds-workspace-sidebar__item:hover:not(:disabled) {
   border-color: rgba(240,201,90,.30) !important;
-  background: rgba(43,37,20,.64) !important;
+  background: rgba(43,37,20,.78) !important;
 }
 
 .bds-workspace-sidebar__item.is-selected {
   border-color: rgba(240,201,90,.42) !important;
-  background: rgba(59,48,19,.64) !important;
+  background: rgba(59,48,19,.78) !important;
   box-shadow: inset 3px 0 0 #D4AF37 !important;
 }
 
@@ -133,41 +162,41 @@ body {
   color: #E3D8B8 !important;
 }
 
-/* Keep the football image, but tint the frame so it belongs to the new theme. */
+/* Scoreboard is a card, so keep its image but let the shell read as glass. */
 .bds-home-shell .bds-hero-v2 {
-  border-color: rgba(212,175,55,.22) !important;
+  border: 1px solid rgba(212,175,55,.22) !important;
   background:
-    linear-gradient(145deg, rgba(7,7,7,.48), rgba(20,16,7,.46)),
+    linear-gradient(145deg, rgba(7,7,7,.32), rgba(20,16,7,.30)),
     url('/backgrounds/football-scoreboard.png') center 52% / cover no-repeat !important;
-  background-color: #090909 !important;
-  border-radius: 18px !important;
-  box-shadow: 0 14px 34px rgba(0,0,0,.32) !important;
+  background-color: transparent !important;
+  border-radius: 20px !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.24) !important;
+  overflow: hidden;
 }
 
 .bds-home-shell .bds-hero-v2::before {
-  background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(212,175,55,.03) 35%, rgba(212,175,55,.03) 65%, rgba(0,0,0,.28)) !important;
+  background: linear-gradient(90deg, rgba(0,0,0,.22), rgba(212,175,55,.02) 35%, rgba(212,175,55,.02) 65%, rgba(0,0,0,.22)) !important;
   border-radius: inherit !important;
 }
 
 .bds-home-shell .bds-hero-v2-crest {
   border-color: rgba(212,175,55,.16) !important;
-  background: rgba(8,8,8,.46) !important;
+  background: rgba(8,8,8,.40) !important;
 }
 
 .bds-barstudio-sidebar {
   border-color: rgba(212,175,55,.16) !important;
-  background: rgba(12,12,12,.56) !important;
-  border-radius: 18px !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+  background: linear-gradient(180deg, rgba(24,21,13,.88), rgba(8,8,8,.94)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .bds-barstudio-sidebar .bds-workspace-sidebar__group-label { color: rgba(227,216,184,.72) !important; }
-.bds-barstudio-sidebar .bds-workspace-sidebar__item { background: rgba(10,10,10,.50) !important; }
+.bds-barstudio-sidebar .bds-workspace-sidebar__item { background: rgba(10,10,10,.82) !important; }
 .bds-barstudio-sidebar .bds-workspace-sidebar__item-icon { color: #D4AF37 !important; }
 .bds-barstudio-sidebar .bds-workspace-sidebar__item.is-selected {
   border-color: rgba(240,201,90,.40) !important;
-  background: rgba(66,52,17,.64) !important;
+  background: rgba(66,52,17,.78) !important;
   box-shadow: inset 3px 0 0 #D4AF37 !important;
 }
 
@@ -177,9 +206,9 @@ footer[data-designer-id="footer"] {
 }
 
 .bds-events-page {
-  --events-surface: rgba(12,12,12,.56);
-  --events-surface-strong: rgba(20,18,13,.68);
-  --events-border: rgba(212,175,55,.16);
+  --events-surface: rgba(10,10,10,.46);
+  --events-surface-strong: rgba(20,18,13,.58);
+  --events-border: rgba(212,175,55,.18);
   --events-border-hover: rgba(240,201,90,.34);
 }
 
