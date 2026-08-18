@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Image, Palette, Paintbrush, Pipette, RefreshCw, Scissors, Sparkles, UserCircle } from 'lucide-react'
 import { PortalWorkspace, WorkspaceEmptyState } from '../../../shared/workspace'
 import { StorageContextProvider } from '../storage'
@@ -40,12 +40,31 @@ const sidebarItems = [
   ...sidebarSections[1].tools.map((tool) => ({ id: tool.id, icon: tool.icon, name: tool.title })),
 ]
 
+function getToolFromUrl() {
+  const toolId = new URLSearchParams(window.location.search).get('tool') || ''
+  return availableTools.some((tool) => tool.id === toolId) ? toolId : ''
+}
+
 function ToolPlaceholder({ tool }) { return <WorkspaceEmptyState icon={tool.icon} title={tool.title} description="Esta ferramenta sera implementada em uma proxima atualizacao." /> }
 
 export default function BarStudioPage() {
-  const [activeToolId, setActiveToolId] = useState('')
+  const [activeToolId, setActiveToolId] = useState(getToolFromUrl)
   const activeTool = availableTools.find((tool) => tool.id === activeToolId) || null
-  return <StorageContextProvider><PortalWorkspace className="bds-portal-workspace--compact bds-barstudio-workspace" header={{ eyebrow: 'Ferramentas criativas', title: 'BarStudio', description: 'Central criativa do Bar dos Amigos.', className: 'bds-barstudio-header' }} sidebar={{ title: '', ariaLabel: 'Ferramentas do BarStudio', className: 'bds-barstudio-sidebar', items: sidebarItems, selectedId: activeToolId, onSelect: (item) => setActiveToolId(item.id) }} content={activeTool ? {} : { title: 'Ferramentas', description: 'Selecione uma ferramenta na barra lateral para comecar.' }}>
+
+  useEffect(() => {
+    const handlePopState = () => setActiveToolId(getToolFromUrl())
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  function selectTool(item) {
+    setActiveToolId(item.id)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tool', item.id)
+    window.history.replaceState({}, '', url)
+  }
+
+  return <StorageContextProvider><PortalWorkspace className="bds-portal-workspace--compact bds-barstudio-workspace" header={{ eyebrow: 'Ferramentas criativas', title: 'BarStudio', description: 'Central criativa do Bar dos Amigos.', className: 'bds-barstudio-header' }} sidebar={{ title: '', ariaLabel: 'Ferramentas do BarStudio', className: 'bds-barstudio-sidebar', items: sidebarItems, selectedId: activeToolId, onSelect: selectTool }} content={activeTool ? {} : { title: 'Ferramentas', description: 'Selecione uma ferramenta na barra lateral para comecar.' }}>
     {activeTool?.id === 'crop' ? <CropTool /> : activeTool?.id === 'remove-background' ? <RemoveBackgroundTool /> : activeTool?.id === 'avatar' ? <AvatarTool /> : activeTool?.id === 'convert' ? <ConvertImageTool /> : activeTool?.id === 'resize' ? <ResizeTool /> : activeTool?.id === 'color-generator' ? <GradientsTool /> : activeTool?.id === 'extract-colors' ? <ExtractColorsTool /> : activeTool?.id === 'palettes' ? <PalettesTool /> : activeTool ? <ToolPlaceholder tool={activeTool} /> : <WorkspaceEmptyState icon={Sparkles} title="Bem-vindo ao BarStudio" description="Selecione uma ferramenta na barra lateral para comecar." />}
   </PortalWorkspace></StorageContextProvider>
 }
