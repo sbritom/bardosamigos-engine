@@ -188,6 +188,18 @@ body {
   background: rgba(8,8,8,.36) !important;
 }
 
+/* Remove leftover blue surfaces inside the Home TV and Chat cards. */
+.bds-home-shell [data-designer-id="tv"] .bds-home-panel-body,
+.bds-home-shell [data-designer-id="tv"] .bds-home-tv-panel,
+.bds-home-shell [data-designer-id="tv"] .bds-home-tv-stage,
+.bds-home-shell [data-designer-id="chat"] .bds-home-panel-body,
+.bds-home-shell [data-designer-id="chat"] .bds-chat-frame {
+  background: rgba(5,5,5,.26) !important;
+  background-image: none !important;
+  border-color: rgba(212,175,55,.12) !important;
+  box-shadow: none !important;
+}
+
 /* Home events banner: show the artwork itself, without the old dark glass layer. */
 .bds-home-shell [data-designer-id="community"] .bds-home-community-note {
   background: url("../../assets/home/events-home-banner.webp") center center / cover no-repeat !important;
