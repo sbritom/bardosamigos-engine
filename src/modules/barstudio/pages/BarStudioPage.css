@@ -1,14 +1,16 @@
 .bds-barstudio-workspace {
   width: min(1480px, calc(100% - 32px));
   margin-inline: auto;
-  padding: 0 0 24px;
+  padding: 0 0 28px;
+  gap: 18px !important;
 }
 
 .bds-barstudio-workspace .bds-barstudio-header {
   padding: 14px 16px;
-  border-color: rgba(212, 175, 55, .18);
-  background: rgba(8, 8, 8, .78);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+  border: 1px solid rgba(212, 175, 55, .22);
+  border-radius: 16px;
+  background: rgba(5, 5, 5, .9);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .32);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -35,33 +37,34 @@
 
 .bds-barstudio-workspace .bds-portal-workspace__layout {
   grid-template-columns: 220px minmax(0, 1fr);
-  gap: 14px;
+  gap: 20px;
   min-height: 0;
+  align-items: start;
 }
 
 .bds-barstudio-workspace .bds-barstudio-sidebar,
 .bds-barstudio-workspace .bds-workspace-content {
-  border-color: rgba(212, 175, 55, .18);
-  background: rgba(8, 8, 8, .76);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, .2);
+  background: rgba(4, 4, 4, .9) !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .bds-barstudio-workspace .bds-barstudio-sidebar {
-  gap: 8px;
-  padding: 12px;
-  border-radius: 15px;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 16px;
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__panel,
 .bds-barstudio-workspace .bds-workspace-sidebar__list {
-  gap: 6px;
+  gap: 8px;
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__group-label {
-  margin: 7px 4px 2px;
-  color: var(--bds-color-text-muted);
+  margin: 10px 5px 3px;
+  color: #bda96e;
   font-size: .62rem;
   font-weight: 850;
   letter-spacing: .1em;
@@ -69,29 +72,29 @@
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__group-label:first-child {
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__item {
-  min-height: 38px;
+  min-height: 40px;
   gap: 8px;
-  padding: 7px 9px;
-  border-color: rgba(212, 175, 55, .14);
-  border-radius: 10px;
-  background: rgba(7, 7, 7, .72);
-  box-shadow: none;
+  padding: 8px 10px;
+  border: 1px solid rgba(212, 175, 55, .15);
+  border-radius: 11px;
+  background: rgba(11, 11, 11, .96) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .16);
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__item:hover:not(:disabled) {
   transform: none;
-  border-color: rgba(240, 201, 90, .34);
-  background: rgba(212, 175, 55, .06);
+  border-color: rgba(240, 201, 90, .38);
+  background: rgba(24, 21, 10, .96) !important;
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__item.is-selected {
-  border-color: rgba(240, 201, 90, .5);
-  background: linear-gradient(90deg, rgba(212, 175, 55, .17), rgba(212, 175, 55, .055));
-  box-shadow: inset 3px 0 0 var(--bds-color-primary-hover);
+  border-color: rgba(240, 201, 90, .62);
+  background: linear-gradient(90deg, rgba(212, 175, 55, .28), rgba(45, 36, 11, .9)) !important;
+  box-shadow: inset 3px 0 0 var(--bds-color-primary-hover), 0 7px 18px rgba(0, 0, 0, .2);
 }
 
 .bds-barstudio-workspace .bds-workspace-sidebar__item-icon {
@@ -105,14 +108,14 @@
 
 .bds-barstudio-workspace .bds-workspace-content {
   min-height: 330px;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 15px;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
 }
 
 .bds-barstudio-workspace .bds-workspace-content__header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(212, 175, 55, .1);
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(212, 175, 55, .12);
 }
 
 .bds-barstudio-workspace .bds-workspace-content__header h2 {
@@ -129,22 +132,52 @@
   min-height: 0;
 }
 
+/* Remove qualquer superficie azul herdada pelas ferramentas do BarStudio. */
+.bds-barstudio-workspace .bds-workspace-content__body,
+.bds-barstudio-workspace .bds-workspace-content__body > *,
+.bds-barstudio-workspace .bds-round-crop-tool,
+.bds-barstudio-workspace .bds-round-crop-tool > *,
+.bds-barstudio-workspace [class*="image-tool"],
+.bds-barstudio-workspace [class*="upload"],
+.bds-barstudio-workspace [class*="dropzone"] {
+  --bds-color-background: #050505;
+  --bds-color-background-secondary: #0a0a0a;
+  --bds-color-surface: rgba(8, 8, 8, .94);
+  --bds-color-surface-alt: rgba(12, 12, 12, .96);
+  --bds-color-surface-elevated: rgba(14, 14, 14, .98);
+  --bds-color-hover: rgba(212, 175, 55, .08);
+  --bds-color-border: rgba(212, 175, 55, .18);
+  --bds-color-glow: rgba(212, 175, 55, .12);
+}
+
+.bds-barstudio-workspace .bds-workspace-content__body [class*="upload"],
+.bds-barstudio-workspace .bds-workspace-content__body [class*="dropzone"] {
+  background-color: rgba(7, 7, 7, .96) !important;
+  background-image: none !important;
+  border-color: rgba(212, 175, 55, .28) !important;
+  color: var(--bds-color-text) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .015), 0 8px 20px rgba(0, 0, 0, .18);
+}
+
+.bds-barstudio-workspace .bds-workspace-content__body section,
+.bds-barstudio-workspace .bds-workspace-content__body article {
+  border-color: rgba(212, 175, 55, .17) !important;
+}
+
 .bds-barstudio-workspace .bds-workspace-empty {
   min-height: 245px;
   align-content: center;
   gap: 7px;
   padding: 24px;
-  border: 1px dashed rgba(212, 175, 55, .13);
+  border: 1px dashed rgba(212, 175, 55, .2);
   border-radius: 13px;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(212, 175, 55, .055), transparent 36%),
-    rgba(5, 5, 5, .22);
+  background: rgba(6, 6, 6, .9);
 }
 
 .bds-barstudio-workspace .bds-workspace-empty__icon {
   width: 44px;
   height: 44px;
-  border-color: rgba(212, 175, 55, .22);
+  border-color: rgba(212, 175, 55, .24);
   background: rgba(212, 175, 55, .07);
   color: var(--bds-color-primary-hover);
 }
@@ -162,16 +195,19 @@
 @media (max-width: 1024px) {
   .bds-barstudio-workspace .bds-portal-workspace__layout {
     grid-template-columns: 205px minmax(0, 1fr);
+    gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .bds-barstudio-workspace {
     width: min(100% - 20px, 1480px);
+    gap: 14px !important;
   }
 
   .bds-barstudio-workspace .bds-portal-workspace__layout {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .bds-barstudio-workspace .bds-barstudio-sidebar,
