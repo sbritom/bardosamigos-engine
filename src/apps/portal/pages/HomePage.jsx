@@ -119,7 +119,6 @@ function TvCard() {
             referrerPolicy="no-referrer"
             allowFullScreen
           />
-
         </div>
 
         {isChannelModalOpen && (
@@ -175,7 +174,6 @@ function TvCard() {
             </div>
           </div>
         )}
-
       </div>
     </FeatureCard>
   )
@@ -247,16 +245,7 @@ function NewsPanel({ news, loading }) {
   )
 }
 
-function CommunityPanel({ events = [] }) {
-  const safeEvents = Array.isArray(events) ? events : []
-  const nextEvent = safeEvents[0] || null
-  const eventFrequency = nextEvent?.homeDateLabel || nextEvent?.recurrenceLabel || nextEvent?.dateLabel || 'Data a definir'
-  const eventType = nextEvent?.title ? nextEvent.title.replace(/\s+do\s+Bar$/i, '') : nextEvent?.typeLabel || 'Evento do Bar'
-  const eventTime = nextEvent?.homeTimeLabel || nextEvent?.timeLabel || 'Horario divulgado no dia'
-  const eventPromo = nextEvent?.metadata?.homePromo
-    || nextEvent?.metadata?.promo
-    || 'Venha participar de uma noite com música, bingos, brincadeiras e muita resenha. Convide seus amigos e faça parte da diversão!'
-
+function CommunityPanel() {
   return (
     <FeatureCard
       className="bds-home-card-full"
@@ -264,16 +253,13 @@ function CommunityPanel({ events = [] }) {
       icon={<CalendarDays size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/events' }}>VER EVENTOS</ActionButton>}
     >
-      {nextEvent ? (
-        <div className="bds-home-community-note" data-designer-id="community.banner" data-designer-label="Eventos / Banner">
-          <span className="bds-home-community-note__lead">🎉 {eventType} • {eventFrequency}</span>
-          <strong>{nextEvent.title || 'Evento do Bar'}</strong>
-          <p>{eventPromo}</p>
-          <span className="bds-home-community-note__footer">🕗 {eventTime} do evento.</span>
-        </div>
-      ) : (
-        <div className="bds-home-empty">Nenhum evento programado no momento.</div>
-      )}
+      <div
+        className="bds-home-community-note"
+        data-designer-id="community.banner"
+        data-designer-label="Eventos / Banner"
+        role="img"
+        aria-label="Bingos e Brincadeiras do Bar"
+      />
     </FeatureCard>
   )
 }
@@ -384,12 +370,11 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><HomeHitsCard hits={dashboard.topHits} loading={loading} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel events={dashboard.events} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="topHits" data-designer-label="Top Hits"><HomeModuleBoundary moduleName="Top Hits"><HomeHitsCard hits={dashboard.topHits} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
     </main>
   )
 }
-
