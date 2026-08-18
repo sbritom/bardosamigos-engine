@@ -162,26 +162,30 @@ body {
   color: #E3D8B8 !important;
 }
 
-/* Scoreboard is a card, so keep its image but let the shell read as glass. */
-.bds-home-shell .bds-hero-v2 {
+/* Scoreboard card: same translucent glass treatment as the other cards. */
+.bds-home-shell .bds-hero-card.bds-hero-v2 {
   border: 1px solid rgba(212,175,55,.22) !important;
-  background:
-    linear-gradient(145deg, rgba(7,7,7,.32), rgba(20,16,7,.30)),
-    url('/backgrounds/football-scoreboard.png') center 52% / cover no-repeat !important;
-  background-color: transparent !important;
+  background: rgba(10,10,10,.38) !important;
   border-radius: 20px !important;
-  box-shadow: 0 14px 34px rgba(0,0,0,.24) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.20) !important;
+  backdrop-filter: blur(16px) saturate(110%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(110%) !important;
   overflow: hidden;
 }
 
-.bds-home-shell .bds-hero-v2::before {
-  background: linear-gradient(90deg, rgba(0,0,0,.22), rgba(212,175,55,.02) 35%, rgba(212,175,55,.02) 65%, rgba(0,0,0,.22)) !important;
+.bds-home-shell .bds-hero-v2-background {
+  opacity: .42 !important;
+  filter: saturate(.70) brightness(.72) !important;
+}
+
+.bds-home-shell .bds-hero-card.bds-hero-v2::after {
+  background: linear-gradient(90deg, rgba(5,5,5,.24) 0%, rgba(8,8,8,.10) 48%, rgba(5,5,5,.24) 100%) !important;
   border-radius: inherit !important;
 }
 
 .bds-home-shell .bds-hero-v2-crest {
   border-color: rgba(212,175,55,.16) !important;
-  background: rgba(8,8,8,.40) !important;
+  background: rgba(8,8,8,.36) !important;
 }
 
 .bds-barstudio-sidebar {
