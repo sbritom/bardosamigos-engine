@@ -54,6 +54,13 @@ const studioToolMeta = {
   'Criador de Avatar (Em breve)': ['Sparkles', 'Em breve.'],
 }
 
+const studioToolLinks = {
+  'Cortar Foto Redonda': 'crop',
+  'Gerador de Cores': 'color-generator',
+  'Remover Fundo': 'remove-background',
+  'Criador de Avatar (Em breve)': 'avatar',
+}
+
 const toolIcons = { Scissors, Sparkles, Music2, Wrench }
 
 function TvCard() {
@@ -279,8 +286,16 @@ function BarStudioCard() {
         {tools.length ? tools.map((tool, index) => {
           const [iconName, description] = studioToolMeta[tool] || ['Wrench', 'Ferramenta da comunidade.']
           const Icon = toolIcons[iconName] || Wrench
+          const targetTool = studioToolLinks[tool]
           return (
-            <button key={tool} className="bds-home-tool-card" type="button" data-designer-id={`barstudio.tool.${index}`} data-designer-label={`BarStudio / ${tool}`}>
+            <button
+              key={tool}
+              className="bds-home-tool-card"
+              type="button"
+              onClick={() => { window.location.href = targetTool ? `/tools?tool=${targetTool}` : '/tools' }}
+              data-designer-id={`barstudio.tool.${index}`}
+              data-designer-label={`BarStudio / ${tool}`}
+            >
               <div className="bds-card-header__icon" data-designer-id={`barstudio.icon.${index}`} data-designer-label={`BarStudio / Icone ${tool}`}>
                 <Icon size={20} />
               </div>
