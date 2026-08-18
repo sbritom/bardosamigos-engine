@@ -119,6 +119,7 @@ function TvCard() {
             referrerPolicy="no-referrer"
             allowFullScreen
           />
+
         </div>
 
         {isChannelModalOpen && (
@@ -174,6 +175,7 @@ function TvCard() {
             </div>
           </div>
         )}
+
       </div>
     </FeatureCard>
   )
@@ -370,9 +372,9 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-12" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="topHits" data-designer-label="Top Hits"><HomeModuleBoundary moduleName="Top Hits"><HomeHitsCard hits={dashboard.topHits} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><HomeHitsCard hits={dashboard.topHits} loading={loading} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
     </main>
