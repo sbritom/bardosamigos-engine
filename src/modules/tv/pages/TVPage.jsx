@@ -16,6 +16,7 @@ import {
 } from '../hooks'
 import { TVProvider } from '../providers'
 import './tvPlatform.css'
+import './tvBlackGold.css'
 
 function TVPlatformContent() {
   const [activeChannel, setActiveChannel] = useState(null)
