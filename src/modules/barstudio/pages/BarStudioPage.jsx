@@ -10,6 +10,7 @@ import GradientsTool from './tools/gradients/GradientsTool'
 import ExtractColorsTool from './tools/extract-colors/ExtractColorsTool'
 import PalettesTool from './tools/palettes/PalettesTool'
 import ResizeTool from './tools/resize/ResizeTool'
+import './BarStudioPage.css'
 
 const sidebarSections = [
   {
@@ -65,6 +66,6 @@ export default function BarStudioPage() {
   }
 
   return <StorageContextProvider><PortalWorkspace className="bds-portal-workspace--compact bds-barstudio-workspace" header={{ eyebrow: 'Ferramentas criativas', title: 'BarStudio', description: 'Central criativa do Bar dos Amigos.', className: 'bds-barstudio-header' }} sidebar={{ title: '', ariaLabel: 'Ferramentas do BarStudio', className: 'bds-barstudio-sidebar', items: sidebarItems, selectedId: activeToolId, onSelect: selectTool }} content={activeTool ? {} : { title: 'Ferramentas', description: 'Selecione uma ferramenta na barra lateral para comecar.' }}>
-    {activeTool?.id === 'crop' ? <CropTool /> : activeTool?.id === 'remove-background' ? <RemoveBackgroundTool /> : activeTool?.id === 'avatar' ? <AvatarTool /> : activeTool?.id === 'convert' ? <ConvertImageTool /> : activeTool?.id === 'resize' ? <ResizeTool /> : activeTool?.id === 'color-generator' ? <GradientsTool /> : activeTool?.id === 'extract-colors' ? <ExtractColorsTool /> : activeTool?.id === 'palettes' ? <PalettesTool /> : activeTool ? <ToolPlaceholder tool={activeTool} /> : <WorkspaceEmptyState icon={Sparkles} title="Bem-vindo ao BarStudio" description="Selecione uma ferramenta na barra lateral para comecar." />}
+    {activeTool?.id === 'crop' ? <CropTool /> : activeTool?.id === 'remove-background' ? <RemoveBackgroundTool /> : activeTool?.id === 'avatar' ? <AvatarTool /> : activeTool?.id === 'convert' ? <ConvertImageTool /> : activeTool?.id === 'resize' ? <ResizeTool /> : activeTool?.id === 'color-generator' ? <GradientsTool /> : activeTool?.id === 'extract-colors' ? <ExtractColorsTool /> : activeTool?.id === 'palettes' ? <PalettesTool /> : activeTool ? <ToolPlaceholder tool={activeTool} /> : <WorkspaceEmptyState icon={Sparkles} title="Bem-vindo ao BarStudio" description="Escolha uma ferramenta ao lado e comece a criar." />}
   </PortalWorkspace></StorageContextProvider>
 }
