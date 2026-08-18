@@ -188,6 +188,22 @@ body {
   background: rgba(8,8,8,.36) !important;
 }
 
+/* Home events banner: show the artwork itself, without the old dark glass layer. */
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note {
+  background: url("../../assets/home/events-home-banner.webp") center center / cover no-repeat !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: brightness(1.14) saturate(1.08) !important;
+  opacity: 1 !important;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note::before,
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note::after {
+  content: none !important;
+  background: transparent !important;
+}
+
 .bds-barstudio-sidebar {
   border-color: rgba(212,175,55,.16) !important;
   background: linear-gradient(180deg, rgba(24,21,13,.88), rgba(8,8,8,.94)) !important;
