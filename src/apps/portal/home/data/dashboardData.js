@@ -10,5 +10,5 @@ export const barStudioTools = [
   'Cortar Foto Redonda',
   'Gerador de Cores',
   'Remover Fundo',
-  'Criador de Avatar (Em breve)',
+  'Criador de Avatar',
 ]
