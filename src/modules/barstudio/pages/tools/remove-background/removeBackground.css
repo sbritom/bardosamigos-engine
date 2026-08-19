@@ -1,5 +1,5 @@
 .bds-remove-bg-controls,.bds-remove-bg-group,.bds-remove-bg-field,.bds-remove-bg-range { display:grid; gap:8px; }
-.bds-remove-bg-group { border-top:1px solid rgba(126,178,250,.12); padding-top:14px; }
+.bds-remove-bg-group { border-top:1px solid rgba(212,175,55,.12); padding-top:14px; }
 .bds-remove-bg-group>strong,.bds-remove-bg-field>span,.bds-remove-bg-range>span,.bds-remove-bg-toggle span { color:var(--bds-color-text-secondary); font-size:11px; font-weight:800; }
 .bds-remove-bg-range>div { display:grid; grid-template-columns:minmax(80px,1fr) 60px auto; align-items:center; gap:6px; }
 .bds-remove-bg-range input[type='range'] { width:100%; accent-color:var(--bds-color-primary); }
@@ -7,15 +7,15 @@
 .bds-remove-bg-toggle { display:flex; min-height:36px; align-items:center; gap:8px; cursor:pointer; }
 .bds-remove-bg-toggle input { width:17px; height:17px; accent-color:var(--bds-color-primary); }
 .bds-remove-bg-backgrounds,.bds-remove-bg-preview__modes { display:flex; flex-wrap:wrap; gap:6px; }
-.bds-remove-bg-backgrounds button,.bds-remove-bg-preview__modes button,.bds-remove-bg-group-title button { display:inline-flex; min-height:32px; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(126,178,250,.20); border-radius:8px; background:rgba(4,25,57,.42); color:var(--bds-color-text-secondary); cursor:pointer; padding:0 9px; font-size:11px; font-weight:800; transition:180ms ease; }
+.bds-remove-bg-backgrounds button,.bds-remove-bg-preview__modes button,.bds-remove-bg-group-title button { display:inline-flex; min-height:32px; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(212,175,55,.2); border-radius:8px; background:rgba(10,10,10,.78); color:var(--bds-color-text-secondary); cursor:pointer; padding:0 9px; font-size:11px; font-weight:800; transition:180ms ease; }
 .bds-remove-bg-backgrounds button:hover,.bds-remove-bg-preview__modes button:hover:not(:disabled),.bds-remove-bg-group-title button:hover,.bds-remove-bg-backgrounds button.is-selected,.bds-remove-bg-preview__modes button.is-selected { border-color:var(--bds-color-primary-hover); color:var(--bds-color-text); }
-.bds-remove-bg-backgrounds button.is-selected,.bds-remove-bg-preview__modes button.is-selected { background:rgba(11,77,187,.35); }
+.bds-remove-bg-backgrounds button.is-selected,.bds-remove-bg-preview__modes button.is-selected { background:rgba(212,175,55,.14); }
 .bds-remove-bg-preview__modes button:disabled { cursor:not-allowed; opacity:.45; }
 .bds-remove-bg-group-title { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .bds-remove-bg-group-title>span { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
 .bds-remove-bg-group-title strong { color:var(--bds-color-text); font-size:12px; }
 .bds-remove-bg-processing { margin:0; color:var(--bds-color-primary-hover); font-size:11px; font-weight:800; text-align:center; }
-.bds-remove-bg-info { display:grid; gap:7px; border-top:1px solid rgba(126,178,250,.12); padding-top:12px; }
+.bds-remove-bg-info { display:grid; gap:7px; border-top:1px solid rgba(212,175,55,.12); padding-top:12px; }
 .bds-remove-bg-info dl { display:grid; gap:5px; margin:0; }
 .bds-remove-bg-info dl>div { display:grid; grid-template-columns:65px minmax(0,1fr); gap:6px; }
 .bds-remove-bg-info dt,.bds-remove-bg-info dd,.bds-remove-bg-info p { margin:0; font-size:10px; }
@@ -24,20 +24,19 @@
 .bds-remove-bg-info p { color:var(--bds-color-text-secondary); }
 .bds-remove-bg-info p.is-export { color:var(--bds-color-success); }
 
-/* Mesmo acabamento do Cortar Foto Redonda. */
 .bds-remove-bg-tool { width:100%; gap:10px; }
 .bds-remove-bg-tool .bds-image-tool__message { margin:0 0 4px; }
-.bds-remove-bg-tool .bds-image-upload { min-height:150px; border:1px dashed rgba(126,178,250,.25); border-radius:14px; background:rgba(5,27,65,.28); box-shadow:none; }
-.bds-remove-bg-tool.has-image .bds-image-upload { min-height:48px; padding:6px 10px; border-radius:10px; background:rgba(5,27,65,.20); }
+.bds-remove-bg-tool .bds-image-upload { min-height:150px; border:1px dashed rgba(212,175,55,.26); border-radius:14px; background:rgba(7,7,7,.82); box-shadow:none; }
+.bds-remove-bg-tool.has-image .bds-image-upload { min-height:48px; padding:6px 10px; border-radius:10px; background:rgba(8,8,8,.88); }
 .bds-remove-bg-tool.has-image .bds-image-upload img { width:38px; height:38px; border-radius:7px; }
 .bds-remove-bg-tool.is-empty .bds-image-tool__workspace { display:none; }
 
 .bds-remove-bg-tool .bds-image-tool__workspace { display:grid; grid-template-columns:240px minmax(0,1fr); align-items:stretch; gap:14px; }
-.bds-remove-bg-tool .bds-image-tool__section { border:1px solid rgba(159,194,240,.18); border-radius:15px; background:rgba(15,45,83,.56); box-shadow:none; }
+.bds-remove-bg-tool .bds-image-tool__section { border:1px solid rgba(212,175,55,.18); border-radius:15px; background:rgba(8,8,8,.78); box-shadow:none; }
 .bds-remove-bg-tool .bds-image-tool__settings { min-height:520px; padding:18px 16px; }
 .bds-remove-bg-settings { display:grid; gap:16px; }
 
-.bds-remove-bg-tool .bds-image-tool__preview { min-height:520px; padding:18px 24px 24px; background:rgba(18,48,85,.50); }
+.bds-remove-bg-tool .bds-image-tool__preview { min-height:520px; padding:18px 24px 24px; background:rgba(5,5,5,.72); }
 .bds-remove-bg-preview { height:100%; display:flex; flex-direction:column; gap:10px; }
 .bds-remove-bg-preview__modes { justify-content:center; }
 .bds-remove-bg-preview__modes button { min-width:82px; }
@@ -45,7 +44,7 @@
 .bds-remove-bg-tool .bds-image-preview canvas { width:min(680px,92%); height:auto; max-width:100%; max-height:430px; margin:auto; }
 .bds-remove-bg-tool .bds-image-preview p,.bds-remove-bg-tool .bds-image-preview small { margin-top:7px; text-align:center; font-size:10px; color:var(--bds-color-text-secondary); }
 
-.bds-remove-bg-tool .bds-image-tool__export { margin:0 0 0 254px; padding:10px 12px; border:1px solid rgba(159,194,240,.15); border-radius:13px; background:rgba(12,39,73,.48); box-shadow:none; }
+.bds-remove-bg-tool .bds-image-tool__export { margin:0 0 0 254px; padding:10px 12px; border:1px solid rgba(212,175,55,.16); border-radius:13px; background:rgba(8,8,8,.78); box-shadow:none; }
 .bds-remove-bg-tool .bds-image-export { display:flex; align-items:flex-end; justify-content:center; flex-wrap:wrap; gap:8px; }
 .bds-remove-bg-tool .bds-image-export>label { display:grid; gap:4px; min-width:118px; flex:0 1 150px; }
 .bds-remove-bg-tool .bds-image-export>label>span { font-size:10px; font-weight:800; color:var(--bds-color-text-secondary); }
