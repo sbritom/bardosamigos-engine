@@ -2,7 +2,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: rgba(6, 30, 73, .42);
+  background: rgba(8, 8, 8, .42);
 }
 
 .bds-home-shell .bds-hero-v2-background {
@@ -23,7 +23,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(90deg, rgba(1, 10, 38, .34) 0%, rgba(1, 10, 38, .16) 48%, rgba(1, 10, 38, .34) 100%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, .34) 0%, rgba(0, 0, 0, .14) 48%, rgba(0, 0, 0, .34) 100%);
   pointer-events: none;
 }
 
