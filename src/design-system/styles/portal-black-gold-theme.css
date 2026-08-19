@@ -2,16 +2,24 @@
 :root {
   --bds-card-border-premium: rgba(212, 175, 55, .18);
   --bds-card-border-premium-hover: rgba(240, 201, 90, .34);
-  --bds-card-surface-premium: rgba(18, 18, 18, .58);
-  --bds-card-surface-premium-hover: rgba(30, 27, 19, .72);
+  --bds-card-surface-premium: rgba(12, 12, 12, .58);
+  --bds-card-surface-premium-hover: rgba(30, 27, 19, .74);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   background:
-    radial-gradient(circle at 16% 0%, rgba(212,175,55,.08), transparent 30%),
-    radial-gradient(circle at 84% 10%, rgba(212,175,55,.045), transparent 26%),
-    linear-gradient(180deg, #0B0B0B 0%, #050505 100%) !important;
+    linear-gradient(180deg, rgba(4,4,4,.58), rgba(4,4,4,.76)),
+    url('/backgrounds/portal-bg.webp') center top / cover fixed no-repeat !important;
+  color: var(--bds-color-text) !important;
 }
+
+#root { background: transparent !important; }
 
 .bds-radio-strip,
 .bds-top-header {
@@ -53,7 +61,6 @@ body {
   color: #090909 !important;
 }
 
-/* Only the actual cards receive the glass/translucent treatment. */
 :where(
   .bds-panel,
   .bds-card,
@@ -86,7 +93,6 @@ body {
   overflow: hidden;
 }
 
-/* Small cards/list cards remain translucent too, with a slightly tighter radius. */
 .bds-home-shell .bds-home-match-row,
 .bds-home-shell .bds-home-news-row,
 .bds-home-shell .bds-home-hits-item,
@@ -106,7 +112,14 @@ body {
   background: rgba(43,37,20,.54) !important;
 }
 
-/* Sidebar/menu items stay opaque: they are not cards. */
+.bds-workspace-header,
+.bds-workspace-sidebar,
+.bds-workspace-content,
+.bds-workspace-section {
+  border-color: rgba(212,175,55,.18) !important;
+  background: rgba(8,8,8,.78) !important;
+}
+
 .bds-workspace-sidebar,
 .bds-workspace-content,
 .bds-workspace-section {
@@ -162,20 +175,19 @@ body {
   color: #E3D8B8 !important;
 }
 
-/* Scoreboard card: same translucent glass treatment as the other cards. */
 .bds-home-shell .bds-hero-card.bds-hero-v2 {
   border: 1px solid rgba(212,175,55,.22) !important;
-  background: rgba(10,10,10,.38) !important;
+  background: rgba(10,10,10,.34) !important;
   border-radius: 20px !important;
   box-shadow: 0 14px 34px rgba(0,0,0,.20) !important;
-  backdrop-filter: blur(16px) saturate(110%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(110%) !important;
+  backdrop-filter: blur(14px) saturate(108%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(108%) !important;
   overflow: hidden;
 }
 
 .bds-home-shell .bds-hero-v2-background {
-  opacity: .42 !important;
-  filter: saturate(.70) brightness(.72) !important;
+  opacity: .48 !important;
+  filter: saturate(.82) brightness(.74) !important;
 }
 
 .bds-home-shell .bds-hero-card.bds-hero-v2::after {
@@ -188,7 +200,6 @@ body {
   background: rgba(8,8,8,.36) !important;
 }
 
-/* Remove leftover blue surfaces inside the Home TV and Chat cards. */
 .bds-home-shell [data-designer-id="tv"] .bds-home-panel-body,
 .bds-home-shell [data-designer-id="tv"] .bds-home-tv-panel,
 .bds-home-shell [data-designer-id="tv"] .bds-home-tv-stage,
@@ -200,7 +211,6 @@ body {
   box-shadow: none !important;
 }
 
-/* Home events banner: show the artwork itself, without the old dark glass layer. */
 .bds-home-shell [data-designer-id="community"] .bds-home-community-note {
   background: url("../../assets/home/events-home-banner.webp") center center / cover no-repeat !important;
   background-color: transparent !important;
@@ -230,6 +240,17 @@ body {
   border-color: rgba(240,201,90,.40) !important;
   background: rgba(66,52,17,.78) !important;
   box-shadow: inset 3px 0 0 #D4AF37 !important;
+}
+
+/* Last-resort BarStudio neutralizer for tool surfaces that previously had hardcoded blue. */
+.bds-barstudio-workspace .bds-image-upload,
+.bds-barstudio-workspace .bds-image-tool__section,
+.bds-barstudio-workspace .bds-image-tool__settings,
+.bds-barstudio-workspace .bds-image-tool__preview,
+.bds-barstudio-workspace .bds-image-tool__export {
+  border-color: rgba(212,175,55,.18) !important;
+  background-color: rgba(7,7,7,.86) !important;
+  color: var(--bds-color-text) !important;
 }
 
 footer[data-designer-id="footer"] {
