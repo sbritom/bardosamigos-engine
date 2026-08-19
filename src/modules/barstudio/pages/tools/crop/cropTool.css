@@ -6,43 +6,40 @@
 
 .bds-round-crop-control-group + .bds-round-crop-control-group,
 .bds-round-crop-control-group + .bds-image-decoration {
-  border-top:1px solid rgba(126,178,250,.12);
+  border-top:1px solid rgba(212,175,55,.12);
   padding-top:16px;
 }
 
 .bds-round-crop-control-title { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .bds-round-crop-control-title strong,
 .bds-round-crop-toggle span { color:var(--bds-color-text); font-size:13px; font-weight:800; }
-.bds-round-crop-control-title button { border:0; background:transparent; color:#69adff; cursor:pointer; padding:4px 0; font-size:11px; font-weight:800; }
+.bds-round-crop-control-title button { border:0; background:transparent; color:var(--bds-color-primary-hover); cursor:pointer; padding:4px 0; font-size:11px; font-weight:800; }
 .bds-round-crop-toggle { display:flex; min-height:38px; align-items:center; gap:8px; cursor:pointer; }
 .bds-round-crop-toggle input { width:17px; height:17px; accent-color:var(--bds-color-primary); }
-.bds-round-crop-options { border-left:2px solid rgba(126,178,250,.14); padding-left:10px; }
+.bds-round-crop-options { border-left:2px solid rgba(212,175,55,.14); padding-left:10px; }
 .bds-round-crop-field>span,.bds-round-crop-range>span { color:var(--bds-color-text-secondary); font-size:11px; font-weight:800; }
 .bds-round-crop-range>div,.bds-round-crop-thickness { display:grid; grid-template-columns:minmax(80px,1fr) 54px auto; align-items:center; gap:6px; }
 .bds-round-crop-range input[type='range'],.bds-round-crop-thickness input[type='range'] { width:100%; accent-color:var(--bds-color-primary); }
 .bds-round-crop-range small,.bds-round-crop-thickness small { min-width:28px; color:var(--bds-color-text-secondary); font-size:10px; }
 
-/* Acabamento inspirado no editor de referencia: uma lateral compacta e um palco principal. */
 .bds-round-crop-tool { gap:10px; width:100%; }
 .bds-round-crop-tool .bds-image-tool__message { margin:0 0 4px; }
 
-/* Upload: antes da imagem e a entrada principal; depois vira apenas uma barra fina para troca. */
 .bds-round-crop-tool .bds-image-upload {
   min-height:150px;
-  border:1px dashed rgba(126,178,250,.25);
+  border:1px dashed rgba(212,175,55,.26);
   border-radius:14px;
-  background:rgba(5,27,65,.28);
+  background:rgba(7,7,7,.82);
   box-shadow:none;
 }
 .bds-round-crop-tool.has-image .bds-image-upload {
   min-height:48px;
   padding:6px 10px;
   border-radius:10px;
-  background:rgba(5,27,65,.20);
+  background:rgba(8,8,8,.88);
 }
 .bds-round-crop-tool.has-image .bds-image-upload img { width:38px; height:38px; border-radius:7px; }
 
-/* Editor principal */
 .bds-round-crop-tool .bds-image-tool__workspace {
   display:grid;
   grid-template-columns:240px minmax(0,1fr);
@@ -50,9 +47,9 @@
   gap:14px;
 }
 .bds-round-crop-tool .bds-image-tool__section {
-  border:1px solid rgba(159,194,240,.18);
+  border:1px solid rgba(212,175,55,.18);
   border-radius:15px;
-  background:rgba(15,45,83,.56);
+  background:rgba(8,8,8,.78);
   box-shadow:none;
 }
 .bds-round-crop-tool .bds-image-tool__settings {
@@ -61,14 +58,13 @@
 }
 .bds-round-crop-tool .bds-round-crop-controls { gap:18px; }
 
-/* Preview sem titulo, amplo e centralizado como na referencia. */
 .bds-round-crop-tool .bds-image-tool__preview {
   min-height:520px;
   padding:24px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(18,48,85,.50);
+  background:rgba(5,5,5,.72);
 }
 .bds-round-crop-tool .bds-image-preview {
   width:100%;
@@ -94,13 +90,12 @@
   color:var(--bds-color-text-secondary);
 }
 
-/* A antiga caixa Finalizar vira uma barra baixa integrada ao editor. */
 .bds-round-crop-tool .bds-image-tool__export {
   margin:0 0 0 254px;
   padding:10px 12px;
-  border:1px solid rgba(159,194,240,.15);
+  border:1px solid rgba(212,175,55,.16);
   border-radius:13px;
-  background:rgba(12,39,73,.48);
+  background:rgba(8,8,8,.78);
   box-shadow:none;
 }
 .bds-round-crop-tool .bds-image-export {
@@ -127,12 +122,15 @@
   white-space:nowrap;
 }
 .bds-round-crop-tool .bds-round-crop-host,
-.bds-round-crop-tool .bds-round-crop-copy-link { border-color:rgba(126,178,250,.34); background:rgba(11,61,145,.58); color:#fff; }
+.bds-round-crop-tool .bds-round-crop-copy-link {
+  border-color:rgba(212,175,55,.34);
+  background:rgba(45,37,16,.82);
+  color:var(--bds-color-text);
+}
 .bds-round-crop-tool .bds-round-crop-host:hover:not(:disabled),
-.bds-round-crop-tool .bds-round-crop-copy-link:hover:not(:disabled) { background:rgba(15,77,178,.75); }
-.bds-round-crop-tool .bds-round-crop-copy-link:disabled { background:rgba(4,20,49,.30); color:var(--bds-color-text-secondary); }
+.bds-round-crop-tool .bds-round-crop-copy-link:hover:not(:disabled) { background:rgba(76,61,20,.9); }
+.bds-round-crop-tool .bds-round-crop-copy-link:disabled { background:rgba(9,9,9,.64); color:var(--bds-color-text-secondary); }
 
-/* Sem imagem nao existe palco vazio: somente o seletor de arquivo. */
 .bds-round-crop-tool.is-empty .bds-image-tool__workspace { display:none; }
 
 @media (max-width:1050px) {
