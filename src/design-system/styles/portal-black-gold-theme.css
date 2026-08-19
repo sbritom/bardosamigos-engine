@@ -15,7 +15,7 @@ body,
 body {
   background:
     linear-gradient(180deg, rgba(4,4,4,.58), rgba(4,4,4,.76)),
-    url('/backgrounds/portal-bg.webp') center top / cover fixed no-repeat !important;
+    url('/backgrounds/portal-bg.webp?v=885134ae') center top / cover fixed no-repeat !important;
   color: var(--bds-color-text) !important;
 }
 
