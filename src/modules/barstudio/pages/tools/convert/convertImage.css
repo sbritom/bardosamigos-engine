@@ -2,48 +2,47 @@
 .bds-convert-group,
 .bds-convert-range,
 .bds-convert-zoom { display:grid; gap:8px; }
-.bds-convert-group+.bds-convert-group { border-top:1px solid rgba(126,178,250,.12); padding-top:13px; }
+.bds-convert-group+.bds-convert-group { border-top:1px solid rgba(212,175,55,.12); padding-top:13px; }
 .bds-convert-group>strong,.bds-convert-quality-title strong,.bds-convert-view-title strong,.bds-convert-range>span,.bds-convert-zoom>span { color:var(--bds-color-text-secondary); font-size:11px; font-weight:800; }
 .bds-convert-formats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
-.bds-convert-formats button { display:grid; min-height:54px; align-content:center; gap:2px; border:1px solid rgba(126,178,250,.18); border-radius:8px; background:rgba(4,25,57,.38); color:var(--bds-color-text); cursor:pointer; padding:7px 8px; text-align:left; transition:180ms ease; }
-.bds-convert-formats button:hover:not(:disabled),.bds-convert-formats button.is-selected,.bds-convert-backgrounds button:hover,.bds-convert-backgrounds button.is-selected,.bds-convert-quality-title button:hover:not(:disabled),.bds-convert-quality-title button.is-selected,.bds-convert-view-title button:hover { border-color:var(--bds-color-primary-hover); background:rgba(11,77,187,.25); }
+.bds-convert-formats button { display:grid; min-height:54px; align-content:center; gap:2px; border:1px solid rgba(212,175,55,.18); border-radius:8px; background:rgba(10,10,10,.76); color:var(--bds-color-text); cursor:pointer; padding:7px 8px; text-align:left; transition:180ms ease; }
+.bds-convert-formats button:hover:not(:disabled),.bds-convert-formats button.is-selected,.bds-convert-backgrounds button:hover,.bds-convert-backgrounds button.is-selected,.bds-convert-quality-title button:hover:not(:disabled),.bds-convert-quality-title button.is-selected,.bds-convert-view-title button:hover { border-color:var(--bds-color-primary-hover); background:rgba(212,175,55,.12); }
 .bds-convert-formats button:disabled,.bds-convert-quality-title button:disabled { cursor:not-allowed; opacity:var(--bds-opacity-disabled); }
 .bds-convert-formats button span { font-size:11px; font-weight:800; }
 .bds-convert-formats button small,.bds-convert-group>p { margin:0; color:var(--bds-color-text-secondary); font-size:9px; line-height:1.3; }
 .bds-convert-quality-title,.bds-convert-view-title { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.bds-convert-quality-title button,.bds-convert-view-title button,.bds-convert-backgrounds button { display:inline-flex; min-height:32px; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(126,178,250,.18); border-radius:8px; background:rgba(4,25,57,.38); color:var(--bds-color-text); cursor:pointer; padding:0 8px; font-size:10px; font-weight:800; transition:180ms ease; }
+.bds-convert-quality-title button,.bds-convert-view-title button,.bds-convert-backgrounds button { display:inline-flex; min-height:32px; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(212,175,55,.18); border-radius:8px; background:rgba(10,10,10,.76); color:var(--bds-color-text); cursor:pointer; padding:0 8px; font-size:10px; font-weight:800; transition:180ms ease; }
 .bds-convert-range input[type='range'],.bds-convert-zoom input[type='range'] { width:100%; accent-color:var(--bds-color-primary); }
 .bds-convert-range>div { display:flex; justify-content:space-between; color:var(--bds-color-text-secondary); font-size:10px; }
 .bds-convert-backgrounds,.bds-convert-view-title>span { display:flex; flex-wrap:wrap; gap:6px; }
 .bds-convert-metadata { display:flex; min-height:32px; align-items:center; gap:8px; color:var(--bds-color-text-secondary); font-size:10px; font-weight:800; }
-.bds-convert-metadata input { width:17px; height:17px; }
+.bds-convert-metadata input { width:17px; height:17px; accent-color:var(--bds-color-primary); }
 .bds-convert-zoom>div { display:grid; grid-template-columns:minmax(80px,1fr) 60px auto; align-items:center; gap:6px; }
 .bds-convert-zoom small { min-width:30px; color:var(--bds-color-text-secondary); font-size:10px; }
-.bds-convert-info { display:grid; gap:6px; width:min(640px,94%); border-top:1px solid rgba(126,178,250,.12); padding-top:10px; }
+.bds-convert-info { display:grid; gap:6px; width:min(640px,94%); border-top:1px solid rgba(212,175,55,.12); padding-top:10px; }
 .bds-convert-info dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 10px; margin:0; }
 .bds-convert-info dl>div { display:flex; min-width:0; justify-content:space-between; gap:7px; }
 .bds-convert-info dt,.bds-convert-info dd,.bds-convert-info p { margin:0; font-size:10px; }
 .bds-convert-info dt,.bds-convert-info p { color:var(--bds-color-text-secondary); }
 .bds-convert-info dd { overflow:hidden; color:var(--bds-color-text); font-weight:800; text-align:right; text-overflow:ellipsis; white-space:nowrap; }
 
-/* Mesmo acabamento compacto das demais ferramentas de imagem do BarStudio. */
 .bds-convert-tool { width:100%; gap:10px; }
 .bds-convert-tool .bds-image-tool__message { margin:0 0 4px; }
-.bds-convert-tool .bds-image-upload { min-height:150px; border:1px dashed rgba(126,178,250,.25); border-radius:14px; background:rgba(5,27,65,.28); box-shadow:none; }
-.bds-convert-tool.has-image .bds-image-upload { min-height:48px; padding:6px 10px; border-radius:10px; background:rgba(5,27,65,.20); }
+.bds-convert-tool .bds-image-upload { min-height:150px; border:1px dashed rgba(212,175,55,.26); border-radius:14px; background:rgba(7,7,7,.82); box-shadow:none; }
+.bds-convert-tool.has-image .bds-image-upload { min-height:48px; padding:6px 10px; border-radius:10px; background:rgba(8,8,8,.88); }
 .bds-convert-tool.has-image .bds-image-upload img { width:38px; height:38px; border-radius:7px; }
 .bds-convert-tool.is-empty .bds-image-tool__workspace { display:none; }
 
 .bds-convert-tool .bds-image-tool__workspace { display:grid; grid-template-columns:250px minmax(0,1fr); align-items:stretch; gap:14px; }
-.bds-convert-tool .bds-image-tool__section { border:1px solid rgba(159,194,240,.18); border-radius:15px; background:rgba(15,45,83,.56); box-shadow:none; }
+.bds-convert-tool .bds-image-tool__section { border:1px solid rgba(212,175,55,.18); border-radius:15px; background:rgba(8,8,8,.78); box-shadow:none; }
 .bds-convert-tool .bds-image-tool__settings { min-height:540px; padding:18px 16px; }
-.bds-convert-tool .bds-image-tool__preview { min-height:540px; padding:20px 28px 18px; background:rgba(18,48,85,.50); }
+.bds-convert-tool .bds-image-tool__preview { min-height:540px; padding:20px 28px 18px; background:rgba(5,5,5,.72); }
 .bds-convert-preview { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
 .bds-convert-tool .bds-image-preview { width:100%; min-height:400px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; }
 .bds-convert-tool .bds-image-preview canvas { width:min(680px,92%); height:auto; max-width:100%; max-height:420px; margin:auto; }
 .bds-convert-tool .bds-image-preview p,.bds-convert-tool .bds-image-preview small { margin-top:8px; text-align:center; font-size:10px; color:var(--bds-color-text-secondary); }
 
-.bds-convert-tool .bds-image-tool__export { margin:0 0 0 264px; padding:10px 12px; border:1px solid rgba(159,194,240,.15); border-radius:13px; background:rgba(12,39,73,.48); box-shadow:none; }
+.bds-convert-tool .bds-image-tool__export { margin:0 0 0 264px; padding:10px 12px; border:1px solid rgba(212,175,55,.16); border-radius:13px; background:rgba(8,8,8,.78); box-shadow:none; }
 .bds-convert-tool .bds-image-export { display:flex; align-items:flex-end; justify-content:center; flex-wrap:wrap; gap:8px; }
 .bds-convert-tool .bds-image-export__actions { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; }
 .bds-convert-tool .bds-image-export__actions button { min-height:36px; border-radius:9px; padding:7px 11px; font-size:12px; white-space:nowrap; }
