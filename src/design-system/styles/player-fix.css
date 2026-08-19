@@ -1,7 +1,7 @@
-/* MXCast top player: keep only the compact blue control strip visible. */
+/* MXCast top player: compact black / graphite control strip. */
 .bds-radio-strip {
-  background: #0B1F33;
-  border-bottom: 1px solid rgba(123, 174, 219, .14);
+  background: #090909;
+  border-bottom: 1px solid rgba(212, 175, 55, .14);
 }
 
 .bds-mxcast-player {
