@@ -14,7 +14,7 @@ body,
 
 body {
   background-color: #050505 !important;
-  background-image: url('/backgrounds/portal-bg.webp?v=4b961889') !important;
+  background-image: var(--bds-portal-background-image) !important;
   background-position: center top !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
