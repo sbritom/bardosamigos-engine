@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 
 import App from "./App";
 
-import "./assets/portalBackground";
 import "./styles/globals.css";
 import "./styles/theme.css";
 
