@@ -74,24 +74,26 @@ function TVPlatformContent() {
   )
   const selectedChannel = activeChannel || fallbackChannel
   const activeCategoryName = selectedChannel?.category?.name || selectedChannel?.language || 'Ao vivo'
+  const catalogError = channels.error || categories.error || featured.error
+  const catalogLoading = channels.loading || categories.loading || featured.loading
 
   const emptyCopy = useMemo(() => {
     if (favoritesOnly) {
       return {
-        icon: <Star size={32} />,
+        icon: <Star size={32} aria-hidden="true" />,
         title: 'Nenhum canal favorito',
         description: 'Toque na estrela de um canal para encontra-lo aqui depois.',
       }
     }
     if (channels.filters.search) {
       return {
-        icon: <SearchX size={32} />,
+        icon: <SearchX size={32} aria-hidden="true" />,
         title: 'Nenhum canal encontrado',
         description: 'Tente outro termo ou remova os filtros da pesquisa.',
       }
     }
     return {
-      icon: <RadioTower size={32} />,
+      icon: <RadioTower size={32} aria-hidden="true" />,
       title: 'Catalogo em preparacao',
       description: 'Nenhum canal foi publicado ainda.',
     }
@@ -157,7 +159,7 @@ function TVPlatformContent() {
   }, [])
 
   return (
-    <main className="tv-platform">
+    <main className="tv-platform" aria-busy={catalogLoading}>
       <header className="tv-platform__header">
         <div className="tv-platform__brand">
           <span><Tv size={20} aria-hidden="true" /></span>
@@ -165,6 +167,12 @@ function TVPlatformContent() {
         </div>
         <Badge>{channelCount} CANAIS</Badge>
       </header>
+
+      {!catalogLoading && catalogError ? (
+        <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100" role="status" aria-live="polite">
+          Nao foi possivel atualizar todo o catalogo agora. Os canais ja disponiveis continuam acessiveis.
+        </p>
+      ) : null}
 
       <section className="tv-platform__player-section" ref={playerRef}>
         <TVPlayer
@@ -179,7 +187,7 @@ function TVPlatformContent() {
             <strong>{selectedChannel?.name || 'Selecione um canal'}</strong>
             {selectedChannel && <small>{activeCategoryName}</small>}
           </div>
-          <button type="button" onClick={openFullscreen}>
+          <button type="button" onClick={openFullscreen} aria-label="Abrir player da TV em tela cheia">
             <Maximize2 size={16} aria-hidden="true" />
             Tela cheia
           </button>
@@ -204,7 +212,7 @@ function TVPlatformContent() {
             className={favoritesOnly ? 'is-active' : ''}
             onClick={toggleFavoritesOnly}
           >
-            <Star size={14} fill={favoritesOnly ? 'currentColor' : 'none'} />
+            <Star size={14} fill={favoritesOnly ? 'currentColor' : 'none'} aria-hidden="true" />
             Favoritos
           </button>
           {categories.data.map((category) => (
@@ -221,7 +229,11 @@ function TVPlatformContent() {
             </button>
           ))}
         </div>
-        {favoriteFeedback && <small className="block text-sm font-semibold text-[var(--text-secondary)]">{favoriteFeedback}</small>}
+        {favoriteFeedback && (
+          <small className="block text-sm font-semibold text-[var(--text-secondary)]" role="status" aria-live="polite">
+            {favoriteFeedback}
+          </small>
+        )}
       </section>
 
       <TVSection

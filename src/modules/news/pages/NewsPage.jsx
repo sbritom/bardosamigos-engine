@@ -32,7 +32,7 @@ function NewsMeta({ item }) {
 function FeaturedStory({ item, onOpen }) {
   if (!item) return null
   return (
-    <button type="button" className="news-page__featured" onClick={() => onOpen(item)}>
+    <button type="button" className="news-page__featured" onClick={() => onOpen(item)} aria-label={`Abrir notícia: ${item.title}`}>
       <NewsCover item={item} className="news-page__featured-cover" />
       <span className="news-page__featured-copy">
         <NewsMeta item={item} />
@@ -45,7 +45,7 @@ function FeaturedStory({ item, onOpen }) {
 
 function NewsRow({ item, onOpen }) {
   return (
-    <button type="button" className="news-page__row" onClick={() => onOpen(item)}>
+    <button type="button" className="news-page__row" onClick={() => onOpen(item)} aria-label={`Abrir notícia: ${item.title}`}>
       <NewsCover item={item} className="news-page__row-cover" />
       <span className="news-page__row-copy">
         <NewsMeta item={item} />
@@ -59,14 +59,14 @@ function NewsReader({ item, onBack }) {
   const content = getArticleContent(item)
   const url = getArticleUrl(item)
   return (
-    <article className="news-page__reader">
+    <article className="news-page__reader" aria-labelledby="news-reader-title">
       <div className="news-page__reader-actions">
         <Button variant="secondary" onClick={onBack}>Voltar</Button>
         {url ? <Button onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}>Abrir original</Button> : null}
       </div>
       <NewsCover item={item} className="news-page__reader-cover" />
       <NewsMeta item={item} />
-      <h2>{item.title}</h2>
+      <h2 id="news-reader-title">{item.title}</h2>
       {content ? <p>{content}</p> : null}
     </article>
   )
@@ -83,11 +83,18 @@ export default function NewsPage() {
   useEffect(() => {
     let active = true
     async function loadNews() {
-      const result = await listNewsPageContent()
-      if (!active) return
-      setNews(result.data || [])
-      setError(result.error)
-      setLoading(false)
+      try {
+        const result = await listNewsPageContent()
+        if (!active) return
+        setNews(result.data || [])
+        setError(result.error)
+      } catch (loadError) {
+        if (!active) return
+        setNews([])
+        setError(loadError)
+      } finally {
+        if (active) setLoading(false)
+      }
     }
     loadNews()
     return () => { active = false }
@@ -109,7 +116,7 @@ export default function NewsPage() {
   const visibleLatest = showAll || search ? latest : latest.slice(0, 4)
 
   return (
-    <main className="news-page">
+    <main className="news-page" aria-busy={loading}>
       <header className="news-page__header">
         <div>
           <span>Informação</span>
@@ -121,6 +128,7 @@ export default function NewsPage() {
           <input
             type="search"
             placeholder="Pesquisar notícias..."
+            aria-label="Pesquisar notícias"
             value={search}
             onChange={(event) => {
               setSearch(event.target.value)
@@ -132,12 +140,18 @@ export default function NewsPage() {
       </header>
 
       {loading ? <WorkspaceSkeleton rows={4} /> : null}
-      {!loading && error ? <div className="news-page__notice">Exibindo conteúdo local enquanto a fonte principal fica indisponível.</div> : null}
+      {!loading && error ? (
+        <div className="news-page__notice" role="status" aria-live="polite">
+          {news.length
+            ? 'Exibindo conteúdo disponível enquanto a fonte principal fica indisponível.'
+            : 'Não foi possível carregar as notícias agora. Tente novamente mais tarde.'}
+        </div>
+      ) : null}
 
       {!loading && selectedArticle ? (
         <NewsReader item={selectedArticle} onBack={() => setSelectedArticle(null)} />
       ) : !loading && filteredNews.length ? (
-        <section className="news-page__content">
+        <section className="news-page__content" aria-label="Lista de notícias">
           <FeaturedStory item={featured} onOpen={setSelectedArticle} />
           <div className="news-page__latest">
             <div className="news-page__section-heading">
@@ -146,7 +160,7 @@ export default function NewsPage() {
                 <span>{filteredNews.length} matérias disponíveis</span>
               </div>
               {!search && latest.length > 4 ? (
-                <Button variant="secondary" onClick={() => setShowAll((value) => !value)}>
+                <Button variant="secondary" onClick={() => setShowAll((value) => !value)} aria-expanded={showAll}>
                   {showAll ? 'Mostrar menos' : 'Ver todas'}
                 </Button>
               ) : null}

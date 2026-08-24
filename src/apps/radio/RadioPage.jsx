@@ -30,6 +30,8 @@ function getListenerLabel(count) {
 export default function RadioPage() {
   const audioRef = useRef(null);
   const requestCloseTimerRef = useRef(null);
+  const requestInputRef = useRef(null);
+  const requestTriggerRef = useRef(null);
   const [metadata, setMetadata] = useState(INITIAL_METADATA);
   const [metadataLoading, setMetadataLoading] = useState(true);
   const [metadataError, setMetadataError] = useState("");
@@ -91,6 +93,29 @@ export default function RadioPage() {
     window.clearTimeout(requestCloseTimerRef.current);
   }, []);
 
+  const closeRequestFlow = useCallback(() => {
+    window.clearTimeout(requestCloseTimerRef.current);
+    setRequestModalOpen(false);
+    window.requestAnimationFrame(() => requestTriggerRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    if (!requestModalOpen) return undefined;
+
+    const frame = window.requestAnimationFrame(() => requestInputRef.current?.focus());
+    const onKeyDown = (event) => {
+      if (event.key !== "Escape" || requestSubmitting) return;
+      event.preventDefault();
+      closeRequestFlow();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [closeRequestFlow, requestModalOpen, requestSubmitting]);
+
   const handleToggle = useCallback(async () => {
     if (!audioRef.current) return;
 
@@ -145,7 +170,7 @@ export default function RadioPage() {
       setRequestForm({ songAndArtist: "", message: "" });
       window.clearTimeout(requestCloseTimerRef.current);
       requestCloseTimerRef.current = window.setTimeout(() => {
-        setRequestModalOpen(false);
+        closeRequestFlow();
         setRequestFeedback("");
         setRequestFeedbackTone("info");
       }, 2400);
@@ -159,7 +184,7 @@ export default function RadioPage() {
     } finally {
       setRequestSubmitting(false);
     }
-  }, [requestForm]);
+  }, [closeRequestFlow, requestForm]);
 
   return (
     <main className="bar-radio-page">
@@ -183,7 +208,7 @@ export default function RadioPage() {
         onWaiting={() => setConnecting(true)}
       />
 
-      <section className="bar-radio-listener-player" aria-label="Player da Radio Bar dos Amigos">
+      <section className="bar-radio-listener-player" aria-label="Player da Radio Bar dos Amigos" aria-busy={metadataLoading}>
         <div className="bar-radio-cover-panel">
           {hasCover ? (
             <img
@@ -206,7 +231,7 @@ export default function RadioPage() {
 
           <div className="bar-radio-listener-row">
             <span>
-              <Headphones size={17} />
+              <Headphones size={17} aria-hidden="true" />
               {getListenerLabel(metadata.listeners)}
             </span>
             {metadata.updatedAt && (
@@ -222,11 +247,11 @@ export default function RadioPage() {
               disabled={connecting}
               aria-label={playing ? "Pausar radio" : "Tocar radio"}
             >
-              {connecting ? <Loader2 size={28} className="bar-radio-spin-icon" /> : playing ? <Pause size={30} /> : <Play size={30} />}
+              {connecting ? <Loader2 size={28} className="bar-radio-spin-icon" aria-hidden="true" /> : playing ? <Pause size={30} aria-hidden="true" /> : <Play size={30} aria-hidden="true" />}
             </button>
 
             <label className="bar-radio-volume-control" title={`Volume ${volume}%`}>
-              <Volume2 size={20} />
+              <Volume2 size={20} aria-hidden="true" />
               <input
                 type="range"
                 min="0"
@@ -238,14 +263,14 @@ export default function RadioPage() {
               />
             </label>
 
-            <button className="bar-radio-request-button" type="button" onClick={openRequestFlow}>
-              <Music2 size={18} />
+            <button ref={requestTriggerRef} className="bar-radio-request-button" type="button" onClick={openRequestFlow}>
+              <Music2 size={18} aria-hidden="true" />
               PEDIR M&Uacute;SICA
             </button>
           </div>
 
           {isUnavailable && (
-            <p className="bar-radio-soft-alert">{playerError || metadataError}</p>
+            <p className="bar-radio-soft-alert" role="status" aria-live="polite">{playerError || metadataError}</p>
           )}
         </div>
       </section>
@@ -255,12 +280,12 @@ export default function RadioPage() {
           <div className="bar-radio-request-panel">
             <div className="bar-radio-request-header">
               <strong id="radio-request-title">Pedir m&uacute;sica</strong>
-              <button type="button" aria-label="Fechar pedido de musica" onClick={() => setRequestModalOpen(false)}>
-                <X size={18} />
+              <button type="button" aria-label="Fechar pedido de musica" onClick={closeRequestFlow} disabled={requestSubmitting}>
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
-            <form className="bar-radio-request-form" onSubmit={handleRequestSubmit}>
+            <form className="bar-radio-request-form" onSubmit={handleRequestSubmit} aria-busy={requestSubmitting}>
               <p className="bar-radio-request-intro">
                 Voce pode pedir como visitante ou com sua conta. O pedido sera enviado ao painel do locutor.
               </p>
@@ -268,6 +293,7 @@ export default function RadioPage() {
               <label>
                 M&uacute;sica e artista
                 <input
+                  ref={requestInputRef}
                   name="songAndArtist"
                   type="text"
                   placeholder="Nome da musica e do artista"
@@ -291,10 +317,18 @@ export default function RadioPage() {
                 />
               </label>
 
-              {requestFeedback && <p className={`bar-radio-request-feedback is-${requestFeedbackTone}`}>{requestFeedback}</p>}
+              {requestFeedback && (
+                <p
+                  className={`bar-radio-request-feedback is-${requestFeedbackTone}`}
+                  role={requestFeedbackTone === "error" ? "alert" : "status"}
+                  aria-live="polite"
+                >
+                  {requestFeedback}
+                </p>
+              )}
 
               <div className="bar-radio-request-actions">
-                <button type="button" onClick={() => setRequestModalOpen(false)} disabled={requestSubmitting}>Fechar</button>
+                <button type="button" onClick={closeRequestFlow} disabled={requestSubmitting}>Fechar</button>
                 <button type="submit" disabled={requestSubmitting}>
                   {requestSubmitting ? "Enviando..." : "Enviar pedido"}
                 </button>
