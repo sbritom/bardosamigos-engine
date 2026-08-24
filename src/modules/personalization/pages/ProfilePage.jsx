@@ -1,214 +1,205 @@
-import { useState } from "react"
-import { Bell, LayoutDashboard, Monitor, Radio, Settings, Star, Trophy, Tv, UserRound } from "lucide-react"
-import { Button, FeatureCard, StatusBadge } from "../../../design-system"
-import { PortalWorkspace, WorkspaceEmptyState } from "../../../shared/workspace"
-import {
-  MyFootballPanel,
-  PersonalizationShell,
-  PreferencePanel,
-  ProfileSummary,
-  SettingsPanel,
-} from "../components/PersonalizationComponents"
-import { preferenceSections, profileConfig, settingsSections } from "../data/personalizationData"
+import { useEffect, useState } from 'react'
+import { LogIn, LogOut, Music2, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
 
-const profileViews = {
-  profile: {
-    title: "Meu Perfil",
-    description: "Informacoes basicas da sua experiencia no portal.",
-  },
-  favorites: {
-    title: "Favoritos",
-    description: "Base organizada para times, competicoes, radios, TV e noticias.",
-  },
-  football: {
-    title: "Meu Futebol",
-    description: "Partidas reais vinculadas aos seus favoritos.",
-  },
-  tv: {
-    title: "Minha TV",
-    description: "Estrutura para canais favoritos e ultimo canal acessado.",
-  },
-  radio: {
-    title: "Minha Radio",
-    description: "Estrutura para radio favorita e ultimos acessos.",
-  },
-  competitions: {
-    title: "Competicoes",
-    description: "Competicoes favoritas, proximas partidas e resultados.",
-  },
-  preferences: {
-    title: "Preferencias",
-    description: "Tema, idioma, esportes e layout preparados para persistencia futura.",
-  },
-  notifications: {
-    title: "Notificacoes",
-    description: "Estrutura visual para futuras notificacoes do portal.",
-  },
+import { useAuth } from '../../auth/AuthContext'
+import { PersonalizationShell } from '../components/PersonalizationComponents'
+
+function AccountBenefit({ icon, title, description }) {
+  return (
+    <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="mb-2 flex items-center gap-2 font-bold text-[var(--text)]">
+        {icon}
+        {title}
+      </div>
+      <p className="text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
+    </article>
+  )
 }
 
-const favoriteGroups = [
-  { id: "teams", title: "Times", description: "Times favoritos aparecerao aqui." },
-  { id: "competitions", title: "Competicoes", description: "Competicoes favoritas aparecerao aqui." },
-  { id: "radios", title: "Radios", description: "Radios favoritas aparecerao aqui." },
-  { id: "tv", title: "TV", description: "Canais favoritos aparecerao aqui." },
-  { id: "news", title: "Noticias", description: "Temas e noticias favoritas aparecerao aqui." },
-]
+function GuestProfile() {
+  const { openAuth } = useAuth()
 
-const notificationGroups = [
-  { id: "games", title: "Jogos", description: "Avisos de partidas e placares." },
-  { id: "events", title: "Eventos", description: "Lembretes de eventos do Bar." },
-  { id: "news", title: "Noticias", description: "Alertas de publicacoes relevantes." },
-  { id: "radio", title: "Radio", description: "Programacao e destaques da radio." },
-  { id: "tv", title: "TV", description: "Canais e conteudos em destaque." },
-]
-
-function ProfileOverview() {
   return (
-    <div className="bds-personalization-main">
-      <ProfileSummary profile={profileConfig} />
-      <FeatureCard
-        className="bds-personalization-card"
-        icon={<UserRound size={18} />}
-        title="Editar Perfil"
-        description="Placeholder visual preparado para edicao futura."
-        action={<StatusBadge status="Em breve" tone="soon" />}
-      >
-        <Button disabled variant="secondary">Editar Perfil</Button>
-      </FeatureCard>
+    <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
+        <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Acesso livre</span>
+        <h2 className="mt-2 text-3xl font-black text-[var(--text)]">Voce esta navegando como visitante</h2>
+        <p className="mt-4 max-w-2xl leading-7 text-[var(--text-secondary)]">
+          Nao e preciso criar conta para ouvir a radio, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo Bar dos Amigos.
+        </p>
+        <p className="mt-3 leading-7 text-[var(--text-secondary)]">
+          A conta so e solicitada quando voce quiser participar de algo que precise identificar voce, como pedir uma musica, salvar favoritos ou participar de palpites.
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => openAuth('', 'login')}
+            className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110"
+          >
+            <LogIn size={18} />
+            Entrar
+          </button>
+          <button
+            type="button"
+            onClick={() => openAuth('', 'signup')}
+            className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10"
+          >
+            <UserPlus size={18} />
+            Criar conta
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
+        <h3 className="text-lg font-black text-[var(--text)]">O que a conta libera?</h3>
+        <div className="mt-4 grid gap-3">
+          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Envie pedidos para o painel do locutor usando sua conta." />
+          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Base para salvar canais, times e outros conteudos pessoais." />
+          <AccountBenefit icon={<Trophy size={18} />} title="Participacoes" description="Sua identidade podera ser usada em palpites e outras atividades do portal." />
+        </div>
+      </section>
     </div>
   )
 }
 
-function FavoritesPanel() {
-  return (
-    <section className="bds-personalization-grid">
-      {favoriteGroups.map((group) => (
-        <FeatureCard
-          key={group.id}
-          className="bds-personalization-card"
-          icon={<Star size={18} />}
-          title={group.title}
-          description={group.description}
-        >
-          <WorkspaceEmptyState title="Nenhum favorito encontrado." />
-        </FeatureCard>
-      ))}
-    </section>
-  )
-}
+function AuthenticatedProfile() {
+  const { user, displayName, updateProfile, signOut } = useAuth()
+  const [name, setName] = useState(displayName || '')
+  const [busy, setBusy] = useState(false)
+  const [feedback, setFeedback] = useState('')
+  const [tone, setTone] = useState('success')
 
-function TvPanel() {
-  return (
-    <section className="bds-personalization-grid">
-      <FeatureCard className="bds-personalization-card" icon={<Tv size={18} />} title="Canais favoritos" description="Canais salvos aparecerao aqui.">
-        <WorkspaceEmptyState title="Nenhum canal favorito encontrado." />
-      </FeatureCard>
-      <FeatureCard className="bds-personalization-card" icon={<Monitor size={18} />} title="Ultimo canal acessado" description="Estrutura preparada para dados futuros.">
-        <WorkspaceEmptyState title="Nenhum canal acessado." />
-      </FeatureCard>
-    </section>
-  )
-}
+  useEffect(() => {
+    setName(displayName || '')
+  }, [displayName])
 
-function RadioPanel() {
-  return (
-    <section className="bds-personalization-grid">
-      <FeatureCard className="bds-personalization-card" icon={<Radio size={18} />} title="Radio favorita" description="Radio principal do perfil.">
-        <WorkspaceEmptyState title="Nenhuma radio favorita encontrada." />
-      </FeatureCard>
-      <FeatureCard className="bds-personalization-card" icon={<LayoutDashboard size={18} />} title="Ultimas radios acessadas" description="Historico preparado para evolucao futura.">
-        <WorkspaceEmptyState title="Nenhum acesso encontrado." />
-      </FeatureCard>
-    </section>
-  )
-}
+  async function handleSave(event) {
+    event.preventDefault()
+    setBusy(true)
+    setFeedback('')
 
-function CompetitionsPanel() {
+    try {
+      await updateProfile({ displayName: name })
+      setTone('success')
+      setFeedback('Perfil atualizado com sucesso.')
+    } catch (error) {
+      setTone('error')
+      setFeedback(error.message || 'Nao foi possivel atualizar seu perfil.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleSignOut() {
+    setBusy(true)
+    setFeedback('')
+
+    try {
+      await signOut()
+    } catch (error) {
+      setTone('error')
+      setFeedback(error.message || 'Nao foi possivel sair da conta.')
+      setBusy(false)
+    }
+  }
+
   return (
-    <div className="bds-personalization-main">
-      <PreferencePanel sections={preferenceSections.filter((section) => section.type === "competition")} />
-      <MyFootballPanel />
+    <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)]/15 text-[var(--primary)]">
+            <UserRound size={32} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Conta conectada</span>
+            <h2 className="truncate text-2xl font-black text-[var(--text)]">{displayName || 'Amigo do Bar'}</h2>
+            <p className="truncate text-sm text-[var(--text-secondary)]">{user?.email}</p>
+          </div>
+        </div>
+
+        <form className="mt-7" onSubmit={handleSave}>
+          <label className="block text-sm font-bold text-[var(--text)]">
+            Nome exibido
+            <input
+              type="text"
+              minLength={2}
+              maxLength={60}
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+            />
+          </label>
+
+          <label className="mt-4 block text-sm font-bold text-[var(--text)]">
+            E-mail
+            <input
+              type="email"
+              readOnly
+              value={user?.email || ''}
+              className="mt-2 w-full cursor-not-allowed rounded-xl border border-white/10 bg-black/10 px-4 py-3 text-[var(--text-secondary)] opacity-80"
+            />
+          </label>
+
+          {feedback && (
+            <p className={`mt-4 rounded-xl px-4 py-3 text-sm ${tone === 'success' ? 'bg-emerald-500/15 text-emerald-200' : 'bg-red-500/15 text-red-200'}`}>
+              {feedback}
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60"
+            >
+              <Save size={18} />
+              {busy ? 'Salvando...' : 'Salvar perfil'}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleSignOut}
+              className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10 disabled:opacity-60"
+            >
+              <LogOut size={18} />
+              Sair
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
+        <h3 className="text-lg font-black text-[var(--text)]">Sua conta no portal</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+          A conta identifica suas participacoes sem transformar o restante do site em uma area fechada.
+        </p>
+        <div className="mt-5 grid gap-3">
+          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Liberado para sua conta." />
+          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Sera conectado aos recursos pessoais na proxima etapa." />
+          <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="A autenticacao ja fica pronta para identificar voce nesses fluxos." />
+        </div>
+      </section>
     </div>
-  )
-}
-
-function PreferencesPanel() {
-  return (
-    <div className="bds-personalization-main">
-      <SettingsPanel sections={settingsSections.filter((section) => section.id !== "notifications")} />
-      <PreferencePanel sections={preferenceSections} />
-    </div>
-  )
-}
-
-function NotificationsPanel() {
-  return (
-    <section className="bds-personalization-grid">
-      {notificationGroups.map((group) => (
-        <FeatureCard
-          key={group.id}
-          className="bds-personalization-card"
-          icon={<Bell size={18} />}
-          title={group.title}
-          description={group.description}
-          action={<StatusBadge status="Estrutura" tone="info" />}
-        >
-          <WorkspaceEmptyState title="Nenhuma notificacao configurada." />
-        </FeatureCard>
-      ))}
-    </section>
   )
 }
 
 export default function ProfilePage() {
-  const [activeView, setActiveView] = useState("profile")
-  const view = profileViews[activeView]
-
-  function renderContent() {
-    if (activeView === "profile") return <ProfileOverview />
-    if (activeView === "favorites") return <FavoritesPanel />
-    if (activeView === "football") return <MyFootballPanel />
-    if (activeView === "tv") return <TvPanel />
-    if (activeView === "radio") return <RadioPanel />
-    if (activeView === "competitions") return <CompetitionsPanel />
-    if (activeView === "preferences") return <PreferencesPanel />
-    return <NotificationsPanel />
-  }
-
-  const sidebarItems = [
-    { id: "profile", icon: UserRound, name: "Meu Perfil" },
-    { id: "favorites", icon: Star, name: "Favoritos" },
-    { id: "football", icon: Trophy, name: "Meu Futebol" },
-    { id: "tv", icon: Tv, name: "Minha TV" },
-    { id: "radio", icon: Radio, name: "Minha Radio" },
-    { id: "competitions", icon: Trophy, name: "Competicoes" },
-    { id: "preferences", icon: Settings, name: "Preferencias" },
-    { id: "notifications", icon: Bell, name: "Notificacoes" },
-  ]
+  const { loading, isAuthenticated } = useAuth()
 
   return (
     <PersonalizationShell
-      eyebrow="Perfil e preferencias"
+      eyebrow="Perfil e autenticacao"
       title="Sua area no Bar dos Amigos"
-      description="Uma base limpa para favoritos, preferencias e conteudo personalizado."
+      description="Navegue livremente como visitante e use uma conta apenas quando quiser participar."
       icon={<UserRound size={40} />}
     >
-      <PortalWorkspace
-        header={{
-          eyebrow: "Perfil",
-          title: view.title,
-          description: view.description,
-        }}
-        sidebar={{
-          title: "Perfil",
-          items: sidebarItems,
-          selectedId: activeView,
-          onSelect: (item) => setActiveView(item.id),
-        }}
-        content={{ title: view.title, description: view.description }}
-      >
-        {renderContent()}
-      </PortalWorkspace>
+      {loading ? (
+        <div className="mx-auto w-full max-w-5xl rounded-3xl border border-white/10 bg-[var(--surface)] p-8 text-center text-[var(--text-secondary)]">
+          Verificando sua sessao...
+        </div>
+      ) : isAuthenticated ? <AuthenticatedProfile /> : <GuestProfile />}
     </PersonalizationShell>
   )
 }

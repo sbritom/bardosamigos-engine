@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
 import PortalSeo from "./seo/PortalSeo";
+import AuthDialog from "../../modules/auth/AuthDialog";
+import { AuthProvider } from "../../modules/auth/AuthContext";
 
 const portalBackground = {
   backgroundImage: 'url("/backgrounds/portal-bg.webp")',
@@ -14,18 +16,21 @@ const portalBackground = {
 
 export default function AppShell() {
   return (
-    <div className="min-h-screen text-[var(--text)]" style={portalBackground}>
-      <PortalSeo />
+    <AuthProvider>
+      <div className="min-h-screen text-[var(--text)]" style={portalBackground}>
+        <PortalSeo />
 
-      <Header />
+        <Header />
 
-      <div className="w-full py-5">
-        <main>
-          <Outlet />
-        </main>
+        <div className="w-full py-5">
+          <main>
+            <Outlet />
+          </main>
+        </div>
+
+        <Footer />
+        <AuthDialog />
       </div>
-
-      <Footer />
-    </div>
+    </AuthProvider>
   );
 }

@@ -1,9 +1,10 @@
 import { Beer, Search, ShieldCheck, Sun, UserCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 
 import Container from '../../../shared/layout/Container'
 import { getMenuPlugins } from '../../../core/registry/plugins'
+import { useAuth } from '../../../modules/auth/AuthContext'
 import { isLocalAdminEnabled, isLocalDesignerEnvironment, toggleLocalAdmin } from '../../../modules/barstudio/designer/services/layoutDesignerService'
 import RadioBar from './RadioBar'
 import '../../../design-system/styles/index.css'
@@ -12,11 +13,17 @@ const PUBLIC_HOME_MENU = ['home', 'tv', 'radio', 'football', 'news', 'events', '
 const PUBLIC_HOME_MENU_ORDER = new Map(PUBLIC_HOME_MENU.map((id, index) => [id, index]))
 
 export default function Header() {
+  const navigate = useNavigate()
+  const { isAuthenticated, displayName, user } = useAuth()
   const menu = getMenuPlugins()
     .filter((item) => PUBLIC_HOME_MENU_ORDER.has(item.id))
     .sort((first, second) => PUBLIC_HOME_MENU_ORDER.get(first.id) - PUBLIC_HOME_MENU_ORDER.get(second.id))
   const showLocalAdmin = isLocalDesignerEnvironment()
   const [localAdminEnabled, setLocalAdminEnabledState] = useState(() => (showLocalAdmin ? isLocalAdminEnabled() : false))
+
+  const profileLabel = isAuthenticated
+    ? `Perfil de ${displayName || user?.email || 'usuario'}`
+    : 'Entrar ou acessar perfil'
 
   useEffect(() => {
     if (!showLocalAdmin) return undefined
@@ -86,7 +93,13 @@ export default function Header() {
                   <ShieldCheck size={18} />
                 </button>
               )}
-              <button className="bds-top-header__icon-button" type="button" aria-label="Perfil">
+              <button
+                className={`bds-top-header__icon-button ${isAuthenticated ? 'bds-top-header__icon-button--active' : ''}`}
+                type="button"
+                aria-label={profileLabel}
+                title={profileLabel}
+                onClick={() => navigate('/profile')}
+              >
                 <UserCircle size={20} />
               </button>
             </div>
