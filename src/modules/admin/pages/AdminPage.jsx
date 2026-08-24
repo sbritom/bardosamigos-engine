@@ -1,32 +1,64 @@
-import { Activity, Bot, Coins, Gamepad2, Logs, Radio, Shield, Store, Tv, Users, Wrench } from 'lucide-react'
+import { CalendarDays, Radio, Shield, Tv } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
 
 const modules = [
-  ['Football Admin', 'Competicoes, jogos, times e resultados.', Shield],
-  ['Competition Admin', 'Bolao, palpites, ranking e auditoria.', Activity],
-  ['TV Admin', 'Canais, categorias e embeds.', Tv],
-  ['Radio Admin', 'Pedidos privados, locutores e historico.', Radio],
-  ['Comunidade Admin', 'Eventos, conquistas e missoes.', Users],
-  ['Brincadeiras Admin', 'Quiz, roleta, sorteios e ranking.', Gamepad2],
-  ['BarCoins Admin', 'Ajustes manuais e historico.', Coins],
-  ['BarStudio Admin', 'Ferramentas e estados.', Wrench],
-  ['Integracoes', 'Supabase, Football-Data, GNews e YouTube.', Logs],
-  ['BarAI Admin', 'Sugestoes e mensagens assistivas locais.', Bot],
-  ['Loja Admin', 'Preparado para recompensas futuras.', Store],
+  {
+    title: 'Competition Admin',
+    description: 'Campeonatos, temporadas, rodadas, times, jogos e resultados.',
+    icon: Shield,
+    path: '/admin/competition/campeonatos',
+  },
+  {
+    title: 'TV Admin',
+    description: 'Canais, categorias, destaques e configuracoes da TV do Bar.',
+    icon: Tv,
+    path: '/admin/tv',
+  },
+  {
+    title: 'Eventos Admin',
+    description: 'Agenda, publicacao, destaques e edicao dos eventos do portal.',
+    icon: CalendarDays,
+    path: '/events/admin',
+  },
+  {
+    title: 'Radio Admin',
+    description: 'Pedidos de musica e operacao do painel do locutor.',
+    icon: Radio,
+    path: '/radio/admin',
+  },
 ]
 
 export default function AdminPage() {
   const navigate = useNavigate()
+
   return (
     <main className="bds-release-page">
-      <HeroCard className="bds-release-hero" eyebrow="Admin modular" title="Administracao do portal" subtitle="Area preparada para usuarios autorizados. Nao deve aparecer para usuarios comuns no menu publico." />
+      <HeroCard
+        className="bds-release-hero"
+        eyebrow="Acesso administrativo"
+        title="Administracao do portal"
+        subtitle="Os modulos abaixo usam rotas protegidas por cargo e continuam sujeitos as validacoes de API e RLS antes de qualquer alteracao de dados."
+      />
+
       <section className="bds-release-section">
-        <SectionHeader eyebrow="Modulos" title="Areas administrativas" subtitle="Admin modular, sem monolito." />
+        <SectionHeader
+          eyebrow="Modulos ativos"
+          title="Areas administrativas"
+          subtitle="Somente os modulos em manutencao nesta fase aparecem aqui."
+        />
         <div className="bds-release-grid bds-release-grid--three">
-          {modules.map(([title, description, Icon]) => (
-            <FeatureCard key={title} icon={<Icon size={20} />} title={title} description={description} action={<StatusBadge status="ADMIN">ADMIN</StatusBadge>}>
-              {title === 'TV Admin' && <ActionButton variant="outline" onClick={() => navigate('/admin/tv')}>Abrir TV Manager</ActionButton>}
+          {modules.map(({ title, description, icon: Icon, path }) => (
+            <FeatureCard
+              key={title}
+              icon={<Icon size={20} />}
+              title={title}
+              description={description}
+              action={<StatusBadge status="PROTEGIDO">PROTEGIDO</StatusBadge>}
+            >
+              <ActionButton variant="outline" onClick={() => navigate(path)}>
+                Abrir painel
+              </ActionButton>
             </FeatureCard>
           ))}
         </div>
