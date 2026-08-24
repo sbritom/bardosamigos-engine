@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Headphones, Loader2, Music2, Pause, Play, Radio, Volume2, X } from "lucide-react";
 
-import { useAuth } from "../../modules/auth/AuthContext";
 import {
   fetchMxCastStatus,
   getMxCastStreamUrl,
@@ -29,7 +28,6 @@ function getListenerLabel(count) {
 }
 
 export default function RadioPage() {
-  const { isAuthenticated, openAuth } = useAuth();
   const audioRef = useRef(null);
   const requestCloseTimerRef = useRef(null);
   const [metadata, setMetadata] = useState(INITIAL_METADATA);
@@ -129,26 +127,15 @@ export default function RadioPage() {
   }, []);
 
   const openRequestFlow = useCallback(() => {
-    if (!isAuthenticated) {
-      openAuth("Entre ou crie sua conta para pedir uma musica na radio.", "login");
-      return;
-    }
-
     setRequestFeedback("");
     setRequestFeedbackTone("info");
     setRequestModalOpen(true);
-  }, [isAuthenticated, openAuth]);
+  }, []);
 
   const handleRequestSubmit = useCallback(async (event) => {
     event.preventDefault();
     setRequestFeedback("");
     setRequestFeedbackTone("info");
-
-    if (!isAuthenticated) {
-      setRequestModalOpen(false);
-      openAuth("Sua sessao terminou. Entre novamente para enviar o pedido.", "login");
-      return;
-    }
 
     try {
       setRequestSubmitting(true);
@@ -163,20 +150,16 @@ export default function RadioPage() {
         setRequestFeedbackTone("info");
       }, 2400);
     } catch (error) {
-      if (error.status === 401) {
-        setRequestModalOpen(false);
-        openAuth("Sua sessao terminou. Entre novamente para enviar o pedido.", "login");
-        return;
-      }
-
       setRequestFeedback(error.status === 429
         ? "Aguarde um pouco antes de enviar outro pedido."
-        : error.message || "Nao foi possivel registrar o pedido agora.");
+        : error.status === 401
+          ? "Sua sessao expirou. Atualize a pagina e tente novamente; pedidos como visitante continuam liberados."
+          : error.message || "Nao foi possivel registrar o pedido agora.");
       setRequestFeedbackTone("error");
     } finally {
       setRequestSubmitting(false);
     }
-  }, [isAuthenticated, openAuth, requestForm]);
+  }, [requestForm]);
 
   return (
     <main className="bar-radio-page">
@@ -279,7 +262,7 @@ export default function RadioPage() {
 
             <form className="bar-radio-request-form" onSubmit={handleRequestSubmit}>
               <p className="bar-radio-request-intro">
-                O pedido sera registrado no painel do locutor assim que o envio for confirmado.
+                Voce pode pedir como visitante ou com sua conta. O pedido sera enviado ao painel do locutor.
               </p>
 
               <label>
