@@ -1,16 +1,20 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { getSupabaseClient } from '../../core/database'
+import { loadUserProfile, saveUserProfile, uploadUserAvatar } from './profileService'
 
 const AuthContext = createContext(null)
 
-function getDisplayName(user) {
+function getMetadataDisplayName(user) {
   return String(user?.user_metadata?.display_name || user?.user_metadata?.name || '').trim()
 }
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileError, setProfileError] = useState('')
   const [authDialog, setAuthDialog] = useState({
     open: false,
     mode: 'login',
@@ -47,6 +51,42 @@ export function AuthProvider({ children }) {
       subscription?.subscription?.unsubscribe()
     }
   }, [])
+
+  const refreshProfile = useCallback(async (userOverride) => {
+    const currentUser = userOverride || session?.user
+    if (!currentUser?.id) {
+      setProfile(null)
+      setProfileError('')
+      setProfileLoading(false)
+      return null
+    }
+
+    setProfileLoading(true)
+    setProfileError('')
+
+    try {
+      const nextProfile = await loadUserProfile(currentUser)
+      setProfile(nextProfile)
+      return nextProfile
+    } catch (error) {
+      setProfile(null)
+      setProfileError(error.message || 'Nao foi possivel carregar seu perfil.')
+      return null
+    } finally {
+      setProfileLoading(false)
+    }
+  }, [session?.user])
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setProfile(null)
+      setProfileError('')
+      setProfileLoading(false)
+      return
+    }
+
+    refreshProfile(session.user)
+  }, [refreshProfile, session?.user])
 
   const openAuth = useCallback((reason = '', mode = 'login') => {
     setAuthDialog({ open: true, mode, reason })
@@ -101,27 +141,51 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }, [])
 
-  const updateProfile = useCallback(async ({ displayName }) => {
+  const updateProfile = useCallback(async (values) => {
     const supabase = getSupabaseClient()
-    if (!supabase) throw new Error('A autenticacao nao esta configurada neste ambiente.')
+    const user = session?.user
+    if (!supabase || !user) throw new Error('Entre na sua conta para editar o perfil.')
 
-    const cleanName = String(displayName || '').trim()
-    if (cleanName.length < 2) throw new Error('Informe um nome com pelo menos 2 caracteres.')
+    const nextProfile = await saveUserProfile(user, values)
 
-    const { data, error } = await supabase.auth.updateUser({
-      data: { display_name: cleanName },
+    if (nextProfile.displayName && nextProfile.displayName !== getMetadataDisplayName(user)) {
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: nextProfile.displayName },
+      })
+      if (error) throw error
+    }
+
+    setProfile(nextProfile)
+    return nextProfile
+  }, [session?.user])
+
+  const uploadAvatar = useCallback(async (file) => {
+    const user = session?.user
+    if (!user) throw new Error('Entre na sua conta para alterar a foto.')
+
+    const uploaded = await uploadUserAvatar(user, file)
+    const nextProfile = await saveUserProfile(user, {
+      displayName: profile?.displayName || getMetadataDisplayName(user),
+      username: profile?.username || '',
+      bio: profile?.bio || '',
+      avatarUrl: uploaded.avatarUrl,
     })
 
-    if (error) throw error
-    return data
-  }, [])
+    setProfile(nextProfile)
+    return nextProfile
+  }, [profile, session?.user])
+
+  const displayName = profile?.displayName || getMetadataDisplayName(session?.user)
 
   const value = useMemo(() => ({
     user: session?.user || null,
     session,
     loading,
     isAuthenticated: Boolean(session?.user),
-    displayName: getDisplayName(session?.user),
+    displayName,
+    profile,
+    profileLoading,
+    profileError,
     authDialog,
     setAuthDialog,
     openAuth,
@@ -130,8 +194,10 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    refreshProfile,
     updateProfile,
-  }), [authDialog, closeAuth, loading, openAuth, requireAuth, session, signIn, signOut, signUp, updateProfile])
+    uploadAvatar,
+  }), [authDialog, closeAuth, displayName, loading, openAuth, profile, profileError, profileLoading, refreshProfile, requireAuth, session, signIn, signOut, signUp, updateProfile, uploadAvatar])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
