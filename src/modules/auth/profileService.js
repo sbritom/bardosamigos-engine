@@ -58,21 +58,30 @@ function handleProfileError(error) {
   throw error
 }
 
-async function createProfileIfMissing(client, user, extra = {}) {
-  const payload = {
-    id: user.id,
-    display_name: fallbackDisplayName(user),
-    ...extra,
+async function getAccessToken(client) {
+  const { data, error } = await client.auth.getSession()
+  if (error) throw error
+
+  const token = data?.session?.access_token || ''
+  if (!token) throw new Error('Sua sessao expirou. Entre novamente para continuar.')
+  return token
+}
+
+async function bootstrapProfile(client, user) {
+  const token = await getAccessToken(client)
+  const response = await fetch('/api/profile', {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok || payload?.ok === false) {
+    throw new Error(payload?.error || 'Nao foi possivel preparar seu perfil agora.')
   }
 
-  const { data, error } = await client
-    .from('profiles')
-    .insert(payload)
-    .select(PROFILE_FIELDS)
-    .single()
-
-  if (error) handleProfileError(error)
-  return mapProfile(data, user)
+  return mapProfile(payload?.data, user)
 }
 
 export function normalizeUsername(value) {
@@ -110,7 +119,19 @@ export async function loadUserProfile(user) {
   if (error) throw error
   if (data) return mapProfile(data, user)
 
-  return createProfileIfMissing(client, user)
+  return bootstrapProfile(client, user)
+}
+
+async function updateExistingProfile(client, user, payload) {
+  const { data, error } = await client
+    .from('profiles')
+    .update(payload)
+    .eq('id', user.id)
+    .select(PROFILE_FIELDS)
+    .maybeSingle()
+
+  if (error) handleProfileError(error)
+  return data ? mapProfile(data, user) : null
 }
 
 export async function saveUserProfile(user, values = {}) {
@@ -135,17 +156,13 @@ export async function saveUserProfile(user, values = {}) {
     payload.avatar_url = String(values.avatarUrl || '').trim() || null
   }
 
-  const { data, error } = await client
-    .from('profiles')
-    .update(payload)
-    .eq('id', user.id)
-    .select(PROFILE_FIELDS)
-    .maybeSingle()
+  const updated = await updateExistingProfile(client, user, payload)
+  if (updated) return updated
 
-  if (error) handleProfileError(error)
-  if (data) return mapProfile(data, user)
-
-  return createProfileIfMissing(client, user, payload)
+  await bootstrapProfile(client, user)
+  const retried = await updateExistingProfile(client, user, payload)
+  if (!retried) throw new Error('Nao foi possivel salvar seu perfil agora.')
+  return retried
 }
 
 function getAvatarExtension(file) {
