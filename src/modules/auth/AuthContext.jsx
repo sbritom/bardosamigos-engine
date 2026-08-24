@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { getSupabaseClient } from '../../core/database'
-import { loadUserProfile, saveUserProfile, uploadUserAvatar } from './profileService'
+import { loadUserProfile, saveUserPreferences, saveUserProfile, uploadUserAvatar } from './profileService'
 
 const AuthContext = createContext(null)
 
@@ -15,6 +15,22 @@ function getFallbackDisplayName(user) {
 
   const email = String(user?.email || '')
   return email.includes('@') ? email.split('@')[0] : 'Amigo do Bar'
+}
+
+function mergePreferences(current = {}, patch = {}) {
+  const next = {
+    ...(current || {}),
+    ...(patch || {}),
+  }
+
+  if (patch?.personalization) {
+    next.personalization = {
+      ...(current?.personalization || {}),
+      ...patch.personalization,
+    }
+  }
+
+  return next
 }
 
 export function AuthProvider({ children }) {
@@ -167,6 +183,16 @@ export function AuthProvider({ children }) {
     return nextProfile
   }, [session?.user])
 
+  const updatePreferences = useCallback(async (patch = {}) => {
+    const user = session?.user
+    if (!user) throw new Error('Entre na sua conta para salvar preferencias.')
+
+    const nextPreferences = mergePreferences(profile?.preferences || {}, patch)
+    const nextProfile = await saveUserPreferences(user, nextPreferences)
+    setProfile(nextProfile)
+    return nextProfile.preferences || {}
+  }, [profile?.preferences, session?.user])
+
   const uploadAvatar = useCallback(async (file) => {
     const user = session?.user
     if (!user) throw new Error('Entre na sua conta para alterar a foto.')
@@ -194,6 +220,7 @@ export function AuthProvider({ children }) {
     profile,
     profileLoading,
     profileError,
+    preferences: profile?.preferences || {},
     authDialog,
     setAuthDialog,
     openAuth,
@@ -204,8 +231,9 @@ export function AuthProvider({ children }) {
     signOut,
     refreshProfile,
     updateProfile,
+    updatePreferences,
     uploadAvatar,
-  }), [authDialog, closeAuth, displayName, loading, openAuth, profile, profileError, profileLoading, refreshProfile, requireAuth, session, signIn, signOut, signUp, updateProfile, uploadAvatar])
+  }), [authDialog, closeAuth, displayName, loading, openAuth, profile, profileError, profileLoading, refreshProfile, requireAuth, session, signIn, signOut, signUp, updatePreferences, updateProfile, uploadAvatar])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
