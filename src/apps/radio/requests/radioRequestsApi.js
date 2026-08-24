@@ -57,36 +57,30 @@ async function parseResponse(response) {
   return payload?.data ?? payload;
 }
 
-async function getUserAccessToken() {
+async function getOptionalUserAccessToken() {
   const supabase = getSupabaseClient();
-  if (!supabase) {
-    const error = new Error("A autenticacao nao esta configurada neste ambiente.");
-    error.status = 503;
-    throw error;
-  }
+  if (!supabase) return "";
 
   const { data, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError) throw sessionError;
+  if (sessionError) return "";
 
-  const token = data?.session?.access_token || "";
-  if (!token) {
-    const error = new Error("Entre ou crie sua conta para pedir uma musica.");
-    error.status = 401;
-    throw error;
-  }
-
-  return token;
+  return data?.session?.access_token || "";
 }
 
 export async function submitRadioMusicRequest({ songAndArtist, message }) {
-  const token = await getUserAccessToken();
+  const token = await getOptionalUserAccessToken();
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(REQUESTS_ENDPOINT, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: JSON.stringify({ songAndArtist, message }),
   });
 

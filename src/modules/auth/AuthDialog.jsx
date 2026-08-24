@@ -114,7 +114,7 @@ export default function AuthDialog() {
         <div className="px-6 py-5">
           <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-[var(--text-secondary)]">
             <strong className="block text-[var(--text)]">O site continua livre para visitantes.</strong>
-            Voce so precisa de uma conta para participar de recursos como pedidos de musica, favoritos, palpites e outras experiencias pessoais.
+            Voce so precisa de uma conta para recursos pessoais, como favoritos, perfil e palpites. Pedidos de musica tambem podem ser enviados como visitante.
           </div>
 
           {authDialog.reason && (

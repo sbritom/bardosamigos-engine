@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AtSign, Camera, LogIn, LogOut, Music2, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
+import { AtSign, Camera, LogIn, LogOut, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
 
 import { useAuth } from '../../auth/AuthContext'
 import { PersonalizationShell } from '../components/PersonalizationComponents'
@@ -25,10 +25,10 @@ function GuestProfile() {
         <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Acesso livre</span>
         <h2 className="mt-2 text-3xl font-black text-[var(--text)]">Voce esta navegando como visitante</h2>
         <p className="mt-4 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          Nao e preciso criar conta para ouvir a radio, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo Bar dos Amigos.
+          Nao e preciso criar conta para ouvir a radio, pedir musica, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo Bar dos Amigos.
         </p>
         <p className="mt-3 leading-7 text-[var(--text-secondary)]">
-          A conta so e solicitada quando voce quiser participar de algo que precise identificar voce, como pedir uma musica, salvar favoritos ou participar de palpites.
+          A conta so e solicitada quando voce quiser usar algo que precise guardar sua identidade ou seus dados, como favoritos, perfil personalizado e palpites.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -54,9 +54,9 @@ function GuestProfile() {
       <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
         <h3 className="text-lg font-black text-[var(--text)]">O que a conta libera?</h3>
         <div className="mt-4 grid gap-3">
-          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Envie pedidos para o painel do locutor usando sua conta." />
+          <AccountBenefit icon={<UserRound size={18} />} title="Perfil personalizado" description="Tenha nome de usuario, foto e bio associados a sua conta." />
           <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Base para salvar canais, times e outros conteudos pessoais." />
-          <AccountBenefit icon={<Trophy size={18} />} title="Participacoes" description="Sua identidade podera ser usada em palpites e outras atividades do portal." />
+          <AccountBenefit icon={<Trophy size={18} />} title="Participacoes identificadas" description="Sua identidade podera ser usada em palpites e outras atividades que precisem guardar seu progresso." />
         </div>
       </section>
     </div>
@@ -297,7 +297,7 @@ function AuthenticatedProfile() {
         </div>
 
         <div className="mt-5 grid gap-3">
-          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Sua conta ja identifica os pedidos enviados para a radio." />
+          <AccountBenefit icon={<UserRound size={18} />} title="Identidade no portal" description="Seu nome, @usuario e avatar ficam disponiveis para recursos que precisem identificar voce." />
           <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="O perfil agora esta pronto para receber seus favoritos na proxima etapa." />
           <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="Nome, usuario e avatar poderao representar voce nesses recursos." />
         </div>
@@ -313,7 +313,7 @@ export default function ProfilePage() {
     <PersonalizationShell
       eyebrow="Perfil e autenticacao"
       title="Sua area no Bar dos Amigos"
-      description="Navegue livremente como visitante e use uma conta apenas quando quiser participar."
+      description="Navegue livremente como visitante e use uma conta apenas quando quiser guardar uma experiencia pessoal."
       icon={<UserRound size={40} />}
     >
       {loading ? (

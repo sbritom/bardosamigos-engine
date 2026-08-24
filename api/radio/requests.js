@@ -62,17 +62,17 @@ function isAuthorizedRadioUser(user) {
   return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true
 }
 
-async function requireUser(request, supabase) {
+async function getOptionalUser(request, supabase) {
   const token = getBearerToken(request)
 
   if (!token) {
-    return { ok: false, status: 401, error: 'Entre ou crie sua conta para pedir uma musica.' }
+    return { ok: true, user: null }
   }
 
   const { data, error } = await supabase.auth.getUser(token)
 
   if (error || !data?.user) {
-    return { ok: false, status: 401, error: 'Sua sessao expirou. Entre novamente para continuar.' }
+    return { ok: false, status: 401, error: 'Sua sessao expirou. Atualize a pagina ou entre novamente.' }
   }
 
   return { ok: true, user: data.user }
@@ -107,9 +107,9 @@ async function readBody(request) {
 }
 
 async function handlePost(request, response, supabase) {
-  const authenticated = await requireUser(request, supabase)
-  if (!authenticated.ok) {
-    response.status(authenticated.status).json({ ok: false, error: authenticated.error })
+  const requester = await getOptionalUser(request, supabase)
+  if (!requester.ok) {
+    response.status(requester.status).json({ ok: false, error: requester.error })
     return
   }
 
@@ -125,7 +125,7 @@ async function handlePost(request, response, supabase) {
     return
   }
 
-  const fingerprint = createFingerprint(request, authenticated.user.id)
+  const fingerprint = createFingerprint(request, requester.user?.id || '')
   const since = new Date(Date.now() - REQUEST_WINDOW_SECONDS * 1000).toISOString()
 
   const { data: recent, error: recentError } = await supabase
@@ -153,7 +153,7 @@ async function handlePost(request, response, supabase) {
       song_and_artist: songAndArtist,
       message: message || null,
       status: 'pending',
-      source: 'authenticated_radio_page',
+      source: requester.user ? 'authenticated_radio_page' : 'public_radio_page',
       request_fingerprint: fingerprint,
       requester_user_agent: getUserAgent(request) || null,
     })
