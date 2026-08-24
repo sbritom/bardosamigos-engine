@@ -51,6 +51,30 @@ function mapProfile(row, user) {
   }
 }
 
+function handleProfileError(error) {
+  if (error?.code === '23505') {
+    throw new Error('Esse nome de usuario ja esta em uso. Escolha outro.')
+  }
+  throw error
+}
+
+async function createProfileIfMissing(client, user, extra = {}) {
+  const payload = {
+    id: user.id,
+    display_name: fallbackDisplayName(user),
+    ...extra,
+  }
+
+  const { data, error } = await client
+    .from('profiles')
+    .insert(payload)
+    .select(PROFILE_FIELDS)
+    .single()
+
+  if (error) handleProfileError(error)
+  return mapProfile(data, user)
+}
+
 export function normalizeUsername(value) {
   return String(value || '')
     .trim()
@@ -84,7 +108,9 @@ export async function loadUserProfile(user) {
     .maybeSingle()
 
   if (error) throw error
-  return mapProfile(data, user)
+  if (data) return mapProfile(data, user)
+
+  return createProfileIfMissing(client, user)
 }
 
 export async function saveUserProfile(user, values = {}) {
@@ -114,16 +140,12 @@ export async function saveUserProfile(user, values = {}) {
     .update(payload)
     .eq('id', user.id)
     .select(PROFILE_FIELDS)
-    .single()
+    .maybeSingle()
 
-  if (error) {
-    if (error.code === '23505') {
-      throw new Error('Esse nome de usuario ja esta em uso. Escolha outro.')
-    }
-    throw error
-  }
+  if (error) handleProfileError(error)
+  if (data) return mapProfile(data, user)
 
-  return mapProfile(data, user)
+  return createProfileIfMissing(client, user, payload)
 }
 
 function getAvatarExtension(file) {
