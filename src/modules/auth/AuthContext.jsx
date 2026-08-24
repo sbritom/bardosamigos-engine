@@ -9,6 +9,14 @@ function getMetadataDisplayName(user) {
   return String(user?.user_metadata?.display_name || user?.user_metadata?.name || '').trim()
 }
 
+function getFallbackDisplayName(user) {
+  const metadataName = getMetadataDisplayName(user)
+  if (metadataName) return metadataName
+
+  const email = String(user?.email || '')
+  return email.includes('@') ? email.split('@')[0] : 'Amigo do Bar'
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -147,15 +155,15 @@ export function AuthProvider({ children }) {
     if (!supabase || !user) throw new Error('Entre na sua conta para editar o perfil.')
 
     const nextProfile = await saveUserProfile(user, values)
+    setProfile(nextProfile)
 
     if (nextProfile.displayName && nextProfile.displayName !== getMetadataDisplayName(user)) {
       const { error } = await supabase.auth.updateUser({
         data: { display_name: nextProfile.displayName },
       })
-      if (error) throw error
+      if (error) console.warn('Nao foi possivel sincronizar o nome no Auth:', error.message)
     }
 
-    setProfile(nextProfile)
     return nextProfile
   }, [session?.user])
 
@@ -165,7 +173,7 @@ export function AuthProvider({ children }) {
 
     const uploaded = await uploadUserAvatar(user, file)
     const nextProfile = await saveUserProfile(user, {
-      displayName: profile?.displayName || getMetadataDisplayName(user),
+      displayName: profile?.displayName || getFallbackDisplayName(user),
       username: profile?.username || '',
       bio: profile?.bio || '',
       avatarUrl: uploaded.avatarUrl,
@@ -175,7 +183,7 @@ export function AuthProvider({ children }) {
     return nextProfile
   }, [profile, session?.user])
 
-  const displayName = profile?.displayName || getMetadataDisplayName(session?.user)
+  const displayName = profile?.displayName || getFallbackDisplayName(session?.user)
 
   const value = useMemo(() => ({
     user: session?.user || null,
