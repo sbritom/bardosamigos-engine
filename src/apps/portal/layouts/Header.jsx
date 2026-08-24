@@ -14,7 +14,7 @@ const PUBLIC_HOME_MENU_ORDER = new Map(PUBLIC_HOME_MENU.map((id, index) => [id, 
 
 export default function Header() {
   const navigate = useNavigate()
-  const { isAuthenticated, displayName, user } = useAuth()
+  const { isAuthenticated, displayName, profile, user } = useAuth()
   const menu = getMenuPlugins()
     .filter((item) => PUBLIC_HOME_MENU_ORDER.has(item.id))
     .sort((first, second) => PUBLIC_HOME_MENU_ORDER.get(first.id) - PUBLIC_HOME_MENU_ORDER.get(second.id))
@@ -100,7 +100,16 @@ export default function Header() {
                 title={profileLabel}
                 onClick={() => navigate('/profile')}
               >
-                <UserCircle size={20} />
+                {isAuthenticated && profile?.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt=""
+                    className="h-6 w-6 rounded-full object-cover"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <UserCircle size={20} />
+                )}
               </button>
             </div>
           </div>
