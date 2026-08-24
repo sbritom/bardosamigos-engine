@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { LogIn, LogOut, Music2, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { AtSign, Camera, LogIn, LogOut, Music2, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
 
 import { useAuth } from '../../auth/AuthContext'
 import { PersonalizationShell } from '../components/PersonalizationComponents'
@@ -64,15 +64,35 @@ function GuestProfile() {
 }
 
 function AuthenticatedProfile() {
-  const { user, displayName, updateProfile, signOut } = useAuth()
-  const [name, setName] = useState(displayName || '')
+  const {
+    user,
+    displayName,
+    profile,
+    profileLoading,
+    profileError,
+    updateProfile,
+    uploadAvatar,
+    signOut,
+  } = useAuth()
+  const avatarInputRef = useRef(null)
+  const [form, setForm] = useState({ displayName: '', username: '', bio: '' })
   const [busy, setBusy] = useState(false)
+  const [avatarBusy, setAvatarBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [tone, setTone] = useState('success')
 
   useEffect(() => {
-    setName(displayName || '')
-  }, [displayName])
+    setForm({
+      displayName: profile?.displayName || displayName || '',
+      username: profile?.username || '',
+      bio: profile?.bio || '',
+    })
+  }, [displayName, profile])
+
+  function handleChange(event) {
+    const { name, value } = event.target
+    setForm((current) => ({ ...current, [name]: value }))
+  }
 
   async function handleSave(event) {
     event.preventDefault()
@@ -80,7 +100,7 @@ function AuthenticatedProfile() {
     setFeedback('')
 
     try {
-      await updateProfile({ displayName: name })
+      await updateProfile(form)
       setTone('success')
       setFeedback('Perfil atualizado com sucesso.')
     } catch (error) {
@@ -88,6 +108,26 @@ function AuthenticatedProfile() {
       setFeedback(error.message || 'Nao foi possivel atualizar seu perfil.')
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function handleAvatarChange(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    setAvatarBusy(true)
+    setFeedback('')
+
+    try {
+      await uploadAvatar(file)
+      setTone('success')
+      setFeedback('Foto de perfil atualizada.')
+    } catch (error) {
+      setTone('error')
+      setFeedback(error.message || 'Nao foi possivel atualizar a foto.')
+    } finally {
+      setAvatarBusy(false)
     }
   }
 
@@ -104,36 +144,109 @@ function AuthenticatedProfile() {
     }
   }
 
+  const avatarUrl = profile?.avatarUrl || ''
+  const usernameLabel = profile?.username ? `@${profile.username}` : 'Escolha seu @usuario'
+
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.15fr_0.85fr]">
       <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)]/15 text-[var(--primary)]">
-            <UserRound size={32} />
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="relative h-24 w-24 shrink-0">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[var(--primary)]/15 text-[var(--primary)]">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={`Foto de ${displayName || 'usuario'}`} className="h-full w-full object-cover" />
+              ) : (
+                <UserRound size={44} />
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={avatarBusy || profileLoading}
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[var(--primary)] text-white shadow-lg transition hover:brightness-110 disabled:opacity-60"
+              aria-label="Alterar foto de perfil"
+              title="Alterar foto de perfil"
+            >
+              <Camera size={18} />
+            </button>
+            <input
+              ref={avatarInputRef}
+              className="hidden"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleAvatarChange}
+            />
           </div>
+
           <div className="min-w-0">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Conta conectada</span>
             <h2 className="truncate text-2xl font-black text-[var(--text)]">{displayName || 'Amigo do Bar'}</h2>
-            <p className="truncate text-sm text-[var(--text-secondary)]">{user?.email}</p>
+            <p className="flex items-center gap-1 truncate text-sm font-semibold text-[var(--primary)]">
+              <AtSign size={14} />
+              {usernameLabel.replace(/^@/, '')}
+            </p>
+            <p className="mt-1 truncate text-sm text-[var(--text-secondary)]">{user?.email}</p>
+            {avatarBusy && <small className="mt-2 block text-[var(--text-secondary)]">Enviando foto...</small>}
           </div>
         </div>
 
+        {profileError && (
+          <p className="mt-5 rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
+            {profileError} Os dados basicos da sua conta continuam disponiveis.
+          </p>
+        )}
+
         <form className="mt-7" onSubmit={handleSave}>
-          <label className="block text-sm font-bold text-[var(--text)]">
-            Nome exibido
-            <input
-              type="text"
-              minLength={2}
-              maxLength={60}
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-sm font-bold text-[var(--text)]">
+              Nome exibido
+              <input
+                name="displayName"
+                type="text"
+                minLength={2}
+                maxLength={60}
+                required
+                value={form.displayName}
+                onChange={handleChange}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+              />
+            </label>
+
+            <label className="block text-sm font-bold text-[var(--text)]">
+              Nome de usuario
+              <div className="relative mt-2">
+                <AtSign size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  name="username"
+                  type="text"
+                  minLength={3}
+                  maxLength={24}
+                  value={form.username}
+                  onChange={handleChange}
+                  placeholder="seuusuario"
+                  className="w-full rounded-xl border border-white/15 bg-black/10 py-3 pl-10 pr-4 lowercase text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+                />
+              </div>
+              <small className="mt-1 block font-normal text-[var(--text-secondary)]">Letras, numeros, ponto e underline.</small>
+            </label>
+          </div>
+
+          <label className="mt-4 block text-sm font-bold text-[var(--text)]">
+            Bio
+            <textarea
+              name="bio"
+              rows={3}
+              maxLength={280}
+              value={form.bio}
+              onChange={handleChange}
+              placeholder="Conte um pouco sobre voce..."
+              className="mt-2 w-full resize-y rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-[var(--text-secondary)]/60 focus:border-[var(--primary)]"
             />
+            <small className="mt-1 block text-right font-normal text-[var(--text-secondary)]">{form.bio.length}/280</small>
           </label>
 
           <label className="mt-4 block text-sm font-bold text-[var(--text)]">
-            E-mail
+            E-mail da conta
             <input
               type="email"
               readOnly
@@ -143,7 +256,7 @@ function AuthenticatedProfile() {
           </label>
 
           {feedback && (
-            <p className={`mt-4 rounded-xl px-4 py-3 text-sm ${tone === 'success' ? 'bg-emerald-500/15 text-emerald-200' : 'bg-red-500/15 text-red-200'}`}>
+            <p className={`mt-4 rounded-xl px-4 py-3 text-sm ${tone === 'success' ? 'bg-emerald-500/15 text-emerald-100' : 'bg-red-500/15 text-red-100'}`}>
               {feedback}
             </p>
           )}
@@ -151,7 +264,7 @@ function AuthenticatedProfile() {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || avatarBusy || profileLoading}
               className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60"
             >
               <Save size={18} />
@@ -159,7 +272,7 @@ function AuthenticatedProfile() {
             </button>
             <button
               type="button"
-              disabled={busy}
+              disabled={busy || avatarBusy}
               onClick={handleSignOut}
               className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10 disabled:opacity-60"
             >
@@ -171,14 +284,22 @@ function AuthenticatedProfile() {
       </section>
 
       <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
-        <h3 className="text-lg font-black text-[var(--text)]">Sua conta no portal</h3>
+        <h3 className="text-lg font-black text-[var(--text)]">Seu perfil no portal</h3>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          A conta identifica suas participacoes sem transformar o restante do site em uma area fechada.
+          Nome, usuario, bio e foto ficam associados a sua conta e acompanham suas participacoes no Bar dos Amigos.
         </p>
+
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Identidade</span>
+          <strong className="mt-2 block text-lg text-[var(--text)]">{displayName || 'Amigo do Bar'}</strong>
+          <span className="text-sm text-[var(--primary)]">{profile?.username ? `@${profile.username}` : 'Sem @usuario definido'}</span>
+          {profile?.bio && <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{profile.bio}</p>}
+        </div>
+
         <div className="mt-5 grid gap-3">
-          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Liberado para sua conta." />
-          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Sera conectado aos recursos pessoais na proxima etapa." />
-          <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="A autenticacao ja fica pronta para identificar voce nesses fluxos." />
+          <AccountBenefit icon={<Music2 size={18} />} title="Pedidos de musica" description="Sua conta ja identifica os pedidos enviados para a radio." />
+          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="O perfil agora esta pronto para receber seus favoritos na proxima etapa." />
+          <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="Nome, usuario e avatar poderao representar voce nesses recursos." />
         </div>
       </section>
     </div>
