@@ -68,9 +68,9 @@ export default function AppShell() {
         <Header />
 
         <div className="w-full py-5">
-          <main id="portal-main-content" tabIndex={-1}>
+          <div id="portal-main-content" tabIndex={-1}>
             <Outlet />
-          </main>
+          </div>
         </div>
 
         <Footer />
