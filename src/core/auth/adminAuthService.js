@@ -13,6 +13,7 @@ export const ADMIN_AUTH_ERRORS = Object.freeze({
   SUPABASE_NOT_CONFIGURED: 'Supabase nao configurado.',
   NO_SESSION: 'Entre para acessar o painel administrativo.',
   NOT_ALLOWED: 'Acesso nao autorizado para este usuario.',
+  INVALID_SESSION: 'Sua sessao administrativa expirou. Entre novamente.',
 })
 
 export function normalizeUsername(username) {
@@ -38,17 +39,21 @@ export function usernameToAuthEmail(username) {
   return `${validateUsername(username)}@${ADMIN_AUTH_DOMAIN}`
 }
 
-function getRoleFromUser(user, { allowLegacyUserMetadata = false } = {}) {
+export function getAdminRole(user, { allowLegacyUserMetadata = false } = {}) {
   return user?.app_metadata?.role || (allowLegacyUserMetadata ? user?.user_metadata?.role : undefined) || ''
 }
 
 export function hasAllowedAdminRole(user, allowedRoles = [], options = {}) {
   const roles = new Set(allowedRoles)
-  const role = getRoleFromUser(user, options)
+  const role = getAdminRole(user, options)
+  const isAdmin = role === ADMIN_ROLES.ADMIN || user?.app_metadata?.is_admin === true
+
+  // Administradores podem operar qualquer rota administrativa. Cargos
+  // especializados, como locutor, continuam limitados as rotas permitidas.
+  if (isAdmin) return true
 
   return roles.has(role)
-    || user?.app_metadata?.is_admin === true
-    || (options.allowLegacyUserMetadata && user?.user_metadata?.is_admin === true)
+    || (options.allowLegacyUserMetadata && user?.user_metadata?.is_admin === true && roles.has(ADMIN_ROLES.ADMIN))
 }
 
 export async function getAdminSession() {
@@ -67,29 +72,63 @@ export async function getAdminSession() {
   }
 }
 
+export async function getVerifiedAdminSession() {
+  const client = getSupabaseClient()
+  if (!client) {
+    return { session: null, user: null, error: new Error(ADMIN_AUTH_ERRORS.SUPABASE_NOT_CONFIGURED) }
+  }
+
+  const { data: sessionData, error: sessionError } = await client.auth.getSession()
+  const session = sessionData?.session || null
+
+  if (sessionError || !session?.access_token) {
+    return { session: null, user: null, error: sessionError || null }
+  }
+
+  const { data: userData, error: userError } = await client.auth.getUser(session.access_token)
+
+  if (userError || !userData?.user) {
+    return { session: null, user: null, error: userError || new Error(ADMIN_AUTH_ERRORS.INVALID_SESSION) }
+  }
+
+  return {
+    session,
+    user: userData.user,
+    error: null,
+  }
+}
+
 export async function getAdminAccessToken() {
   const { session } = await getAdminSession()
   return session?.access_token || ''
 }
 
 export async function getAdminAccess({ allowedRoles = [ADMIN_ROLES.ADMIN], allowLegacyUserMetadata = false, noSessionReason = ADMIN_AUTH_ERRORS.NO_SESSION } = {}) {
-  const { session, user, error } = await getAdminSession()
+  const { session, user, error } = await getVerifiedAdminSession()
 
   if (error?.message === ADMIN_AUTH_ERRORS.SUPABASE_NOT_CONFIGURED) {
-    return { allowed: false, hasSession: false, reason: ADMIN_AUTH_ERRORS.SUPABASE_NOT_CONFIGURED, user: null }
+    return { allowed: false, hasSession: false, reason: ADMIN_AUTH_ERRORS.SUPABASE_NOT_CONFIGURED, user: null, role: '' }
   }
 
-  if (error || !session?.access_token) {
-    return { allowed: false, hasSession: false, reason: noSessionReason, user: null }
+  if (error || !session?.access_token || !user) {
+    return {
+      allowed: false,
+      hasSession: false,
+      reason: error ? ADMIN_AUTH_ERRORS.INVALID_SESSION : noSessionReason,
+      user: null,
+      role: '',
+    }
   }
 
   const allowed = hasAllowedAdminRole(user, allowedRoles, { allowLegacyUserMetadata })
+  const role = getAdminRole(user, { allowLegacyUserMetadata })
 
   return {
     allowed,
     hasSession: true,
     reason: allowed ? '' : ADMIN_AUTH_ERRORS.NOT_ALLOWED,
     user,
+    role,
   }
 }
 
@@ -109,7 +148,14 @@ export async function signInAdminWithUsername({ username, password, allowedRoles
     throw new Error(ADMIN_AUTH_ERRORS.INVALID_LOGIN)
   }
 
-  return getAdminAccess({ allowedRoles, allowLegacyUserMetadata })
+  const access = await getAdminAccess({ allowedRoles, allowLegacyUserMetadata })
+
+  if (!access.allowed) {
+    await client.auth.signOut()
+    throw new Error(access.reason || ADMIN_AUTH_ERRORS.NOT_ALLOWED)
+  }
+
+  return access
 }
 
 export async function signOutAdmin() {

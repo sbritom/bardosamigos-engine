@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 
 import HomePage from "../../apps/portal/pages/HomePage";
+import AdminRouteGuard from "../auth/AdminRouteGuard";
+import { ADMIN_ROLES } from "../auth/adminAuthService";
 import PluginPage from "../../shared/layout/PluginPage";
 
 const FullScreenChat = React.lazy(() => import("../../modules/chat/pages/FullScreenChat"));
@@ -61,11 +63,22 @@ const ProfilePage = React.lazy(() => import("../../modules/personalization/pages
 const ForYouPage = React.lazy(() => import("../../modules/personalization/pages/ForYouPage"));
 const SettingsPage = React.lazy(() => import("../../modules/personalization/pages/SettingsPage"));
 
+const ADMIN_ONLY_ROLES = Object.freeze([ADMIN_ROLES.ADMIN]);
+const RADIO_ADMIN_ROLES = Object.freeze([ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR]);
+
 function LazyPluginPage({ component: Component, title, description, ...props }) {
   return (
     <React.Suspense fallback={<PluginPage title={title} description={description || `Carregando ${title}...`} />}>
       <Component {...props} />
     </React.Suspense>
+  );
+}
+
+function AdminPluginPage({ component, title, allowedRoles = ADMIN_ONLY_ROLES, ...props }) {
+  return (
+    <AdminRouteGuard allowedRoles={allowedRoles} title={title}>
+      <LazyPluginPage component={component} title={title} {...props} />
+    </AdminRouteGuard>
   );
 }
 
@@ -79,7 +92,7 @@ export const plugins = [
     element: <HomePage />,
   },
 
-    {
+  {
     id: "tv",
     title: "TV",
     path: "/tv",
@@ -88,7 +101,7 @@ export const plugins = [
     element: <LazyPluginPage component={TVPage} title="TV" />,
   },
 
-    {
+  {
     id: "radio",
     title: "Rádio",
     path: "/radio",
@@ -112,7 +125,13 @@ export const plugins = [
     path: "/radio/admin",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={RadioAdminPage} title="Radio Admin" />,
+    element: (
+      <AdminPluginPage
+        component={RadioAdminPage}
+        title="Radio Admin"
+        allowedRoles={RADIO_ADMIN_ROLES}
+      />
+    ),
   },
 
   {
@@ -166,7 +185,7 @@ export const plugins = [
     element: <LazyPluginPage component={NewsPage} title="Notícias" />,
   },
 
-    {
+  {
     id: "tools",
     title: "BarStudio",
     path: "/tools",
@@ -184,7 +203,7 @@ export const plugins = [
     element: <LazyPluginPage component={DesignerPage} title="Designer Pro" />,
   },
 
-    {
+  {
     id: "games",
     title: "Brincadeiras",
     path: "/brincadeiras",
@@ -238,7 +257,7 @@ export const plugins = [
     element: <LazyPluginPage component={SettingsPage} title="Configuracoes" />,
   },
 
-    {
+  {
     id: "barcoins",
     title: "BarCoins",
     path: "/barcoins",
@@ -247,7 +266,7 @@ export const plugins = [
     element: <LazyPluginPage component={BarCoinsPage} title="BarCoins" />,
   },
 
-    {
+  {
     id: "events",
     title: "Eventos",
     path: "/events",
@@ -262,7 +281,7 @@ export const plugins = [
     path: "/events/admin",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={EventsAdminPage} title="Eventos Admin" />,
+    element: <AdminPluginPage component={EventsAdminPage} title="Eventos Admin" />,
   },
 
   {
@@ -280,7 +299,7 @@ export const plugins = [
     path: "/admin",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={AdminPage} title="Admin" />,
+    element: <AdminPluginPage component={AdminPage} title="Admin" />,
   },
 
   {
@@ -289,7 +308,7 @@ export const plugins = [
     path: "/admin/tv",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager" section="dashboard" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager" section="dashboard" />,
   },
 
   {
@@ -298,7 +317,7 @@ export const plugins = [
     path: "/admin/tv/categories",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager Categorias" section="categories" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager Categorias" section="categories" />,
   },
 
   {
@@ -307,7 +326,7 @@ export const plugins = [
     path: "/admin/tv/channels",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager Canais" section="channels" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager Canais" section="channels" />,
   },
 
   {
@@ -316,7 +335,7 @@ export const plugins = [
     path: "/admin/tv/featured",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager Destaques" section="featured" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager Destaques" section="featured" />,
   },
 
   {
@@ -325,7 +344,7 @@ export const plugins = [
     path: "/admin/tv/settings",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager Configurações" section="settings" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager Configurações" section="settings" />,
   },
 
   {
@@ -334,7 +353,7 @@ export const plugins = [
     path: "/admin/tv/import",
     icon: Tv,
     menu: false,
-    element: <LazyPluginPage component={TVManager} title="TV Manager Importação" section="import" />,
+    element: <AdminPluginPage component={TVManager} title="TV Manager Importação" section="import" />,
   },
 
   {
@@ -356,7 +375,7 @@ export const plugins = [
     path: "/admin/competition/campeonatos",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={ChampionshipsPage} title="Admin Competition" />,
+    element: <AdminPluginPage component={ChampionshipsPage} title="Admin Competition" />,
   },
 
   {
@@ -365,7 +384,7 @@ export const plugins = [
     path: "/admin/competition/temporadas",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={SeasonsPage} title="Admin Competition Temporadas" />,
+    element: <AdminPluginPage component={SeasonsPage} title="Admin Competition Temporadas" />,
   },
 
   {
@@ -374,7 +393,7 @@ export const plugins = [
     path: "/admin/competition/rodadas",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={RoundsPage} title="Admin Competition Rodadas" />,
+    element: <AdminPluginPage component={RoundsPage} title="Admin Competition Rodadas" />,
   },
 
   {
@@ -383,7 +402,7 @@ export const plugins = [
     path: "/admin/competition/times",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={TeamsPage} title="Admin Competition Times" />,
+    element: <AdminPluginPage component={TeamsPage} title="Admin Competition Times" />,
   },
 
   {
@@ -392,7 +411,7 @@ export const plugins = [
     path: "/admin/competition/jogos",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={MatchesPage} title="Admin Competition Jogos" />,
+    element: <AdminPluginPage component={MatchesPage} title="Admin Competition Jogos" />,
   },
 
   {
@@ -401,7 +420,7 @@ export const plugins = [
     path: "/admin/competition/resultados",
     icon: Shield,
     menu: false,
-    element: <LazyPluginPage component={MatchResultsPage} title="Admin Competition Resultados" />,
+    element: <AdminPluginPage component={MatchResultsPage} title="Admin Competition Resultados" />,
   },
 
   {
