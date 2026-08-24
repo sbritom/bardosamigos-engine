@@ -48,7 +48,9 @@ export function hasAllowedAdminRole(user, allowedRoles = [], options = {}) {
   const role = getAdminRole(user, options)
   const isAdmin = role === ADMIN_ROLES.ADMIN || user?.app_metadata?.is_admin === true
 
-  if (isAdmin) return roles.has(ADMIN_ROLES.ADMIN) || roles.has(role) || roles.has(ADMIN_ROLES.LOCUTOR)
+  // Administradores podem operar qualquer rota administrativa. Cargos
+  // especializados, como locutor, continuam limitados as rotas permitidas.
+  if (isAdmin) return true
 
   return roles.has(role)
     || (options.allowLegacyUserMetadata && user?.user_metadata?.is_admin === true && roles.has(ADMIN_ROLES.ADMIN))
