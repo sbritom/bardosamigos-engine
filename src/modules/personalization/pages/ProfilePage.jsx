@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { AtSign, Camera, LogIn, LogOut, Save, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
+import { AtSign, Camera, LogIn, LogOut, Save, Settings, Sparkles, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../auth/AuthContext'
 import { PersonalizationShell } from '../components/PersonalizationComponents'
@@ -55,7 +56,7 @@ function GuestProfile() {
         <h3 className="text-lg font-black text-[var(--text)]">O que a conta libera?</h3>
         <div className="mt-4 grid gap-3">
           <AccountBenefit icon={<UserRound size={18} />} title="Perfil personalizado" description="Tenha nome de usuario, foto e bio associados a sua conta." />
-          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Base para salvar canais, times e outros conteudos pessoais." />
+          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Salve canais da TV e times para encontrar depois." />
           <AccountBenefit icon={<Trophy size={18} />} title="Participacoes identificadas" description="Sua identidade podera ser usada em palpites e outras atividades que precisem guardar seu progresso." />
         </div>
       </section>
@@ -64,6 +65,7 @@ function GuestProfile() {
 }
 
 function AuthenticatedProfile() {
+  const navigate = useNavigate()
   const {
     user,
     displayName,
@@ -286,7 +288,7 @@ function AuthenticatedProfile() {
       <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
         <h3 className="text-lg font-black text-[var(--text)]">Seu perfil no portal</h3>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          Nome, usuario, bio e foto ficam associados a sua conta e acompanham suas participacoes no Bar dos Amigos.
+          Nome, usuario, bio, foto, favoritos e preferencias ficam associados a sua conta.
         </p>
 
         <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -298,8 +300,27 @@ function AuthenticatedProfile() {
 
         <div className="mt-5 grid gap-3">
           <AccountBenefit icon={<UserRound size={18} />} title="Identidade no portal" description="Seu nome, @usuario e avatar ficam disponiveis para recursos que precisem identificar voce." />
-          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="O perfil agora esta pronto para receber seus favoritos na proxima etapa." />
+          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Canais da TV e times salvos acompanham sua conta." />
           <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="Nome, usuario e avatar poderao representar voce nesses recursos." />
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => navigate('/for-you')}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-3 font-bold text-white transition hover:brightness-110"
+          >
+            <Sparkles size={18} />
+            Meus favoritos
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/settings')}
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 font-bold text-[var(--text)] transition hover:bg-white/10"
+          >
+            <Settings size={18} />
+            Preferencias
+          </button>
         </div>
       </section>
     </div>

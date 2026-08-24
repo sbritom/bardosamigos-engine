@@ -134,9 +134,19 @@ async function updateExistingProfile(client, user, payload) {
   return data ? mapProfile(data, user) : null
 }
 
+async function updateWithBootstrap(user, payload) {
+  const client = getClient()
+  const updated = await updateExistingProfile(client, user, payload)
+  if (updated) return updated
+
+  await bootstrapProfile(client, user)
+  const retried = await updateExistingProfile(client, user, payload)
+  if (!retried) throw new Error('Nao foi possivel salvar seu perfil agora.')
+  return retried
+}
+
 export async function saveUserProfile(user, values = {}) {
   if (!user?.id) throw new Error('Entre na sua conta para editar o perfil.')
-  const client = getClient()
 
   const displayName = String(values.displayName || '').trim()
   const username = validateUsername(values.username)
@@ -156,13 +166,17 @@ export async function saveUserProfile(user, values = {}) {
     payload.avatar_url = String(values.avatarUrl || '').trim() || null
   }
 
-  const updated = await updateExistingProfile(client, user, payload)
-  if (updated) return updated
+  return updateWithBootstrap(user, payload)
+}
 
-  await bootstrapProfile(client, user)
-  const retried = await updateExistingProfile(client, user, payload)
-  if (!retried) throw new Error('Nao foi possivel salvar seu perfil agora.')
-  return retried
+export async function saveUserPreferences(user, preferences = {}) {
+  if (!user?.id) throw new Error('Entre na sua conta para salvar preferencias.')
+
+  const safePreferences = preferences && typeof preferences === 'object' && !Array.isArray(preferences)
+    ? preferences
+    : {}
+
+  return updateWithBootstrap(user, { preferences: safePreferences })
 }
 
 function getAvatarExtension(file) {
