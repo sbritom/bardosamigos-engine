@@ -11,19 +11,22 @@ const portalBackground = {
   backgroundPosition: 'center top',
   backgroundSize: 'cover',
   backgroundRepeat: 'no-repeat',
-  backgroundAttachment: 'fixed',
 }
 
 export default function AppShell() {
   return (
     <AuthProvider>
-      <div className="min-h-screen text-[var(--text)]" style={portalBackground}>
+      <div className="bds-portal-shell min-h-screen text-[var(--text)]" style={portalBackground}>
         <PortalSeo />
+
+        <a className="bds-skip-link" href="#portal-main-content">
+          Pular para o conteudo
+        </a>
 
         <Header />
 
         <div className="w-full py-5">
-          <main>
+          <main id="portal-main-content" tabIndex={-1}>
             <Outlet />
           </main>
         </div>

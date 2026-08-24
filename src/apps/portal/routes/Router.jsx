@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AppShell from "../AppShell";
+import NotFoundPage from "../pages/NotFoundPage";
 import { plugins } from "../../../core/registry/plugins";
 
 export default function Router() {
@@ -15,6 +16,7 @@ export default function Router() {
               element={plugin.element}
             />
           ))}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -52,8 +52,10 @@ export function hasAllowedAdminRole(user, allowedRoles = [], options = {}) {
   // especializados, como locutor, continuam limitados as rotas permitidas.
   if (isAdmin) return true
 
-  return roles.has(role)
-    || (options.allowLegacyUserMetadata && user?.user_metadata?.is_admin === true && roles.has(ADMIN_ROLES.ADMIN))
+  return Boolean(
+    roles.has(role)
+      || (options.allowLegacyUserMetadata && user?.user_metadata?.is_admin === true && roles.has(ADMIN_ROLES.ADMIN)),
+  )
 }
 
 export async function getAdminSession() {
