@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Badge, Button, Card, EmptyState, Loading, StatCard, Table } from '../../../../design-system'
 import { formatBrazilFullDateTime } from '../../../../core/time'
 import { getSportsStatusLabel } from '../../../../core/sports'
+import { useAuth } from '../../../auth/AuthContext'
 import { getFootballTeamDetails, toggleFootballFavorite } from '../../services/footballCenterService'
 import { FootballCrest } from '../components/FootballCrest'
 
@@ -43,6 +44,7 @@ function TeamStandings({ rows, teamName }) {
 export default function FootballTeamPage() {
   const { teamId } = useParams()
   const navigate = useNavigate()
+  const { openAuth } = useAuth()
   const [state, setState] = useState({ loading: true, data: null, error: '', message: '' })
 
   async function load() {
@@ -62,6 +64,12 @@ export default function FootballTeamPage() {
       id: team.id,
       metadata: { name: team.name, crest: team.crestUrl || team.logoUrl, country: team.country },
     })
+
+    if (!result.authenticated) {
+      openAuth('Entre para salvar este time nos seus favoritos. A area de Futebol continua livre para visitantes.', 'login')
+      return
+    }
+
     setState((current) => ({ ...current, message: result.error?.message || (result.favorited ? 'Time favoritado.' : 'Favorito removido.') }))
   }
 
