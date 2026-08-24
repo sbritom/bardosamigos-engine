@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 export default function NotFoundPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 md:py-16" aria-labelledby="not-found-title">
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 text-center shadow-xl md:p-10">
+    <section className="mx-auto w-full max-w-3xl px-4 py-10 md:py-16" aria-labelledby="not-found-title">
+      <div className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 text-center shadow-xl md:p-10">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primary)]/15 text-[var(--primary)]">
           <SearchX size={28} aria-hidden="true" />
         </span>
@@ -24,7 +24,7 @@ export default function NotFoundPage() {
           <Home size={18} aria-hidden="true" />
           Ir para a pagina inicial
         </Link>
-      </section>
-    </main>
+      </div>
+    </section>
   )
 }
