@@ -35,6 +35,8 @@
     "stream:test": "node server/src/tests/streamEngine.test.js",
     "engine:test": "node server/src/tests/engine.test.js",
     "validate-stream": "node server/src/tests/validateStream.test.js",
+    "portal:test": "node --test tests/portal/adminAuthService.test.mjs",
+    "quality:portal": "npm run portal:test && npm run build",
     "seed:tv": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs",
     "seed:tv:dry": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs --dry-run",
     "sync:football": "npm run sync:football-data",
