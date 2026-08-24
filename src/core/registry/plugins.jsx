@@ -63,6 +63,9 @@ const ProfilePage = React.lazy(() => import("../../modules/personalization/pages
 const ForYouPage = React.lazy(() => import("../../modules/personalization/pages/ForYouPage"));
 const SettingsPage = React.lazy(() => import("../../modules/personalization/pages/SettingsPage"));
 
+const ADMIN_ONLY_ROLES = Object.freeze([ADMIN_ROLES.ADMIN]);
+const RADIO_ADMIN_ROLES = Object.freeze([ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR]);
+
 function LazyPluginPage({ component: Component, title, description, ...props }) {
   return (
     <React.Suspense fallback={<PluginPage title={title} description={description || `Carregando ${title}...`} />}>
@@ -71,7 +74,7 @@ function LazyPluginPage({ component: Component, title, description, ...props }) 
   );
 }
 
-function AdminPluginPage({ component, title, allowedRoles = [ADMIN_ROLES.ADMIN], ...props }) {
+function AdminPluginPage({ component, title, allowedRoles = ADMIN_ONLY_ROLES, ...props }) {
   return (
     <AdminRouteGuard allowedRoles={allowedRoles} title={title}>
       <LazyPluginPage component={component} title={title} {...props} />
@@ -126,7 +129,7 @@ export const plugins = [
       <AdminPluginPage
         component={RadioAdminPage}
         title="Radio Admin"
-        allowedRoles={[ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR]}
+        allowedRoles={RADIO_ADMIN_ROLES}
       />
     ),
   },
