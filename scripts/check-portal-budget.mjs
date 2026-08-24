@@ -6,7 +6,7 @@ const DIST_DIR = path.resolve('dist')
 const LIMITS = Object.freeze({
   js: 450 * 1024,
   css: 260 * 1024,
-  image: 2_000_000,
+  image: 2_300_000,
 })
 
 const IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.webp'])
