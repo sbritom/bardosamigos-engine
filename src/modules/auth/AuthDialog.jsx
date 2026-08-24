@@ -90,13 +90,13 @@ export default function AuthDialog() {
         if (event.target === event.currentTarget && !busy) closeAuth()
       }}
     >
-      <section className="w-full max-w-md overflow-hidden rounded-3xl border border-white/15 bg-[var(--surface,#07162d)] shadow-2xl">
+      <section className="w-full max-w-md overflow-hidden rounded-3xl border border-white/15 bg-[var(--surface)] shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
           <div>
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary,#4ea1ff)]">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
               Bar dos Amigos
             </span>
-            <h2 id="bds-auth-title" className="mt-1 text-2xl font-black text-[var(--text,#fff)]">
+            <h2 id="bds-auth-title" className="mt-1 text-2xl font-black text-[var(--text)]">
               {mode === 'signup' ? 'Criar sua conta' : 'Entrar na sua conta'}
             </h2>
           </div>
@@ -105,27 +105,27 @@ export default function AuthDialog() {
             aria-label="Fechar"
             onClick={closeAuth}
             disabled={busy}
-            className="rounded-full border border-white/10 p-2 text-[var(--text-secondary,#b9c8dd)] transition hover:bg-white/10"
+            className="rounded-full border border-white/10 p-2 text-[var(--text-secondary)] transition hover:bg-white/10"
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="px-6 py-5">
-          <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-[var(--text-secondary,#b9c8dd)]">
-            <strong className="block text-[var(--text,#fff)]">O site continua livre para visitantes.</strong>
+          <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-[var(--text-secondary)]">
+            <strong className="block text-[var(--text)]">O site continua livre para visitantes.</strong>
             Voce so precisa de uma conta para participar de recursos como pedidos de musica, favoritos, palpites e outras experiencias pessoais.
           </div>
 
           {authDialog.reason && (
-            <p className="mb-4 rounded-xl border border-[var(--primary,#4ea1ff)]/30 bg-[var(--primary,#4ea1ff)]/10 px-4 py-3 text-sm text-[var(--text,#fff)]">
+            <p className="mb-4 rounded-xl border border-[var(--primary)]/30 bg-[var(--primary)]/10 px-4 py-3 text-sm text-[var(--text)]">
               {authDialog.reason}
             </p>
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {mode === 'signup' && (
-              <label className="block text-sm font-semibold text-[var(--text,#fff)]">
+              <label className="block text-sm font-semibold text-[var(--text)]">
                 Como quer ser chamado?
                 <input
                   name="displayName"
@@ -137,12 +137,12 @@ export default function AuthDialog() {
                   value={form.displayName}
                   onChange={handleChange}
                   placeholder="Seu nome no Bar"
-                  className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text,#fff)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary,#4ea1ff)]"
+                  className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary)]"
                 />
               </label>
             )}
 
-            <label className="block text-sm font-semibold text-[var(--text,#fff)]">
+            <label className="block text-sm font-semibold text-[var(--text)]">
               E-mail
               <input
                 name="email"
@@ -152,11 +152,11 @@ export default function AuthDialog() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="voce@email.com"
-                className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text,#fff)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary,#4ea1ff)]"
+                className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary)]"
               />
             </label>
 
-            <label className="block text-sm font-semibold text-[var(--text,#fff)]">
+            <label className="block text-sm font-semibold text-[var(--text)]">
               Senha
               <input
                 name="password"
@@ -167,7 +167,7 @@ export default function AuthDialog() {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Minimo de 6 caracteres"
-                className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text,#fff)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary,#4ea1ff)]"
+                className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary)]"
               />
             </label>
 
@@ -180,7 +180,7 @@ export default function AuthDialog() {
             <button
               type="submit"
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary,#2563eb)] px-4 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
             >
               {mode === 'signup' ? <UserPlus size={18} /> : <LogIn size={18} />}
               {busy ? 'Aguarde...' : mode === 'signup' ? 'Criar conta' : 'Entrar'}
@@ -191,14 +191,14 @@ export default function AuthDialog() {
             <button
               type="button"
               onClick={() => changeMode(mode === 'signup' ? 'login' : 'signup')}
-              className="font-semibold text-[var(--primary,#4ea1ff)] hover:underline"
+              className="font-semibold text-[var(--primary)] hover:underline"
             >
               {mode === 'signup' ? 'Ja tenho conta' : 'Criar uma conta'}
             </button>
             <button
               type="button"
               onClick={closeAuth}
-              className="text-[var(--text-secondary,#b9c8dd)] hover:text-[var(--text,#fff)]"
+              className="text-[var(--text-secondary)] hover:text-[var(--text)]"
             >
               Continuar como visitante
             </button>
