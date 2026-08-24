@@ -45,11 +45,16 @@ function getUserAgent(request) {
   return cleanText(request.headers['user-agent'] || '', 500)
 }
 
-function createFingerprint(request) {
+function createFingerprint(request, userId = '') {
   return crypto
     .createHash('sha256')
-    .update(`${getIp(request)}|${getUserAgent(request)}`)
+    .update(`${userId}|${getIp(request)}|${getUserAgent(request)}`)
     .digest('hex')
+}
+
+function getBearerToken(request) {
+  const header = request.headers.authorization || ''
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : ''
 }
 
 function isAuthorizedRadioUser(user) {
@@ -57,9 +62,24 @@ function isAuthorizedRadioUser(user) {
   return AUTHORIZED_ROLES.has(role) || user?.app_metadata?.is_admin === true
 }
 
+async function requireUser(request, supabase) {
+  const token = getBearerToken(request)
+
+  if (!token) {
+    return { ok: false, status: 401, error: 'Entre ou crie sua conta para pedir uma musica.' }
+  }
+
+  const { data, error } = await supabase.auth.getUser(token)
+
+  if (error || !data?.user) {
+    return { ok: false, status: 401, error: 'Sua sessao expirou. Entre novamente para continuar.' }
+  }
+
+  return { ok: true, user: data.user }
+}
+
 async function requireAdmin(request, supabase) {
-  const header = request.headers.authorization || ''
-  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+  const token = getBearerToken(request)
 
   if (!token) {
     return { ok: false, status: 401, error: 'Autenticacao administrativa obrigatoria.' }
@@ -87,6 +107,12 @@ async function readBody(request) {
 }
 
 async function handlePost(request, response, supabase) {
+  const authenticated = await requireUser(request, supabase)
+  if (!authenticated.ok) {
+    response.status(authenticated.status).json({ ok: false, error: authenticated.error })
+    return
+  }
+
   const body = await readBody(request)
   const songAndArtist = cleanText(body.songAndArtist, 180)
   const message = cleanText(body.message, 500)
@@ -99,7 +125,7 @@ async function handlePost(request, response, supabase) {
     return
   }
 
-  const fingerprint = createFingerprint(request)
+  const fingerprint = createFingerprint(request, authenticated.user.id)
   const since = new Date(Date.now() - REQUEST_WINDOW_SECONDS * 1000).toISOString()
 
   const { data: recent, error: recentError } = await supabase
@@ -127,7 +153,7 @@ async function handlePost(request, response, supabase) {
       song_and_artist: songAndArtist,
       message: message || null,
       status: 'pending',
-      source: 'public_radio_page',
+      source: 'authenticated_radio_page',
       request_fingerprint: fingerprint,
       requester_user_agent: getUserAgent(request) || null,
     })
