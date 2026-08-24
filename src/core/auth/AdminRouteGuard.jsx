@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { LogIn, LogOut, ShieldAlert, ShieldCheck } from 'lucide-react'
 
+import { getSupabaseClient } from '../database/client/supabaseClient.js'
 import {
   ADMIN_AUTH_ERRORS,
   ADMIN_ROLES,
@@ -38,8 +39,9 @@ export default function AdminRouteGuard({
   const [busy, setBusy] = useState(false)
   const [loginError, setLoginError] = useState('')
 
-  const refreshAccess = useCallback(async () => {
-    setAccess((current) => ({ ...current, loading: true }))
+  const refreshAccess = useCallback(async ({ showLoading = true } = {}) => {
+    if (showLoading) setAccess((current) => ({ ...current, loading: true }))
+
     try {
       const result = await getAdminAccess({ allowedRoles })
       setAccess({ loading: false, ...result })
@@ -56,12 +58,15 @@ export default function AdminRouteGuard({
 
   useEffect(() => {
     let active = true
+    const client = getSupabaseClient()
 
-    getAdminAccess({ allowedRoles })
-      .then((result) => {
+    const verify = async (showLoading = true) => {
+      if (showLoading && active) setAccess((current) => ({ ...current, loading: true }))
+
+      try {
+        const result = await getAdminAccess({ allowedRoles })
         if (active) setAccess({ loading: false, ...result })
-      })
-      .catch((error) => {
+      } catch (error) {
         if (active) {
           setAccess({
             ...INITIAL_STATE,
@@ -69,10 +74,19 @@ export default function AdminRouteGuard({
             reason: error.message || ADMIN_AUTH_ERRORS.NOT_ALLOWED,
           })
         }
-      })
+      }
+    }
+
+    verify(true)
+
+    const { data: authSubscription } = client?.auth.onAuthStateChange(() => {
+      // Revalidate against Supabase instead of trusting the session event payload.
+      window.setTimeout(() => verify(false), 0)
+    }) || { data: null }
 
     return () => {
       active = false
+      authSubscription?.subscription?.unsubscribe()
     }
   }, [allowedRoles])
 
