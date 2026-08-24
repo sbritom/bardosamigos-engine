@@ -1,0 +1,169 @@
+/* Mobile and rendering performance layer. Loaded last so it can safely refine legacy rules. */
+
+/* The Events banner is intentionally withheld until AppShell marks it as near the viewport. */
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note {
+  background-image: none !important;
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note.bds-deferred-background-ready {
+  background-image: url("../../assets/home/events-home-banner.webp") !important;
+}
+
+/* Skip layout/paint work for lower Home modules until the browser needs them. */
+@supports (content-visibility: auto) {
+  .bds-home-shell [data-designer-id="football"],
+  .bds-home-shell [data-designer-id="news"],
+  .bds-home-shell [data-designer-id="radio"],
+  .bds-home-shell [data-designer-id="community"],
+  .bds-home-shell [data-designer-id="barstudio"] {
+    content-visibility: auto;
+    contain-intrinsic-size: 420px;
+  }
+}
+
+img,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .bds-responsive-container {
+    padding-inline: 16px;
+  }
+
+  .bds-top-header__bar {
+    min-height: 64px;
+    gap: 10px;
+  }
+
+  .bds-top-header__brand-icon {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+  }
+
+  .bds-top-header__brand-title {
+    font-size: clamp(.88rem, 4vw, 1.05rem);
+    white-space: nowrap;
+  }
+
+  .bds-top-header [data-designer-id="header.actions"] {
+    gap: 4px;
+  }
+
+  .bds-top-header__icon-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .bds-top-header__mobile-nav {
+    gap: 8px;
+    margin-inline: -4px;
+    padding-inline: 4px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bds-top-header__mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bds-top-header__mobile-link {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding-inline: 12px;
+    scroll-snap-align: start;
+  }
+
+  .bds-action-button,
+  .bds-button {
+    min-height: 44px;
+  }
+
+  .bds-feature-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-panel {
+    padding: 16px;
+  }
+
+  .bds-hero-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .bds-section-header,
+  .bds-card-header {
+    gap: 12px;
+  }
+
+  .bds-section-header__action,
+  .bds-card-header__action {
+    max-width: 100%;
+  }
+
+  .bds-match-card__teams {
+    gap: 8px;
+  }
+
+  .bds-news-card {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .bds-news-card__image,
+  .bds-media-block__fallback {
+    width: 72px;
+    height: 56px;
+  }
+
+  .bds-home-tv-categories {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bds-home-tv-categories::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bds-home-tv-categories > * {
+    flex: 0 0 auto;
+  }
+
+  .bds-home-community-note {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bds-top-header__bar {
+    gap: 6px;
+  }
+
+  .bds-top-header__brand-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .bds-top-header__brand-title {
+    font-size: .86rem;
+  }
+
+  .bds-home-tv-header-button {
+    white-space: normal;
+    line-height: 1.15;
+  }
+}
