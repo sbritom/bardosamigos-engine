@@ -37,14 +37,14 @@ test('sitemap contem somente as paginas SEO publicas e usa o dominio oficial', a
   ))
 
   assert.deepEqual(locations.sort(), expected.sort())
-  assert.doesNotMatch(sitemap, /bardosamigos\.com\.br(?!\/)/)
+  assert.doesNotMatch(sitemap, /https:\/\/bardosamigos\.com\.br/)
   assert.doesNotMatch(sitemap, /\/barcoins|\/brincadeiras|\/games/)
 })
 
 test('robots aponta para o sitemap oficial e bloqueia areas internas ou congeladas', async () => {
   const robots = await source('public/robots.txt')
 
-  assert.match(robots, new RegExp(`Sitemap: ${EXPECTED_SITE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/sitemap\\.xml`))
+  assert.ok(robots.includes(`Sitemap: ${EXPECTED_SITE_URL}/sitemap.xml`))
 
   for (const path of [
     '/admin',
@@ -59,7 +59,7 @@ test('robots aponta para o sitemap oficial e bloqueia areas internas ou congelad
     '/brincadeiras',
     '/games',
   ]) {
-    assert.match(robots, new RegExp(`Disallow: ${path.replace('/', '\\/')}(?:\\n|$)`))
+    assert.ok(robots.split('\n').includes(`Disallow: ${path}`), `${path} deve estar bloqueada no robots.txt`)
   }
 })
 
@@ -73,8 +73,8 @@ test('rotas nao publicadas para SEO continuam noindex no cliente', () => {
 test('html inicial usa dominio correto e card social coerente com favicon quadrado', async () => {
   const html = await source('index.html')
 
-  assert.match(html, new RegExp(`<link rel="canonical" href="${EXPECTED_SITE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`))
-  assert.match(html, new RegExp(`<meta property="og:url" content="${EXPECTED_SITE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`))
+  assert.ok(html.includes(`<link rel="canonical" href="${EXPECTED_SITE_URL}"`))
+  assert.ok(html.includes(`<meta property="og:url" content="${EXPECTED_SITE_URL}"`))
   assert.match(html, /<meta name="twitter:card" content="summary"/)
   assert.match(html, /<meta property="og:image:width" content="256"/)
   assert.match(html, /<meta property="og:image:height" content="256"/)
