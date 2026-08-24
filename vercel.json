@@ -42,6 +42,34 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/football",
+      "destination": "/football/index.html"
+    },
+    {
+      "source": "/radio",
+      "destination": "/radio/index.html"
+    },
+    {
+      "source": "/tv",
+      "destination": "/tv/index.html"
+    },
+    {
+      "source": "/events",
+      "destination": "/events/index.html"
+    },
+    {
+      "source": "/news",
+      "destination": "/news/index.html"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools/index.html"
+    },
+    {
+      "source": "/community",
+      "destination": "/community/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
