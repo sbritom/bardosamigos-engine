@@ -14,22 +14,27 @@ const portalBackground = {
   backgroundRepeat: 'no-repeat',
 }
 
+function markDeferredBackgroundReady(container) {
+  const background = container.querySelector('.bds-home-community-note')
+  background?.classList.add('bds-deferred-background-ready')
+}
+
 function useDeferredPortalBackgrounds(pathname) {
   useEffect(() => {
     let observer = null
     const frame = window.requestAnimationFrame(() => {
-      const targets = Array.from(document.querySelectorAll('.bds-home-community-note'))
+      const targets = Array.from(document.querySelectorAll('.bds-home-shell [data-designer-id="community"]'))
       if (!targets.length) return
 
       if (!('IntersectionObserver' in window)) {
-        targets.forEach((target) => target.classList.add('bds-deferred-background-ready'))
+        targets.forEach(markDeferredBackgroundReady)
         return
       }
 
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return
-          entry.target.classList.add('bds-deferred-background-ready')
+          markDeferredBackgroundReady(entry.target)
           observer?.unobserve(entry.target)
         })
       }, {
