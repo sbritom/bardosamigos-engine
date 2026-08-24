@@ -5,6 +5,7 @@ import {
   signInAdminWithUsername,
   signOutAdmin,
 } from "../../../core/auth/adminAuthService";
+import { getSupabaseClient } from "../../../core/database";
 
 const REQUESTS_ENDPOINT = "/api/radio/requests";
 const RADIO_ADMIN_ROLES = [ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR];
@@ -56,12 +57,35 @@ async function parseResponse(response) {
   return payload?.data ?? payload;
 }
 
+async function getUserAccessToken() {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    const error = new Error("A autenticacao nao esta configurada neste ambiente.");
+    error.status = 503;
+    throw error;
+  }
+
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+
+  const token = data?.session?.access_token || "";
+  if (!token) {
+    const error = new Error("Entre ou crie sua conta para pedir uma musica.");
+    error.status = 401;
+    throw error;
+  }
+
+  return token;
+}
+
 export async function submitRadioMusicRequest({ songAndArtist, message }) {
+  const token = await getUserAccessToken();
   const response = await fetch(REQUESTS_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ songAndArtist, message }),
   });
