@@ -33,5 +33,8 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Release smoke
+        run: npm run portal:release-smoke
+
       - name: Performance budget
         run: npm run portal:budget
