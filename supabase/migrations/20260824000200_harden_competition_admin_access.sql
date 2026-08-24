@@ -1,6 +1,39 @@
 -- Bar dos Amigos - Competition admin hardening.
--- Additive and idempotent: enables RLS and closes direct write access
--- while preserving the public read paths used by the football portal.
+-- Additive and idempotent: aligns the trusted admin claim with database RLS,
+-- enables RLS on Competition catalog tables and closes direct write access.
+
+-- app_metadata is controlled by the authentication backend (unlike
+-- user_metadata), so it is safe to use as an additional trusted admin source.
+-- Existing profile roles/admin assignments remain valid for compatibility.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') in ('admin', 'super_admin')
+    or lower(coalesce(auth.jwt() -> 'app_metadata' ->> 'is_admin', 'false')) = 'true'
+    or exists (
+      select 1
+      from public.profiles p
+      where p.id = auth.uid()
+        and p.deleted_at is null
+        and (
+          p.role::text in ('admin', 'super_admin')
+          or exists (
+            select 1
+            from public.admin_assignments aa
+            join public.admin_roles ar on ar.id = aa.role_id
+            where aa.profile_id = auth.uid()
+              and aa.is_active = true
+              and ar.is_active = true
+              and ar.slug in ('admin', 'super_admin')
+          )
+        )
+    );
+$$;
 
 alter table if exists public.competitions enable row level security;
 alter table if exists public.competition_seasons enable row level security;
@@ -26,8 +59,8 @@ begin
       with check (public.is_admin());
   end if;
 
-  -- Auxiliary football catalog tables are public read models. RLS prevents
-  -- anonymous/authenticated clients from mutating them directly.
+  -- Auxiliary football catalog tables remain public read models for all
+  -- non-deleted records, while writes require an administrator.
   if to_regclass('public.competition_seasons') is not null
     and not exists (
       select 1 from pg_policies
