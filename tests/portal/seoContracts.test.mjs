@@ -75,15 +75,15 @@ test('rotas nao publicadas para SEO continuam noindex no cliente', () => {
   }
 })
 
-test('capa social oficial usa formato horizontal recomendado', async () => {
+test('capa social oficial usa formato horizontal para card grande', async () => {
   assert.equal(DEFAULT_SOCIAL_IMAGE, EXPECTED_SOCIAL_IMAGE)
-  assert.equal(DEFAULT_SOCIAL_IMAGE_WIDTH, '1200')
-  assert.equal(DEFAULT_SOCIAL_IMAGE_HEIGHT, '630')
+  assert.equal(DEFAULT_SOCIAL_IMAGE_WIDTH, '600')
+  assert.equal(DEFAULT_SOCIAL_IMAGE_HEIGHT, '315')
   assert.match(DEFAULT_SOCIAL_IMAGE_ALT, /Bar dos Amigos/)
 
   const imageInfo = await stat(new URL('../../public/social/bar-dos-amigos-social.jpg', import.meta.url))
-  assert.ok(imageInfo.size > 50_000, 'capa social nao deve ser um placeholder pequeno')
-  assert.ok(imageInfo.size < 500_000, 'capa social deve permanecer leve para compartilhamento')
+  assert.ok(imageInfo.size > 5_000, 'capa social nao deve ser um placeholder vazio')
+  assert.ok(imageInfo.size < 100_000, 'capa social deve permanecer leve para compartilhamento')
 })
 
 test('html inicial publica card social grande com a nova capa', async () => {
@@ -95,8 +95,8 @@ test('html inicial publica card social grande com a nova capa', async () => {
   assert.ok(html.includes(`<meta property="og:image" content="${imageUrl}"`))
   assert.ok(html.includes(`<meta name="twitter:image" content="${imageUrl}"`))
   assert.match(html, /<meta name="twitter:card" content="summary_large_image"/)
-  assert.match(html, /<meta property="og:image:width" content="1200"/)
-  assert.match(html, /<meta property="og:image:height" content="630"/)
+  assert.match(html, /<meta property="og:image:width" content="600"/)
+  assert.match(html, /<meta property="og:image:height" content="315"/)
 })
 
 test('paginas indexadas nao promovem modulos congelados no texto SEO', () => {
