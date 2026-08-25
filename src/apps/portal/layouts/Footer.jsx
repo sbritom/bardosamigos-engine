@@ -22,12 +22,6 @@ export default function Footer() {
           <div className="text-center text-[var(--bds-color-text-muted)]">
             © 2016 - 2026 Bar dos Amigos. Todos os direitos reservados.
           </div>
-
-          <div className="flex gap-4 text-[var(--bds-color-text-secondary)]">
-            <span>Sobre</span>
-            <span>Termos</span>
-            <span>Contato</span>
-          </div>
         </div>
       </Container>
     </footer>
