@@ -5,6 +5,7 @@ import process from 'node:process'
 import {
   DEFAULT_SOCIAL_IMAGE,
   DEFAULT_SOCIAL_IMAGE_HEIGHT,
+  DEFAULT_SOCIAL_IMAGE_TYPE,
   DEFAULT_SOCIAL_IMAGE_WIDTH,
   SITE_URL,
   publicSeoPages,
@@ -44,6 +45,8 @@ for (const page of publicSeoPages) {
     [`name="description" content="${page.description}"`, 'description'],
     ['name="robots" content="index,follow"', 'robots'],
     [`property="og:image" content="${socialImageUrl}"`, 'og:image'],
+    [`property="og:image:secure_url" content="${socialImageUrl}"`, 'og:image:secure_url'],
+    [`property="og:image:type" content="${DEFAULT_SOCIAL_IMAGE_TYPE}"`, 'og:image:type'],
     [`property="og:image:width" content="${DEFAULT_SOCIAL_IMAGE_WIDTH}"`, 'og:image:width'],
     [`property="og:image:height" content="${DEFAULT_SOCIAL_IMAGE_HEIGHT}"`, 'og:image:height'],
     ['name="twitter:card" content="summary_large_image"', 'twitter:card'],
@@ -53,6 +56,18 @@ for (const page of publicSeoPages) {
   for (const [needle, label] of checks) {
     if (!html.includes(needle)) fail(`${page.path}: ${label} incorreto`)
   }
+}
+
+try {
+  const fallback = await readFile(path.join(DIST_DIR, 'noindex', 'index.html'), 'utf8')
+  if (!fallback.includes('name="robots" content="noindex,nofollow"')) {
+    fail('fallback de rotas nao publicas nao esta marcado como noindex,nofollow')
+  }
+  if (!fallback.includes(`property="og:image" content="${socialImageUrl}"`)) {
+    fail('fallback noindex perdeu a capa social padrao')
+  }
+} catch {
+  fail('entrypoint fallback noindex ausente no dist')
 }
 
 try {
@@ -73,4 +88,4 @@ try {
   fail('robots.txt ou sitemap.xml ausente no dist')
 }
 
-if (!process.exitCode) console.log(`[release-smoke] ${publicSeoPages.length} rotas publicas e imagem social validadas com sucesso.`)
+if (!process.exitCode) console.log(`[release-smoke] ${publicSeoPages.length} rotas publicas, fallback noindex e imagem social validados com sucesso.`)

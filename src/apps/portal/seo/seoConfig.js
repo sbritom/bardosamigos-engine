@@ -3,6 +3,7 @@ export const SITE_NAME = 'Bar dos Amigos'
 export const DEFAULT_SOCIAL_IMAGE = '/social/bar-dos-amigos-social.jpg'
 export const DEFAULT_SOCIAL_IMAGE_WIDTH = '600'
 export const DEFAULT_SOCIAL_IMAGE_HEIGHT = '315'
+export const DEFAULT_SOCIAL_IMAGE_TYPE = 'image/jpeg'
 export const DEFAULT_SOCIAL_IMAGE_ALT = 'Bar dos Amigos — Rádio, TV, Futebol e Comunidade'
 export const THEME_COLOR = '#010A26'
 

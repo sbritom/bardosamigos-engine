@@ -6,6 +6,7 @@ import {
   DEFAULT_SOCIAL_IMAGE,
   DEFAULT_SOCIAL_IMAGE_ALT,
   DEFAULT_SOCIAL_IMAGE_HEIGHT,
+  DEFAULT_SOCIAL_IMAGE_TYPE,
   DEFAULT_SOCIAL_IMAGE_WIDTH,
   SITE_URL,
   getSeoForPath,
@@ -79,6 +80,7 @@ test('capa social oficial usa formato horizontal para card grande', async () => 
   assert.equal(DEFAULT_SOCIAL_IMAGE, EXPECTED_SOCIAL_IMAGE)
   assert.equal(DEFAULT_SOCIAL_IMAGE_WIDTH, '600')
   assert.equal(DEFAULT_SOCIAL_IMAGE_HEIGHT, '315')
+  assert.equal(DEFAULT_SOCIAL_IMAGE_TYPE, 'image/jpeg')
   assert.match(DEFAULT_SOCIAL_IMAGE_ALT, /Bar dos Amigos/)
 
   const imageInfo = await stat(new URL('../../public/social/bar-dos-amigos-social.jpg', import.meta.url))
@@ -93,10 +95,29 @@ test('html inicial publica card social grande com a nova capa', async () => {
   assert.ok(html.includes(`<link rel="canonical" href="${EXPECTED_SITE_URL}"`))
   assert.ok(html.includes(`<meta property="og:url" content="${EXPECTED_SITE_URL}"`))
   assert.ok(html.includes(`<meta property="og:image" content="${imageUrl}"`))
+  assert.ok(html.includes(`<meta property="og:image:secure_url" content="${imageUrl}"`))
+  assert.ok(html.includes(`<meta property="og:image:type" content="image/jpeg"`))
   assert.ok(html.includes(`<meta name="twitter:image" content="${imageUrl}"`))
   assert.match(html, /<meta name="twitter:card" content="summary_large_image"/)
   assert.match(html, /<meta property="og:image:width" content="600"/)
   assert.match(html, /<meta property="og:image:height" content="315"/)
+})
+
+test('Vercel envia somente as rotas SEO publicas para entrypoints indexaveis', async () => {
+  const config = JSON.parse(await source('vercel.json'))
+  const rewrites = new Map(config.rewrites.map((item) => [item.source, item.destination]))
+
+  assert.equal(rewrites.get('/'), '/index.html')
+
+  for (const page of publicSeoPages.filter((item) => item.path !== '/')) {
+    assert.equal(
+      rewrites.get(page.path),
+      `${page.path}/index.html`,
+      `${page.path} deve apontar para seu entrypoint estatico`,
+    )
+  }
+
+  assert.equal(rewrites.get('/(.*)'), '/noindex/index.html')
 })
 
 test('paginas indexadas nao promovem modulos congelados no texto SEO', () => {
