@@ -78,7 +78,7 @@ test('migration marca catalogo legado como BR_ONLY e adiciona fontes globais ofi
   assert.match(sql, /youtube-nocookie\.com\/embed/i)
 })
 
-test('frontend consulta pais no Vercel e bloqueia iframe regional antes de renderizar', async () => {
+test('frontend consulta pais no Vercel e bloqueia iframe antes de resolver a regiao', async () => {
   const geoApi = await source('api/geo.js')
   const page = await source('src/modules/tv/pages/TVPage.jsx')
   const player = await source('src/modules/tv/components/TVPlayer.jsx')
@@ -89,8 +89,10 @@ test('frontend consulta pais no Vercel e bloqueia iframe regional antes de rende
   assert.doesNotMatch(geoApi, /x-forwarded-for|client-ip|remoteAddress/i)
 
   assert.match(page, /fetch\('\/api\/geo'/)
+  assert.match(page, /regionCheckPending=!\{?geoResolved/i)
   assert.match(page, /blockedByRegion=/)
   assert.match(page, /sortTVChannelsForCountry/)
-  assert.match(player, /!blockedByRegion && embedUrl/)
+  assert.match(player, /!regionCheckPending && !blockedByRegion && embedUrl/)
+  assert.match(player, /Verificando disponibilidade/)
   assert.match(channelService, /pageSize:\s*200/)
 })
