@@ -1,13 +1,21 @@
 import { tvRepository } from '../repository'
 import {
   getTVChannelAvailabilityScope,
+  normalizeOfficialTVHlsUrl,
   normalizeTVCountryCode,
   normalizeTVEmbedUrl,
   slugifyTVValue,
 } from '../utils'
 
+function normalizeProviderEmbed(payload) {
+  if (payload.provider === 'hls-official') {
+    return normalizeOfficialTVHlsUrl(payload.embedUrl)
+  }
+  return normalizeTVEmbedUrl(payload.embedUrl)
+}
+
 function normalizeChannel(payload) {
-  const embed = normalizeTVEmbedUrl(payload.embedUrl)
+  const embed = normalizeProviderEmbed(payload)
   const allowedCountries = Array.isArray(payload.allowedCountries)
     ? payload.allowedCountries.map(normalizeTVCountryCode).filter(Boolean)
     : []
