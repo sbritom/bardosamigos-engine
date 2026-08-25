@@ -17,8 +17,18 @@ import {
 } from '../hooks'
 import { TVProvider } from '../providers'
 import { TVFavoriteService } from '../services/TVFavoriteService'
+import { isTVChannelAvailableInCountry, sortTVChannelsForCountry } from '../utils'
 import './tvPlatform.css'
 import './tvBlackGold.css'
+
+function countryDisplayName(countryCode) {
+  if (!countryCode) return ''
+  try {
+    return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(countryCode) || countryCode
+  } catch {
+    return countryCode
+  }
+}
 
 function TVPlatformContent() {
   const { user, isAuthenticated, openAuth } = useAuth()
@@ -26,10 +36,37 @@ function TVPlatformContent() {
   const [favoriteIds, setFavoriteIds] = useState(() => new Set())
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [favoriteFeedback, setFavoriteFeedback] = useState('')
+  const [viewerCountry, setViewerCountry] = useState('')
+  const [geoResolved, setGeoResolved] = useState(false)
   const playerRef = useRef(null)
   const categories = useTVCategories()
   const channels = useTVChannels()
   const featured = useTVFeatured()
+
+  useEffect(() => {
+    let active = true
+
+    fetch('/api/geo', {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (!active) return
+        setViewerCountry(String(payload?.country || '').toUpperCase())
+      })
+      .catch(() => {
+        if (active) setViewerCountry('')
+      })
+      .finally(() => {
+        if (active) setGeoResolved(true)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -62,20 +99,35 @@ function TVPlatformContent() {
     }
   }, [user?.id])
 
+  const availableChannels = useMemo(
+    () => channels.data.filter((channel) => isTVChannelAvailableInCountry(channel, viewerCountry)),
+    [channels.data, viewerCountry],
+  )
+
   const visibleChannels = useMemo(() => {
-    if (!favoritesOnly) return channels.data
-    return channels.data.filter((channel) => favoriteIds.has(channel.id))
-  }, [channels.data, favoriteIds, favoritesOnly])
+    const base = favoritesOnly
+      ? channels.data.filter((channel) => favoriteIds.has(channel.id))
+      : channels.data
+    return sortTVChannelsForCountry(base, viewerCountry)
+  }, [channels.data, favoriteIds, favoritesOnly, viewerCountry])
 
   const channelCount = channels.count || channels.data.length
-  const fallbackChannel = useMemo(
-    () => featured.data.find((item) => item?.channel)?.channel || channels.data[0] || null,
-    [channels.data, featured.data],
-  )
+  const fallbackChannel = useMemo(() => {
+    const availableFeatured = featured.data.find((item) => (
+      item?.channel && isTVChannelAvailableInCountry(item.channel, viewerCountry)
+    ))?.channel
+    return availableFeatured || availableChannels[0] || channels.data[0] || null
+  }, [availableChannels, channels.data, featured.data, viewerCountry])
+
   const selectedChannel = activeChannel || fallbackChannel
+  const selectedAvailable = selectedChannel
+    ? isTVChannelAvailableInCountry(selectedChannel, viewerCountry)
+    : false
   const activeCategoryName = selectedChannel?.category?.name || selectedChannel?.language || 'Ao vivo'
   const catalogError = channels.error || categories.error || featured.error
   const catalogLoading = channels.loading || categories.loading || featured.loading
+  const outsideBrazil = Boolean(geoResolved && viewerCountry && viewerCountry !== 'BR')
+  const viewerCountryName = useMemo(() => countryDisplayName(viewerCountry), [viewerCountry])
 
   const emptyCopy = useMemo(() => {
     if (favoritesOnly) {
@@ -150,13 +202,13 @@ function TVPlatformContent() {
 
   const openFullscreen = useCallback(async () => {
     const player = playerRef.current
-    if (!player || !player.requestFullscreen) return
+    if (!player || !player.requestFullscreen || !selectedAvailable) return
     try {
       await player.requestFullscreen()
     } catch (error) {
       console.warn('[TVPage] Nao foi possivel abrir tela cheia.', error)
     }
-  }, [])
+  }, [selectedAvailable])
 
   return (
     <main className="tv-platform" aria-busy={catalogLoading}>
@@ -165,12 +217,18 @@ function TVPlatformContent() {
           <span><Tv size={20} aria-hidden="true" /></span>
           <h1>TV DO BAR</h1>
         </div>
-        <Badge>{channelCount} CANAIS</Badge>
+        <Badge>{outsideBrazil ? `${availableChannels.length} DISPONIVEIS` : `${channelCount} CANAIS`}</Badge>
       </header>
 
       {!catalogLoading && catalogError ? (
         <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100" role="status" aria-live="polite">
           Nao foi possivel atualizar todo o catalogo agora. Os canais ja disponiveis continuam acessiveis.
+        </p>
+      ) : null}
+
+      {outsideBrazil ? (
+        <p className="mb-4 rounded-xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm font-semibold text-sky-100" role="status">
+          Acesso identificado em {viewerCountryName || viewerCountry}. As fontes brasileiras atuais reproduzem apenas no Brasil; canais marcados como Global continuam disponiveis normalmente.
         </p>
       ) : null}
 
@@ -180,6 +238,8 @@ function TVPlatformContent() {
           title={selectedChannel?.name}
           poster={selectedChannel?.logo}
           provider={selectedChannel?.provider}
+          blockedByRegion={Boolean(selectedChannel && !selectedAvailable)}
+          viewerCountry={viewerCountryName || viewerCountry}
         />
         <div className="tv-platform__nowbar">
           <div>
@@ -187,7 +247,13 @@ function TVPlatformContent() {
             <strong>{selectedChannel?.name || 'Selecione um canal'}</strong>
             {selectedChannel && <small>{activeCategoryName}</small>}
           </div>
-          <button type="button" onClick={openFullscreen} aria-label="Abrir player da TV em tela cheia">
+          <button
+            type="button"
+            onClick={openFullscreen}
+            disabled={!selectedChannel || !selectedAvailable}
+            aria-label="Abrir player da TV em tela cheia"
+            className="disabled:cursor-not-allowed disabled:opacity-50"
+          >
             <Maximize2 size={16} aria-hidden="true" />
             Tela cheia
           </button>
@@ -250,6 +316,7 @@ function TVPlatformContent() {
                 channel={channel}
                 active={selectedChannel?.id === channel.id}
                 favorite={favoriteIds.has(channel.id)}
+                unavailable={Boolean(viewerCountry && !isTVChannelAvailableInCountry(channel, viewerCountry))}
                 onSelect={selectChannel}
                 onToggleFavorite={toggleFavorite}
               />
