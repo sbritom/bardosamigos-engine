@@ -202,13 +202,13 @@ function TVPlatformContent() {
 
   const openFullscreen = useCallback(async () => {
     const player = playerRef.current
-    if (!player || !player.requestFullscreen || !selectedAvailable) return
+    if (!geoResolved || !player || !player.requestFullscreen || !selectedAvailable) return
     try {
       await player.requestFullscreen()
     } catch (error) {
       console.warn('[TVPage] Nao foi possivel abrir tela cheia.', error)
     }
-  }, [selectedAvailable])
+  }, [geoResolved, selectedAvailable])
 
   return (
     <main className="tv-platform" aria-busy={catalogLoading}>
@@ -238,7 +238,8 @@ function TVPlatformContent() {
           title={selectedChannel?.name}
           poster={selectedChannel?.logo}
           provider={selectedChannel?.provider}
-          blockedByRegion={Boolean(selectedChannel && !selectedAvailable)}
+          blockedByRegion={Boolean(geoResolved && selectedChannel && !selectedAvailable)}
+          regionCheckPending={!geoResolved}
           viewerCountry={viewerCountryName || viewerCountry}
         />
         <div className="tv-platform__nowbar">
@@ -250,7 +251,7 @@ function TVPlatformContent() {
           <button
             type="button"
             onClick={openFullscreen}
-            disabled={!selectedChannel || !selectedAvailable}
+            disabled={!geoResolved || !selectedChannel || !selectedAvailable}
             aria-label="Abrir player da TV em tela cheia"
             className="disabled:cursor-not-allowed disabled:opacity-50"
           >
