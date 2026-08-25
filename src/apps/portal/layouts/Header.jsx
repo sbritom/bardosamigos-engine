@@ -1,4 +1,4 @@
-import { Beer, Search, ShieldCheck, Sun, UserCircle } from 'lucide-react'
+import { Beer, ShieldCheck, UserCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
@@ -76,12 +76,6 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-2 text-sm" data-designer-id="header.actions" data-designer-label="Header / Acoes">
-              <button className="bds-top-header__icon-button" type="button" aria-label="Pesquisar">
-                <Search size={18} />
-              </button>
-              <button className="bds-top-header__icon-button" type="button" aria-label="Tema">
-                <Sun size={18} />
-              </button>
               {showLocalAdmin && (
                 <button
                   className={`bds-top-header__icon-button ${localAdminEnabled ? 'bds-top-header__icon-button--active' : ''}`}
