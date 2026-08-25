@@ -196,7 +196,7 @@ export function HomeHitsCard({ hits = [], loading = false, error = null }) {
     <FeatureCard
       className="bds-home-card-full bds-home-hits-card"
       title="📈 Hits do Momento"
-      description="As musicas em alta no YouTube Brasil."
+      description="Selecao musical em destaque no Bar dos Amigos."
       icon={<Music2 size={20} />}
     >
       <div className="bds-home-hits-list" data-designer-id="radio.topSongs" data-designer-label="Hits do Momento / Lista">
