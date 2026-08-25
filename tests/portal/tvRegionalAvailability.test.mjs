@@ -1,0 +1,96 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+
+import {
+  TV_AVAILABILITY_SCOPE,
+  getTVChannelAvailabilityScope,
+  isTVChannelAvailableInCountry,
+  sortTVChannelsForCountry,
+} from '../../src/modules/tv/utils/tvAvailability.js'
+
+async function source(path) {
+  return readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
+}
+
+test('provedor brasileiro e sempre BR_ONLY', () => {
+  const channel = {
+    provider: 'embed-canais-tv',
+    availabilityScope: 'GLOBAL',
+  }
+
+  assert.equal(getTVChannelAvailabilityScope(channel), TV_AVAILABILITY_SCOPE.BR_ONLY)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'BR'), true)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'PT'), false)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'US'), false)
+})
+
+test('canais GLOBAL continuam disponiveis fora do Brasil', () => {
+  const channel = {
+    provider: 'youtube-official',
+    availabilityScope: 'GLOBAL',
+  }
+
+  assert.equal(isTVChannelAvailableInCountry(channel, 'BR'), true)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'PT'), true)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'US'), true)
+})
+
+test('COUNTRY_LIST respeita lista explicita de paises', () => {
+  const channel = {
+    provider: 'official',
+    availabilityScope: 'COUNTRY_LIST',
+    allowedCountries: ['BR', 'PT'],
+  }
+
+  assert.equal(isTVChannelAvailableInCountry(channel, 'PT'), true)
+  assert.equal(isTVChannelAvailableInCountry(channel, 'US'), false)
+})
+
+test('fora do Brasil canais disponiveis sao priorizados no catalogo', () => {
+  const brazilian = { id: 'br', provider: 'embed-canais-tv', availabilityScope: 'BR_ONLY' }
+  const global = { id: 'global', provider: 'youtube-official', availabilityScope: 'GLOBAL' }
+
+  assert.deepEqual(
+    sortTVChannelsForCountry([brazilian, global], 'PT').map((channel) => channel.id),
+    ['global', 'br'],
+  )
+})
+
+test('migration marca catalogo legado como BR_ONLY e adiciona fontes globais oficiais', async () => {
+  const sql = await source('supabase/migrations/20260825132718_add_tv_regional_availability_and_global_channels.sql')
+
+  assert.match(sql, /where provider = 'embed-canais-tv'/i)
+  assert.match(sql, /availability_scope = 'BR_ONLY'/i)
+  assert.match(sql, /allowed_countries = array\['BR'\]/i)
+
+  for (const slug of [
+    'france24-english',
+    'al-jazeera-english',
+    'dw-news',
+    'bloomberg-television',
+    'euronews-english',
+    'nasa-media',
+  ]) {
+    assert.ok(sql.includes(`'${slug}'`), `${slug} deve estar no catalogo global inicial`)
+  }
+
+  assert.match(sql, /youtube-nocookie\.com\/embed/i)
+})
+
+test('frontend consulta pais no Vercel e bloqueia iframe regional antes de renderizar', async () => {
+  const geoApi = await source('api/geo.js')
+  const page = await source('src/modules/tv/pages/TVPage.jsx')
+  const player = await source('src/modules/tv/components/TVPlayer.jsx')
+  const channelService = await source('src/modules/tv/services/TVChannelService.js')
+
+  assert.match(geoApi, /x-vercel-ip-country/i)
+  assert.match(geoApi, /private, no-store/i)
+  assert.doesNotMatch(geoApi, /x-forwarded-for|client-ip|remoteAddress/i)
+
+  assert.match(page, /fetch\('\/api\/geo'/)
+  assert.match(page, /blockedByRegion=/)
+  assert.match(page, /sortTVChannelsForCountry/)
+  assert.match(player, /!blockedByRegion && embedUrl/)
+  assert.match(channelService, /pageSize:\s*200/)
+})
