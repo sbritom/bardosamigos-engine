@@ -78,6 +78,32 @@ test('migration marca catalogo legado como BR_ONLY e adiciona fontes globais ofi
   assert.match(sql, /youtube-nocookie\.com\/embed/i)
 })
 
+test('migration adiciona quatro canais infantis globais por live oficial de canal', async () => {
+  const sql = await source('supabase/migrations/20260825135646_add_global_kids_tv_channels.sql')
+
+  for (const slug of [
+    'wb-kids-global',
+    'babytv-global',
+    'peppa-pig-global',
+    'wildbrain-zoo-global',
+  ]) {
+    assert.ok(sql.includes(`'${slug}'`), `${slug} deve estar no catalogo infantil global`)
+  }
+
+  assert.match(sql, /where slug = 'infantil'/i)
+  assert.match(sql, /availability_scope = 'GLOBAL'/i)
+  assert.match(sql, /youtube-nocookie\.com\/embed\/live_stream\?channel=UC/i)
+})
+
+test('adaptador YouTube oficial valida video ou live de canal oficial', async () => {
+  const provider = await source('src/modules/tv/providers/TVEmbedProviderRegistry.jsx')
+
+  assert.match(provider, /YOUTUBE_VIDEO_ID/)
+  assert.match(provider, /YOUTUBE_CHANNEL_ID/)
+  assert.match(provider, /embedId === 'live_stream'/)
+  assert.match(provider, /searchParams\.get\('channel'\)/)
+})
+
 test('frontend consulta pais no Vercel e bloqueia iframe antes de resolver a regiao', async () => {
   const geoApi = await source('api/geo.js')
   const page = await source('src/modules/tv/pages/TVPage.jsx')
