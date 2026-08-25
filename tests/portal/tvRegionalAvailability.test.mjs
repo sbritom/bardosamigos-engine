@@ -89,7 +89,7 @@ test('frontend consulta pais no Vercel e bloqueia iframe antes de resolver a reg
   assert.doesNotMatch(geoApi, /x-forwarded-for|client-ip|remoteAddress/i)
 
   assert.match(page, /fetch\('\/api\/geo'/)
-  assert.match(page, /regionCheckPending=!\{?geoResolved/i)
+  assert.match(page, /regionCheckPending=\{!geoResolved\}/)
   assert.match(page, /blockedByRegion=/)
   assert.match(page, /sortTVChannelsForCountry/)
   assert.match(player, /!regionCheckPending && !blockedByRegion && embedUrl/)
