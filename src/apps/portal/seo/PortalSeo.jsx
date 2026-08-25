@@ -5,6 +5,7 @@ import {
   DEFAULT_SOCIAL_IMAGE,
   DEFAULT_SOCIAL_IMAGE_ALT,
   DEFAULT_SOCIAL_IMAGE_HEIGHT,
+  DEFAULT_SOCIAL_IMAGE_TYPE,
   DEFAULT_SOCIAL_IMAGE_WIDTH,
   SITE_NAME,
   SITE_URL,
@@ -57,6 +58,8 @@ export default function PortalSeo() {
     upsertMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' })
     upsertMeta('meta[property="og:url"]', { property: 'og:url', content: seo.canonical })
     upsertMeta('meta[property="og:image"]', { property: 'og:image', content: imageUrl })
+    upsertMeta('meta[property="og:image:secure_url"]', { property: 'og:image:secure_url', content: imageUrl })
+    upsertMeta('meta[property="og:image:type"]', { property: 'og:image:type', content: DEFAULT_SOCIAL_IMAGE_TYPE })
     upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width', content: DEFAULT_SOCIAL_IMAGE_WIDTH })
     upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height', content: DEFAULT_SOCIAL_IMAGE_HEIGHT })
     upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt', content: DEFAULT_SOCIAL_IMAGE_ALT })
