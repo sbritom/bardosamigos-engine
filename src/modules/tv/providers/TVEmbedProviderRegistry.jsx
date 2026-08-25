@@ -1,4 +1,9 @@
-import { normalizeTVEmbedUrl, TV_EMBED_IFRAME_POLICY } from '../utils'
+import { OfficialHlsPlayer } from '../components/OfficialHlsPlayer'
+import {
+  normalizeOfficialTVHlsUrl,
+  normalizeTVEmbedUrl,
+  TV_EMBED_IFRAME_POLICY,
+} from '../utils'
 
 const providers = new Map()
 const YOUTUBE_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
@@ -62,4 +67,10 @@ registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
 
   parsed.hash = ''
   return iframeFor(parsed.toString(), title)
+})
+
+registerTVEmbedProvider('hls-official', ({ embedUrl, title }) => {
+  const normalized = normalizeOfficialTVHlsUrl(embedUrl)
+  if (!normalized.valid) return null
+  return <OfficialHlsPlayer src={normalized.url} title={title} />
 })

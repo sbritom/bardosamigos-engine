@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Maximize2, RadioTower, SearchX, Star, Tv } from 'lucide-react'
+import { Globe2, Maximize2, RadioTower, SearchX, Star, Tv } from 'lucide-react'
 import { Badge } from '../../../design-system'
 import { useAuth } from '../../auth/AuthContext'
 import {
@@ -35,6 +35,7 @@ function TVPlatformContent() {
   const [activeChannel, setActiveChannel] = useState(null)
   const [favoriteIds, setFavoriteIds] = useState(() => new Set())
   const [favoritesOnly, setFavoritesOnly] = useState(false)
+  const [globalOnly, setGlobalOnly] = useState(false)
   const [favoriteFeedback, setFavoriteFeedback] = useState('')
   const [viewerCountry, setViewerCountry] = useState('')
   const [geoResolved, setGeoResolved] = useState(false)
@@ -105,11 +106,14 @@ function TVPlatformContent() {
   )
 
   const visibleChannels = useMemo(() => {
-    const base = favoritesOnly
+    let base = favoritesOnly
       ? channels.data.filter((channel) => favoriteIds.has(channel.id))
       : channels.data
+    if (globalOnly) {
+      base = base.filter((channel) => channel.availabilityScope === 'GLOBAL')
+    }
     return sortTVChannelsForCountry(base, viewerCountry)
-  }, [channels.data, favoriteIds, favoritesOnly, viewerCountry])
+  }, [channels.data, favoriteIds, favoritesOnly, globalOnly, viewerCountry])
 
   const channelCount = channels.count || channels.data.length
   const fallbackChannel = useMemo(() => {
@@ -130,6 +134,13 @@ function TVPlatformContent() {
   const viewerCountryName = useMemo(() => countryDisplayName(viewerCountry), [viewerCountry])
 
   const emptyCopy = useMemo(() => {
+    if (globalOnly) {
+      return {
+        icon: <Globe2 size={32} aria-hidden="true" />,
+        title: 'Nenhum canal global encontrado',
+        description: 'Remova a busca ou volte para Todos para ver o catalogo completo.',
+      }
+    }
     if (favoritesOnly) {
       return {
         icon: <Star size={32} aria-hidden="true" />,
@@ -149,7 +160,7 @@ function TVPlatformContent() {
       title: 'Catalogo em preparacao',
       description: 'Nenhum canal foi publicado ainda.',
     }
-  }, [channels.filters.search, favoritesOnly])
+  }, [channels.filters.search, favoritesOnly, globalOnly])
 
   const selectChannel = useCallback((channel) => {
     setActiveChannel(channel)
@@ -197,8 +208,15 @@ function TVPlatformContent() {
       openAuth('Entre para ver sua lista de canais favoritos.', 'login')
       return
     }
+    setGlobalOnly(false)
     setFavoritesOnly((current) => !current)
   }, [isAuthenticated, openAuth])
+
+  const toggleGlobalOnly = useCallback(() => {
+    setFavoritesOnly(false)
+    channels.setCategory('')
+    setGlobalOnly((current) => !current)
+  }, [channels])
 
   const openFullscreen = useCallback(async () => {
     const player = playerRef.current
@@ -266,13 +284,22 @@ function TVPlatformContent() {
         <div className="tv-platform__categories" aria-label="Categorias">
           <button
             type="button"
-            className={!channels.filters.categoryId && !favoritesOnly ? 'is-active' : ''}
+            className={!channels.filters.categoryId && !favoritesOnly && !globalOnly ? 'is-active' : ''}
             onClick={() => {
               setFavoritesOnly(false)
+              setGlobalOnly(false)
               channels.setCategory('')
             }}
           >
             Todos
+          </button>
+          <button
+            type="button"
+            className={globalOnly ? 'is-active' : ''}
+            onClick={toggleGlobalOnly}
+          >
+            <Globe2 size={14} aria-hidden="true" />
+            Globais
           </button>
           <button
             type="button"
@@ -286,9 +313,10 @@ function TVPlatformContent() {
             <button
               key={category.id}
               type="button"
-              className={!favoritesOnly && channels.filters.categoryId === category.id ? 'is-active' : ''}
+              className={!favoritesOnly && !globalOnly && channels.filters.categoryId === category.id ? 'is-active' : ''}
               onClick={() => {
                 setFavoritesOnly(false)
+                setGlobalOnly(false)
                 channels.setCategory(channels.filters.categoryId === category.id ? '' : category.id)
               }}
             >
@@ -304,7 +332,7 @@ function TVPlatformContent() {
       </section>
 
       <TVSection
-        title={favoritesOnly ? 'Meus favoritos' : 'Canais'}
+        title={globalOnly ? 'Canais globais' : favoritesOnly ? 'Meus favoritos' : 'Canais'}
         action={<Badge>{visibleChannels.length} EXIBIDOS</Badge>}
       >
         {channels.loading || categories.loading ? (
