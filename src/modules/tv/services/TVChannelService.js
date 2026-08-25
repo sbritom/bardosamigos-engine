@@ -1,8 +1,17 @@
 import { tvRepository } from '../repository'
-import { normalizeTVEmbedUrl, slugifyTVValue } from '../utils'
+import {
+  getTVChannelAvailabilityScope,
+  normalizeTVCountryCode,
+  normalizeTVEmbedUrl,
+  slugifyTVValue,
+} from '../utils'
 
 function normalizeChannel(payload) {
   const embed = normalizeTVEmbedUrl(payload.embedUrl)
+  const allowedCountries = Array.isArray(payload.allowedCountries)
+    ? payload.allowedCountries.map(normalizeTVCountryCode).filter(Boolean)
+    : []
+
   return {
     data: {
       name: String(payload.name || '').trim(),
@@ -18,6 +27,8 @@ function normalizeChannel(payload) {
       verified: Boolean(payload.verified),
       enabled: payload.enabled !== false,
       displayOrder: Math.max(0, Number(payload.displayOrder) || 0),
+      availabilityScope: getTVChannelAvailabilityScope(payload),
+      allowedCountries,
     },
     embed,
   }
@@ -36,7 +47,7 @@ async function validate(payload, excludeId) {
 }
 
 export const TVChannelService = {
-  list: (query) => tvRepository.listChannels(query),
+  list: (query = {}) => tvRepository.listChannels({ pageSize: 200, ...query }),
   find: (idOrSlug) => tvRepository.findChannel(idOrSlug),
   search: (search, options = {}) => tvRepository.listChannels({ ...options, search }),
   listByCategory: (categoryId, options = {}) => tvRepository.listChannels({ ...options, categoryId }),
