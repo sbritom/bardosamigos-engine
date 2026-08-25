@@ -18,12 +18,10 @@ export function listTVEmbedProviders() {
   return [...providers.keys()]
 }
 
-registerTVEmbedProvider('iframe', ({ embedUrl, title }) => {
-  const normalized = normalizeTVEmbedUrl(embedUrl)
-  if (!normalized.valid) return null
+function iframeFor(url, title) {
   return (
     <iframe
-      src={normalized.url}
+      src={url}
       title={title}
       allow={TV_EMBED_IFRAME_POLICY.allow}
       allowFullScreen
@@ -32,4 +30,26 @@ registerTVEmbedProvider('iframe', ({ embedUrl, title }) => {
       sandbox={TV_EMBED_IFRAME_POLICY.sandbox}
     />
   )
+}
+
+registerTVEmbedProvider('iframe', ({ embedUrl, title }) => {
+  const normalized = normalizeTVEmbedUrl(embedUrl)
+  if (!normalized.valid) return null
+  return iframeFor(normalized.url, title)
+})
+
+registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
+  let parsed
+  try {
+    parsed = new URL(String(embedUrl || ''))
+  } catch {
+    return null
+  }
+
+  if (parsed.protocol !== 'https:') return null
+  if (parsed.hostname !== 'www.youtube-nocookie.com') return null
+  if (!parsed.pathname.startsWith('/embed/')) return null
+
+  parsed.hash = ''
+  return iframeFor(parsed.toString(), title)
 })
