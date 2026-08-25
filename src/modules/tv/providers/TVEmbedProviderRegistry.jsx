@@ -1,4 +1,9 @@
-import { normalizeTVEmbedUrl, TV_EMBED_IFRAME_POLICY } from '../utils'
+import ReactPlayer from 'react-player'
+import {
+  normalizeOfficialTVHlsUrl,
+  normalizeTVEmbedUrl,
+  TV_EMBED_IFRAME_POLICY,
+} from '../utils'
 
 const providers = new Map()
 const YOUTUBE_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
@@ -62,4 +67,21 @@ registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
 
   parsed.hash = ''
   return iframeFor(parsed.toString(), title)
+})
+
+registerTVEmbedProvider('hls-official', ({ embedUrl }) => {
+  const normalized = normalizeOfficialTVHlsUrl(embedUrl)
+  if (!normalized.valid) return null
+
+  return (
+    <ReactPlayer
+      src={normalized.url}
+      controls
+      playsInline
+      preload="metadata"
+      width="100%"
+      height="100%"
+      style={{ width: '100%', height: '100%', background: '#000' }}
+    />
+  )
 })
