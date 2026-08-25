@@ -10,11 +10,12 @@ export function normalizeTVCountryCode(value) {
 }
 
 export function getTVChannelAvailabilityScope(channel) {
+  // O provedor brasileiro atual é conhecido como BR-only. Mantemos esta
+  // proteção mesmo se um seed legado criar o registro com o default GLOBAL.
+  if (channel?.provider === 'embed-canais-tv') return TV_AVAILABILITY_SCOPE.BR_ONLY
+
   const configured = String(channel?.availabilityScope || '').trim().toUpperCase()
   if (Object.values(TV_AVAILABILITY_SCOPE).includes(configured)) return configured
-
-  // Compatibilidade com catálogos antigos: o provedor brasileiro atual é BR-only.
-  if (channel?.provider === 'embed-canais-tv') return TV_AVAILABILITY_SCOPE.BR_ONLY
   return TV_AVAILABILITY_SCOPE.GLOBAL
 }
 
