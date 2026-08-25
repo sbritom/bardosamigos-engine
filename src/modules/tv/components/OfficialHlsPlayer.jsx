@@ -21,8 +21,16 @@ export function OfficialHlsPlayer({ src, title = 'Canal ao vivo' }) {
     }
 
     if (video.canPlayType(NATIVE_HLS_TYPE)) {
+      const handleNativeError = () => {
+        if (!cancelled) setError('A fonte deste canal nao respondeu corretamente.')
+      }
+      video.addEventListener('error', handleNativeError)
       video.src = src
-      return cleanupVideo
+      return () => {
+        cancelled = true
+        video.removeEventListener('error', handleNativeError)
+        cleanupVideo()
+      }
     }
 
     import('hls.js/light')
