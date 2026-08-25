@@ -134,14 +134,18 @@ test('seed HLS prepara treze canais globais sem publica-los antes do player', as
 
 test('adaptadores oficiais validam YouTube e HLS antes de reproduzir', async () => {
   const provider = await source('src/modules/tv/providers/TVEmbedProviderRegistry.jsx')
+  const hlsPlayer = await source('src/modules/tv/components/OfficialHlsPlayer.jsx')
 
   assert.match(provider, /YOUTUBE_VIDEO_ID/)
   assert.match(provider, /YOUTUBE_CHANNEL_ID/)
   assert.match(provider, /embedId === 'live_stream'/)
   assert.match(provider, /searchParams\.get\('channel'\)/)
-  assert.match(provider, /ReactPlayer/)
+  assert.match(provider, /OfficialHlsPlayer/)
+  assert.doesNotMatch(provider, /ReactPlayer/)
   assert.match(provider, /registerTVEmbedProvider\('hls-official'/)
   assert.match(provider, /normalizeOfficialTVHlsUrl/)
+  assert.match(hlsPlayer, /import\('hls\.js\/light'\)/)
+  assert.match(hlsPlayer, /canPlayType\(NATIVE_HLS_TYPE\)/)
 })
 
 test('frontend consulta pais no Vercel, bloqueia por regiao e oferece filtro Global', async () => {
