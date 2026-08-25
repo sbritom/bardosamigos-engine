@@ -58,8 +58,8 @@ for (const page of publicSeoPages) {
 try {
   const socialImage = path.join(DIST_DIR, DEFAULT_SOCIAL_IMAGE.replace(/^\//, ''))
   const imageInfo = await stat(socialImage)
-  if (imageInfo.size < 50_000) fail('imagem social gerada parece pequena ou ausente')
-  if (imageInfo.size > 500_000) fail('imagem social excede 500 KB')
+  if (imageInfo.size < 5_000) fail('imagem social gerada parece vazia ou ausente')
+  if (imageInfo.size > 100_000) fail('imagem social excede 100 KB')
 } catch {
   fail('imagem social ausente no dist')
 }
