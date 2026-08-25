@@ -1,8 +1,9 @@
 export const SITE_URL = 'https://www.radiobardosamigos.com.br'
 export const SITE_NAME = 'Bar dos Amigos'
-export const DEFAULT_SOCIAL_IMAGE = '/favicon-ba.png'
-export const DEFAULT_SOCIAL_IMAGE_WIDTH = '256'
-export const DEFAULT_SOCIAL_IMAGE_HEIGHT = '256'
+export const DEFAULT_SOCIAL_IMAGE = '/social/bar-dos-amigos-social.jpg'
+export const DEFAULT_SOCIAL_IMAGE_WIDTH = '600'
+export const DEFAULT_SOCIAL_IMAGE_HEIGHT = '315'
+export const DEFAULT_SOCIAL_IMAGE_ALT = 'Bar dos Amigos — Rádio, TV, Futebol e Comunidade'
 export const THEME_COLOR = '#010A26'
 
 export const publicSeoPages = [
