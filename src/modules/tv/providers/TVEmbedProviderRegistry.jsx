@@ -1,4 +1,4 @@
-import ReactPlayer from 'react-player'
+import { OfficialHlsPlayer } from '../components/OfficialHlsPlayer'
 import {
   normalizeOfficialTVHlsUrl,
   normalizeTVEmbedUrl,
@@ -69,19 +69,8 @@ registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
   return iframeFor(parsed.toString(), title)
 })
 
-registerTVEmbedProvider('hls-official', ({ embedUrl }) => {
+registerTVEmbedProvider('hls-official', ({ embedUrl, title }) => {
   const normalized = normalizeOfficialTVHlsUrl(embedUrl)
   if (!normalized.valid) return null
-
-  return (
-    <ReactPlayer
-      src={normalized.url}
-      controls
-      playsInline
-      preload="metadata"
-      width="100%"
-      height="100%"
-      style={{ width: '100%', height: '100%', background: '#000' }}
-    />
-  )
+  return <OfficialHlsPlayer src={normalized.url} title={title} />
 })
