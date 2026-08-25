@@ -1,6 +1,8 @@
 import { normalizeTVEmbedUrl, TV_EMBED_IFRAME_POLICY } from '../utils'
 
 const providers = new Map()
+const YOUTUBE_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
+const YOUTUBE_CHANNEL_ID = /^UC[A-Za-z0-9_-]{22}$/
 
 export function registerTVEmbedProvider(name, renderer) {
   if (!name || typeof renderer !== 'function') {
@@ -49,6 +51,14 @@ registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
   if (parsed.protocol !== 'https:') return null
   if (parsed.hostname !== 'www.youtube-nocookie.com') return null
   if (!parsed.pathname.startsWith('/embed/')) return null
+
+  const embedId = parsed.pathname.slice('/embed/'.length).split('/')[0]
+  if (embedId === 'live_stream') {
+    const channelId = parsed.searchParams.get('channel') || ''
+    if (!YOUTUBE_CHANNEL_ID.test(channelId)) return null
+  } else if (!YOUTUBE_VIDEO_ID.test(embedId)) {
+    return null
+  }
 
   parsed.hash = ''
   return iframeFor(parsed.toString(), title)
