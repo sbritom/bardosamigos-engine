@@ -1,0 +1,45 @@
+.bds-gradients-tool__flag-preview {
+  display: inline-block;
+  background-image: var(--bds-nameflag-image);
+  background-repeat: repeat;
+  background-size: 145% auto;
+  background-position: 0 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 4px var(--bds-nameflag-glow)) drop-shadow(0 0 8px var(--bds-nameflag-glow));
+  transform-origin: center;
+  animation-duration: var(--bds-nameflag-speed);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.bds-gradients-tool__flag-preview.motion-wave { animation-name: bds-nameflag-wave; }
+.bds-gradients-tool__flag-preview.motion-r { animation-name: bds-nameflag-rotate; }
+.bds-gradients-tool__flag-preview.motion-e { animation-name: bds-nameflag-expand; }
+.bds-gradients-tool__flag-preview.motion-u { animation-name: bds-nameflag-vertical; }
+.bds-gradients-tool__flag-preview.is-reverse { animation-direction: reverse; }
+
+@keyframes bds-nameflag-wave {
+  0% { background-position: 0 48%; transform: scale(1); }
+  50% { background-position: 100% 55%; transform: scale(var(--bds-nameflag-growth)); }
+  100% { background-position: 200% 48%; transform: scale(1); }
+}
+
+@keyframes bds-nameflag-rotate {
+  0% { background-position: 0 50%; transform: rotate(0deg) scale(1); }
+  50% { background-position: 100% 50%; transform: rotate(180deg) scale(var(--bds-nameflag-growth)); }
+  100% { background-position: 200% 50%; transform: rotate(360deg) scale(1); }
+}
+
+@keyframes bds-nameflag-expand {
+  0%, 100% { background-position: 0 50%; transform: scaleX(1); }
+  50% { background-position: 100% 50%; transform: scaleX(calc(var(--bds-nameflag-growth) * var(--bds-nameflag-cycle))); }
+}
+
+@keyframes bds-nameflag-vertical {
+  0% { background-position: 50% 0; transform: translateY(-6px) scale(var(--bds-nameflag-growth)); }
+  50% { background-position: 50% 100%; transform: translateY(6px) scale(var(--bds-nameflag-growth)); }
+  100% { background-position: 50% 200%; transform: translateY(-6px) scale(var(--bds-nameflag-growth)); }
+}

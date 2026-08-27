@@ -1,0 +1,16 @@
+[Unit]
+Description=Bar Radio Engine
+After=network.target icecast2.service
+Wants=icecast2.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/bardosamigos-engine
+ExecStart=/usr/bin/npm run radio
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=RADIO_STREAM_ON_START=true
+
+[Install]
+WantedBy=multi-user.target

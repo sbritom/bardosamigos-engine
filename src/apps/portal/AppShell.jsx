@@ -1,27 +1,81 @@
-import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
-import Sidebar from "../../shared/layout/Sidebar";
+import PortalSeo from "./seo/PortalSeo";
+import AuthDialog from "../../modules/auth/AuthDialog";
+import { AuthProvider } from "../../modules/auth/AuthContext";
+
+const portalBackground = {
+  backgroundImage: 'url("/backgrounds/portal-bg.webp")',
+  backgroundPosition: 'center top',
+  backgroundSize: 'cover',
+  backgroundRepeat: 'no-repeat',
+}
+
+function markDeferredBackgroundReady(container) {
+  const background = container.querySelector('.bds-home-community-note')
+  background?.classList.add('bds-deferred-background-ready')
+}
+
+function useDeferredPortalBackgrounds(pathname) {
+  useEffect(() => {
+    let observer = null
+    const frame = window.requestAnimationFrame(() => {
+      const targets = Array.from(document.querySelectorAll('.bds-home-shell [data-designer-id="community"]'))
+      if (!targets.length) return
+
+      if (!('IntersectionObserver' in window)) {
+        targets.forEach(markDeferredBackgroundReady)
+        return
+      }
+
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          markDeferredBackgroundReady(entry.target)
+          observer?.unobserve(entry.target)
+        })
+      }, {
+        rootMargin: '600px 0px',
+        threshold: 0.01,
+      })
+
+      targets.forEach((target) => observer.observe(target))
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      observer?.disconnect()
+    }
+  }, [pathname])
+}
 
 export default function AppShell() {
+  const { pathname } = useLocation()
+  useDeferredPortalBackgrounds(pathname)
+
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <AuthProvider>
+      <div className="bds-portal-shell min-h-screen text-[var(--text)]" style={portalBackground}>
+        <PortalSeo />
 
-      <Header />
+        <a className="bds-skip-link" href="#portal-main-content">
+          Pular para o conteudo
+        </a>
 
-      <div className="mx-auto flex max-w-[1700px] gap-5 p-5">
+        <Header />
 
-        <Sidebar />
+        <div className="w-full py-5">
+          <div id="portal-main-content" tabIndex={-1}>
+            <Outlet />
+          </div>
+        </div>
 
-        <main className="flex-1">
-          <Outlet />
-        </main>
-
+        <Footer />
+        <AuthDialog />
       </div>
-
-      <Footer />
-
-    </div>
+    </AuthProvider>
   );
 }

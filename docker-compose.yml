@@ -1,0 +1,37 @@
+services:
+  icecast:
+    image: moul/icecast
+    ports:
+      - "8000:8000"
+    environment:
+      - ICECAST_SOURCE_PASSWORD=${ICECAST_SOURCE_PASSWORD:?Defina ICECAST_SOURCE_PASSWORD no ambiente}
+      - ICECAST_ADMIN_PASSWORD=${ICECAST_ADMIN_PASSWORD:?Defina ICECAST_ADMIN_PASSWORD no ambiente}
+      - ICECAST_RELAY_PASSWORD=${ICECAST_RELAY_PASSWORD:?Defina ICECAST_RELAY_PASSWORD no ambiente}
+      - ICECAST_HOSTNAME=${ICECAST_HOSTNAME:-localhost}
+    volumes:
+      - ./server/logs:/var/log/icecast2
+
+  bar-streaming-engine:
+    build: .
+    depends_on:
+      - icecast
+    environment:
+      - STREAM_DRY_RUN=false
+      - RADIO_HOST=0.0.0.0
+      - RADIO_ENGINE_ADMIN_TOKEN=${RADIO_ENGINE_ADMIN_TOKEN:?Defina RADIO_ENGINE_ADMIN_TOKEN no ambiente}
+      - ICECAST_HOST=icecast
+      - ICECAST_PORT=8000
+      - ICECAST_MOUNT=/radio
+      - ICECAST_USER=source
+      - ICECAST_SOURCE_PASSWORD=${ICECAST_SOURCE_PASSWORD:?Defina ICECAST_SOURCE_PASSWORD no ambiente}
+      - ICECAST_ADMIN_PASSWORD=${ICECAST_ADMIN_PASSWORD:?Defina ICECAST_ADMIN_PASSWORD no ambiente}
+      - RADIO_STREAM_ON_START=true
+    volumes:
+      - ./server/radio/music:/app/server/radio/music
+      - ./server/logs:/app/server/logs
+      - ./config:/app/config
+
+volumes:
+  music:
+  logs:
+  config:

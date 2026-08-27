@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '../../../../core/database'
 import { toCamelCase, toSnakeCase } from '../../../../core/database/mappers'
+import { nowUtcIso } from '../../../../core/time'
 
 function getClient() {
   return getSupabaseClient()
@@ -56,7 +57,7 @@ export async function deleteCompetitionAdminRecord(table, id) {
 
   const { data, error } = await client
     .from(table)
-    .update({ deleted_at: new Date().toISOString() })
+    .update({ deleted_at: nowUtcIso() })
     .eq('id', id)
     .select('*')
     .single()

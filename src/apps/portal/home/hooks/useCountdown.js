@@ -1,24 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
+import { getCountdownParts } from '../../../../core/time'
 
 function getRemaining(targetDate) {
-  const difference = Math.max(0, new Date(targetDate).getTime() - Date.now())
-  const hours = Math.floor(difference / 1000 / 60 / 60)
-  const minutes = Math.floor((difference / 1000 / 60) % 60)
-  const seconds = Math.floor((difference / 1000) % 60)
-
-  return { hours, minutes, seconds }
+  return getCountdownParts(targetDate)
 }
 
 export function useCountdown(targetDate) {
   const [remaining, setRemaining] = useState(() => getRemaining(targetDate))
 
   useEffect(() => {
+    const intervalMs = remaining.hours > 24 ? 60000 : remaining.hours > 1 ? 15000 : 1000
     const timer = window.setInterval(() => {
       setRemaining(getRemaining(targetDate))
-    }, 1000)
+    }, intervalMs)
 
     return () => window.clearInterval(timer)
-  }, [targetDate])
+  }, [remaining.hours, targetDate])
 
   return useMemo(() => remaining, [remaining])
 }

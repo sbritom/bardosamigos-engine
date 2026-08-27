@@ -1,0 +1,331 @@
+/* Final visual layer for the Bar dos Amigos portal. Black / graphite + gold only. */
+
+:root {
+  --bds-card-border-premium: rgba(212, 175, 55, .18);
+  --bds-card-border-premium-hover: rgba(240, 201, 90, .32);
+  --bds-card-surface-premium: rgba(10, 10, 10, .62);
+  --bds-card-surface-premium-hover: rgba(29, 25, 16, .78);
+  --bds-card-shadow-premium: 0 12px 32px rgba(0, 0, 0, .22);
+  --bds-card-shadow-premium-hover: 0 18px 42px rgba(0, 0, 0, .30);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, .64), rgba(5, 5, 5, .78)),
+    url("/backgrounds/portal-bg.webp") center top / cover fixed no-repeat;
+  color: var(--bds-color-text);
+}
+
+#root {
+  background: transparent;
+}
+
+.bds-top-header {
+  border-bottom: 1px solid rgba(212, 175, 55, .16);
+  background: linear-gradient(180deg, rgba(18, 18, 18, .94), rgba(7, 7, 7, .96));
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .28);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.bds-top-header__brand-icon {
+  border-color: rgba(212, 175, 55, .28);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(212, 175, 55, .16), transparent 56%),
+    rgba(12, 12, 12, .9);
+  color: var(--bds-color-primary-hover);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 8px 20px rgba(0,0,0,.24);
+}
+
+.bds-top-header__brand-title {
+  color: var(--bds-color-text);
+}
+
+.bds-top-header__brand-title span {
+  color: var(--bds-color-primary);
+}
+
+.bds-top-header__nav-link,
+.bds-top-header__mobile-link,
+.bds-top-header__icon-button {
+  border-color: rgba(212, 175, 55, .14);
+  background: rgba(10, 10, 10, .76);
+  color: var(--bds-color-text-secondary);
+  box-shadow: none;
+}
+
+.bds-top-header__nav-link:hover,
+.bds-top-header__mobile-link:hover,
+.bds-top-header__icon-button:hover {
+  border-color: rgba(240, 201, 90, .34);
+  background: rgba(47, 40, 22, .72);
+  color: var(--bds-color-text);
+}
+
+.bds-top-header__nav-link--active,
+.bds-top-header__mobile-link--active,
+.bds-top-header__icon-button--active {
+  border-color: rgba(240, 201, 90, .5);
+  background: linear-gradient(180deg, #E5BD45, #A98019);
+  color: #090909;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.bds-top-header__mobile-nav {
+  border-top-color: rgba(212, 175, 55, .12);
+}
+
+.bds-radio-strip {
+  border-bottom: 1px solid rgba(212, 175, 55, .14);
+  background: linear-gradient(180deg, rgba(18, 18, 18, .96), rgba(7, 7, 7, .96));
+}
+
+.bds-mxcast-player {
+  width: 100%;
+  padding-block: 10px;
+}
+
+.bds-mxcast-player__iframe {
+  display: block;
+  width: 100%;
+  min-height: 92px;
+  border: 1px solid rgba(212, 175, 55, .14);
+  border-radius: var(--bds-radius-lg);
+  background: rgba(8, 8, 8, .72);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .22);
+}
+
+:where(
+  .bds-panel,
+  .bds-card,
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-tv-stage,
+  .bds-chat-frame,
+  .bds-home-card-list,
+  .bds-home-empty,
+  .bds-home-radio-card,
+  .bds-home-radio-status,
+  .bds-home-tool-card,
+  .bds-home-community-note,
+  .bds-home-result-box,
+  .bds-home-hits-state,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-barstudio-crop-controls__panel,
+  .bds-barstudio-crop-result,
+  .bds-community-hero,
+  .bds-community-event-card,
+  .bds-community-events-grid,
+  .bds-community-panel
+) {
+  border-color: var(--bds-card-border-premium);
+  background: var(--bds-card-surface-premium);
+  box-shadow: var(--bds-card-shadow-premium);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+:where(
+  .bds-feature-card,
+  .bds-hero-card,
+  .bds-player-card,
+  .bds-stats-card,
+  .bds-match-card,
+  .bds-news-card,
+  .bds-community-card,
+  .bds-tool-card,
+  .bds-home-card-full,
+  .bds-home-tv-content,
+  .bds-home-radio-card,
+  .bds-home-tool-card,
+  .bds-barstudio-tool-card,
+  .bds-barstudio-crop-upload,
+  .bds-barstudio-crop-preview-card,
+  .bds-community-event-card
+):where(:hover, :focus-within) {
+  border-color: var(--bds-card-border-premium-hover);
+  background: var(--bds-card-surface-premium-hover);
+  box-shadow: var(--bds-card-shadow-premium-hover);
+}
+
+/* Home dashboard finish */
+.bds-home-shell {
+  padding-top: clamp(18px, 2.2vw, 32px);
+}
+
+.bds-home-shell .bds-dashboard-grid {
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+.bds-home-shell .bds-feature-card,
+.bds-home-shell .bds-hero-card {
+  overflow: hidden;
+}
+
+.bds-home-shell .bds-card-header {
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(212, 175, 55, .1);
+}
+
+.bds-home-shell .bds-card-header__icon {
+  border-color: rgba(212, 175, 55, .18);
+  background: rgba(212, 175, 55, .08);
+  color: var(--bds-color-primary-hover);
+}
+
+.bds-home-shell .bds-card-header__title,
+.bds-home-shell .bds-section-header__title,
+.bds-home-shell .bds-hero-card__title,
+.bds-home-shell .bds-home-hits-track strong,
+.bds-home-shell .bds-home-tool-card strong,
+.bds-home-shell .bds-home-news-row h3,
+.bds-home-shell .bds-match-card__team span {
+  color: var(--bds-color-text);
+}
+
+.bds-home-shell .bds-card-header__subtitle,
+.bds-home-shell .bds-section-header__description,
+.bds-home-shell .bds-hero-card__subtitle,
+.bds-home-shell .bds-home-hits-track span,
+.bds-home-shell .bds-home-hits-duration,
+.bds-home-shell .bds-home-tool-card span,
+.bds-home-shell .bds-news-card__meta,
+.bds-home-shell .bds-match-card__footer {
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-home-shell .bds-hero-v2 {
+  position: relative;
+  isolation: isolate;
+  min-height: 250px;
+  background: rgba(8, 8, 8, .5);
+}
+
+.bds-home-shell .bds-hero-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(0,0,0,.08), transparent 30%, transparent 70%, rgba(0,0,0,.08));
+  pointer-events: none;
+}
+
+.bds-home-shell .bds-hero-v2-crest {
+  border-color: rgba(212, 175, 55, .16);
+  background: rgba(8, 8, 8, .48);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.bds-home-shell .bds-hero-v2-score {
+  color: var(--bds-color-text);
+  text-shadow: none;
+}
+
+.bds-home-shell .bds-hero-v2-meta,
+.bds-home-shell .bds-hero-v2-info {
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-home-shell .bds-home-tv-stage,
+.bds-home-shell .bds-chat-frame {
+  border-color: rgba(212, 175, 55, .12);
+  background: rgba(5, 5, 5, .5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.015);
+}
+
+.bds-home-shell .bds-home-tv-iframe {
+  background: #050505;
+}
+
+.bds-home-shell .bds-home-match-row,
+.bds-home-shell .bds-home-news-row,
+.bds-home-shell .bds-home-hits-item,
+.bds-home-shell .bds-home-tool-card {
+  border-color: rgba(212, 175, 55, .12);
+  background: rgba(10, 10, 10, .58);
+  box-shadow: none;
+}
+
+.bds-home-shell .bds-home-match-row:hover,
+.bds-home-shell .bds-home-news-row:hover,
+.bds-home-shell .bds-home-hits-item:hover,
+.bds-home-shell .bds-home-tool-card:hover {
+  border-color: rgba(240, 201, 90, .28);
+  background: rgba(31, 27, 18, .72);
+}
+
+.bds-home-shell .bds-home-hits-position {
+  color: var(--bds-color-primary-hover);
+}
+
+.bds-home-shell .bds-home-empty,
+.bds-home-shell .bds-home-hits-state,
+.bds-home-shell .bds-home-tv-no-results {
+  border-color: rgba(212, 175, 55, .1);
+  background: rgba(8, 8, 8, .56);
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-home-shell [data-designer-id="community"] .bds-home-community-note {
+  border-color: rgba(212, 175, 55, .12);
+  background-color: rgba(8, 8, 8, .64);
+  box-shadow: none;
+}
+
+.bds-home-shell .bds-action-button--primary {
+  border-color: rgba(240, 201, 90, .42);
+  background: linear-gradient(180deg, #E7C14F, #B58A20);
+  color: #090909;
+}
+
+.bds-home-shell .bds-action-button--secondary,
+.bds-home-shell .bds-action-button--outline {
+  border-color: rgba(212, 175, 55, .16);
+  background: rgba(12, 12, 12, .72);
+  color: var(--bds-color-text-secondary);
+}
+
+.bds-home-shell .bds-action-button:hover {
+  border-color: rgba(240, 201, 90, .34);
+  filter: none;
+}
+
+@media (max-width: 720px) {
+  .bds-mxcast-player {
+    padding-block: 8px;
+  }
+
+  .bds-mxcast-player__iframe {
+    min-height: 86px;
+    border-radius: var(--bds-radius-md);
+  }
+
+  .bds-home-shell {
+    padding-top: 14px;
+  }
+
+  .bds-home-shell .bds-dashboard-grid {
+    gap: 14px;
+  }
+
+  .bds-home-shell .bds-hero-v2 {
+    min-height: 220px;
+  }
+}

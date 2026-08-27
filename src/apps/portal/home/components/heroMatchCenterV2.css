@@ -1,0 +1,34 @@
+.bds-home-shell .bds-hero-card.bds-hero-v2 {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: rgba(8, 8, 8, .42);
+}
+
+.bds-home-shell .bds-hero-v2-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: .82;
+  pointer-events: none;
+}
+
+.bds-home-shell .bds-hero-card.bds-hero-v2::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .34) 0%, rgba(0, 0, 0, .14) 48%, rgba(0, 0, 0, .34) 100%);
+  pointer-events: none;
+}
+
+.bds-home-shell .bds-hero-v2-content,
+.bds-home-shell .bds-hero-v2-empty {
+  position: relative;
+  z-index: 1;
+}

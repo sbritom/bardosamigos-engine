@@ -1,4 +1,5 @@
 import { MATCH_STATUS } from '../constants'
+import { getUtcTimestamp, nowUtcIso } from '../../../core/time'
 
 export const MatchValidator = {
   validate(match = {}) {
@@ -8,7 +9,7 @@ export const MatchValidator = {
       errors.push('Match roundId is required.')
     }
 
-    if (!match.startsAt || Number.isNaN(new Date(match.startsAt).getTime())) {
+    if (!match.startsAt || Number.isNaN(getUtcTimestamp(match.startsAt))) {
       errors.push('Match startsAt must be a valid date.')
     }
 
@@ -22,8 +23,7 @@ export const MatchValidator = {
     }
   },
 
-  isPredictionOpen(match = {}, now = new Date()) {
-    const startsAt = new Date(match.startsAt)
-    return startsAt.getTime() > new Date(now).getTime()
+  isPredictionOpen(match = {}, now = nowUtcIso()) {
+    return getUtcTimestamp(match.startsAt) > getUtcTimestamp(now)
   },
 }

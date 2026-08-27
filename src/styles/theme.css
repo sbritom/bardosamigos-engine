@@ -1,26 +1,28 @@
 :root{
 
---bg:#050505;
+--bg:var(--bds-color-background);
 
---card:#111315;
+--card:var(--bds-color-surface);
 
---card-hover:#191c20;
+--card-hover:var(--bds-color-hover);
 
---border:#2A2E35;
+--border:var(--bds-color-border);
 
---gold:#D4AF37;
+--gold:var(--bds-color-primary);
 
---gold-light:#F2C94C;
+--gold-light:var(--bds-color-primary-hover);
 
---text:#F5F5F5;
+--text:var(--bds-color-text);
 
---secondary:#A1A1AA;
+--secondary:var(--bds-color-text-secondary);
+
+--glow:var(--bds-color-glow);
 
 --success:#16C47F;
 
 --danger:#FF4444;
 
---radius:18px;
+--radius:var(--bds-radius-md);
 
 --gap:16px;
 

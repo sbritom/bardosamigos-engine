@@ -113,13 +113,13 @@ export function CompetitionCrudPage({ entity }) {
     <section className="space-y-5">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <h1 className="text-3xl font-black text-[var(--gold)]">{entity.title}</h1>
-          <p className="mt-1 text-[var(--secondary)]">{entity.description}</p>
+          <h1 className="text-3xl font-black text-[var(--bds-color-primary-hover)]">{entity.title}</h1>
+          <p className="mt-1 text-[var(--bds-color-text-secondary)]">{entity.description}</p>
         </div>
         <Button onClick={openCreate}>Novo registro</Button>
       </div>
 
-      <Card className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+      <Card className="rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
           <Input label="Pesquisar" value={search} onChange={(event) => { setPage(1); setSearch(event.target.value) }} />
           {entity.filters?.[0] && (

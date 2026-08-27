@@ -1,0 +1,17 @@
+/* Home scoreboard image layer. Keeps the existing card dimensions untouched. */
+.bds-home-shell .bds-hero-v2 {
+  background:
+    linear-gradient(145deg, rgba(5, 5, 5, .30), rgba(5, 5, 5, .50)),
+    url('/backgrounds/football-scoreboard.png') center 52% / cover no-repeat;
+  background-color: #080808;
+}
+
+.bds-home-shell .bds-hero-v2::before {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, .22),
+    rgba(0, 0, 0, .08) 30%,
+    rgba(0, 0, 0, .08) 70%,
+    rgba(0, 0, 0, .22)
+  );
+}

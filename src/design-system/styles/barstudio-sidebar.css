@@ -1,0 +1,79 @@
+/* BarStudio sidebar: compact grouped navigation in black / graphite + gold. */
+.bds-barstudio-sidebar {
+  gap: 0;
+  border-color: rgba(212, 175, 55, .18);
+  background: linear-gradient(180deg, rgba(20, 18, 12, .88), rgba(7, 7, 7, .94));
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__panel,
+.bds-barstudio-sidebar .bds-workspace-sidebar__list {
+  gap: 6px;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__group-label {
+  margin-top: 10px;
+  padding: 8px 10px 4px;
+  color: rgba(227, 216, 184, .76);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__group-label:first-child {
+  margin-top: 0;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item {
+  min-height: 44px;
+  gap: 12px;
+  border-color: transparent;
+  border-radius: 10px;
+  background: rgba(9, 9, 9, .82);
+  box-shadow: none;
+  padding: 10px 12px;
+  transform: none;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item:hover:not(:disabled) {
+  transform: none;
+  border-color: rgba(240, 201, 90, .24);
+  background: rgba(41, 35, 19, .74);
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item.is-selected {
+  border-color: rgba(240, 201, 90, .4);
+  background: rgba(61, 49, 17, .78);
+  box-shadow: inset 3px 0 0 rgba(240, 201, 90, .86);
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item-icon {
+  color: #D4AF37;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item-copy {
+  gap: 0;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item-copy strong {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item-copy small {
+  display: none;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__badge {
+  border-color: rgba(212, 175, 55, .16);
+  background: rgba(212, 175, 55, .08);
+  color: rgba(227, 216, 184, .68);
+  font-size: 10px;
+}
+
+.bds-barstudio-sidebar .bds-workspace-sidebar__item:disabled {
+  opacity: .48;
+}

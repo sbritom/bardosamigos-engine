@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /radio/admin
+Disallow: /events/admin
+Disallow: /barstudio
+Disallow: /barstudio/
+Disallow: /profile
+Disallow: /settings
+Disallow: /for-you
+Disallow: /meus-palpites
+Disallow: /meus-palpites/
+Disallow: /palpites
+Disallow: /barcoins
+Disallow: /brincadeiras
+Disallow: /games
+Disallow: /radio/xat
+Disallow: /football-placeholder
+
+Sitemap: https://www.radiobardosamigos.com.br/sitemap.xml

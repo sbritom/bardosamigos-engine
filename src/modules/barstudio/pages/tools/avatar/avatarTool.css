@@ -1,0 +1,48 @@
+.bds-avatar-controls,.bds-avatar-group,.bds-avatar-field { display:grid; gap:8px; }
+.bds-avatar-group+.bds-avatar-group,.bds-avatar-group+.bds-image-decoration,.bds-image-decoration+.bds-avatar-group { border-top:1px solid rgba(212,175,55,.12); padding-top:13px; }
+.bds-avatar-group>strong,.bds-avatar-field>span,.bds-avatar-group-title strong { color:var(--bds-color-text-secondary); font-size:11px; font-weight:800; }
+.bds-avatar-presets,.bds-avatar-segments { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.bds-avatar-presets button,.bds-avatar-segments button,.bds-avatar-group-title button,.bds-avatar-background-upload span { display:inline-flex; min-height:34px; align-items:center; justify-content:center; gap:5px; border:1px solid rgba(212,175,55,.18); border-radius:8px; background:rgba(10,10,10,.76); color:var(--bds-color-text); cursor:pointer; padding:0 8px; font-size:11px; font-weight:800; transition:180ms ease; }
+.bds-avatar-presets button:hover,.bds-avatar-segments button:hover,.bds-avatar-group-title button:hover,.bds-avatar-segments button.is-selected { border-color:var(--bds-color-primary-hover); background:rgba(212,175,55,.12); }
+.bds-avatar-segments button.is-selected { color:var(--bds-color-primary-hover); }
+.bds-avatar-custom-size { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px; }
+.bds-avatar-custom-size small { color:var(--bds-color-text-secondary); font-size:10px; }
+.bds-avatar-background-upload input { display:none; }
+.bds-avatar-background-upload span { overflow:hidden; justify-content:flex-start; text-overflow:ellipsis; white-space:nowrap; }
+.bds-avatar-group-title { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.bds-avatar-group-title>span { display:flex; gap:5px; }
+.bds-avatar-group-title button { min-height:30px; }
+.bds-avatar-info { display:grid; gap:6px; border-top:1px solid rgba(212,175,55,.12); padding-top:10px; }
+.bds-avatar-info dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 10px; margin:0; }
+.bds-avatar-info dl div { display:flex; min-width:0; justify-content:space-between; gap:7px; }
+.bds-avatar-info dt,.bds-avatar-info dd,.bds-avatar-info p { margin:0; font-size:10px; }
+.bds-avatar-info dt,.bds-avatar-info p { color:var(--bds-color-text-secondary); }
+.bds-avatar-info dd { color:var(--bds-color-text); font-weight:800; text-align:right; }
+
+.bds-avatar-tool { width:100%; gap:10px; }
+.bds-avatar-tool .bds-image-tool__message { margin:0 0 4px; }
+.bds-avatar-tool .bds-image-upload { min-height:150px; border:1px dashed rgba(212,175,55,.26); border-radius:14px; background:rgba(7,7,7,.82); box-shadow:none; }
+.bds-avatar-tool.has-image .bds-image-upload { min-height:48px; padding:6px 10px; border-radius:10px; background:rgba(8,8,8,.88); }
+.bds-avatar-tool.has-image .bds-image-upload img { width:38px; height:38px; border-radius:7px; }
+.bds-avatar-tool.is-empty .bds-image-tool__workspace { display:none; }
+.bds-avatar-tool .bds-image-tool__workspace { display:grid; grid-template-columns:250px minmax(0,1fr); align-items:stretch; gap:14px; }
+.bds-avatar-tool .bds-image-tool__section { border:1px solid rgba(212,175,55,.18); border-radius:15px; background:rgba(8,8,8,.78); box-shadow:none; }
+.bds-avatar-tool .bds-image-tool__settings { min-height:540px; padding:18px 16px; }
+.bds-avatar-tool .bds-image-tool__preview { min-height:540px; padding:20px 28px 18px; background:rgba(5,5,5,.72); }
+.bds-avatar-preview { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+.bds-avatar-tool .bds-image-preview { width:100%; min-height:400px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; }
+.bds-avatar-tool .bds-image-preview canvas { width:min(390px,80%); height:auto; max-width:100%; max-height:400px; margin:auto; }
+.bds-avatar-tool .bds-image-preview p,.bds-avatar-tool .bds-image-preview small { margin-top:8px; text-align:center; font-size:10px; color:var(--bds-color-text-secondary); }
+.bds-avatar-tool .bds-avatar-info { width:min(620px,94%); }
+.bds-avatar-tool .bds-image-tool__export { margin:0 0 0 264px; padding:10px 12px; border:1px solid rgba(212,175,55,.16); border-radius:13px; background:rgba(8,8,8,.78); box-shadow:none; }
+.bds-avatar-tool .bds-image-export { display:flex; align-items:flex-end; justify-content:center; flex-wrap:wrap; gap:8px; }
+.bds-avatar-tool .bds-image-export>label { display:grid; gap:4px; min-width:118px; flex:0 1 150px; }
+.bds-avatar-tool .bds-image-export>label>span { font-size:10px; font-weight:800; color:var(--bds-color-text-secondary); }
+.bds-avatar-tool .bds-image-export select { min-height:36px; border-radius:9px; }
+.bds-avatar-tool .bds-image-export__actions { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; }
+.bds-avatar-tool .bds-image-export__actions button { min-height:36px; border-radius:9px; padding:7px 11px; font-size:12px; white-space:nowrap; }
+
+@media (max-width:1050px) { .bds-avatar-tool .bds-image-tool__workspace { grid-template-columns:225px minmax(0,1fr); gap:10px; } .bds-avatar-tool .bds-image-tool__export { margin-left:235px; } }
+@media (max-width:760px) { .bds-avatar-tool .bds-image-tool__workspace { grid-template-columns:1fr; } .bds-avatar-tool .bds-image-tool__preview { order:1; min-height:410px; } .bds-avatar-tool .bds-image-tool__settings { order:2; min-height:auto; } .bds-avatar-tool .bds-image-tool__export { margin-left:0; } }
+@media (max-width:560px) { .bds-avatar-info dl { grid-template-columns:1fr; } .bds-avatar-group-title { align-items:stretch; flex-direction:column; } .bds-avatar-group-title>span,.bds-avatar-group-title button { width:100%; } .bds-avatar-tool .bds-image-tool__preview { min-height:350px; padding:12px; } .bds-avatar-tool .bds-image-preview { min-height:300px; } .bds-avatar-tool .bds-image-preview canvas { width:min(330px,92%); } .bds-avatar-tool .bds-image-export { align-items:stretch; } .bds-avatar-tool .bds-image-export>label { flex:1 1 120px; } .bds-avatar-tool .bds-image-export__actions { width:100%; } }
+@media (prefers-reduced-motion:reduce) { .bds-avatar-presets button,.bds-avatar-segments button,.bds-avatar-group-title button { transition:none; } }

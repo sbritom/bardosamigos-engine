@@ -1,0 +1,80 @@
+# Football-Data v1.0
+
+Integracao oficial preparada para sincronizar dados da Football-Data.org atraves do Sync Engine.
+
+## Regra Principal
+
+Componentes React nao devem chamar Football-Data.org diretamente.
+
+Fluxo esperado:
+
+Football-Data.org -> Sync Engine -> Supabase -> Competition/Home/Noticias
+
+## Variavel de Ambiente
+
+- `VITE_FOOTBALL_DATA_API_KEY`
+- `FOOTBALL_DATA_API_KEY` para o proxy server-side/serverless em producao
+
+Nenhum valor de chave deve ser salvo no repositorio. A execucao real da sincronizacao deve ocorrer em ambiente controlado, preferencialmente server-side, para evitar exposicao indevida.
+
+## Endpoints Preparados
+
+Base URL:
+
+- `https://api.football-data.org/v4`
+
+Endpoints:
+
+- `GET /competitions`
+- `GET /competitions/{competitionCode}/teams`
+- `GET /competitions/{competitionCode}/matches?status=SCHEDULED`
+- `GET /competitions/{competitionCode}/matches?status=TIMED`
+- `GET /competitions/{competitionCode}/matches?status=LIVE`
+- `GET /competitions/{competitionCode}/matches?status=IN_PLAY`
+- `GET /competitions/{competitionCode}/matches?status=PAUSED`
+- `GET /competitions/{competitionCode}/matches?status=FINISHED`
+- `GET /competitions/{competitionCode}/standings`
+
+Com a chave atual, `GET /competitions` retorna competicoes como `BSA`, `CLI`, `WC`, `CL`, `PL` e `PD`. Durante a janela ativa da Copa do Mundo FIFA 2026, o fallback da Home descobre a competicao `FIFA World Cup` pela API, consulta a temporada 2026 e prioriza seus jogos ate a final encerrar. Depois disso, o fallback volta automaticamente para as competicoes gerais.
+
+## Producao na Vercel
+
+O portal deve ler partidas do Supabase como fonte principal. Quando o Supabase nao retornar partidas para a Home, o fallback seguro usa o endpoint serverless:
+
+- `GET /api/football/matches`
+
+Variaveis necessarias na Vercel:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `FOOTBALL_DATA_API_KEY`
+
+Evite configurar `VITE_FOOTBALL_DATA_API_KEY` em producao, porque variaveis `VITE_` entram no bundle do frontend.
+
+## Estrutura
+
+- Adapter: `src/core/sync/providers/footballData/footballDataAdapter.js`
+- Service: `src/core/sync/providers/footballData/footballDataService.js`
+- Repository: `src/core/sync/providers/footballData/footballDataRepository.js`
+- Mapper: `src/core/sync/providers/footballData/footballDataMapper.js`
+- Constants: `src/core/sync/providers/footballData/footballDataConstants.js`
+
+## Dados Sincronizados
+
+- Competicoes -> `competitions`
+- Times -> `competition_teams`
+- Proximos jogos -> `competition_matches`
+- Jogos encerrados -> `competition_matches`
+- Classificacao -> `ranking_entries` quando houver relacionamento interno disponivel
+
+## Fallback
+
+Quando a API falhar ou a chave nao estiver configurada, o service registra erro e tenta manter o consumo por dados ja sincronizados no Supabase.
+
+## Proximos Passos
+
+1. Criar job server-side para executar `syncEngine.sync('football-data', ...)`.
+2. Definir mapeamento interno de `competitionCode`, `competitionId` e `roundId`.
+3. Criar agendamento de sincronizacao periodica.
+4. Finalizar tela admin para disparar sincronizacao manual.
+5. Adicionar upsert por `external_ref` quando as constraints estiverem definidas no banco.

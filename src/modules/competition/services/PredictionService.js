@@ -1,12 +1,13 @@
 import { PREDICTION_STATUS } from '../constants'
 import { createPrediction } from '../domain/Prediction'
 import { PredictionValidator } from '../validators/PredictionValidator'
+import { nowUtcIso } from '../../../core/time'
 
 export function createPredictionService(options = {}) {
   const repository = options.repository
 
   return {
-    createPrediction({ match, user, prediction: predictionInput, now = new Date() } = {}) {
+    createPrediction({ match, user, prediction: predictionInput, now = nowUtcIso() } = {}) {
       const prediction = createPrediction({
         ...predictionInput,
         matchId: match?.id || predictionInput?.matchId,

@@ -1,3 +1,9 @@
+# Dependencias e builds
+node_modules
+dist
+dist-ssr
+*.local
+
 # Logs
 logs
 *.log
@@ -7,12 +13,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# Editor / IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -22,3 +23,31 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime e arquivos gerados
+server/backups/
+server/cache/
+server/storage/*
+!server/storage/.gitkeep
+**/library-cache.json
+**/metadata-cache.json
+**/cover-cache.json
+
+# Temporarios
+*.tmp
+*.temp
+
+# Ambiente e segredos locais
+.env
+.env.*
+!.env.example
+
+# Backups locais de codigo
+*.backup
+*.backup.*
+*.bak
+.codex/backups/
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini

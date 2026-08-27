@@ -1,0 +1,11 @@
+{
+  "executablePath": "",
+  "codec": "libmp3lame",
+  "bitrate": "128k",
+  "sampleRate": 44100,
+  "channels": 2,
+  "buffer": "4096k",
+  "format": "mp3",
+  "extraArgs": [],
+  "logLevel": "warning"
+}
