@@ -130,17 +130,24 @@
 }
 
 /* Player IMORTAL0800: 45px exatos para o container e o iframe. */
-.bds-radio-strip .imortal-radio-player,
-.bds-radio-strip .imortal-radio-player__iframe {
+.bds-radio-strip .imortal-radio-player {
   height: 45px !important;
   min-height: 45px !important;
   max-height: 45px !important;
+}
+
+.bds-radio-strip .imortal-radio-player__iframe {
+  height: 31px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
 }
 
 .bds-radio-strip .imortal-radio-player {
   width: 100%;
   max-width: 1180px;
   margin-inline: auto;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border: 1px solid rgba(35, 139, 255, 0.2) !important;
   border-radius: 12px !important;
@@ -152,12 +159,11 @@
 
 .bds-radio-strip .imortal-radio-player__iframe {
   display: block !important;
-  width: 119.048% !important;
+  width: 100% !important;
   border: 0 !important;
   border-radius: 11px !important;
   background: #071426 !important;
-  transform: scale(0.84);
-  transform-origin: center center;
+  transform: none !important;
 }
 
 .bds-radio-strip > div {
@@ -166,11 +172,16 @@
 }
 
 @media (max-width: 720px) {
-  .bds-radio-strip .imortal-radio-player,
-  .bds-radio-strip .imortal-radio-player__iframe {
+  .bds-radio-strip .imortal-radio-player {
     height: 45px !important;
     min-height: 45px !important;
     max-height: 45px !important;
+  }
+
+  .bds-radio-strip .imortal-radio-player__iframe {
+    height: 31px !important;
+    min-height: 31px !important;
+    max-height: 31px !important;
   }
 }
 
