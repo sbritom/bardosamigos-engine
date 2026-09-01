@@ -1,4 +1,4 @@
-.imortal-footer {
+footer.imortal-footer[data-designer-id="footer"] {
   position: relative;
   border-top: 1px solid rgba(28, 126, 255, 0.18) !important;
   background:
