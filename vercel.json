@@ -134,6 +134,14 @@
       "destination": "/tv/index.html"
     },
     {
+      "source": "/games",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/brincadeiras",
+      "destination": "/index.html"
+    },
+    {
       "source": "/events",
       "destination": "/events/index.html"
     },
