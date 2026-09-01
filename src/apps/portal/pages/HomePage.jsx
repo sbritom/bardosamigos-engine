@@ -1,13 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CalendarDays,
-  Mic2,
-  Music2,
   Play,
   Search,
-  Scissors,
-  Sparkles,
-  Wrench,
   X,
 } from 'lucide-react'
 import {
@@ -15,7 +10,6 @@ import {
   DashboardGrid,
   FeatureCard,
   Loading,
-  NewsCard,
   ResponsiveContainer,
 } from '../../../design-system'
 import '../../../design-system/styles/index.css'
@@ -25,9 +19,7 @@ import { isFinishedStatus, isLiveStatus } from '../../../core/time'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HomePortalBanner } from '../home/components/HomePortalBanner'
 import { HomeGamesCard } from '../home/components/HomeGamesCard'
-import { HomeHitsCard } from '../home/components/HomeHitsCard'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
-import { barStudioTools } from '../home/data/dashboardData'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
 import { loadHomeTVChannels } from '../../../modules/tv/services/TVHomeChannelSource'
@@ -39,31 +31,9 @@ const OfficialChat = lazy(() =>
 )
 
 const initialDashboard = {
-  news: [],
-  events: [],
-  topHits: [],
   competitionMatches: [],
-  nextMatch: null,
   liveMatchCenter: null,
-  latestResults: [],
-  errors: [],
 }
-
-const studioToolMeta = {
-  'Cortar Foto Redonda': ['Scissors', 'Foto redonda para perfil e xat.'],
-  'Gerador de Cores': ['Sparkles', 'Cores para nomes e visual do xat.'],
-  'Remover Fundo': ['Wrench', 'Recorte de imagem preparado.'],
-  'Criador de Avatar (Em breve)': ['Sparkles', 'Em breve.'],
-}
-
-const studioToolLinks = {
-  'Cortar Foto Redonda': 'crop',
-  'Gerador de Cores': 'color-generator',
-  'Remover Fundo': 'remove-background',
-  'Criador de Avatar (Em breve)': 'avatar',
-}
-
-const toolIcons = { Scissors, Sparkles, Music2, Wrench }
 
 function TvCard() {
   const [tvChannels, setTvChannels] = useState(HOME_TV_CHANNELS)
@@ -298,91 +268,8 @@ function FootballCard({ matches }) {
   )
 }
 
-function NewsPanel({ news, loading }) {
-  const safeNews = Array.isArray(news) ? news : []
-
-  return (
-    <FeatureCard
-      className="bds-home-card-full"
-      title="Noticias"
-      icon={<Mic2 size={20} />}
-      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/news' }}>Ver todas</ActionButton>}
-    >
-      {loading ? <Loading label="Carregando noticias" /> : safeNews.length ? (
-        <div className="bds-home-card-list" data-designer-id="news.cards" data-designer-label="Noticias / Cards">
-          {safeNews.slice(0, 3).map((item, index) => (
-            <NewsCard
-              key={item.id || `news-${index}`}
-              className="bds-home-news-row"
-              image={item.image}
-              onOpen={() => { window.location.href = '/news' }}
-              title={item.title || 'Noticia indisponivel'}
-            />
-          ))}
-        </div>
-      ) : <div className="bds-home-empty">Nenhuma noticia sincronizada encontrada.</div>}
-    </FeatureCard>
-  )
-}
-
-function CommunityPanel() {
-  return (
-    <FeatureCard
-      className="bds-home-card-full"
-      title="📅 EVENTOS DO BAR"
-      icon={<CalendarDays size={20} />}
-      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/events' }}>VER EVENTOS</ActionButton>}
-    >
-      <div
-        className="bds-home-community-note"
-        data-designer-id="community.banner"
-        data-designer-label="Eventos / Banner"
-        role="img"
-        aria-label="Bingos e Brincadeiras do Bar"
-      />
-    </FeatureCard>
-  )
-}
-
-function BarStudioCard() {
-  const tools = Array.isArray(barStudioTools) ? barStudioTools : []
-
-  return (
-    <FeatureCard
-      title="BAR STUDIO"
-      icon={<Scissors size={20} />}
-      action={<ActionButton onClick={() => { window.location.href = '/tools' }}>Abrir BarStudio</ActionButton>}
-    >
-      <div className="bds-home-tools-grid" data-designer-id="barstudio.tools" data-designer-label="BarStudio / Ferramentas">
-        {tools.length ? tools.map((tool, index) => {
-          const [iconName, description] = studioToolMeta[tool] || ['Wrench', 'Ferramenta da comunidade.']
-          const Icon = toolIcons[iconName] || Wrench
-          const targetTool = studioToolLinks[tool]
-          return (
-            <button
-              key={tool}
-              className="bds-home-tool-card"
-              type="button"
-              onClick={() => { window.location.href = targetTool ? `/tools?tool=${targetTool}` : '/tools' }}
-              data-designer-id={`barstudio.tool.${index}`}
-              data-designer-label={`BarStudio / ${tool}`}
-            >
-              <div className="bds-card-header__icon" data-designer-id={`barstudio.icon.${index}`} data-designer-label={`BarStudio / Icone ${tool}`}>
-                <Icon size={20} />
-              </div>
-              <strong>{tool}</strong>
-              <span>{description}</span>
-            </button>
-          )
-        }) : <div className="bds-home-empty">Nenhuma ferramenta disponivel agora.</div>}
-      </div>
-    </FeatureCard>
-  )
-}
-
 export default function HomePage() {
   const [dashboard, setDashboard] = useState(initialDashboard)
-  const [loading, setLoading] = useState(true)
   const hasLiveMatchRef = useRef(false)
 
   useEffect(() => {
@@ -402,21 +289,13 @@ export default function HomePage() {
             liveMatchCenter: content?.liveMatchCenter || null,
           })
           setDashboard({
-            news: Array.isArray(content?.news) ? content.news : [],
-            events: Array.isArray(content?.events) ? content.events : [],
-            topHits: Array.isArray(content?.topHits) ? content.topHits : [],
             competitionMatches: Array.isArray(content?.competitionMatches) ? content.competitionMatches : [],
-            nextMatch: content?.nextMatch || null,
             liveMatchCenter: content?.liveMatchCenter || null,
-            latestResults: Array.isArray(content?.latestResults) ? content.latestResults : [],
-            errors: Array.isArray(content?.errors) ? content.errors : [],
           })
         }
       } catch (error) {
         console.error('[HomePage] Falha ao carregar dashboard', error)
         if (active) setDashboard(initialDashboard)
-      } finally {
-        if (active) setLoading(false)
       }
     }
 
@@ -458,10 +337,6 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="games" data-designer-label="Games"><HomeModuleBoundary moduleName="Games"><HomeGamesCard /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><HomeHitsCard hits={dashboard.topHits} loading={loading} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-12" data-designer-id="barstudio" data-designer-label="BarStudio"><HomeModuleBoundary moduleName="BarStudio"><BarStudioCard /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
     </main>
