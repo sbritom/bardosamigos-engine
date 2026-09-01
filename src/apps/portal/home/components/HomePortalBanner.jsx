@@ -1,51 +1,45 @@
-import { Gamepad2, MessageCircle, Radio, Trophy, Tv } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import bannerImortalImage from '../data/bannerImortalImage'
+import bannerXatImage from '../data/bannerXatImage'
+import bannerFootballImage from '../data/bannerFootballImage'
+import bannerGamesImage from '../data/bannerGamesImage'
 import './homePortalBanner.css'
 
 const SLIDES = [
   {
     id: 'portal',
-    eyebrow: 'IMORTAL0800',
-    title: 'Tudo acontece aqui.',
-    description: 'TV, Xat, futebol, games e música reunidos em um só lugar.',
+    image: bannerImortalImage,
+    alt: 'IMORTAL0800 — Tudo acontece aqui. TV, Xat, futebol, games e música reunidos em um só lugar.',
     actionLabel: 'Assistir TV',
     actionHref: '/tv',
-    icon: Tv,
   },
   {
     id: 'chat',
-    eyebrow: 'XAT OFICIAL',
-    title: 'Entre na resenha.',
-    description: 'Acesse o chat oficial do IMORTAL0800 e acompanhe a comunidade em tempo real.',
+    image: bannerXatImage,
+    alt: 'Xat Oficial IMORTAL0800 — Entre na resenha e acompanhe a comunidade em tempo real.',
     actionLabel: 'Abrir Xat',
     actionHref: 'https://xat.com/Imortal0800',
     external: true,
-    icon: MessageCircle,
   },
   {
     id: 'football',
-    eyebrow: 'FUTEBOL',
-    title: 'Jogos, placares e tabelas.',
-    description: 'Acompanhe os jogos do dia, resultados, estatísticas, escalações e bolão.',
+    image: bannerFootballImage,
+    alt: 'Futebol — Jogos, placares e tabelas. Acompanhe resultados, estatísticas, escalações e bolão.',
     actionLabel: 'Ver Futebol',
     actionHref: '/football',
-    icon: Trophy,
   },
   {
     id: 'games',
-    eyebrow: 'GAMES',
-    title: 'Free Fire, Fortnite e esports.',
-    description: 'Novidades, campeonatos, lançamentos e jogos gratuitos em destaque.',
+    image: bannerGamesImage,
+    alt: 'Games — Free Fire, Fortnite e esports. Novidades, campeonatos, lançamentos e jogos gratuitos.',
     actionLabel: 'Ver Games',
     actionHref: '/games',
-    icon: Gamepad2,
   },
 ]
 
 export function HomePortalBanner() {
   const [activeIndex, setActiveIndex] = useState(0)
   const activeSlide = SLIDES[activeIndex]
-  const Icon = activeSlide.icon || Radio
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -66,35 +60,28 @@ export function HomePortalBanner() {
 
   return (
     <section className="imortal-home-banner" aria-label="Destaques do IMORTAL0800">
-      <div className="imortal-home-banner__ambient" aria-hidden="true" />
+      <img
+        key={activeSlide.id}
+        className="imortal-home-banner__image"
+        src={activeSlide.image}
+        alt={activeSlide.alt}
+        loading="eager"
+        decoding="async"
+      />
 
-      <div className="imortal-home-banner__content">
-        <div className="imortal-home-banner__icon" aria-hidden="true">
-          <Icon size={28} />
-        </div>
+      <button
+        className="imortal-home-banner__action-hotspot"
+        type="button"
+        aria-label={activeSlide.actionLabel}
+        onClick={() => openSlide(activeSlide)}
+      />
 
-        <div className="imortal-home-banner__copy" key={activeSlide.id}>
-          <span className="imortal-home-banner__eyebrow">{activeSlide.eyebrow}</span>
-          <h1>{activeSlide.title}</h1>
-          <p>{activeSlide.description}</p>
-        </div>
-
-        <button
-          className="imortal-home-banner__action"
-          type="button"
-          onClick={() => openSlide(activeSlide)}
-        >
-          {activeSlide.actionLabel}
-        </button>
-      </div>
-
-      <div className="imortal-home-banner__dots" aria-label="Selecionar destaque">
+      <div className="imortal-home-banner__dot-hotspots" aria-label="Selecionar destaque">
         {SLIDES.map((slide, index) => (
           <button
             key={slide.id}
-            className={index === activeIndex ? 'is-active' : ''}
             type="button"
-            aria-label={`Mostrar destaque ${index + 1}: ${slide.eyebrow}`}
+            aria-label={`Mostrar destaque ${index + 1}`}
             aria-current={index === activeIndex ? 'true' : undefined}
             onClick={() => setActiveIndex(index)}
           />
