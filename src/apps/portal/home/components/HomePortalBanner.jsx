@@ -5,15 +5,21 @@ const SLIDES = [
   {
     id: 'portal',
     image: '/banners/imortal0800-portal.webp',
-    alt: 'IMORTAL0800 — Tudo acontece aqui. TV, Xat, futebol, games e rádio em um só lugar.',
+    eyebrow: 'IMORTAL0800',
+    title: 'Tudo acontece aqui.',
+    subtitle: 'TV, Xat, futebol, games e rádio em um só lugar.',
+    alt: 'IMORTAL0800 — Tudo acontece aqui.',
     fallbackTitle: 'IMORTAL0800',
-    actionLabel: 'Assistir TV',
+    actionLabel: 'Conhecer o portal',
     actionHref: '/tv',
   },
   {
     id: 'chat',
     image: '/banners/imortal0800-xat.webp',
-    alt: 'Xat Oficial IMORTAL0800 — Entre na resenha e acompanhe a comunidade em tempo real.',
+    eyebrow: 'XAT OFICIAL',
+    title: 'Entre na resenha.',
+    subtitle: 'Comunidade em tempo real.',
+    alt: 'Xat Oficial IMORTAL0800 — Entre na resenha.',
     fallbackTitle: 'XAT OFICIAL',
     actionLabel: 'Abrir Xat',
     actionHref: 'https://xat.com/Imortal0800',
@@ -22,7 +28,10 @@ const SLIDES = [
   {
     id: 'football',
     image: '/banners/imortal0800-football.webp',
-    alt: 'Futebol — Jogos, placares e tabelas. Acompanhe resultados, estatísticas, escalações e bolão.',
+    eyebrow: 'FUTEBOL',
+    title: 'Jogos, placares e tabelas.',
+    subtitle: 'Resultados, estatísticas, escalações e muito mais.',
+    alt: 'Futebol — Jogos, placares e tabelas.',
     fallbackTitle: 'FUTEBOL',
     actionLabel: 'Ver Futebol',
     actionHref: '/football',
@@ -30,7 +39,10 @@ const SLIDES = [
   {
     id: 'games',
     image: '/banners/imortal0800-games.webp',
-    alt: 'Games — Free Fire, Fortnite e esports. Novidades, campeonatos e lançamentos.',
+    eyebrow: 'GAMES',
+    title: 'Free Fire, Fortnite e esports.',
+    subtitle: 'Novidades, campeonatos e lançamentos.',
+    alt: 'Games — Free Fire, Fortnite e esports.',
     fallbackTitle: 'GAMES',
     actionLabel: 'Ver Games',
     actionHref: '/games',
@@ -61,23 +73,32 @@ export function HomePortalBanner() {
   }
 
   return (
-    <section className="imortal-home-banner" aria-label="Destaques do IMORTAL0800">
-      {imageFailed ? (
-        <div className="imortal-home-banner__fallback" data-slide={activeSlide.id} role="img" aria-label={activeSlide.alt}>
-          <strong>{activeSlide.fallbackTitle}</strong>
-          <span>{activeSlide.actionLabel}</span>
-        </div>
-      ) : (
+    <section className="imortal-home-banner" data-slide={activeSlide.id} aria-label="Destaques do IMORTAL0800">
+      {!imageFailed && (
         <img
           key={activeSlide.id}
           className="imortal-home-banner__image"
-          data-slide={activeSlide.id}
           src={activeSlide.image}
-          alt={activeSlide.alt}
+          alt=""
+          aria-hidden="true"
           loading="eager"
           decoding="async"
           onError={() => setFailedImages((current) => ({ ...current, [activeSlide.id]: true }))}
         />
+      )}
+
+      <div className="imortal-home-banner__shade" aria-hidden="true" />
+
+      <div className="imortal-home-banner__content">
+        <span>{activeSlide.eyebrow}</span>
+        <strong>{activeSlide.title}</strong>
+        <small>{activeSlide.subtitle}</small>
+      </div>
+
+      {imageFailed && (
+        <div className="imortal-home-banner__fallback" role="img" aria-label={activeSlide.alt}>
+          <strong>{activeSlide.fallbackTitle}</strong>
+        </div>
       )}
 
       <button
