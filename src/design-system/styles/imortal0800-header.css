@@ -137,9 +137,9 @@
 }
 
 .bds-radio-strip .imortal-radio-player__iframe {
-  height: 31px !important;
-  min-height: 31px !important;
-  max-height: 31px !important;
+  height: 45px !important;
+  min-height: 45px !important;
+  max-height: 45px !important;
 }
 
 .bds-radio-strip .imortal-radio-player {
@@ -179,9 +179,9 @@
   }
 
   .bds-radio-strip .imortal-radio-player__iframe {
-    height: 31px !important;
-    min-height: 31px !important;
-    max-height: 31px !important;
+    height: 45px !important;
+    min-height: 45px !important;
+    max-height: 45px !important;
   }
 }
 
