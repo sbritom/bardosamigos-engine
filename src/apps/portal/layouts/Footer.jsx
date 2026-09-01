@@ -1,27 +1,52 @@
-import { Beer } from "lucide-react";
+import { Gamepad2, Music2, RadioTower, Trophy, Tv, Users } from "lucide-react";
 import Container from "../../../shared/layout/Container";
+import "../../../design-system/styles/imortal0800-footer.css";
+
+const FOOTER_LINKS = [
+  { label: "TV", href: "/tv", icon: Tv },
+  { label: "Futebol", href: "/football", icon: Trophy },
+  { label: "Games", href: "/games", icon: Gamepad2 },
+  { label: "Música", href: "/radio", icon: Music2 },
+  { label: "Comunidade", href: "/community", icon: Users },
+];
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer
-      className="border-t border-[rgba(212,175,55,.14)] bg-[rgba(8,8,8,.92)] backdrop-blur-xl"
+      className="imortal-footer"
       data-designer-id="footer"
       data-designer-label="Footer"
     >
-      <Container className="py-5">
-        <div className="flex flex-col items-center justify-between gap-4 text-sm text-[var(--bds-color-text-secondary)] md:flex-row">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-full border border-[rgba(212,175,55,.20)] bg-[rgba(212,175,55,.08)]">
-              <Beer size={20} className="text-[#D4AF37]" />
+      <Container className="imortal-footer__container">
+        <div className="imortal-footer__main">
+          <a className="imortal-footer__brand" href="/" aria-label="IMORTAL0800 - Início">
+            <span className="imortal-footer__brand-icon" aria-hidden="true">
+              <RadioTower size={19} />
             </span>
-            <strong className="text-[var(--bds-color-text)]">
-              BAR DOS <span className="text-[#D4AF37]">AMIGOS</span>
-            </strong>
-          </div>
+            <span className="imortal-footer__brand-copy">
+              <strong>IMORTAL<span>0800</span></strong>
+              <small>TV, futebol, games, música e comunidade.</small>
+            </span>
+          </a>
 
-          <div className="text-center text-[var(--bds-color-text-muted)]">
-            © 2016 - 2026 Bar dos Amigos. Todos os direitos reservados.
-          </div>
+          <nav className="imortal-footer__nav" aria-label="Navegação do rodapé">
+            {FOOTER_LINKS.map(({ label, href, icon: Icon }) => (
+              <a key={href} href={href}>
+                <Icon size={15} aria-hidden="true" />
+                <span>{label}</span>
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        <div className="imortal-footer__bottom">
+          <span>© {year} IMORTAL0800. Todos os direitos reservados.</span>
+          <span className="imortal-footer__status">
+            <i aria-hidden="true" />
+            Portal online
+          </span>
         </div>
       </Container>
     </footer>
