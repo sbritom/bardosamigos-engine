@@ -82,7 +82,7 @@ export function HomePortalBanner() {
           decoding="async"
           onError={() => setFailedImages((current) => ({ ...current, [activeSlide.id]: true }))}
         />
-      )
+      )}
 
       <button
         className="imortal-home-banner__action-hotspot"
