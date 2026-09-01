@@ -1,7 +1,7 @@
 import Container from "../../../shared/layout/Container";
 
 const IMORTAL_RADIO_PLAYER_URL =
-  "https://player.svrdedicado.org/player-topo-moderno1/7956/071426";
+  "https://player.svrdedicado.org/player-barra/7956/071426";
 
 export default function RadioBar() {
   return (
@@ -27,9 +27,9 @@ export default function RadioBar() {
             style={{
               display: 'block',
               width: '100%',
-              height: '45px',
-              minHeight: '45px',
-              maxHeight: '45px',
+              height: '31px',
+              minHeight: '31px',
+              maxHeight: '31px',
               border: 0,
               borderRadius: 0,
             }}
