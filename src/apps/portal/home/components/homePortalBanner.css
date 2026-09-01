@@ -11,14 +11,49 @@
 
 .imortal-home-banner__image {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: -38%;
   display: block;
   width: 100%;
-  height: 100%;
+  height: 176%;
   object-fit: cover;
   object-position: center 46%;
+  transform: scaleY(0.568);
+  transform-origin: center center;
   image-rendering: auto;
   animation: imortal-banner-image-enter 280ms ease;
+}
+
+/* A arte de futebol ja foi recortada para a proporcao baixa do banner. */
+.imortal-home-banner__image[data-slide="football"] {
+  top: 0;
+  height: 100%;
+  object-position: center center;
+  transform: none;
+}
+
+.imortal-home-banner__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 0 28px;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(91, 75, 255, 0.18), transparent 30%),
+    linear-gradient(100deg, rgba(3, 7, 14, 0.98), rgba(8, 24, 45, 0.94));
+  color: #f7fbff;
+}
+
+.imortal-home-banner__fallback strong {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 900;
+}
+
+.imortal-home-banner__fallback span {
+  color: rgba(218, 232, 248, 0.66);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .imortal-home-banner__action-hotspot {
@@ -84,8 +119,14 @@
 
 @media (max-width: 900px) {
   .imortal-home-banner {
-    height: clamp(150px, 20vw, 190px);
+    height: clamp(100px, 13vw, 125px);
     border-radius: 15px;
+  }
+
+  .imortal-home-banner__image:not([data-slide="football"]) {
+    top: -20%;
+    height: 140%;
+    transform: scaleY(0.714);
   }
 
   .imortal-home-banner__dot-hotspots {
@@ -100,10 +141,26 @@
 
 @media (max-width: 520px) {
   .imortal-home-banner {
-    height: 145px;
+    height: 95px;
     border-radius: 13px;
   }
 
+  .imortal-home-banner__image,
+  .imortal-home-banner__image:not([data-slide="football"]) {
+    top: 0;
+    height: 100%;
+    transform: none;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .imortal-home-banner__image[data-slide="football"] {
+    object-position: left center;
+  }
+
+  .imortal-home-banner__fallback {
+    padding-inline: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
