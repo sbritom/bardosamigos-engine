@@ -20,7 +20,9 @@ import {
   ResponsiveContainer,
 } from '../../../design-system'
 import '../../../design-system/styles/index.css'
+import '../home/components/homeFootballStrip.css'
 import { getSupabaseClient } from '../../../core/database'
+import { getBrazilDateKey, isFinishedStatus, isLiveStatus, nowUtcIso } from '../../../core/time'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HomePortalBanner } from '../home/components/HomePortalBanner'
 import { HomeHitsCard } from '../home/components/HomeHitsCard'
@@ -188,41 +190,88 @@ function TvCard() {
   )
 }
 
-function CompetitionMatchRow({ match }) {
-  const hasScore = match.homeScore !== null && match.homeScore !== undefined && match.awayScore !== null && match.awayScore !== undefined
+function FootballTeam({ name, crest }) {
+  return (
+    <div className="imortal-football-match__team">
+      <div className="imortal-football-match__crest" aria-hidden={!crest}>
+        {crest ? <img src={crest} alt="" loading="lazy" /> : <span>{String(name || '?').slice(0, 2).toUpperCase()}</span>}
+      </div>
+      <strong title={name}>{name || 'Time'}</strong>
+    </div>
+  )
+}
+
+function FootballTodayMatch({ match }) {
+  const live = isLiveStatus(match.standardStatus)
+  const finished = isFinishedStatus(match.standardStatus)
+  const hasScore = match.homeScore !== null && match.homeScore !== undefined
+    && match.awayScore !== null && match.awayScore !== undefined
+  const statusLabel = live ? (match.status || 'Ao vivo') : finished ? 'Encerrado' : (match.localTime || match.status || 'Em breve')
+  const statusTone = live ? 'is-live' : finished ? 'is-finished' : 'is-upcoming'
 
   return (
-    <MatchCard
-      action={match.competitionLogo && <img src={match.competitionLogo} alt="" className="bds-home-competition-logo" loading="lazy" />}
-      awayCrest={match.awayCrest}
-      awayTeam={match.awayTeam}
-      className="bds-home-match-row"
-      competition={match.championship}
-      homeCrest={match.homeCrest}
-      homeTeam={match.homeTeam}
-      meta={match.dateLabel || match.localTime}
-      onOpen={() => { window.location.href = '/football' }}
-      score={hasScore ? `${match.homeScore} x ${match.awayScore}` : 'VS'}
-      status={match.status || match.standardStatus}
-    />
+    <button
+      className="imortal-football-match"
+      type="button"
+      onClick={() => { window.location.href = '/football' }}
+      aria-label={`${match.homeTeam} contra ${match.awayTeam}`}
+    >
+      <div className="imortal-football-match__top">
+        <span className="imortal-football-match__competition">
+          {match.competitionLogo ? <img src={match.competitionLogo} alt="" loading="lazy" /> : null}
+          {match.championship || 'Futebol'}
+        </span>
+        <span className={`imortal-football-match__status ${statusTone}`}>{statusLabel}</span>
+      </div>
+
+      <div className="imortal-football-match__teams">
+        <FootballTeam name={match.homeTeam} crest={match.homeCrest} />
+        <div className="imortal-football-match__score">
+          {hasScore ? (
+            <>
+              <strong>{match.homeScore}</strong>
+              <span>x</span>
+              <strong>{match.awayScore}</strong>
+            </>
+          ) : (
+            <>
+              <span className="imortal-football-match__time">{match.localTime || '--:--'}</span>
+            </>
+          )}
+        </div>
+        <FootballTeam name={match.awayTeam} crest={match.awayCrest} />
+      </div>
+    </button>
   )
 }
 
 function FootballCard({ matches }) {
   const safeMatches = Array.isArray(matches) ? matches : []
+  const today = getBrazilDateKey(nowUtcIso())
+  const todayMatches = safeMatches
+    .filter((match) => (match.localDateIso || '') === today)
+    .slice(0, 3)
 
   return (
     <FeatureCard
-      className="bds-home-card-full"
-      title="Futebol"
+      className="bds-home-card-full imortal-home-football"
+      title="Jogos de Hoje"
       icon={<CalendarDays size={20} />}
-      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Abrir</ActionButton>}
+      action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Ver todos os jogos</ActionButton>}
     >
-      <div className="bds-home-card-list" data-designer-id="football.cards" data-designer-label="Futebol / Cards">
-        {safeMatches.length ? safeMatches.slice(0, 3).map((match) => <CompetitionMatchRow key={match.id} match={match} />) : (
-          <div className="bds-home-empty">Nenhum jogo sincronizado encontrado.</div>
-        )}
+      <div className="imortal-home-football__intro">
+        <span>Partidas, horários, placares e status em tempo real.</span>
       </div>
+
+      {todayMatches.length ? (
+        <div className="imortal-home-football__grid" data-designer-id="football.cards" data-designer-label="Futebol / Jogos de Hoje">
+          {todayMatches.map((match) => <FootballTodayMatch key={match.id} match={match} />)}
+        </div>
+      ) : (
+        <div className="imortal-home-football__empty">
+          Nenhum jogo programado para hoje.
+        </div>
+      )}
     </FeatureCard>
   )
 }
@@ -385,7 +434,7 @@ export default function HomePage() {
           <div className="bds-grid-span-12" data-designer-id="hero" data-designer-label="Hero"><HomeModuleBoundary moduleName="Hero"><HomePortalBanner /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="tv" data-designer-label="TV"><HomeModuleBoundary moduleName="TV"><TvCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
-          <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="news" data-designer-label="Noticias"><HomeModuleBoundary moduleName="Noticias"><NewsPanel loading={loading} news={dashboard.news} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="radio" data-designer-label="Radio"><HomeModuleBoundary moduleName="Radio"><HomeHitsCard hits={dashboard.topHits} loading={loading} /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="community" data-designer-label="Comunidade"><HomeModuleBoundary moduleName="Comunidade"><CommunityPanel /></HomeModuleBoundary></div>
