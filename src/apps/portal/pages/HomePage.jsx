@@ -22,7 +22,7 @@ import {
 import '../../../design-system/styles/index.css'
 import { getSupabaseClient } from '../../../core/database'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
-import { HeroMatchCenterV2 } from '../home/components/HeroMatchCenterV2'
+import { HomePortalBanner } from '../home/components/HomePortalBanner'
 import { HomeHitsCard } from '../home/components/HomeHitsCard'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
 import { barStudioTools } from '../home/data/dashboardData'
@@ -382,7 +382,7 @@ export default function HomePage() {
     <main className="bds-home-shell">
       <ResponsiveContainer size="xl">
         <DashboardGrid>
-          <div className="bds-grid-span-12" data-designer-id="hero" data-designer-label="Hero"><HomeModuleBoundary moduleName="Hero"><HeroMatchCenterV2 liveMatchCenter={dashboard.liveMatchCenter} /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="hero" data-designer-label="Hero"><HomeModuleBoundary moduleName="Hero"><HomePortalBanner /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="tv" data-designer-label="TV"><HomeModuleBoundary moduleName="TV"><TvCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
