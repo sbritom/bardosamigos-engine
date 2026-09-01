@@ -1,25 +1,45 @@
-import { Beer, ShieldCheck, UserCircle } from 'lucide-react'
+import {
+  Gamepad2,
+  Home,
+  Menu,
+  Music2,
+  ShieldCheck,
+  Trophy,
+  Tv,
+  UserCircle,
+  Users,
+  X,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
 import Container from '../../../shared/layout/Container'
-import { getMenuPlugins } from '../../../core/registry/plugins'
 import { useAuth } from '../../../modules/auth/AuthContext'
-import { isLocalAdminEnabled, isLocalDesignerEnvironment, toggleLocalAdmin } from '../../../modules/barstudio/designer/services/layoutDesignerService'
+import {
+  isLocalAdminEnabled,
+  isLocalDesignerEnvironment,
+  toggleLocalAdmin,
+} from '../../../modules/barstudio/designer/services/layoutDesignerService'
 import RadioBar from './RadioBar'
 import '../../../design-system/styles/index.css'
 
-const PUBLIC_HOME_MENU = ['home', 'tv', 'radio', 'football', 'news', 'events', 'tools']
-const PUBLIC_HOME_MENU_ORDER = new Map(PUBLIC_HOME_MENU.map((id, index) => [id, index]))
+const IMORTAL_HOME_MENU = [
+  { id: 'home', title: 'Início', path: '/', icon: Home },
+  { id: 'tv', title: 'TV', path: '/tv', icon: Tv },
+  { id: 'football', title: 'Futebol', path: '/football', icon: Trophy },
+  { id: 'games', title: 'Games', path: '/games', icon: Gamepad2 },
+  { id: 'music', title: 'Música', path: '/radio', icon: Music2 },
+  { id: 'organization', title: 'Organização', path: '/community', icon: Users },
+]
 
 export default function Header() {
   const navigate = useNavigate()
   const { isAuthenticated, displayName, profile, user } = useAuth()
-  const menu = getMenuPlugins()
-    .filter((item) => PUBLIC_HOME_MENU_ORDER.has(item.id))
-    .sort((first, second) => PUBLIC_HOME_MENU_ORDER.get(first.id) - PUBLIC_HOME_MENU_ORDER.get(second.id))
   const showLocalAdmin = isLocalDesignerEnvironment()
-  const [localAdminEnabled, setLocalAdminEnabledState] = useState(() => (showLocalAdmin ? isLocalAdminEnabled() : false))
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [localAdminEnabled, setLocalAdminEnabledState] = useState(() =>
+    showLocalAdmin ? isLocalAdminEnabled() : false,
+  )
 
   const profileLabel = isAuthenticated
     ? `Perfil de ${displayName || user?.email || 'usuario'}`
@@ -38,25 +58,41 @@ export default function Header() {
 
   return (
     <>
-      <RadioBar />
-
-      <header className="bds-top-header" data-designer-id="header" data-designer-label="Header">
+      <header className="bds-top-header imortal-header" data-designer-id="header" data-designer-label="Header">
         <Container>
-          <div className="bds-top-header__bar">
-            <div className="flex min-w-0 items-center gap-3" data-designer-id="header.logo" data-designer-label="Header / Logo">
-              <div className="bds-top-header__brand-icon" data-designer-id="header.logoIcon" data-designer-label="Header / Icone">
-                <Beer size={36} />
-              </div>
+          <div className="bds-top-header__bar imortal-header__bar">
+            <button
+              className="bds-top-header__icon-button imortal-header__menu-toggle"
+              type="button"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="imortal-mobile-menu"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={22} />}
+            </button>
 
-              <div className="min-w-0">
-                <div className="bds-top-header__brand-title" data-designer-id="header.title" data-designer-label="Header / Titulo">
-                  BAR DOS <span>AMIGOS</span>
-                </div>
+            <NavLink
+              to="/"
+              end
+              className="imortal-header__brand-link"
+              data-designer-id="header.logo"
+              data-designer-label="Header / Logo"
+              aria-label="IMORTAL0800 - Início"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div className="bds-top-header__brand-title imortal-header__brand" data-designer-id="header.title" data-designer-label="Header / Titulo">
+                IMORTAL<span>0800</span>
               </div>
-            </div>
+            </NavLink>
 
-            <nav className="hidden flex-1 justify-center gap-2 xl:flex" aria-label="Menu principal" data-designer-id="header.menu" data-designer-label="Header / Menu">
-              {menu.map((item) => {
+            <nav
+              className="imortal-header__desktop-nav"
+              aria-label="Menu principal"
+              data-designer-id="header.menu"
+              data-designer-label="Header / Menu"
+            >
+              {IMORTAL_HOME_MENU.map((item) => {
                 const Icon = item.icon
 
                 return (
@@ -75,7 +111,7 @@ export default function Header() {
               })}
             </nav>
 
-            <div className="flex shrink-0 items-center gap-2 text-sm" data-designer-id="header.actions" data-designer-label="Header / Acoes">
+            <div className="imortal-header__actions" data-designer-id="header.actions" data-designer-label="Header / Acoes">
               {showLocalAdmin && (
                 <button
                   className={`bds-top-header__icon-button ${localAdminEnabled ? 'bds-top-header__icon-button--active' : ''}`}
@@ -87,6 +123,7 @@ export default function Header() {
                   <ShieldCheck size={18} />
                 </button>
               )}
+
               <button
                 className={`bds-top-header__icon-button ${isAuthenticated ? 'bds-top-header__icon-button--active' : ''}`}
                 type="button"
@@ -107,9 +144,15 @@ export default function Header() {
               </button>
             </div>
           </div>
-          <nav className="bds-top-header__mobile-nav" aria-label="Menu principal mobile">
-            {menu.map((item) => {
+
+          <nav
+            id="imortal-mobile-menu"
+            className={`bds-top-header__mobile-nav imortal-header__mobile-nav ${mobileMenuOpen ? 'is-open' : ''}`}
+            aria-label="Menu principal mobile"
+          >
+            {IMORTAL_HOME_MENU.map((item) => {
               const Icon = item.icon
+
               return (
                 <NavLink
                   key={item.id}
@@ -118,8 +161,9 @@ export default function Header() {
                   className={({ isActive }) =>
                     `bds-top-header__mobile-link ${isActive ? 'bds-top-header__mobile-link--active' : ''}`
                   }
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Icon size={14} />
+                  <Icon size={15} />
                   {item.title}
                 </NavLink>
               )
@@ -127,6 +171,8 @@ export default function Header() {
           </nav>
         </Container>
       </header>
+
+      <RadioBar />
     </>
   )
 }
