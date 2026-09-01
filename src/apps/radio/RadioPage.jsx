@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CalendarDays,
   Headphones,
   ListMusic,
   Loader2,
@@ -36,14 +35,6 @@ const INITIAL_METADATA = {
 };
 
 const RADIO_SECTIONS = [
-  {
-    id: "programacao",
-    icon: CalendarDays,
-    eyebrow: "Grade da rádio",
-    title: "Programação",
-    description: "Programas, horários e locutores da IMORTAL0800.",
-    empty: "A programação oficial ainda não foi publicada.",
-  },
   {
     id: "ranking",
     icon: ListMusic,
@@ -266,7 +257,6 @@ export default function RadioPage() {
         <nav className="imortal-radio-nav" aria-label="Seções da rádio">
           <a href="#ao-vivo">Ao vivo</a>
           <button ref={requestTriggerRef} type="button" onClick={openRequestFlow}>Pedidos</button>
-          <a href="#programacao">Programação</a>
           <a href="#ranking">Ranking</a>
           <a href="#novidades">Novidades</a>
         </nav>
