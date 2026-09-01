@@ -11,25 +11,14 @@
 
 .imortal-home-banner__image {
   position: absolute;
-  left: 0;
-  top: -38%;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 176%;
+  height: 100%;
   object-fit: cover;
-  object-position: center 46%;
-  transform: scaleY(0.568);
-  transform-origin: center center;
+  object-position: center center;
   image-rendering: auto;
   animation: imortal-banner-image-enter 280ms ease;
-}
-
-/* A arte de futebol ja foi recortada para a proporcao baixa do banner. */
-.imortal-home-banner__image[data-slide="football"] {
-  top: 0;
-  height: 100%;
-  object-position: center center;
-  transform: none;
 }
 
 .imortal-home-banner__fallback {
@@ -123,12 +112,6 @@
     border-radius: 15px;
   }
 
-  .imortal-home-banner__image:not([data-slide="football"]) {
-    top: -20%;
-    height: 140%;
-    transform: scaleY(0.714);
-  }
-
   .imortal-home-banner__dot-hotspots {
     right: 12px;
     bottom: 9px;
@@ -143,19 +126,6 @@
   .imortal-home-banner {
     height: 95px;
     border-radius: 13px;
-  }
-
-  .imortal-home-banner__image,
-  .imortal-home-banner__image:not([data-slide="football"]) {
-    top: 0;
-    height: 100%;
-    transform: none;
-    object-fit: cover;
-    object-position: center center;
-  }
-
-  .imortal-home-banner__image[data-slide="football"] {
-    object-position: left center;
   }
 
   .imortal-home-banner__fallback {
