@@ -131,9 +131,9 @@
 
 /* Player IMORTAL0800: 45px exatos para o container e o iframe. */
 .bds-radio-strip .imortal-radio-player {
-  height: 48px !important;
-  min-height: 48px !important;
-  max-height: 48px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
 }
 
 .bds-radio-strip .imortal-radio-player__iframe {
@@ -173,9 +173,9 @@
 
 @media (max-width: 720px) {
   .bds-radio-strip .imortal-radio-player {
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    max-height: 80px !important;
   }
 
   .bds-radio-strip .imortal-radio-player__iframe {
