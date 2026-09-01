@@ -1,7 +1,7 @@
 .imortal-home-banner {
   position: relative;
   width: 100%;
-  height: clamp(170px, 14vw, 230px);
+  height: clamp(135px, 10vw, 180px);
   overflow: hidden;
   border: 1px solid rgba(28, 124, 255, 0.22);
   border-radius: 18px;
