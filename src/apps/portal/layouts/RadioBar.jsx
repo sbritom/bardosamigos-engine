@@ -1,7 +1,7 @@
 import Container from "../../../shared/layout/Container";
 
-const MXCAST_PLAYER_URL =
-  "https://player.mxcast.com.br/mx-player/7186/D4AF37";
+const IMORTAL_RADIO_PLAYER_URL =
+  "https://player.svrdedicado.org/player-topo-moderno2/7956/030611";
 
 export default function RadioBar() {
   return (
@@ -10,25 +10,25 @@ export default function RadioBar() {
         <div
           className="bds-mxcast-player"
           style={{
-            height: '30px',
+            height: '80px',
             overflow: 'hidden',
             paddingBlock: 0,
           }}
         >
           <iframe
-            src={MXCAST_PLAYER_URL}
-            title="Rádio Bar dos Amigos"
+            src={IMORTAL_RADIO_PLAYER_URL}
+            title="Rádio IMORTAL0800"
             className="bds-mxcast-player__iframe"
             allow="autoplay"
             loading="eager"
+            frameBorder="0"
             style={{
               display: 'block',
               width: '100%',
-              height: '78px',
-              minHeight: 0,
+              height: '80px',
+              minHeight: '80px',
               border: 0,
               borderRadius: 0,
-              transform: 'translateY(0)',
             }}
           />
         </div>
