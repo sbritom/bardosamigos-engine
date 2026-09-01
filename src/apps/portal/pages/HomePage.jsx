@@ -21,7 +21,7 @@ import {
 import '../../../design-system/styles/index.css'
 import '../home/components/homeFootballStrip.css'
 import { getSupabaseClient } from '../../../core/database'
-import { getBrazilDateKey, isFinishedStatus, isLiveStatus, nowUtcIso } from '../../../core/time'
+import { isFinishedStatus, isLiveStatus } from '../../../core/time'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HomePortalBanner } from '../home/components/HomePortalBanner'
 import { HomeHitsCard } from '../home/components/HomeHitsCard'
@@ -245,30 +245,26 @@ function FootballTodayMatch({ match }) {
 }
 
 function FootballCard({ matches }) {
-  const safeMatches = Array.isArray(matches) ? matches : []
-  const today = getBrazilDateKey(nowUtcIso())
-  const todayMatches = safeMatches
-    .filter((match) => (match.localDateIso || '') === today)
-    .slice(0, 3)
+  const recentMatches = Array.isArray(matches) ? matches.slice(0, 3) : []
 
   return (
     <FeatureCard
       className="bds-home-card-full imortal-home-football"
-      title="Jogos de Hoje"
+      title="Jogos Recentes"
       icon={<CalendarDays size={20} />}
       action={<ActionButton variant="outline" onClick={() => { window.location.href = '/football' }}>Ver todos os jogos</ActionButton>}
     >
       <div className="imortal-home-football__intro">
-        <span>Partidas, horários, placares e status em tempo real.</span>
+        <span>Ao vivo, jogos de hoje e resultados mais recentes com placares atualizados.</span>
       </div>
 
-      {todayMatches.length ? (
-        <div className="imortal-home-football__grid" data-designer-id="football.cards" data-designer-label="Futebol / Jogos de Hoje">
-          {todayMatches.map((match) => <FootballTodayMatch key={match.id} match={match} />)}
+      {recentMatches.length ? (
+        <div className="imortal-home-football__grid" data-designer-id="football.cards" data-designer-label="Futebol / Jogos Recentes">
+          {recentMatches.map((match) => <FootballTodayMatch key={match.id} match={match} />)}
         </div>
       ) : (
         <div className="imortal-home-football__empty">
-          Nenhum jogo programado para hoje.
+          Nenhum jogo recente encontrado.
         </div>
       )}
     </FeatureCard>
