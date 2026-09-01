@@ -28,7 +28,7 @@ const IMORTAL_HOME_MENU = [
   { id: 'tv', title: 'TV', path: '/tv', icon: Tv },
   { id: 'football', title: 'Futebol', path: '/football', icon: Trophy },
   { id: 'games', title: 'Games', path: '/games', icon: Gamepad2 },
-  { id: 'music', title: 'Música', path: '/radio', icon: Music2 },
+  { id: 'music', title: 'Rádio', path: '/radio', icon: Music2 },
   { id: 'organization', title: 'Comunidade', path: '/community', icon: Users },
 ]
 
