@@ -10,10 +10,12 @@
 }
 
 .imortal-home-banner__image {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   object-position: center center;
   image-rendering: auto;
   animation: imortal-banner-image-enter 280ms ease;
@@ -102,9 +104,6 @@
     border-radius: 13px;
   }
 
-  .imortal-home-banner__image {
-    object-position: center center;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
