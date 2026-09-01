@@ -13,10 +13,11 @@ footer.imortal-footer[data-designer-id="footer"] {
 }
 
 .imortal-footer__row {
+  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
   white-space: nowrap;
 }
@@ -64,12 +65,15 @@ footer.imortal-footer[data-designer-id="footer"] {
 }
 
 .imortal-footer__copyright {
+  position: absolute;
+  left: 50%;
   min-width: 0;
   overflow: hidden;
+  transform: translateX(-50%);
   color: rgba(219, 229, 242, 0.52);
   font-size: 0.66rem;
   line-height: 1.25;
-  text-align: right;
+  text-align: center;
   text-overflow: ellipsis;
 }
 
@@ -99,6 +103,7 @@ footer.imortal-footer[data-designer-id="footer"] {
   }
 
   .imortal-footer__copyright {
+    max-width: 58vw;
     font-size: 0.54rem;
   }
 }
