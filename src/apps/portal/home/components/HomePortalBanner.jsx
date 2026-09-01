@@ -10,6 +10,7 @@ const SLIDES = [
     id: 'portal',
     image: bannerImortalImage,
     alt: 'IMORTAL0800 — Tudo acontece aqui. TV, Xat, futebol, games e música reunidos em um só lugar.',
+    fallbackTitle: 'IMORTAL0800',
     actionLabel: 'Assistir TV',
     actionHref: '/tv',
   },
@@ -17,6 +18,7 @@ const SLIDES = [
     id: 'chat',
     image: bannerXatImage,
     alt: 'Xat Oficial IMORTAL0800 — Entre na resenha e acompanhe a comunidade em tempo real.',
+    fallbackTitle: 'XAT OFICIAL',
     actionLabel: 'Abrir Xat',
     actionHref: 'https://xat.com/Imortal0800',
     external: true,
@@ -25,6 +27,7 @@ const SLIDES = [
     id: 'football',
     image: bannerFootballImage,
     alt: 'Futebol — Jogos, placares e tabelas. Acompanhe resultados, estatísticas, escalações e bolão.',
+    fallbackTitle: 'FUTEBOL',
     actionLabel: 'Ver Futebol',
     actionHref: '/football',
   },
@@ -32,6 +35,7 @@ const SLIDES = [
     id: 'games',
     image: bannerGamesImage,
     alt: 'Games — Free Fire, Fortnite e esports. Novidades, campeonatos, lançamentos e jogos gratuitos.',
+    fallbackTitle: 'GAMES',
     actionLabel: 'Ver Games',
     actionHref: '/games',
   },
@@ -39,7 +43,9 @@ const SLIDES = [
 
 export function HomePortalBanner() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [failedImages, setFailedImages] = useState({})
   const activeSlide = SLIDES[activeIndex]
+  const imageFailed = Boolean(failedImages[activeSlide.id])
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -60,14 +66,23 @@ export function HomePortalBanner() {
 
   return (
     <section className="imortal-home-banner" aria-label="Destaques do IMORTAL0800">
-      <img
-        key={activeSlide.id}
-        className="imortal-home-banner__image"
-        src={activeSlide.image}
-        alt={activeSlide.alt}
-        loading="eager"
-        decoding="async"
-      />
+      {imageFailed ? (
+        <div className="imortal-home-banner__fallback" data-slide={activeSlide.id} role="img" aria-label={activeSlide.alt}>
+          <strong>{activeSlide.fallbackTitle}</strong>
+          <span>{activeSlide.actionLabel}</span>
+        </div>
+      ) : (
+        <img
+          key={activeSlide.id}
+          className="imortal-home-banner__image"
+          data-slide={activeSlide.id}
+          src={activeSlide.image}
+          alt={activeSlide.alt}
+          loading="eager"
+          decoding="async"
+          onError={() => setFailedImages((current) => ({ ...current, [activeSlide.id]: true }))}
+        />
+      )
 
       <button
         className="imortal-home-banner__action-hotspot"
