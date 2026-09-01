@@ -19,7 +19,7 @@ import { TVProvider } from '../providers'
 import { TVFavoriteService } from '../services/TVFavoriteService'
 import { isTVChannelAvailableInCountry, sortTVChannelsForCountry } from '../utils'
 import './tvPlatform.css'
-import './tvBlackGold.css'
+import './tvImortal.css'
 
 function countryDisplayName(countryCode) {
   if (!countryCode) return ''
@@ -233,7 +233,7 @@ function TVPlatformContent() {
       <header className="tv-platform__header">
         <div className="tv-platform__brand">
           <span><Tv size={20} aria-hidden="true" /></span>
-          <h1>TV DO BAR</h1>
+          <h1>TV <span>IMORTAL0800</span></h1>
         </div>
         <Badge>{outsideBrazil ? `${availableChannels.length} DISPONIVEIS` : `${channelCount} CANAIS`}</Badge>
       </header>
