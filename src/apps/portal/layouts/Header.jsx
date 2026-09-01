@@ -29,7 +29,7 @@ const IMORTAL_HOME_MENU = [
   { id: 'football', title: 'Futebol', path: '/football', icon: Trophy },
   { id: 'games', title: 'Games', path: '/games', icon: Gamepad2 },
   { id: 'music', title: 'Música', path: '/radio', icon: Music2 },
-  { id: 'organization', title: 'Organização', path: '/community', icon: Users },
+  { id: 'organization', title: 'Comunidade', path: '/community', icon: Users },
 ]
 
 export default function Header() {
