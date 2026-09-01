@@ -1,0 +1,204 @@
+.imortal-home-football {
+  border-color: rgba(27, 126, 255, 0.18) !important;
+}
+
+.imortal-home-football__intro {
+  margin-top: 2px;
+  color: rgba(220, 231, 247, 0.62);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.imortal-home-football__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.imortal-football-match {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  border: 1px solid rgba(35, 129, 255, 0.14);
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgba(12, 22, 38, 0.82), rgba(5, 9, 16, 0.92));
+  color: #eef5ff;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.imortal-football-match:hover {
+  border-color: rgba(49, 148, 255, 0.36);
+  background:
+    linear-gradient(180deg, rgba(14, 34, 61, 0.88), rgba(6, 13, 23, 0.94));
+  transform: translateY(-1px);
+}
+
+.imortal-football-match__top {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.imortal-football-match__competition {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  color: rgba(225, 235, 248, 0.68);
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-football-match__competition img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.imortal-football-match__status {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.imortal-football-match__status.is-upcoming {
+  color: #8fd7ff;
+  background: rgba(10, 103, 194, 0.12);
+  border-color: rgba(44, 153, 255, 0.18);
+}
+
+.imortal-football-match__status.is-live {
+  color: #ff8585;
+  background: rgba(190, 35, 35, 0.12);
+  border-color: rgba(255, 95, 95, 0.24);
+}
+
+.imortal-football-match__status.is-finished {
+  color: rgba(230, 236, 245, 0.62);
+  background: rgba(255,255,255,0.04);
+}
+
+.imortal-football-match__teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.imortal-football-match__team {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 7px;
+  text-align: center;
+}
+
+.imortal-football-match__team strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #f4f8fd;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.18;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-football-match__crest {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.025);
+}
+
+.imortal-football-match__crest img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.imortal-football-match__crest span {
+  color: #7bc9ff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.imortal-football-match__score {
+  display: flex;
+  min-width: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(224, 235, 249, 0.62);
+  text-align: center;
+}
+
+.imortal-football-match__score strong {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.imortal-football-match__time {
+  color: #74c8ff;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.imortal-home-football__empty {
+  margin-top: 10px;
+  border: 1px dashed rgba(38, 132, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(7, 13, 22, 0.55);
+  color: rgba(223, 232, 245, 0.62);
+  padding: 18px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 980px) {
+  .imortal-home-football__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-football-match__teams {
+    grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .imortal-football-match {
+    padding: 10px;
+  }
+
+  .imortal-football-match__crest {
+    width: 36px;
+    height: 36px;
+  }
+
+  .imortal-football-match__crest img {
+    width: 31px;
+    height: 31px;
+  }
+
+  .imortal-football-match__team strong {
+    font-size: 0.72rem;
+  }
+}
