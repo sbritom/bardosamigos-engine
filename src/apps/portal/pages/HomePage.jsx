@@ -15,7 +15,6 @@ import {
   DashboardGrid,
   FeatureCard,
   Loading,
-  MatchCard,
   NewsCard,
   ResponsiveContainer,
 } from '../../../design-system'
