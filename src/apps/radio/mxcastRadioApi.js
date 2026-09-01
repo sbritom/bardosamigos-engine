@@ -1,4 +1,4 @@
-const OFFICIAL_STREAM_URL = "https://stm1.mxcast.com.br:7186/stream";
+const OFFICIAL_STREAM_URL = "https://s01.svrdedicado.org:7956/stream";
 const METADATA_REFRESH_INTERVAL = 15000;
 
 function getMetadataUrl() {
@@ -12,12 +12,12 @@ function parseSongTitle(rawTitle) {
 
   if (!title) {
     return {
-      track: "Programacao ao vivo",
-      artist: "Radio Bar dos Amigos",
+      track: "Programação ao vivo",
+      artist: "IMORTAL0800",
     };
   }
 
-  const separators = [" - ", " \u2013 ", " \u2014 ", " | ", " / "];
+  const separators = [" - ", " – ", " — ", " | ", " / "];
 
   for (const separator of separators) {
     if (title.includes(separator)) {
@@ -35,7 +35,7 @@ function parseSongTitle(rawTitle) {
 
   return {
     track: title,
-    artist: "Radio Bar dos Amigos",
+    artist: "IMORTAL0800",
   };
 }
 
@@ -72,7 +72,7 @@ export async function fetchMxCastStatus({ signal } = {}) {
     artist: parsed.artist,
     listeners: Number(data.listeners) || 0,
     peakListeners: Number(data.peakListeners) || 0,
-    serverTitle: data.serverTitle || "Radio Bar dos Amigos",
+    serverTitle: data.serverTitle || "IMORTAL0800",
     streamUrl: data.streamUrl || OFFICIAL_STREAM_URL,
     cover: data.cover || "",
     updatedAt: data.updatedAt || new Date().toISOString(),
