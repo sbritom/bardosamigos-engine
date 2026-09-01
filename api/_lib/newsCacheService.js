@@ -13,6 +13,7 @@ const TOPICS = Object.freeze([
   { category: 'Esportes', query: 'futebol OR esportes', weight: 14 },
   { category: 'Entretenimento', query: 'entretenimento', weight: 10 },
   { category: 'Tecnologia', query: 'tecnologia', weight: 10 },
+  { category: 'Games', query: 'games OR esports OR videogames OR "Free Fire" OR Fortnite OR VALORANT', weight: 13 },
 ])
 
 const WORLD_CUP_TOPIC = Object.freeze({
