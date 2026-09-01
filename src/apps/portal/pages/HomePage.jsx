@@ -190,10 +190,24 @@ function TvCard() {
 }
 
 function FootballTeam({ name, crest }) {
+  const [failedCrest, setFailedCrest] = useState('')
+  const showCrest = Boolean(crest && failedCrest !== crest)
+  const fallback = String(name || '?').trim().slice(0, 2).toUpperCase()
+
   return (
     <div className="imortal-football-match__team">
-      <div className="imortal-football-match__crest" aria-hidden={!crest}>
-        {crest ? <img src={crest} alt="" loading="lazy" /> : <span>{String(name || '?').slice(0, 2).toUpperCase()}</span>}
+      <div className="imortal-football-match__crest" aria-hidden={!showCrest}>
+        {showCrest ? (
+          <img
+            src={crest}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setFailedCrest(crest)}
+          />
+        ) : (
+          <span>{fallback}</span>
+        )}
       </div>
       <strong title={name}>{name || 'Time'}</strong>
     </div>
@@ -221,7 +235,15 @@ function FootballRecentMatch({ match }) {
     >
       <div className="imortal-football-match__top">
         <span className="imortal-football-match__competition">
-          {match.competitionLogo ? <img src={match.competitionLogo} alt="" loading="lazy" /> : null}
+          {match.competitionLogo ? (
+            <img
+              src={match.competitionLogo}
+              alt=""
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={(event) => { event.currentTarget.style.display = 'none' }}
+            />
+          ) : null}
           {match.championship || 'Futebol'}
         </span>
         <span className={`imortal-football-match__status ${statusTone}`}>{statusLabel}</span>
