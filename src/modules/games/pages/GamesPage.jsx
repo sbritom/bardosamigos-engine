@@ -34,6 +34,15 @@ function isChampionship(item = {}) {
   )
 }
 
+
+function classify(item = {}) {
+  const text = normalize(`${item.title} ${item.description}`)
+  if (/esport|campeonato|torneio|competitiv|free fire|valorant|fortnite|league of legends|lol|cs2|counter strike/.test(text)) return 'esports'
+  if (/gratis|gratuito|free to play|free-to-play|de graca|epic games store/.test(text)) return 'free'
+  if (/lancamento|lanca|release|estreia|chega|novo jogo|nova temporada|atualizacao|update/.test(text)) return 'releases'
+  return 'news'
+}
+
 function formatDate(value) {
   if (!value) return ''
   const date = new Date(value)
@@ -123,17 +132,25 @@ export default function GamesPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/games', {
+      const response = await fetch('/api/news?category=Games&limit=30', {
         headers: { Accept: 'application/json' },
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(data.error || 'Não foi possível carregar Games.')
+
+      const items = (Array.isArray(data.articles) ? data.articles : []).map((item) => ({
+        ...item,
+        description: item.description || item.summary || '',
+        publishedAt: item.publishedAt || item.date || '',
+        kind: classify(item),
+      }))
+
       setPayload({
-        items: Array.isArray(data.items) ? data.items : [],
-        featured: data.featured || null,
-        esports: Array.isArray(data.esports) ? data.esports : [],
-        releases: Array.isArray(data.releases) ? data.releases : [],
-        free: Array.isArray(data.free) ? data.free : [],
+        items,
+        featured: items[0] || null,
+        esports: items.filter((item) => item.kind === 'esports').slice(0, 6),
+        releases: items.filter((item) => item.kind === 'releases').slice(0, 6),
+        free: items.filter((item) => item.kind === 'free').slice(0, 6),
       })
     } catch (loadError) {
       setError(loadError)
