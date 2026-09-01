@@ -41,6 +41,13 @@ function getStage(match = {}) {
   return match.competitionRounds?.competitionStages || {}
 }
 
+function normalizeImageSource(value) {
+  const source = String(value || '').trim()
+  if (!source) return ''
+
+  return /^(https?:\/\/|\/|data:image\/|blob:)/i.test(source) ? source : ''
+}
+
 function getTeamMetadata(match = {}, side) {
   const metadata = match.metadata || {}
   const rawTeam = metadata.raw?.[`${side}Team`]
@@ -82,10 +89,15 @@ function getTeamCrest(match = {}, side) {
   const crestSnakeKey = side === 'home' ? 'home_crest' : 'away_crest'
   const shieldKey = side === 'home' ? 'homeShield' : 'awayShield'
 
-  return match[crestKey]
-    || match[crestSnakeKey]
-    || match.metadata?.[shieldKey]
-    || team.crest
+  return normalizeImageSource(match[crestKey])
+    || normalizeImageSource(match[crestSnakeKey])
+    || normalizeImageSource(team.crest)
+    || normalizeImageSource(team.crestUrl)
+    || normalizeImageSource(team.crest_url)
+    || normalizeImageSource(team.logo)
+    || normalizeImageSource(team.logoUrl)
+    || normalizeImageSource(team.logo_url)
+    || normalizeImageSource(match.metadata?.[shieldKey])
     || ''
 }
 
@@ -206,7 +218,12 @@ export function normalizeFootballMatch(match = {}) {
     competitionCode,
     competitionName: translateCompetition(match.competitionName || match.competition_name || competition.name || metadata.competition?.namePtBr, competitionCode) || 'Competicao',
     championship: translateCompetition(match.competitionName || match.competition_name || competition.name || metadata.competition?.namePtBr, competitionCode) || 'Competicao',
-    competitionLogo: match.competitionLogo || match.competition_logo || competition.logoUrl || competition.logo_url || metadata.competition?.logoUrl || '',
+    competitionLogo: normalizeImageSource(match.competitionLogo)
+      || normalizeImageSource(match.competition_logo)
+      || normalizeImageSource(competition.logoUrl)
+      || normalizeImageSource(competition.logo_url)
+      || normalizeImageSource(metadata.competition?.logoUrl)
+      || '',
     homeTeam,
     awayTeam,
     homeParticipant: homeTeam,
