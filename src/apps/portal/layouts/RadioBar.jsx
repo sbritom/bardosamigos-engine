@@ -1,7 +1,7 @@
 import Container from "../../../shared/layout/Container";
 
 const IMORTAL_RADIO_PLAYER_URL =
-  "https://player.svrdedicado.org/player-topo-moderno2/7956/071426";
+  "https://player.svrdedicado.org/player-topo-moderno1/7956/071426";
 
 export default function RadioBar() {
   return (
@@ -10,9 +10,9 @@ export default function RadioBar() {
         <div
           className="bds-mxcast-player imortal-radio-player"
           style={{
-            height: '48px',
-            minHeight: '48px',
-            maxHeight: '48px',
+            height: '45px',
+            minHeight: '45px',
+            maxHeight: '45px',
             overflow: 'hidden',
             paddingBlock: 0,
           }}
@@ -27,9 +27,9 @@ export default function RadioBar() {
             style={{
               display: 'block',
               width: '100%',
-              height: '48px',
-              minHeight: '48px',
-              maxHeight: '48px',
+              height: '45px',
+              minHeight: '45px',
+              maxHeight: '45px',
               border: 0,
               borderRadius: 0,
             }}
