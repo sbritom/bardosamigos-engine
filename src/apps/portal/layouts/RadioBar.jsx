@@ -10,9 +10,9 @@ export default function RadioBar() {
         <div
           className="bds-mxcast-player imortal-radio-player"
           style={{
-            height: '48px',
-            minHeight: '48px',
-            maxHeight: '48px',
+            height: '80px',
+            minHeight: '80px',
+            maxHeight: '80px',
             overflow: 'hidden',
             paddingBlock: 0,
           }}
