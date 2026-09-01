@@ -8,8 +8,8 @@ footer.imortal-footer[data-designer-id="footer"] {
 }
 
 .imortal-footer__container {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .imortal-footer__row {
@@ -34,8 +34,8 @@ footer.imortal-footer[data-designer-id="footer"] {
 
 .imortal-footer__infinity {
   display: grid;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid rgba(42, 143, 255, 0.22);
@@ -43,14 +43,14 @@ footer.imortal-footer[data-designer-id="footer"] {
   background:
     linear-gradient(180deg, rgba(14, 117, 255, 0.16), rgba(78, 61, 255, 0.08));
   color: #75d3ff;
-  font-size: 1rem;
+  font-size: 0.86rem;
   font-weight: 800;
   line-height: 1;
 }
 
 .imortal-footer__brand strong {
   color: #f7f9fc;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -71,7 +71,7 @@ footer.imortal-footer[data-designer-id="footer"] {
   overflow: hidden;
   transform: translateX(-50%);
   color: rgba(219, 229, 242, 0.52);
-  font-size: 0.60rem;
+  font-size: 0.56rem;
   line-height: 1.25;
   text-align: center;
   text-overflow: ellipsis;
@@ -79,8 +79,8 @@ footer.imortal-footer[data-designer-id="footer"] {
 
 @media (max-width: 520px) {
   .imortal-footer__container {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
   }
 
   .imortal-footer__row {
@@ -92,18 +92,18 @@ footer.imortal-footer[data-designer-id="footer"] {
   }
 
   .imortal-footer__infinity {
-    width: 21px;
-    height: 21px;
+    width: 18px;
+    height: 18px;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.78rem;
   }
 
   .imortal-footer__brand strong {
-    font-size: 0.66rem;
+    font-size: 0.62rem;
   }
 
   .imortal-footer__copyright {
     max-width: 58vw;
-    font-size: 0.50rem;
+    font-size: 0.48rem;
   }
 }
