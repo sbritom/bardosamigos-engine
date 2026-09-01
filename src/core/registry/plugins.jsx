@@ -205,20 +205,20 @@ export const plugins = [
 
   {
     id: "games",
-    title: "Brincadeiras",
-    path: "/brincadeiras",
+    title: "Games",
+    path: "/games",
     icon: Gamepad2,
     menu: true,
-    element: <LazyPluginPage component={GamesPage} title="Brincadeiras" />,
+    element: <LazyPluginPage component={GamesPage} title="Games" />,
   },
 
   {
-    id: "games-alias",
-    title: "Brincadeiras",
-    path: "/games",
+    id: "games-legacy",
+    title: "Games",
+    path: "/brincadeiras",
     icon: Gamepad2,
     menu: false,
-    element: <LazyPluginPage component={GamesPage} title="Brincadeiras" />,
+    element: <LazyPluginPage component={GamesPage} title="Games" />,
   },
 
   {
