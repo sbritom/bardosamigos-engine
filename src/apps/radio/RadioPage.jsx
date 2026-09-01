@@ -1,5 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Headphones, Loader2, Music2, Pause, Play, Radio, Volume2, X } from "lucide-react";
+import {
+  CalendarDays,
+  Headphones,
+  ListMusic,
+  Loader2,
+  Music2,
+  Newspaper,
+  Pause,
+  Play,
+  Radio,
+  Sparkles,
+  Volume2,
+  X,
+} from "lucide-react";
 
 import {
   fetchMxCastStatus,
@@ -12,15 +25,42 @@ import "./radioUi.css";
 const INITIAL_METADATA = {
   online: false,
   songTitle: "",
-  track: "Programacao ao vivo",
-  artist: "Radio Bar dos Amigos",
+  track: "Programação ao vivo",
+  artist: "IMORTAL0800",
   listeners: 0,
   peakListeners: 0,
-  serverTitle: "Radio Bar dos Amigos",
+  serverTitle: "IMORTAL0800",
   streamUrl: getMxCastStreamUrl(),
   cover: "",
   updatedAt: null,
 };
+
+const RADIO_SECTIONS = [
+  {
+    id: "programacao",
+    icon: CalendarDays,
+    eyebrow: "Grade da rádio",
+    title: "Programação",
+    description: "Programas, horários e locutores da IMORTAL0800.",
+    empty: "A programação oficial ainda não foi publicada.",
+  },
+  {
+    id: "ranking",
+    icon: ListMusic,
+    eyebrow: "Mais tocadas",
+    title: "Ranking musical",
+    description: "As músicas que estão se destacando na rádio e nos pedidos.",
+    empty: "Ainda não há um ranking musical publicado.",
+  },
+  {
+    id: "novidades",
+    icon: Newspaper,
+    eyebrow: "Música",
+    title: "Novidades",
+    description: "Lançamentos, destaques e novidades do universo musical.",
+    empty: "As próximas novidades musicais aparecerão aqui.",
+  },
+];
 
 function getListenerLabel(count) {
   const value = Number(count) || 0;
@@ -65,7 +105,7 @@ export default function RadioPage() {
       setMetadataError("");
     } catch (error) {
       if (error.name !== "AbortError") {
-        setMetadataError("Nao foi possivel atualizar os dados da radio agora.");
+        setMetadataError("Os dados da faixa não puderam ser atualizados agora.");
       }
     } finally {
       setMetadataLoading(false);
@@ -75,7 +115,10 @@ export default function RadioPage() {
   useEffect(() => {
     const controller = new AbortController();
     const refreshTimer = window.setTimeout(() => refreshMetadata(controller.signal), 0);
-    const intervalId = window.setInterval(() => refreshMetadata(controller.signal), getRadioMetadataInterval());
+    const intervalId = window.setInterval(
+      () => refreshMetadata(controller.signal),
+      getRadioMetadataInterval(),
+    );
 
     return () => {
       controller.abort();
@@ -133,7 +176,7 @@ export default function RadioPage() {
       setPlaying(true);
     } catch {
       setPlaying(false);
-      setPlayerError("Nao foi possivel conectar a radio agora.");
+      setPlayerError("Não foi possível conectar à rádio agora.");
     } finally {
       setConnecting(false);
     }
@@ -175,11 +218,13 @@ export default function RadioPage() {
         setRequestFeedbackTone("info");
       }, 2400);
     } catch (error) {
-      setRequestFeedback(error.status === 429
-        ? "Aguarde um pouco antes de enviar outro pedido."
-        : error.status === 401
-          ? "Sua sessao expirou. Atualize a pagina e tente novamente; pedidos como visitante continuam liberados."
-          : error.message || "Nao foi possivel registrar o pedido agora.");
+      setRequestFeedback(
+        error.status === 429
+          ? "Aguarde um pouco antes de enviar outro pedido."
+          : error.status === 401
+            ? "Sua sessão expirou. Atualize a página e tente novamente."
+            : error.message || "Não foi possível registrar o pedido agora.",
+      );
       setRequestFeedbackTone("error");
     } finally {
       setRequestSubmitting(false);
@@ -187,7 +232,7 @@ export default function RadioPage() {
   }, [closeRequestFlow, requestForm]);
 
   return (
-    <main className="bar-radio-page">
+    <main className="imortal-radio-page">
       <audio
         ref={audioRef}
         src={streamUrl}
@@ -197,7 +242,7 @@ export default function RadioPage() {
         onError={() => {
           setConnecting(false);
           setPlaying(false);
-          setPlayerError("Stream temporariamente indisponivel.");
+          setPlayerError("Stream temporariamente indisponível.");
         }}
         onPause={() => setPlaying(false)}
         onPlay={() => {
@@ -208,95 +253,166 @@ export default function RadioPage() {
         onWaiting={() => setConnecting(true)}
       />
 
-      <section className="bar-radio-listener-player" aria-label="Player da Radio Bar dos Amigos" aria-busy={metadataLoading}>
-        <div className="bar-radio-cover-panel">
+      <header className="imortal-radio-hero">
+        <div>
+          <span className="imortal-radio-hero__eyebrow">
+            <Radio size={15} />
+            RÁDIO IMORTAL0800
+          </span>
+          <h1>Som que não para.</h1>
+          <p>Ouça ao vivo, peça sua música e acompanhe tudo que acontece na programação.</p>
+        </div>
+
+        <nav className="imortal-radio-nav" aria-label="Seções da rádio">
+          <a href="#ao-vivo">Ao vivo</a>
+          <button ref={requestTriggerRef} type="button" onClick={openRequestFlow}>Pedidos</button>
+          <a href="#programacao">Programação</a>
+          <a href="#ranking">Ranking</a>
+          <a href="#novidades">Novidades</a>
+        </nav>
+      </header>
+
+      <section
+        id="ao-vivo"
+        className="imortal-radio-player-card"
+        aria-label="Player da Rádio IMORTAL0800"
+        aria-busy={metadataLoading}
+      >
+        <div className="imortal-radio-cover">
           {hasCover ? (
             <img
               src={coverUrl}
               alt={`Capa de ${metadata.track}`}
-              className="bar-radio-cover-image"
               onError={() => setFailedCover(coverUrl)}
             />
           ) : (
-            <div className="bar-radio-cover-fallback" aria-hidden="true">
+            <div className="imortal-radio-cover__fallback" aria-hidden="true">
               <Radio size={72} />
+              <span>IMORTAL0800</span>
             </div>
           )}
         </div>
 
-        <div className="bar-radio-player-content">
-          <span className="bar-radio-now-label">TOCANDO AGORA</span>
-          <h2>{metadataLoading ? "Carregando musica..." : metadata.track}</h2>
-          <p>{metadata.artist}</p>
-
-          <div className="bar-radio-listener-row">
-            <span>
-              <Headphones size={17} aria-hidden="true" />
+        <div className="imortal-radio-player-card__content">
+          <div className="imortal-radio-live-line">
+            <span className={`imortal-radio-live-badge ${metadata.online || playing ? "is-live" : ""}`}>
+              <i aria-hidden="true" />
+              {playing ? "OUVINDO AGORA" : metadata.online ? "NO AR" : "RÁDIO"}
+            </span>
+            <span className="imortal-radio-listeners">
+              <Headphones size={16} />
               {getListenerLabel(metadata.listeners)}
             </span>
-            {metadata.updatedAt && (
-              <small>Atualizado {new Date(metadata.updatedAt).toLocaleTimeString("pt-BR")}</small>
-            )}
           </div>
 
-          <div className="bar-radio-controls">
+          <div className="imortal-radio-track">
+            <span>TOCANDO AGORA</span>
+            <h2>{metadataLoading ? "Carregando música..." : metadata.track}</h2>
+            <p>{metadata.artist || "IMORTAL0800"}</p>
+          </div>
+
+          <div className="imortal-radio-controls">
             <button
-              className="bar-radio-play-button"
+              className="imortal-radio-play"
               type="button"
               onClick={handleToggle}
               disabled={connecting}
-              aria-label={playing ? "Pausar radio" : "Tocar radio"}
+              aria-label={playing ? "Pausar rádio" : "Tocar rádio"}
             >
-              {connecting ? <Loader2 size={28} className="bar-radio-spin-icon" aria-hidden="true" /> : playing ? <Pause size={30} aria-hidden="true" /> : <Play size={30} aria-hidden="true" />}
+              {connecting ? (
+                <Loader2 size={25} className="imortal-radio-spin" aria-hidden="true" />
+              ) : playing ? (
+                <Pause size={27} aria-hidden="true" />
+              ) : (
+                <Play size={27} fill="currentColor" aria-hidden="true" />
+              )}
             </button>
 
-            <label className="bar-radio-volume-control" title={`Volume ${volume}%`}>
-              <Volume2 size={20} aria-hidden="true" />
+            <label className="imortal-radio-volume" title={`Volume ${volume}%`}>
+              <Volume2 size={19} aria-hidden="true" />
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={volume}
                 onChange={handleVolume}
-                aria-label="Volume da radio"
-                style={{ "--bar-radio-volume": `${volume}%` }}
+                aria-label="Volume da rádio"
+                style={{ "--imortal-radio-volume": `${volume}%` }}
               />
             </label>
 
-            <button ref={requestTriggerRef} className="bar-radio-request-button" type="button" onClick={openRequestFlow}>
+            <button className="imortal-radio-request" type="button" onClick={openRequestFlow}>
               <Music2 size={18} aria-hidden="true" />
-              PEDIR M&Uacute;SICA
+              Pedir música
             </button>
           </div>
 
           {isUnavailable && (
-            <p className="bar-radio-soft-alert" role="status" aria-live="polite">{playerError || metadataError}</p>
+            <p className="imortal-radio-alert" role="status" aria-live="polite">
+              {playerError || metadataError}
+            </p>
           )}
         </div>
       </section>
 
+      <section className="imortal-radio-request-strip" aria-label="Pedidos musicais">
+        <div className="imortal-radio-request-strip__icon">
+          <Sparkles size={22} />
+        </div>
+        <div>
+          <span>QUER OUVIR SUA MÚSICA?</span>
+          <strong>Faça seu pedido para a rádio.</strong>
+          <p>Envie música e artista; o pedido segue direto para o painel do locutor.</p>
+        </div>
+        <button type="button" onClick={openRequestFlow}>
+          <Music2 size={17} />
+          Fazer pedido
+        </button>
+      </section>
+
+      <section className="imortal-radio-content-grid" aria-label="Conteúdo da rádio">
+        {RADIO_SECTIONS.map((section) => {
+          const Icon = section.icon;
+          return (
+            <article key={section.id} id={section.id} className="imortal-radio-info-card">
+              <div className="imortal-radio-info-card__icon">
+                <Icon size={21} />
+              </div>
+              <span>{section.eyebrow}</span>
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+              <div className="imortal-radio-empty">
+                <strong>Em preparação</strong>
+                <small>{section.empty}</small>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
       {requestModalOpen && (
-        <div className="bar-radio-request-modal" role="dialog" aria-modal="true" aria-labelledby="radio-request-title">
-          <div className="bar-radio-request-panel">
-            <div className="bar-radio-request-header">
-              <strong id="radio-request-title">Pedir m&uacute;sica</strong>
-              <button type="button" aria-label="Fechar pedido de musica" onClick={closeRequestFlow} disabled={requestSubmitting}>
+        <div className="imortal-radio-modal" role="dialog" aria-modal="true" aria-labelledby="radio-request-title">
+          <div className="imortal-radio-modal__panel">
+            <div className="imortal-radio-modal__header">
+              <div>
+                <span>IMORTAL0800</span>
+                <strong id="radio-request-title">Pedir música</strong>
+              </div>
+              <button type="button" aria-label="Fechar pedido de música" onClick={closeRequestFlow} disabled={requestSubmitting}>
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
 
-            <form className="bar-radio-request-form" onSubmit={handleRequestSubmit} aria-busy={requestSubmitting}>
-              <p className="bar-radio-request-intro">
-                Voce pode pedir como visitante ou com sua conta. O pedido sera enviado ao painel do locutor.
-              </p>
+            <form className="imortal-radio-request-form" onSubmit={handleRequestSubmit} aria-busy={requestSubmitting}>
+              <p>Você pode pedir como visitante. O pedido será enviado ao painel do locutor.</p>
 
               <label>
-                M&uacute;sica e artista
+                Música e artista
                 <input
                   ref={requestInputRef}
                   name="songAndArtist"
                   type="text"
-                  placeholder="Nome da musica e do artista"
+                  placeholder="Nome da música e do artista"
                   minLength={3}
                   maxLength={180}
                   required
@@ -306,10 +422,10 @@ export default function RadioPage() {
               </label>
 
               <label>
-                Deixe seu recado <span>(opcional)</span>
+                Recado <span>(opcional)</span>
                 <textarea
                   name="message"
-                  placeholder="Deixe um recado para a radio"
+                  placeholder="Deixe um recado para a rádio"
                   maxLength={500}
                   rows={3}
                   value={requestForm.message}
@@ -319,7 +435,7 @@ export default function RadioPage() {
 
               {requestFeedback && (
                 <p
-                  className={`bar-radio-request-feedback is-${requestFeedbackTone}`}
+                  className={`imortal-radio-feedback is-${requestFeedbackTone}`}
                   role={requestFeedbackTone === "error" ? "alert" : "status"}
                   aria-live="polite"
                 >
@@ -327,8 +443,8 @@ export default function RadioPage() {
                 </p>
               )}
 
-              <div className="bar-radio-request-actions">
-                <button type="button" onClick={closeRequestFlow} disabled={requestSubmitting}>Fechar</button>
+              <div className="imortal-radio-modal__actions">
+                <button type="button" onClick={closeRequestFlow} disabled={requestSubmitting}>Cancelar</button>
                 <button type="submit" disabled={requestSubmitting}>
                   {requestSubmitting ? "Enviando..." : "Enviar pedido"}
                 </button>
