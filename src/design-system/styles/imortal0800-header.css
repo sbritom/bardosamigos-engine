@@ -129,12 +129,12 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
-/* Player IMORTAL0800: neutraliza os limites antigos de 48px do MxCast. */
+/* Player IMORTAL0800: 48px exatos para o container e o iframe. */
 .bds-radio-strip .imortal-radio-player,
 .bds-radio-strip .imortal-radio-player__iframe {
-  height: 80px !important;
-  min-height: 80px !important;
-  max-height: 80px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
 }
 
 .bds-radio-strip .imortal-radio-player {
@@ -166,9 +166,9 @@
 @media (max-width: 720px) {
   .bds-radio-strip .imortal-radio-player,
   .bds-radio-strip .imortal-radio-player__iframe {
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
   }
 }
 
