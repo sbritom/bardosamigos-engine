@@ -159,7 +159,7 @@
   overflow: hidden;
   border: 0 !important;
   border-radius: 0 !important;
-  background: #071426 !important;
+  background: #060A11 !important;
   box-shadow: none !important;
   box-sizing: border-box;
 }
@@ -173,7 +173,7 @@
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
-  background: #071426 !important;
+  background: #060A11 !important;
 }
 
 @media (max-width: 1279px) {
