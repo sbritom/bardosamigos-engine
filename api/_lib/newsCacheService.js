@@ -128,6 +128,7 @@ function mapCachedArticle(row = {}) {
     date: row.published_at || row.created_at || '',
     image: row.cover_url || '',
     source: metadata.source || 'Fonte sincronizada',
+    description: row.summary || '',
     publishedAt: row.published_at || row.created_at || '',
     url: metadata.sourceUrl || metadata.originalUrl || '',
     coverUrl: row.cover_url || '',
@@ -417,14 +418,21 @@ export async function syncGNewsToSupabase(options = {}) {
   }
 }
 
-export async function listCachedNews({ limit = NEWS_LIMIT } = {}) {
+export async function listCachedNews({ limit = NEWS_LIMIT, category = '' } = {}) {
   const requestedLimit = Math.min(Math.max(Number(limit || NEWS_LIMIT), 1), MAX_NEWS_LIMIT)
   const client = createNewsSupabaseClient()
-  const { data, error } = await client
+
+  let query = client
     .from('news_articles')
-    .select('id, title, cover_url, published_at, created_at, metadata')
+    .select('id, title, summary, cover_url, published_at, created_at, metadata')
     .eq('status', 'published')
     .is('deleted_at', null)
+
+  if (category) {
+    query = query.contains('metadata', { category })
+  }
+
+  const { data, error } = await query
     .order('published_at', { ascending: false })
     .limit(requestedLimit)
 
