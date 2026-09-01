@@ -1,0 +1,182 @@
+/* IMORTAL0800 - Header/Home first stage
+   Scoped to the top navigation and radio strip so TV/Xat stay untouched. */
+
+.imortal-header,
+.bds-radio-strip {
+  border-color: rgba(24, 126, 255, 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(9, 13, 22, 0.97), rgba(3, 6, 12, 0.98)) !important;
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.34),
+    0 0 28px rgba(0, 119, 255, 0.04) !important;
+}
+
+.imortal-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(18px) saturate(118%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(118%) !important;
+}
+
+.imortal-header__bar {
+  min-height: 68px;
+  gap: 18px;
+}
+
+.imortal-header__brand-link {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.imortal-header__brand {
+  color: #f7f9fc !important;
+  font-size: clamp(1.45rem, 2vw, 2rem) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.045em !important;
+  text-transform: uppercase;
+  text-shadow: none !important;
+}
+
+.imortal-header__brand span {
+  display: inline-block;
+  margin-left: 2px;
+  background: linear-gradient(92deg, #0b78ff 0%, #15c9ff 52%, #8d5cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.imortal-header__desktop-nav {
+  display: none;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.imortal-header .bds-top-header__nav-link,
+.imortal-header .bds-top-header__mobile-link,
+.imortal-header .bds-top-header__icon-button {
+  border-color: rgba(44, 130, 255, 0.18) !important;
+  background: rgba(7, 11, 18, 0.82) !important;
+  color: rgba(241, 246, 255, 0.78) !important;
+  box-shadow: none !important;
+}
+
+.imortal-header .bds-top-header__nav-link:hover,
+.imortal-header .bds-top-header__mobile-link:hover,
+.imortal-header .bds-top-header__icon-button:hover {
+  border-color: rgba(35, 139, 255, 0.52) !important;
+  background: rgba(10, 91, 211, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.imortal-header .bds-top-header__nav-link--active,
+.imortal-header .bds-top-header__mobile-link--active,
+.imortal-header .bds-top-header__icon-button--active {
+  border-color: rgba(33, 132, 255, 0.72) !important;
+  background:
+    linear-gradient(180deg, rgba(13, 119, 255, 0.28), rgba(5, 50, 118, 0.36)) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 22px rgba(0, 119, 255, 0.13) !important;
+}
+
+.imortal-header__actions {
+  display: flex;
+  min-width: 40px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.imortal-header__menu-toggle {
+  display: inline-flex !important;
+}
+
+.imortal-header__mobile-nav {
+  display: none !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border-top: 1px solid rgba(44, 130, 255, 0.14) !important;
+  padding: 10px 0 14px !important;
+}
+
+.imortal-header__mobile-nav.is-open {
+  display: grid !important;
+}
+
+.imortal-header__mobile-nav .bds-top-header__mobile-link {
+  min-height: 38px;
+  justify-content: flex-start;
+  border-radius: 12px !important;
+  padding-inline: 12px;
+}
+
+.bds-radio-strip {
+  position: relative;
+  z-index: 45;
+  border-bottom: 1px solid rgba(28, 122, 255, 0.18) !important;
+}
+
+.bds-radio-strip .bds-mxcast-player {
+  border: 1px solid rgba(31, 128, 255, 0.15);
+  border-radius: 12px;
+  background: rgba(5, 8, 14, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+@media (max-width: 1279px) {
+  .imortal-header__bar {
+    display: grid !important;
+    grid-template-columns: 40px minmax(0, 1fr) 40px !important;
+    align-items: center;
+    gap: 10px !important;
+  }
+
+  .imortal-header__brand-link {
+    justify-self: center;
+  }
+
+  .imortal-header__brand {
+    font-size: clamp(1.35rem, 5.8vw, 1.75rem) !important;
+  }
+
+  .imortal-header__actions {
+    justify-self: end;
+  }
+
+  .imortal-header__actions .bds-top-header__icon-button:not(:last-child) {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .imortal-header__bar {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) max-content !important;
+    align-items: center;
+  }
+
+  .imortal-header__desktop-nav {
+    display: flex;
+  }
+
+  .imortal-header__menu-toggle,
+  .imortal-header__mobile-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .imortal-header__mobile-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-header__brand {
+    font-size: 1.42rem !important;
+  }
+}
