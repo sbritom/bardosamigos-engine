@@ -152,10 +152,12 @@
 
 .bds-radio-strip .imortal-radio-player__iframe {
   display: block !important;
-  width: 100% !important;
+  width: 111.111% !important;
   border: 0 !important;
   border-radius: 11px !important;
   background: #071426 !important;
+  transform: scale(0.9);
+  transform-origin: center center;
 }
 
 .bds-radio-strip > div {
