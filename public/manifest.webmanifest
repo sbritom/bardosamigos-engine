@@ -1,17 +1,17 @@
 {
-  "name": "Bar dos Amigos",
-  "short_name": "Bar dos Amigos",
-  "description": "Portal Bar dos Amigos com radio ao vivo, TV, futebol, eventos, noticias, ferramentas e comunidade.",
+  "name": "IMORTAL0800",
+  "short_name": "IMORTAL0800",
+  "description": "Rádio ao vivo, TV, futebol, games e comunidade em um só portal.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#010A26",
-  "theme_color": "#010A26",
+  "background_color": "#03060B",
+  "theme_color": "#060A11",
   "icons": [
     {
-      "src": "/favicon-ba.png",
-      "sizes": "256x256",
-      "type": "image/png",
+      "src": "/favicon-imortal.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
