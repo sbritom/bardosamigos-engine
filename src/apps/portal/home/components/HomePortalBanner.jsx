@@ -5,7 +5,7 @@ const SLIDES = [
   {
     id: 'portal',
     image: '/banners/imortal0800-portal.webp',
-    alt: 'IMORTAL0800 — Tudo acontece aqui. TV, Xat, futebol, games e rádio reunidos em um só lugar.',
+    alt: 'IMORTAL0800 — Tudo acontece aqui. TV, Xat, futebol, games e rádio em um só lugar.',
     fallbackTitle: 'IMORTAL0800',
     actionLabel: 'Assistir TV',
     actionHref: '/tv',
@@ -21,7 +21,7 @@ const SLIDES = [
   },
   {
     id: 'football',
-    image: '/banners/imortal0800-futebol.webp',
+    image: '/banners/imortal0800-football.webp',
     alt: 'Futebol — Jogos, placares e tabelas. Acompanhe resultados, estatísticas, escalações e bolão.',
     fallbackTitle: 'FUTEBOL',
     actionLabel: 'Ver Futebol',
@@ -30,7 +30,7 @@ const SLIDES = [
   {
     id: 'games',
     image: '/banners/imortal0800-games.webp',
-    alt: 'Games — Free Fire, Fortnite e esports. Novidades, campeonatos, lançamentos e jogos gratuitos.',
+    alt: 'Games — Free Fire, Fortnite e esports. Novidades, campeonatos e lançamentos.',
     fallbackTitle: 'GAMES',
     actionLabel: 'Ver Games',
     actionHref: '/games',
