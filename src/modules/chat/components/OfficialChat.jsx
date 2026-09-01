@@ -8,7 +8,7 @@ function OfficialChatComponent({ fullscreen = false }) {
   return (
     <FeatureCard
       className={fullscreen ? 'bds-home-card-full' : 'bds-home-card-full'}
-      title="Chat Oficial Bar dos Amigos"
+      title="Chat Oficial IMORTAL0800"
       icon={<MessageCircle size={20} />}
       action={(
         <div className="bds-chat-actions">
@@ -25,11 +25,11 @@ function OfficialChatComponent({ fullscreen = false }) {
     >
       <div className={fullscreen ? 'bds-chat-frame bds-chat-frame--fullscreen' : 'bds-chat-frame'} data-designer-id="chat.iframe" data-designer-label="Chat / Iframe">
         <iframe
-          title="Chat Oficial Bar dos Amigos"
+          title="Chat Oficial IMORTAL0800"
           src={XAT_CHAT_EMBED_URL}
           allow="clipboard-write"
-          width="480"
-          height="640"
+          width="540"
+          height="405"
           frameBorder="0"
           scrolling="no"
           loading="lazy"
