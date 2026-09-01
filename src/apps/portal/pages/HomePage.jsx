@@ -200,12 +200,16 @@ function FootballTeam({ name, crest }) {
   )
 }
 
-function FootballTodayMatch({ match }) {
+function FootballRecentMatch({ match }) {
   const live = isLiveStatus(match.standardStatus)
   const finished = isFinishedStatus(match.standardStatus)
   const hasScore = match.homeScore !== null && match.homeScore !== undefined
     && match.awayScore !== null && match.awayScore !== undefined
-  const statusLabel = live ? (match.status || 'Ao vivo') : finished ? 'Encerrado' : (match.localTime || match.status || 'Em breve')
+  const statusLabel = live
+    ? (match.status || 'Ao vivo')
+    : finished
+      ? (match.dateLabel ? `Encerrado • ${match.dateLabel}` : 'Encerrado')
+      : (match.localTime || match.status || 'Em breve')
   const statusTone = live ? 'is-live' : finished ? 'is-finished' : 'is-upcoming'
 
   return (
@@ -260,7 +264,7 @@ function FootballCard({ matches }) {
 
       {recentMatches.length ? (
         <div className="imortal-home-football__grid" data-designer-id="football.cards" data-designer-label="Futebol / Jogos Recentes">
-          {recentMatches.map((match) => <FootballTodayMatch key={match.id} match={match} />)}
+          {recentMatches.map((match) => <FootballRecentMatch key={match.id} match={match} />)}
         </div>
       ) : (
         <div className="imortal-home-football__empty">
