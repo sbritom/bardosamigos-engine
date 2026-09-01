@@ -9,8 +9,8 @@
   "theme_color": "#010A26",
   "icons": [
     {
-      "src": "/favicon-ba.png",
-      "sizes": "256x256",
+      "src": "/favicon-imortal.png",
+      "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
     }
