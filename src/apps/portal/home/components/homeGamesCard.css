@@ -1,0 +1,125 @@
+.imortal-home-games {
+  border-color: rgba(91, 76, 255, 0.18) !important;
+}
+
+.imortal-home-games__intro {
+  margin-top: 2px;
+  color: rgba(220, 231, 247, 0.62);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.imortal-home-games__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.imortal-home-games__item {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+  border: 1px solid rgba(80, 121, 255, 0.14);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(102, 73, 255, 0.11), transparent 34%),
+    linear-gradient(180deg, rgba(11, 20, 35, 0.88), rgba(5, 9, 16, 0.94));
+  color: #f1f6ff;
+  padding: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.imortal-home-games__item:hover {
+  border-color: rgba(84, 156, 255, 0.34);
+  transform: translateY(-1px);
+}
+
+.imortal-home-games__item-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.imortal-home-games__item-top > span {
+  color: #7acbff;
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.imortal-home-games__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(68, 152, 255, 0.18);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(18, 115, 255, 0.13), rgba(84, 53, 255, 0.09));
+  color: #87d5ff;
+}
+
+.imortal-home-games__item > strong {
+  color: #ffffff;
+  font-size: 0.94rem;
+  font-weight: 850;
+  line-height: 1.15;
+}
+
+.imortal-home-games__item > p {
+  min-height: 38px;
+  margin: 0;
+  color: rgba(221, 231, 244, 0.64);
+  font-size: 0.76rem;
+  line-height: 1.42;
+}
+
+.imortal-home-games__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.imortal-home-games__tags span {
+  border: 1px solid rgba(83, 144, 255, 0.13);
+  border-radius: 999px;
+  background: rgba(19, 61, 116, 0.12);
+  color: rgba(217, 235, 255, 0.72);
+  padding: 4px 7px;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+.imortal-home-games__cta {
+  display: none;
+  margin-top: 10px;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(69, 150, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(7, 21, 39, 0.72);
+  color: #dff3ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 920px) {
+  .imortal-home-games__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-home-games__item > p {
+    min-height: 0;
+  }
+
+  .imortal-home-games__cta {
+    display: flex;
+  }
+}
