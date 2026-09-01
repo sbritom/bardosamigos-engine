@@ -129,59 +129,127 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
-/* Player IMORTAL0800: 45px exatos para o container e o iframe. */
-.bds-radio-strip .imortal-radio-player {
-  height: 80px !important;
-  min-height: 80px !important;
-  max-height: 80px !important;
-}
-
-.bds-radio-strip .imortal-radio-player__iframe {
-  height: 45px !important;
-  min-height: 45px !important;
-  max-height: 45px !important;
-}
-
-.bds-radio-strip .imortal-radio-player {
-  width: 100%;
-  max-width: 1180px;
-  margin-inline: auto;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid rgba(35, 139, 255, 0.2) !important;
-  border-radius: 12px !important;
-  background: #071426 !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.025),
-    0 8px 22px rgba(0, 0, 0, 0.18) !important;
-}
-
-.bds-radio-strip .imortal-radio-player__iframe {
-  display: block !important;
-  width: 100% !important;
-  border: 0 !important;
-  border-radius: 11px !important;
-  background: #071426 !important;
-  transform: none !important;
-}
-
+/* Player próprio IMORTAL0800: encaixe total dentro do contêiner de 80px. */
 .bds-radio-strip > div {
   width: 100%;
   padding-block: 0 !important;
 }
 
+.bds-radio-strip .imortal-radio-player {
+  display: grid !important;
+  width: 100%;
+  max-width: 1180px;
+  height: 64px !important;
+  min-height: 64px !important;
+  max-height: 64px !important;
+  grid-template-columns: auto minmax(180px, 1fr) auto minmax(150px, 220px);
+  align-items: center;
+  gap: 14px;
+  margin: 8px auto;
+  padding: 0 16px;
+  overflow: hidden;
+  border: 1px solid rgba(35, 139, 255, 0.22) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(12, 126, 255, 0.12), transparent 30%),
+    linear-gradient(90deg, #071426, #050d19) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 8px 22px rgba(0, 0, 0, 0.18) !important;
+  box-sizing: border-box;
+}
+
+.imortal-radio-player__play {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(52, 157, 255, 0.42);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #168cff, #0755c8);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(18, 137, 255, 0.2);
+}
+
+.imortal-radio-player__station {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.imortal-radio-player__station strong {
+  overflow: hidden;
+  color: #f5f9ff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-radio-player__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #67ccff;
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.imortal-radio-player__live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2fd47d;
+  box-shadow: 0 0 9px rgba(47, 212, 125, 0.5);
+}
+
+.imortal-radio-player__signal,
+.imortal-radio-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(220, 232, 247, 0.62);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.imortal-radio-player__signal svg,
+.imortal-radio-player__volume svg {
+  color: #69caff;
+}
+
+.imortal-radio-player__volume input {
+  width: 100%;
+  min-width: 90px;
+  accent-color: #168cff;
+}
+
 @media (max-width: 720px) {
   .bds-radio-strip .imortal-radio-player {
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    padding-inline: 10px;
   }
 
-  .bds-radio-strip .imortal-radio-player__iframe {
-    height: 45px !important;
-    min-height: 45px !important;
-    max-height: 45px !important;
+  .imortal-radio-player__signal {
+    display: none;
+  }
+
+  .imortal-radio-player__volume {
+    width: 92px;
+  }
+}
+
+@media (max-width: 460px) {
+  .bds-radio-strip .imortal-radio-player {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .imortal-radio-player__volume {
+    display: none;
   }
 }
 
