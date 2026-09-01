@@ -1,0 +1,200 @@
+.tv-platform {
+  width: min(100%, 1440px);
+  color: #f5f9ff;
+}
+
+.tv-platform__header {
+  padding: 4px 0 2px;
+}
+
+.tv-platform__brand > span {
+  border-color: rgba(39, 145, 255, .28) !important;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(25, 143, 255, .24), rgba(7, 20, 36, .88)) !important;
+  color: #60c8ff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 0 20px rgba(16, 126, 255, .10);
+}
+
+.tv-platform__brand h1 {
+  color: #f7f9fc !important;
+  font-weight: 950 !important;
+  letter-spacing: -.035em !important;
+}
+
+.tv-platform__brand h1 span {
+  margin-left: 4px;
+  background: linear-gradient(92deg, #0b78ff 0%, #15c9ff 58%, #8d5cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.tv-platform__header .bds-status-badge,
+.tv-platform__header .bds-metric-chip,
+.tv-section .bds-status-badge,
+.tv-section .bds-metric-chip {
+  border-color: rgba(42, 143, 255, .18) !important;
+  background: rgba(8, 21, 37, .78) !important;
+  color: #67caff !important;
+}
+
+.tv-platform__player-section {
+  width: min(94%, 1340px);
+  margin-inline: auto;
+  border-color: rgba(35, 139, 255, .20) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(180deg, rgba(8, 14, 24, .94), rgba(3, 7, 12, .98)) !important;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.28),
+    0 0 30px rgba(0, 112, 255, .04) !important;
+  backdrop-filter: blur(16px) saturate(108%);
+  -webkit-backdrop-filter: blur(16px) saturate(108%);
+}
+
+.tv-player__viewport {
+  background:
+    radial-gradient(circle at 50% 44%, rgba(13, 109, 226, .09), transparent 42%),
+    #03070c !important;
+}
+
+.tv-platform__nowbar {
+  border-top-color: rgba(38, 137, 255, .16) !important;
+  background:
+    linear-gradient(180deg, rgba(8, 16, 28, .95), rgba(4, 9, 16, .98)) !important;
+}
+
+.tv-platform__nowbar span {
+  color: #5fc8ff !important;
+}
+
+.tv-platform__nowbar strong {
+  color: #f7f9fc !important;
+}
+
+.tv-platform__nowbar small,
+.tv-channel-card__body span {
+  color: rgba(214, 228, 245, .58) !important;
+}
+
+.tv-platform__nowbar button,
+.tv-platform__categories button {
+  border-color: rgba(44, 143, 255, .18) !important;
+  background: rgba(7, 17, 30, .82) !important;
+  color: rgba(225, 236, 250, .72) !important;
+}
+
+.tv-platform__nowbar button:hover,
+.tv-platform__categories button:hover {
+  border-color: rgba(61, 165, 255, .42) !important;
+  background: rgba(10, 91, 211, .16) !important;
+  color: #ffffff !important;
+}
+
+.tv-platform__categories button.is-active {
+  border-color: rgba(66, 167, 255, .56) !important;
+  background:
+    linear-gradient(180deg, rgba(18, 133, 255, .96), rgba(6, 72, 174, .98)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(0, 104, 255, .14) !important;
+}
+
+.tv-search {
+  border-color: rgba(42, 143, 255, .18) !important;
+  background: rgba(6, 15, 27, .78) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.tv-search svg {
+  color: #66c9ff;
+}
+
+.tv-search input {
+  color: #f7f9fc !important;
+}
+
+.tv-search input::placeholder {
+  color: rgba(211, 225, 242, .46) !important;
+}
+
+.tv-section .bds-section-header__title {
+  color: #f7f9fc !important;
+}
+
+.tv-section .bds-section-header__eyebrow {
+  color: #5fc8ff !important;
+}
+
+.tv-channel-card {
+  border-color: rgba(35, 132, 245, .16) !important;
+  border-radius: 17px !important;
+  background:
+    linear-gradient(180deg, rgba(8, 15, 25, .82), rgba(4, 8, 14, .92)) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.16) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tv-channel-card:hover {
+  border-color: rgba(54, 159, 255, .34) !important;
+  background:
+    linear-gradient(180deg, rgba(10, 29, 51, .90), rgba(5, 12, 21, .96)) !important;
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.22),
+    0 0 20px rgba(0, 115, 255, .05) !important;
+  transform: translateY(-2px);
+}
+
+.tv-channel-card--active,
+.tv-channel-card--active:hover {
+  border-color: rgba(61, 163, 255, .58) !important;
+  background:
+    linear-gradient(180deg, rgba(11, 70, 139, .30), rgba(4, 17, 34, .96)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(65, 171, 255, .06),
+    0 14px 34px rgba(0,0,0,.22) !important;
+}
+
+.tv-channel-card__media {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(21, 125, 240, .10), transparent 48%),
+    #050a10 !important;
+}
+
+.tv-channel-card__play {
+  background: rgba(2, 8, 15, .66) !important;
+  color: #ffffff !important;
+}
+
+.tv-channel-card__body strong {
+  color: #f7f9fc !important;
+}
+
+.tv-channel-card__body button[aria-pressed="true"] {
+  border-color: rgba(61, 164, 255, .54) !important;
+  background: linear-gradient(180deg, #158cff, #0755c8) !important;
+  color: #fff !important;
+}
+
+.tv-platform__skeleton,
+.tv-empty-state {
+  border-color: rgba(40, 139, 255, .14) !important;
+  background: rgba(6, 14, 24, .70) !important;
+  color: rgba(217, 229, 244, .62) !important;
+}
+
+.tv-platform__nowbar button:focus-visible,
+.tv-platform__categories button:focus-visible,
+.tv-channel-card__media:focus-visible,
+.tv-search:focus-within {
+  outline-color: #168cff !important;
+  box-shadow: 0 0 0 3px rgba(22,140,255,.12) !important;
+}
+
+@media (max-width: 760px) {
+  .tv-platform__player-section {
+    width: 100%;
+  }
+}
