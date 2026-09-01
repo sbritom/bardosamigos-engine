@@ -1,100 +1,36 @@
 .imortal-home-banner {
   position: relative;
   width: 100%;
-  height: clamp(105px, 8vw, 140px);
+  max-width: 1180px;
+  aspect-ratio: 1180 / 140;
   overflow: hidden;
   border: 1px solid rgba(28, 124, 255, 0.22);
   border-radius: 18px;
-  background:
-    radial-gradient(circle at 70% 50%, rgba(19, 126, 255, 0.10), transparent 36%),
-    linear-gradient(100deg, #03070d 0%, #040a12 52%, #06111f 100%);
+  background: #03060c;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
-  isolation: isolate;
 }
 
 .imortal-home-banner__image {
   position: absolute;
-  z-index: 0;
-  top: 0;
-  right: 0;
+  inset: 0;
   display: block;
-  width: 58%;
+  width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: right center;
+  object-fit: contain;
+  object-position: center;
   image-rendering: auto;
   animation: imortal-banner-image-enter 280ms ease;
 }
 
-.imortal-home-banner__shade {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(3, 7, 13, 1) 0%,
-      rgba(3, 7, 13, 0.98) 35%,
-      rgba(3, 7, 13, 0.80) 49%,
-      rgba(3, 7, 13, 0.18) 68%,
-      transparent 82%
-    );
-  pointer-events: none;
-}
-
-.imortal-home-banner__content {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: clamp(20px, 3vw, 38px);
-  display: grid;
-  max-width: 50%;
-  gap: 1px;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.imortal-home-banner__content > span {
-  color: #52c8ff;
-  font-size: clamp(0.55rem, 0.8vw, 0.68rem);
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.imortal-home-banner__content > strong {
-  margin-top: 5px;
-  color: #f6f9ff;
-  font-size: clamp(1.05rem, 2vw, 1.7rem);
-  font-weight: 950;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  white-space: nowrap;
-}
-
-.imortal-home-banner__content > small {
-  margin-top: 5px;
-  overflow: hidden;
-  color: rgba(211, 226, 244, 0.66);
-  font-size: clamp(0.57rem, 0.85vw, 0.76rem);
-  font-weight: 650;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .imortal-home-banner__fallback {
   position: absolute;
-  z-index: 0;
   inset: 0;
   display: grid;
-  place-items: center end;
-  padding-right: 32px;
+  place-items: center;
   background:
     radial-gradient(circle at 78% 50%, rgba(91, 75, 255, 0.18), transparent 30%),
     linear-gradient(100deg, rgba(3, 7, 14, 0.98), rgba(8, 24, 45, 0.94));
-  color: rgba(247, 251, 255, 0.24);
+  color: #f7fbff;
 }
 
 .imortal-home-banner__fallback strong {
@@ -105,7 +41,7 @@
 .imortal-home-banner__action-hotspot {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   min-width: 0;
   min-height: 0;
   border: 0;
@@ -117,9 +53,9 @@
 
 .imortal-home-banner__dot-hotspots {
   position: absolute;
-  z-index: 4;
+  z-index: 3;
   right: 18px;
-  bottom: 12px;
+  bottom: 10px;
   display: flex;
   gap: 7px;
 }
@@ -131,9 +67,9 @@
   min-height: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.28);
   cursor: pointer;
-  opacity: 0.72;
+  opacity: 0.78;
   transition: 160ms ease;
 }
 
@@ -160,21 +96,12 @@
 
 @media (max-width: 900px) {
   .imortal-home-banner {
-    height: clamp(100px, 13vw, 125px);
     border-radius: 15px;
-  }
-
-  .imortal-home-banner__image {
-    width: 62%;
-  }
-
-  .imortal-home-banner__content {
-    max-width: 52%;
   }
 
   .imortal-home-banner__dot-hotspots {
     right: 12px;
-    bottom: 9px;
+    bottom: 8px;
   }
 
   .imortal-home-banner__dot-hotspots button {
@@ -184,41 +111,12 @@
 
 @media (max-width: 520px) {
   .imortal-home-banner {
-    height: 95px;
     border-radius: 13px;
   }
 
-  .imortal-home-banner__image {
-    width: 100%;
-    opacity: 0.58;
-  }
-
-  .imortal-home-banner__shade {
-    background: linear-gradient(90deg, rgba(3,7,13,.98) 0%, rgba(3,7,13,.86) 54%, rgba(3,7,13,.32) 100%);
-  }
-
-  .imortal-home-banner__content {
-    left: 15px;
-    max-width: 72%;
-  }
-
-  .imortal-home-banner__content > span {
-    font-size: 0.5rem;
-  }
-
-  .imortal-home-banner__content > strong {
-    margin-top: 3px;
-    font-size: clamp(0.9rem, 5vw, 1.12rem);
-  }
-
-  .imortal-home-banner__content > small {
-    margin-top: 3px;
-    font-size: 0.52rem;
-  }
-
   .imortal-home-banner__dot-hotspots {
-    right: 9px;
-    bottom: 7px;
+    right: 8px;
+    bottom: 6px;
     gap: 4px;
   }
 
