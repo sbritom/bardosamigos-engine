@@ -21,7 +21,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const payload = await listCachedNews({ limit: request.query?.limit })
+    const payload = await listCachedNews({ limit: request.query?.limit, category: request.query?.category })
 
     response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
     response.status(200).json(payload)
