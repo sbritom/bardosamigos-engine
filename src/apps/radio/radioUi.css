@@ -362,7 +362,7 @@
 .imortal-radio-modal {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 90;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -575,6 +575,84 @@
   }
 
   .imortal-radio-modal__actions button {
+    width: 100%;
+  }
+}
+
+
+.imortal-radio-request-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid rgba(49, 143, 255, 0.16);
+  border-radius: 11px;
+  background: rgba(11, 120, 255, 0.055);
+}
+
+.imortal-radio-request-identity > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.imortal-radio-request-identity span {
+  color: rgba(214, 226, 241, 0.42);
+  font-size: 0.56rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.imortal-radio-request-identity strong {
+  overflow: hidden;
+  color: #f5f9ff;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-radio-request-identity.is-user strong {
+  color: #15c9ff;
+}
+
+.imortal-radio-request-identity small {
+  color: rgba(214, 226, 241, 0.45);
+  font-size: 0.61rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.imortal-radio-request-identity button {
+  min-height: 34px;
+  flex: none;
+  padding: 0 12px;
+  border: 1px solid rgba(21, 201, 255, 0.26);
+  border-radius: 9px;
+  background: rgba(11, 120, 255, 0.10);
+  color: #67d9ff;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.imortal-radio-request-identity button:hover {
+  background: rgba(11, 120, 255, 0.18);
+}
+
+@media (max-width: 600px) {
+  .imortal-radio-request-identity {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .imortal-radio-request-identity small {
+    text-align: left;
+  }
+
+  .imortal-radio-request-identity button {
     width: 100%;
   }
 }
