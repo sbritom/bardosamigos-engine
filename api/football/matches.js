@@ -411,3 +411,5 @@ export default async function handler(request, response) {
     response.status(502).json({ error: error.message || 'Football-Data request failed.' })
   }
 }
+
+// Football env sync
