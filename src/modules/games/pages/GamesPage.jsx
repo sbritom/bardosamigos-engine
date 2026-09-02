@@ -61,14 +61,40 @@ function formatDate(value, options = {}) {
   }).format(date)
 }
 
-async function fetchJson(url) {
+function withPreviewAccess(path) {
+  if (typeof window === 'undefined') return path
+
+  const shareToken = new URLSearchParams(window.location.search).get('_vercel_share')
+  if (!shareToken) return path
+
+  const url = new URL(path, window.location.origin)
+  url.searchParams.set('_vercel_share', shareToken)
+  return `${url.pathname}${url.search}`
+}
+
+async function fetchJson(path) {
+  const url = withPreviewAccess(path)
+
   try {
-    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
+    })
+
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+      return {
+        ok: false,
+        data: {},
+        error: new Error(`Resposta inválida ao carregar ${path}`),
+      }
+    }
+
     const data = await response.json().catch(() => ({}))
     return {
       ok: response.ok,
       data,
-      error: response.ok ? null : new Error(data.error || `Falha ao carregar ${url}`),
+      error: response.ok ? null : new Error(data.error || `Falha ao carregar ${path}`),
     }
   } catch (error) {
     return { ok: false, data: {}, error }
