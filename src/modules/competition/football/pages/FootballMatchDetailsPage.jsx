@@ -1,34 +1,50 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CalendarDays, Clock3, Trophy } from 'lucide-react'
-import { Button, Card, EmptyState, Loading, StatCard } from '../../../../design-system'
+import {
+  ArrowLeft,
+  BarChart3,
+  CalendarDays,
+  Clock3,
+  Info,
+  MapPin,
+  Trophy,
+  Users,
+  Whistle,
+} from 'lucide-react'
+import { EmptyState, Loading } from '../../../../design-system'
 import { formatBrazilFullDateTime, isLiveStatus } from '../../../../core/time'
 import { FootballStatusBadge } from '../components/FootballCommon'
 import { FootballLiveValue } from '../components/FootballLiveMotion'
 import { FootballCrest } from '../components/FootballCrest'
-import { formatFootballScore, getFootballMatchDisplayStatus, getFootballMatchMinute, getFootballMatchTime } from '../utils/footballCenterUtils'
+import {
+  formatFootballScore,
+  getFootballMatchDisplayStatus,
+  getFootballMatchMinute,
+  getFootballMatchTime,
+} from '../utils/footballCenterUtils'
 import { getFootballMatchDetails } from '../../services/footballCenterService'
+import './matchDetails.css'
 
 const STAT_LABELS = {
-  shots: 'Finalizacoes',
-  shotsOnTarget: 'Finalizacoes no alvo',
+  shots: 'Finalizações',
+  shotsOnTarget: 'No alvo',
   corners: 'Escanteios',
   fouls: 'Faltas',
-  cards: 'Cartoes',
+  cards: 'Cartões',
   possession: 'Posse de bola',
   offsides: 'Impedimentos',
-  substitutions: 'Substituicoes',
+  substitutions: 'Substituições',
 }
 
 const STAT_PRIORITY = ['shots', 'shotsOnTarget', 'corners', 'fouls', 'cards', 'possession', 'offsides', 'substitutions']
 
 function TeamBlock({ name, crest }) {
   return (
-    <div className="min-w-0 text-center">
-      <span className="mx-auto block h-20 w-20">
-        <FootballCrest src={crest} name={name} iconSize={28} />
+    <div className="imortal-match-team">
+      <span className="imortal-match-team__crest">
+        <FootballCrest src={crest} name={name} iconSize={32} />
       </span>
-      <h2 className="mt-3 truncate text-xl font-black sm:text-2xl">{name}</h2>
+      <strong>{name || 'Time'}</strong>
     </div>
   )
 }
@@ -82,10 +98,21 @@ function getLineupSides(match, lineups) {
   ].filter((side) => side.players.length)
 }
 
+function formatStatValue(value) {
+  if (value === null || value === undefined || value === '') return '-'
+  if (typeof value === 'object') {
+    const home = value.home ?? value.homeTeam ?? value.homeValue
+    const away = value.away ?? value.awayTeam ?? value.awayValue
+    if (home !== undefined || away !== undefined) return `${home ?? '-'} — ${away ?? '-'}`
+    return '-'
+  }
+  return String(value)
+}
+
 function getStatistics(match) {
   const entries = Object.entries(match.statistics || {})
-    .filter(([key, value]) => Boolean(value) && key !== 'attendance' && key !== 'referee')
-    .map(([key, value]) => ({ key, label: STAT_LABELS[key] || key, value }))
+    .filter(([key, value]) => value !== null && value !== undefined && value !== '' && key !== 'attendance' && key !== 'referee')
+    .map(([key, value]) => ({ key, label: STAT_LABELS[key] || key, value: formatStatValue(value) }))
 
   return entries.sort((left, right) => {
     const leftIndex = STAT_PRIORITY.indexOf(left.key)
@@ -95,22 +122,27 @@ function getStatistics(match) {
 }
 
 function getMatchInfo(match) {
-  const dateLabel = match.localDateIso || match.startsAt ? formatBrazilFullDateTime(match.localDateIso || match.startsAt) : ''
+  const dateSource = match.localDateIso || match.startsAt
+  const dateLabel = dateSource ? formatBrazilFullDateTime(dateSource) : ''
   return [
-    ['Estadio', match.venue],
-    ['Cidade', match.city],
-    ['Arbitro', match.referee],
-    ['Rodada', match.round?.name],
-    ['Competicao', match.competitionName],
-    ['Data', dateLabel],
-    ['Horario', match.localTime || getFootballMatchTime(match)],
-  ].filter(([, value]) => Boolean(value))
+    { label: 'Estádio', value: match.venue, icon: MapPin },
+    { label: 'Cidade', value: match.city, icon: MapPin },
+    { label: 'Árbitro', value: match.referee, icon: Whistle },
+    { label: 'Rodada', value: match.round?.name, icon: Trophy },
+    { label: 'Competição', value: match.competitionName, icon: Trophy },
+    { label: 'Data', value: dateLabel, icon: CalendarDays },
+    { label: 'Horário', value: match.localTime || getFootballMatchTime(match), icon: Clock3 },
+  ].filter((item) => Boolean(item.value))
 }
 
 function getHeroTimeLabel(match) {
   const display = getFootballMatchDisplayStatus(match)
   const live = isLiveStatus(display.value) || isLiveStatus(match?.status)
   return live ? getFootballMatchMinute(match) : getFootballMatchTime(match)
+}
+
+function EmptyMatchSection({ children }) {
+  return <p className="imortal-match-empty">{children}</p>
 }
 
 export default function FootballMatchDetailsPage() {
@@ -121,12 +153,15 @@ export default function FootballMatchDetailsPage() {
 
   useEffect(() => {
     let active = true
+
     async function load() {
       const result = await getFootballMatchDetails(matchId)
       if (active) setState({ loading: false, match: result.data, error: result.error?.message || '' })
     }
+
     load()
     const timer = window.setInterval(load, ['AO_VIVO', 'INTERVALO'].includes(pollingStatus) ? 30000 : 60000)
+
     return () => {
       active = false
       window.clearInterval(timer)
@@ -135,7 +170,7 @@ export default function FootballMatchDetailsPage() {
 
   if (state.loading) return <Loading label="Carregando detalhes da partida" />
   if (state.error) return <EmptyState title="Erro ao carregar partida" description={state.error} />
-  if (!state.match) return <EmptyState title="Partida nao encontrada" description="O jogo pode nao estar mais disponivel." />
+  if (!state.match) return <EmptyState title="Partida não encontrada" description="O jogo pode não estar mais disponível." />
 
   const match = state.match
   const { timeline, lineups } = getDetailCollections(match)
@@ -148,89 +183,150 @@ export default function FootballMatchDetailsPage() {
   const heroTimeLabel = getHeroTimeLabel(match)
 
   return (
-    <section className="space-y-5">
-      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button variant="secondary" onClick={() => navigate('/football')}>Voltar</Button>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <FootballStatusBadge match={match} />
-            {heroTimeLabel ? (
-              <FootballLiveValue as="span" value={heroTimeLabel} className="bds-football-time-value text-xs font-black tabular-nums text-[var(--bds-color-text-secondary)]">
-                {heroTimeLabel}
-              </FootballLiveValue>
-            ) : null}
+    <main className="imortal-match-page">
+      <div className="imortal-match-topbar">
+        <button type="button" onClick={() => navigate('/football')}>
+          <ArrowLeft size={16} />
+          Voltar ao Futebol
+        </button>
+
+        <div className="imortal-match-topbar__status">
+          <FootballStatusBadge match={match} />
+          {heroTimeLabel ? (
+            <FootballLiveValue as="span" value={heroTimeLabel} className="imortal-match-time">
+              {heroTimeLabel}
+            </FootballLiveValue>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="imortal-match-hero">
+        <div className="imortal-match-competition">
+          {match.competitionLogo ? <img src={match.competitionLogo} alt="" loading="lazy" /> : null}
+          <div>
+            <span>IMORTAL0800 • FUTEBOL</span>
+            <strong>{match.competitionName || 'Futebol'}</strong>
+            {match.round?.name ? <small>{match.round.name}</small> : null}
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-center">
-          {match.competitionLogo && <img src={match.competitionLogo} alt="" className="h-7 w-7 object-contain" loading="lazy" />}
-          <span className="text-sm font-bold text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
-          {match.round?.name ? <span className="text-sm font-bold text-[var(--bds-color-text-secondary)]">- {match.round.name}</span> : null}
-        </div>
-
-        <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+        <div className="imortal-match-scoreboard">
           <TeamBlock name={match.homeTeam} crest={match.homeCrest} />
-          <FootballLiveValue
-            as="strong"
-            value={formatFootballScore(match)}
-            highlight={match.hasScore}
-            className="bds-football-score-value text-center text-[2.35rem] font-black leading-none text-[var(--bds-color-text)] sm:text-[3.2rem]"
-          >
-            {formatFootballScore(match)}
-          </FootballLiveValue>
+
+          <div className="imortal-match-score">
+            <small>PLACAR</small>
+            <FootballLiveValue
+              as="strong"
+              value={formatFootballScore(match)}
+              highlight={match.hasScore}
+            >
+              {formatFootballScore(match)}
+            </FootballLiveValue>
+            <span>{match.localTime || getFootballMatchTime(match)}</span>
+          </div>
+
           <TeamBlock name={match.awayTeam} crest={match.awayCrest} />
         </div>
-      </Card>
 
-      {timelineItems.length ? (
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="flex items-center gap-2 text-xl font-black"><Clock3 size={18} aria-hidden="true" /> Timeline</h2>
-          <div className="mt-4 space-y-2">
-            {timelineItems.map((item, index) => (
-              <p key={`${item.label}-${index}`} className="bds-football-timeline-row flex items-center gap-3 rounded-[var(--radius)] border border-[var(--bds-color-border)] px-3 py-2 text-sm font-bold text-[var(--bds-color-text-secondary)]">
-                <span className="bds-football-timeline-minute text-right tabular-nums">{item.minute ? `${item.minute}'` : ''}</span>
-                <span className="bds-football-timeline-mark text-center" aria-hidden="true">{item.mark}</span>
-                <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              </p>
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
-      {statistics.length ? (
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="flex items-center gap-2 text-xl font-black"><Trophy size={18} aria-hidden="true" /> Estatisticas</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {statistics.map(({ key, label, value }) => (
-              <StatCard key={key} label={label} value={value} />
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
-      {lineupSides.length ? (
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="flex items-center gap-2 text-xl font-black"><CalendarDays size={18} aria-hidden="true" /> Escalacoes</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {lineupSides.map((side) => (
-              <div key={side.label} className="rounded-[var(--radius)] border border-[var(--bds-color-border)] p-3">
-                <h3 className="text-sm font-black uppercase text-[var(--bds-color-primary-hover)]">{side.label}</h3>
-                <p className="mt-1 truncate text-sm font-bold text-[var(--bds-color-text)]">{side.team}</p>
-                <p className="mt-2 text-sm text-[var(--bds-color-text-secondary)]">{side.players.join(', ')}</p>
+        {matchInfo.length ? (
+          <div className="imortal-match-quickinfo">
+            {matchInfo.slice(0, 4).map(({ label, value, icon: Icon }) => (
+              <div key={label}>
+                <Icon size={14} />
+                <span>{label}</span>
+                <strong>{value}</strong>
               </div>
             ))}
           </div>
-        </Card>
-      ) : null}
+        ) : null}
+      </section>
 
-      {matchInfo.length ? (
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="flex items-center gap-2 text-xl font-black"><CalendarDays size={18} aria-hidden="true" /> Informacoes da Partida</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {matchInfo.map(([label, value]) => <StatCard key={label} label={label} value={value} />)}
+      <div className="imortal-match-grid">
+        <section className="imortal-match-panel">
+          <header>
+            <span><BarChart3 size={17} /></span>
+            <div><strong>Estatísticas</strong><small>Dados disponíveis para a partida</small></div>
+          </header>
+
+          {statistics.length ? (
+            <div className="imortal-match-stats">
+              {statistics.map(({ key, label, value }) => (
+                <article key={key}>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyMatchSection>As estatísticas ainda não foram disponibilizadas para esta partida.</EmptyMatchSection>
+          )}
+        </section>
+
+        <section className="imortal-match-panel">
+          <header>
+            <span><Clock3 size={17} /></span>
+            <div><strong>Eventos do jogo</strong><small>Gols, cartões e substituições</small></div>
+          </header>
+
+          {timelineItems.length ? (
+            <div className="imortal-match-timeline">
+              {timelineItems.map((item, index) => (
+                <div key={`${item.label}-${index}`}>
+                  <span className="imortal-match-timeline__minute">{item.minute ? `${item.minute}'` : '—'}</span>
+                  <span className="imortal-match-timeline__mark">{item.mark || '•'}</span>
+                  <strong>{item.label}</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyMatchSection>Os eventos desta partida ainda não estão disponíveis.</EmptyMatchSection>
+          )}
+        </section>
+      </div>
+
+      <section className="imortal-match-panel">
+        <header>
+          <span><Users size={17} /></span>
+          <div><strong>Escalações</strong><small>Titulares disponibilizados pela fonte</small></div>
+        </header>
+
+        {lineupSides.length ? (
+          <div className="imortal-match-lineups">
+            {lineupSides.map((side) => (
+              <article key={side.label}>
+                <span>{side.label}</span>
+                <h3>{side.team}</h3>
+                <ol>
+                  {side.players.map((player, index) => <li key={`${player}-${index}`}>{player}</li>)}
+                </ol>
+              </article>
+            ))}
           </div>
-        </Card>
-      ) : null}
-    </section>
+        ) : (
+          <EmptyMatchSection>As escalações ainda não foram disponibilizadas para esta partida.</EmptyMatchSection>
+        )}
+      </section>
+
+      <section className="imortal-match-panel">
+        <header>
+          <span><Info size={17} /></span>
+          <div><strong>Informações da partida</strong><small>Dados gerais do confronto</small></div>
+        </header>
+
+        {matchInfo.length ? (
+          <div className="imortal-match-info">
+            {matchInfo.map(({ label, value, icon: Icon }) => (
+              <article key={label}>
+                <Icon size={15} />
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <EmptyMatchSection>Não há informações adicionais disponíveis para esta partida.</EmptyMatchSection>
+        )}
+      </section>
+    </main>
   )
 }
