@@ -22,6 +22,10 @@ import {
 } from '../services/eventsService'
 
 function temporalStatus(event = {}) {
+  if (String(event.metadata?.phase || '').toLowerCase() === 'preparing') {
+    return { id: 'upcoming', label: 'Em preparação' }
+  }
+
   const now = Date.now()
   const startsAt = event.startsAt || event.starts_at
   const endsAt = event.endsAt || event.ends_at

@@ -16,8 +16,11 @@ import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../auth/AuthContext'
 import {
+  deleteCommunityWallPost,
   loadCommunityPageData,
+  submitCommunityBirthday,
   submitCommunityWallPost,
+  updateCommunityWallPost,
 } from '../services/communityService'
 import { useCommunityPresence } from '../presence/CommunityPresenceContext'
 import './communityPage.css'
@@ -165,16 +168,58 @@ function EventCard({ event, onOpen }) {
   )
 }
 
-function WallCard({ post }) {
+function WallCard({
+  post,
+  editing,
+  editText,
+  busy,
+  onEditText,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
+}) {
   return (
     <article className="imortal-community-wall-post">
       <div className="imortal-community-wall-post__meta">
         <strong>{post.authorName || 'Imortal'}</strong>
         <span>{post.source === 'xat' ? 'Xat' : formatWallDate(post.createdAt)}</span>
       </div>
-      <p>{post.body}</p>
-      {post.source === 'xat' && post.createdAt ? (
-        <small>{formatWallDate(post.createdAt)}</small>
+
+      {editing ? (
+        <textarea
+          className="imortal-community-wall-post__edit"
+          rows={3}
+          minLength={2}
+          maxLength={280}
+          value={editText}
+          onChange={(event) => onEditText(event.target.value)}
+          disabled={busy}
+        />
+      ) : (
+        <p>{post.body}</p>
+      )}
+
+      {post.updatedAt && post.createdAt && post.updatedAt !== post.createdAt ? (
+        <small>Editado</small>
+      ) : null}
+
+      {post.canEdit ? (
+        <div className="imortal-community-wall-post__actions">
+          {editing ? (
+            <>
+              <button type="button" onClick={onSaveEdit} disabled={busy || editText.trim().length < 2}>Salvar</button>
+              <button type="button" onClick={onCancelEdit} disabled={busy}>Cancelar</button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={onStartEdit} disabled={busy}>Editar</button>
+              <button type="button" className="is-danger" onClick={onDelete} disabled={busy}>
+                {post.canModerate ? 'Remover' : 'Excluir'}
+              </button>
+            </>
+          )}
+        </div>
       ) : null}
     </article>
   )
@@ -182,7 +227,7 @@ function WallCard({ post }) {
 
 export default function CommunityPage() {
   const navigate = useNavigate()
-  const { isAuthenticated, openAuth } = useAuth()
+  const { isAuthenticated, displayName } = useAuth()
   const { connected: presenceConnected, onlineCount } = useCommunityPresence()
   const [data, setData] = useState({
     events: [],
@@ -194,9 +239,17 @@ export default function CommunityPage() {
     errors: [],
   })
   const [loading, setLoading] = useState(true)
+  const [wallName, setWallName] = useState('')
   const [wallText, setWallText] = useState('')
   const [wallBusy, setWallBusy] = useState(false)
   const [wallFeedback, setWallFeedback] = useState('')
+  const [editingWallId, setEditingWallId] = useState('')
+  const [editingWallText, setEditingWallText] = useState('')
+  const [birthdayOpen, setBirthdayOpen] = useState(false)
+  const [birthdayName, setBirthdayName] = useState('')
+  const [birthdayDate, setBirthdayDate] = useState('')
+  const [birthdayBusy, setBirthdayBusy] = useState(false)
+  const [birthdayFeedback, setBirthdayFeedback] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -211,6 +264,12 @@ export default function CommunityPage() {
     load()
   }, [load])
 
+  useEffect(() => {
+    if (isAuthenticated && displayName && !wallName.trim()) {
+      setWallName(displayName)
+    }
+  }, [displayName, isAuthenticated, wallName])
+
   const onlineLabel = useMemo(() => {
     if (presenceConnected && Number.isFinite(Number(onlineCount))) {
       return String(Number(onlineCount))
@@ -220,17 +279,11 @@ export default function CommunityPage() {
 
   async function handleWallSubmit(event) {
     event.preventDefault()
-
-    if (!isAuthenticated) {
-      openAuth('Entre para publicar um recado no mural.', 'login')
-      return
-    }
-
     setWallBusy(true)
     setWallFeedback('')
 
     try {
-      await submitCommunityWallPost({ body: wallText })
+      await submitCommunityWallPost({ body: wallText, authorName: wallName })
       setWallText('')
       setWallFeedback('Recado publicado.')
       await load()
@@ -238,6 +291,80 @@ export default function CommunityPage() {
       setWallFeedback(error.message || 'Não foi possível publicar o recado agora.')
     } finally {
       setWallBusy(false)
+    }
+  }
+
+  function startWallEdit(post) {
+    setEditingWallId(post.id)
+    setEditingWallText(post.body)
+    setWallFeedback('')
+  }
+
+  async function saveWallEdit() {
+    if (!editingWallId) return
+    setWallBusy(true)
+    setWallFeedback('')
+
+    try {
+      await updateCommunityWallPost({ id: editingWallId, body: editingWallText })
+      setEditingWallId('')
+      setEditingWallText('')
+      setWallFeedback('Recado atualizado.')
+      await load()
+    } catch (error) {
+      setWallFeedback(error.message || 'Não foi possível editar o recado agora.')
+    } finally {
+      setWallBusy(false)
+    }
+  }
+
+  async function removeWallPost(post) {
+    if (typeof window !== 'undefined' && !window.confirm('Excluir este recado?')) return
+    setWallBusy(true)
+    setWallFeedback('')
+
+    try {
+      await deleteCommunityWallPost(post.id)
+      if (editingWallId === post.id) {
+        setEditingWallId('')
+        setEditingWallText('')
+      }
+      setWallFeedback(post.canModerate ? 'Recado removido pela moderação.' : 'Recado excluído.')
+      await load()
+    } catch (error) {
+      setWallFeedback(error.message || 'Não foi possível excluir o recado agora.')
+    } finally {
+      setWallBusy(false)
+    }
+  }
+
+  async function handleBirthdaySubmit(event) {
+    event.preventDefault()
+    const match = birthdayDate.trim().match(/^(\\d{1,2})\\/(\\d{1,2})$/)
+
+    if (!match) {
+      setBirthdayFeedback('Use o formato DD/MM.')
+      return
+    }
+
+    setBirthdayBusy(true)
+    setBirthdayFeedback('')
+
+    try {
+      await submitCommunityBirthday({
+        displayName: birthdayName,
+        day: Number(match[1]),
+        month: Number(match[2]),
+      })
+      setBirthdayName('')
+      setBirthdayDate('')
+      setBirthdayOpen(false)
+      setBirthdayFeedback('Aniversário cadastrado.')
+      await load()
+    } catch (error) {
+      setBirthdayFeedback(error.message || 'Não foi possível cadastrar o aniversário agora.')
+    } finally {
+      setBirthdayBusy(false)
     }
   }
 
@@ -370,23 +497,34 @@ export default function CommunityPage() {
           />
 
           <form className="imortal-community-wall-form" onSubmit={handleWallSubmit}>
+            <input
+              type="text"
+              minLength={2}
+              maxLength={50}
+              value={wallName}
+              onChange={(event) => setWallName(event.target.value)}
+              placeholder="Seu nome"
+              aria-label="Seu nome"
+              required
+              disabled={wallBusy}
+            />
             <textarea
               rows={3}
               minLength={2}
               maxLength={280}
               value={wallText}
               onChange={(event) => setWallText(event.target.value)}
-              placeholder={isAuthenticated ? 'Escreva um recado...' : 'Entre para publicar um recado'}
-              disabled={wallBusy || !isAuthenticated}
+              placeholder="Escreva um recado..."
+              disabled={wallBusy}
             />
             <div>
-              <small>{wallText.length}/280</small>
+              <small>Identificação obrigatória • {wallText.length}/280</small>
               <button
                 type="submit"
-                disabled={wallBusy || (isAuthenticated && wallText.trim().length < 2)}
+                disabled={wallBusy || wallName.trim().length < 2 || wallText.trim().length < 2}
               >
                 <Send size={15} />
-                {wallBusy ? 'Publicando...' : isAuthenticated ? 'Publicar' : 'Entrar para publicar'}
+                {wallBusy ? 'Publicando...' : 'Publicar'}
               </button>
             </div>
           </form>
@@ -395,7 +533,23 @@ export default function CommunityPage() {
 
           <div className="imortal-community-wall-list">
             {data.wall?.length ? (
-              data.wall.slice(0, 8).map((post) => <WallCard key={post.id} post={post} />)
+              data.wall.slice(0, 8).map((post) => (
+                <WallCard
+                  key={post.id}
+                  post={post}
+                  editing={editingWallId === post.id}
+                  editText={editingWallText}
+                  busy={wallBusy}
+                  onEditText={setEditingWallText}
+                  onStartEdit={() => startWallEdit(post)}
+                  onCancelEdit={() => {
+                    setEditingWallId('')
+                    setEditingWallText('')
+                  }}
+                  onSaveEdit={saveWallEdit}
+                  onDelete={() => removeWallPost(post)}
+                />
+              ))
             ) : (
               <EmptyState>O mural ainda não tem recados.</EmptyState>
             )}
@@ -406,8 +560,51 @@ export default function CommunityPage() {
           <CommunitySectionHeader
             eyebrow="Calendário"
             title="Aniversariantes do mês"
-            description="Apenas participantes que autorizaram a exibição aparecem aqui."
+            description="Quem frequenta o Xat pode cadastrar nome e aniversário sem precisar de conta."
+            action={(
+              <button
+                className="imortal-community-inline-action"
+                type="button"
+                onClick={() => {
+                  setBirthdayOpen((current) => !current)
+                  setBirthdayFeedback('')
+                }}
+              >
+                {birthdayOpen ? 'Fechar' : 'Cadastrar aniversário'}
+              </button>
+            )}
           />
+
+          {birthdayOpen ? (
+            <form className="imortal-community-birthday-form" onSubmit={handleBirthdaySubmit}>
+              <input
+                type="text"
+                minLength={2}
+                maxLength={50}
+                value={birthdayName}
+                onChange={(event) => setBirthdayName(event.target.value)}
+                placeholder="Seu nome"
+                required
+                disabled={birthdayBusy}
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={birthdayDate}
+                onChange={(event) => setBirthdayDate(event.target.value)}
+                placeholder="DD/MM"
+                maxLength={5}
+                required
+                disabled={birthdayBusy}
+              />
+              <button type="submit" disabled={birthdayBusy || birthdayName.trim().length < 2}>
+                {birthdayBusy ? 'Enviando...' : 'Cadastrar'}
+              </button>
+              <small>Somente dia e mês. O ano de nascimento não é solicitado.</small>
+            </form>
+          ) : null}
+
+          {birthdayFeedback ? <p className="imortal-community-feedback">{birthdayFeedback}</p> : null}
 
           {data.birthdays?.length ? (
             <div className="imortal-community-birthdays">
