@@ -10,24 +10,15 @@ const BIRTHDAY_COOLDOWN_SECONDS = 60
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    throw new Error('Supabase server credentials are not configured.')
-  }
+  if (!url || !key) throw new Error('Supabase server credentials are not configured.')
 
   return createClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
+    auth: { persistSession: false, autoRefreshToken: false },
   })
 }
 
 function cleanText(value, maxLength) {
-  return String(value || '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLength)
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength)
 }
 
 function getIp(request) {
@@ -42,8 +33,7 @@ function getUserAgent(request) {
 }
 
 function createFingerprint(request, scope = '', userId = '') {
-  return crypto
-    .createHash('sha256')
+  return crypto.createHash('sha256')
     .update(scope + '|' + userId + '|' + getIp(request) + '|' + getUserAgent(request))
     .digest('hex')
 }
@@ -75,7 +65,6 @@ async function getOptionalUser(request, supabase) {
   if (error || !data?.user) {
     return { ok: false, status: 401, error: 'Sua sessão expirou. Atualize a página.' }
   }
-
   return { ok: true, user: data.user }
 }
 
@@ -83,24 +72,37 @@ function isAdminUser(user) {
   return user?.app_metadata?.role === 'admin' || user?.app_metadata?.is_admin === true
 }
 
+async function requireAdmin(request, response, supabase) {
+  const viewer = await getOptionalUser(request, supabase)
+  if (!viewer.ok) {
+    response.status(viewer.status).json({ ok: false, error: viewer.error })
+    return null
+  }
+  if (!isAdminUser(viewer.user)) {
+    response.status(403).json({ ok: false, error: 'Acesso administrativo negado.' })
+    return null
+  }
+  return viewer.user
+}
+
 async function readBody(request) {
   if (request.body && typeof request.body === 'object') return request.body
   if (typeof request.body === 'string') {
-    try {
-      return JSON.parse(request.body)
-    } catch {
-      return {}
-    }
+    try { return JSON.parse(request.body) } catch { return {} }
   }
   return {}
 }
 
-function mapBirthday(row = {}) {
+function mapBirthday(row = {}, options = {}) {
   return {
     id: row.id,
     displayName: row.display_name || 'Imortal',
     day: Number(row.birth_day) || 0,
     month: Number(row.birth_month) || 0,
+    status: row.status || 'pending',
+    createdAt: row.created_at || '',
+    updatedAt: row.updated_at || '',
+    canEdit: Boolean(options.canEdit),
   }
 }
 
@@ -111,6 +113,7 @@ function mapWallPost(row = {}, options = {}) {
     xatId: row.xat_id || '',
     body: row.body || '',
     source: row.source || 'portal',
+    status: row.status || 'published',
     createdAt: row.created_at || '',
     updatedAt: row.updated_at || '',
     canEdit: Boolean(options.canEdit),
@@ -118,19 +121,57 @@ function mapWallPost(row = {}, options = {}) {
   }
 }
 
-async function getBirthdays(supabase) {
-  const month = new Date().getMonth() + 1
+function maceioTodayParts() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Maceio',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+  }
+}
+
+function birthdayDistance(day, month, today) {
+  const todayUtc = Date.UTC(today.year, today.month - 1, today.day)
+  let targetYear = today.year
+  let targetUtc = Date.UTC(targetYear, month - 1, day)
+  if (targetUtc < todayUtc) {
+    targetYear += 1
+    targetUtc = Date.UTC(targetYear, month - 1, day)
+  }
+  return Math.round((targetUtc - todayUtc) / 86400000)
+}
+
+async function getBirthdayCollections(supabase) {
+  const today = maceioTodayParts()
   const { data, error } = await supabase
     .from(BIRTHDAY_TABLE)
-    .select('id,display_name,birth_day,birth_month')
+    .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
     .eq('status', 'published')
-    .eq('birth_month', month)
+    .order('birth_month', { ascending: true })
     .order('birth_day', { ascending: true })
     .order('display_name', { ascending: true })
-    .limit(200)
+    .limit(500)
 
   if (error) throw error
-  return (data || []).map(mapBirthday)
+
+  const rows = (data || []).map((row) => ({
+    ...mapBirthday(row),
+    distance: birthdayDistance(Number(row.birth_day), Number(row.birth_month), today),
+  }))
+
+  return {
+    month: rows.filter((row) => row.month === today.month).sort((a, b) => a.day - b.day),
+    upcoming: rows.filter((row) => row.distance >= 0 && row.distance <= 7)
+      .sort((a, b) => a.distance - b.distance || a.displayName.localeCompare(b.displayName, 'pt-BR'))
+      .slice(0, 6),
+  }
 }
 
 async function getCommunityRanking(supabase) {
@@ -186,8 +227,8 @@ async function getCommunityAchievements(supabase) {
 }
 
 async function handleOverview(response, supabase) {
-  const [birthdays, ranking, achievements] = await Promise.all([
-    getBirthdays(supabase),
+  const [birthdayCollections, ranking, achievements] = await Promise.all([
+    getBirthdayCollections(supabase),
     getCommunityRanking(supabase),
     getCommunityAchievements(supabase),
   ])
@@ -196,7 +237,8 @@ async function handleOverview(response, supabase) {
   response.status(200).json({
     ok: true,
     data: {
-      birthdays,
+      birthdays: birthdayCollections.month,
+      birthdaysUpcoming: birthdayCollections.upcoming,
       ranking,
       achievements,
       xat: { connected: false, onlineCount: null },
@@ -243,7 +285,7 @@ async function handleWallPost(request, response, supabase) {
   const text = cleanText(body.body, 280)
 
   if (authorName.length < 2) {
-    response.status(400).json({ ok: false, error: 'Informe seu nome para deixar o recado.' })
+    response.status(400).json({ ok: false, error: 'Informe seu nome ou nick como aparece no Xat.' })
     return
   }
   if (text.length < 2) {
@@ -278,7 +320,7 @@ async function handleWallPost(request, response, supabase) {
       edit_token_hash: hashEditToken(editToken),
       request_fingerprint: fingerprint,
     })
-    .select('id,profile_id,author_name,xat_id,body,source,created_at,updated_at')
+    .select('id,profile_id,author_name,xat_id,body,source,status,created_at,updated_at')
     .single()
 
   if (error) throw error
@@ -302,9 +344,7 @@ async function requireWallPermission(request, response, supabase, row, body) {
   if (viewer.user?.id && row.profile_id === viewer.user.id) return { admin: false }
 
   const suppliedHash = hashEditToken(body.editToken)
-  if (row.edit_token_hash && safeHashEquals(row.edit_token_hash, suppliedHash)) {
-    return { admin: false }
-  }
+  if (row.edit_token_hash && safeHashEquals(row.edit_token_hash, suppliedHash)) return { admin: false }
 
   response.status(403).json({ ok: false, error: 'Você não pode alterar este recado.' })
   return null
@@ -339,7 +379,7 @@ async function handleWallPatch(request, response, supabase) {
     .from(WALL_TABLE)
     .update({ body: text, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select('id,profile_id,author_name,xat_id,body,source,created_at,updated_at')
+    .select('id,profile_id,author_name,xat_id,body,source,status,created_at,updated_at')
     .single()
 
   if (error) throw error
@@ -418,33 +458,226 @@ async function handleBirthdayPost(request, response, supabase) {
 
   const { data: existing, error: existingError } = await supabase
     .from(BIRTHDAY_TABLE)
-    .select('id,display_name,birth_day,birth_month')
+    .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
     .eq('birth_day', day)
     .eq('birth_month', month)
     .ilike('display_name', displayName)
-    .eq('status', 'published')
+    .in('status', ['pending', 'published'])
     .limit(1)
 
   if (existingError) throw existingError
   if (existing?.length) {
-    response.status(200).json({ ok: true, data: mapBirthday(existing[0]) })
+    response.status(409).json({ ok: false, error: 'Este nick e aniversário já foram cadastrados.' })
     return
   }
 
+  const editToken = createEditToken()
   const { data, error } = await supabase
     .from(BIRTHDAY_TABLE)
     .insert({
       display_name: displayName,
       birth_day: day,
       birth_month: month,
-      status: 'published',
+      status: 'pending',
       submission_fingerprint: fingerprint,
+      edit_token_hash: hashEditToken(editToken),
     })
-    .select('id,display_name,birth_day,birth_month')
+    .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
     .single()
 
   if (error) throw error
-  response.status(201).json({ ok: true, data: mapBirthday(data) })
+  response.status(201).json({
+    ok: true,
+    data: {
+      birthday: mapBirthday(data, { canEdit: true }),
+      editToken,
+    },
+  })
+}
+
+async function requireBirthdayPermission(request, response, supabase, row, body) {
+  const viewer = await getOptionalUser(request, supabase)
+  if (!viewer.ok) {
+    response.status(viewer.status).json({ ok: false, error: viewer.error })
+    return null
+  }
+  if (isAdminUser(viewer.user)) return { admin: true }
+
+  const suppliedHash = hashEditToken(body.editToken)
+  if (row.edit_token_hash && safeHashEquals(row.edit_token_hash, suppliedHash)) return { admin: false }
+
+  response.status(403).json({ ok: false, error: 'Você não pode alterar este aniversário.' })
+  return null
+}
+
+async function handleBirthdayPatch(request, response, supabase) {
+  const body = await readBody(request)
+  const id = cleanText(body.id, 80)
+  const displayName = cleanText(body.displayName, 50)
+  const day = Number(body.day)
+  const month = Number(body.month)
+
+  if (!id || displayName.length < 2 || !isValidBirthday(day, month)) {
+    response.status(400).json({ ok: false, error: 'Cadastro de aniversário inválido.' })
+    return
+  }
+
+  const { data: row, error: rowError } = await supabase
+    .from(BIRTHDAY_TABLE)
+    .select('id,edit_token_hash,status')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (rowError) throw rowError
+  if (!row) {
+    response.status(404).json({ ok: false, error: 'Aniversário não encontrado.' })
+    return
+  }
+
+  const permission = await requireBirthdayPermission(request, response, supabase, row, body)
+  if (!permission) return
+
+  const nextStatus = permission.admin && ['pending', 'published', 'hidden'].includes(body.status)
+    ? body.status
+    : 'pending'
+
+  const { data, error } = await supabase
+    .from(BIRTHDAY_TABLE)
+    .update({
+      display_name: displayName,
+      birth_day: day,
+      birth_month: month,
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
+    .single()
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: mapBirthday(data, { canEdit: true }) })
+}
+
+async function handleBirthdayDelete(request, response, supabase) {
+  const body = await readBody(request)
+  const id = cleanText(request.query?.id || body.id, 80)
+  if (!id) {
+    response.status(400).json({ ok: false, error: 'Aniversário não informado.' })
+    return
+  }
+
+  const { data: row, error: rowError } = await supabase
+    .from(BIRTHDAY_TABLE)
+    .select('id,edit_token_hash,status')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (rowError) throw rowError
+  if (!row) {
+    response.status(404).json({ ok: false, error: 'Aniversário não encontrado.' })
+    return
+  }
+
+  const permission = await requireBirthdayPermission(request, response, supabase, row, body)
+  if (!permission) return
+
+  const { error } = await supabase.from(BIRTHDAY_TABLE).delete().eq('id', id)
+  if (error) throw error
+
+  response.status(200).json({ ok: true, data: { id, deleted: true } })
+}
+
+async function handleModerationGet(request, response, supabase) {
+  const admin = await requireAdmin(request, response, supabase)
+  if (!admin) return
+
+  const [wallResult, birthdayResult] = await Promise.all([
+    supabase.from(WALL_TABLE)
+      .select('id,author_name,xat_id,body,source,status,created_at,updated_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
+    supabase.from(BIRTHDAY_TABLE)
+      .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
+  ])
+
+  if (wallResult.error) throw wallResult.error
+  if (birthdayResult.error) throw birthdayResult.error
+
+  response.setHeader('Cache-Control', 'private, no-store, max-age=0')
+  response.status(200).json({
+    ok: true,
+    data: {
+      wall: (wallResult.data || []).map((row) => mapWallPost(row, { canEdit: true, canModerate: true })),
+      birthdays: (birthdayResult.data || []).map((row) => mapBirthday(row, { canEdit: true })),
+    },
+  })
+}
+
+async function handleModerationPatch(request, response, supabase) {
+  const admin = await requireAdmin(request, response, supabase)
+  if (!admin) return
+
+  const body = await readBody(request)
+  const resource = cleanText(body.resource, 30)
+  const id = cleanText(body.id, 80)
+  const action = cleanText(body.action, 30)
+
+  if (!id || !['wall', 'birthday'].includes(resource)) {
+    response.status(400).json({ ok: false, error: 'Item de moderação inválido.' })
+    return
+  }
+
+  if (resource === 'wall') {
+    if (!['publish', 'hide'].includes(action)) {
+      response.status(400).json({ ok: false, error: 'Ação de moderação inválida.' })
+      return
+    }
+    const status = action === 'publish' ? 'published' : 'hidden'
+    const { data, error } = await supabase.from(WALL_TABLE)
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('id,author_name,xat_id,body,source,status,created_at,updated_at')
+      .single()
+    if (error) throw error
+    response.status(200).json({ ok: true, data: mapWallPost(data, { canEdit: true, canModerate: true }) })
+    return
+  }
+
+  if (!['approve', 'hide', 'publish'].includes(action)) {
+    response.status(400).json({ ok: false, error: 'Ação de moderação inválida.' })
+    return
+  }
+
+  const status = action === 'hide' ? 'hidden' : 'published'
+  const { data, error } = await supabase.from(BIRTHDAY_TABLE)
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
+    .single()
+  if (error) throw error
+  response.status(200).json({ ok: true, data: mapBirthday(data, { canEdit: true }) })
+}
+
+async function handleModerationDelete(request, response, supabase) {
+  const admin = await requireAdmin(request, response, supabase)
+  if (!admin) return
+
+  const body = await readBody(request)
+  const resource = cleanText(body.resource, 30)
+  const id = cleanText(body.id, 80)
+
+  if (!id || !['wall', 'birthday'].includes(resource)) {
+    response.status(400).json({ ok: false, error: 'Item de moderação inválido.' })
+    return
+  }
+
+  const table = resource === 'wall' ? WALL_TABLE : BIRTHDAY_TABLE
+  const { error } = await supabase.from(table).delete().eq('id', id)
+  if (error) throw error
+
+  response.status(200).json({ ok: true, data: { id, deleted: true } })
 }
 
 export default async function handler(request, response) {
@@ -475,17 +708,22 @@ export default async function handler(request, response) {
       if (request.method === 'POST') return handleWallPost(request, response, supabase)
       if (request.method === 'PATCH') return handleWallPatch(request, response, supabase)
       if (request.method === 'DELETE') return handleWallDelete(request, response, supabase)
-      response.status(405).json({ ok: false, error: 'Method not allowed' })
-      return
     }
 
     if (section === 'birthday') {
       if (request.method === 'POST') return handleBirthdayPost(request, response, supabase)
-      response.status(405).json({ ok: false, error: 'Method not allowed' })
-      return
+      if (request.method === 'PATCH') return handleBirthdayPatch(request, response, supabase)
+      if (request.method === 'DELETE') return handleBirthdayDelete(request, response, supabase)
     }
 
-    if (request.method === 'GET') return handleOverview(response, supabase)
+    if (section === 'moderation') {
+      if (request.method === 'GET') return handleModerationGet(request, response, supabase)
+      if (request.method === 'PATCH') return handleModerationPatch(request, response, supabase)
+      if (request.method === 'DELETE') return handleModerationDelete(request, response, supabase)
+    }
+
+    if (!section && request.method === 'GET') return handleOverview(response, supabase)
+
     response.status(405).json({ ok: false, error: 'Method not allowed' })
   } catch (error) {
     console.error('Community API error:', error.message)
