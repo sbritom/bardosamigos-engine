@@ -1,5 +1,5 @@
 const RAWG_BASE_URL = 'https://api.rawg.io/api'
-const GAMERPOWER_URL = 'https://www.gamerpower.com/api/giveaways?type=game&sort-by=date'
+const GAMERPOWER_URL = 'https://www.gamerpower.com/api/giveaways?sort-by=date'
 const PANDASCORE_BASE_URL = 'https://api.pandascore.co'
 
 function isoDate(date) {
@@ -158,6 +158,11 @@ export async function listGamerPowerFreeGames() {
     attribution: { label: 'Ofertas por GamerPower', url: 'https://www.gamerpower.com/' },
     items: (Array.isArray(payload) ? payload : [])
       .filter((item) => String(item.status || 'Active').toLowerCase() === 'active')
+      .sort((a, b) => {
+        const aGame = String(a.type || '').toLowerCase() === 'game' ? 0 : 1
+        const bGame = String(b.type || '').toLowerCase() === 'game' ? 0 : 1
+        return aGame - bGame
+      })
       .slice(0, 18)
       .map(normalizeGiveaway),
   }
