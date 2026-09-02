@@ -9,6 +9,7 @@ import { sortLiveMatchCenterMatches } from './liveMatchCenterService'
 import { FOOTBALL_CURRENT_MATCH_WINDOW, calculateFootballStandings, listCurrentFootballMatches, normalizeFootballMatch } from './footballMatchQueryService'
 
 const MATCH_SELECT = '*, competition_rounds(*, competition_stages(*, competition_seasons(*, competitions(*))))'
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function configError() {
   return new Error('Supabase nao esta configurado.')
@@ -166,12 +167,16 @@ export async function getFootballTeamDetails(teamId) {
   const client = getSupabaseClient()
   if (!client) return { data: null, error: configError() }
 
-  const { data: teamRow, error: teamError } = await client
+  let teamQuery = client
     .from('competition_teams')
     .select('*, competitions(*)')
-    .eq('id', teamId)
     .is('deleted_at', null)
-    .maybeSingle()
+
+  teamQuery = UUID_RE.test(String(teamId || ''))
+    ? teamQuery.eq('id', teamId)
+    : teamQuery.contains('metadata', { externalRef: String(teamId || '') })
+
+  const { data: teamRow, error: teamError } = await teamQuery.maybeSingle()
 
   if (teamError) return { data: null, error: teamError }
   if (!teamRow) return { data: null, error: null }
