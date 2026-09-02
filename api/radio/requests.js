@@ -262,7 +262,7 @@ async function handlePatch(request, response, supabase) {
     .from(TABLE)
     .update(payload)
     .eq('id', id)
-    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at')
+    .select('id, song_and_artist, message, status, source, requester_profile_id, requester_name, requester_kind, admin_note, handled_by, created_at, updated_at')
     .single()
 
   if (error) {
