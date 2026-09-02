@@ -224,6 +224,7 @@ export default function FootballMatchDetailsPage() {
 
   useEffect(() => {
     let active = true
+    let providerController = null
 
     async function load() {
       const result = await getFootballMatchDetails(matchId)
@@ -232,8 +233,9 @@ export default function FootballMatchDetailsPage() {
         return
       }
 
-      const controller = new AbortController()
-      const providerMatch = await fetchProviderMatchDetails(result.data, controller.signal).catch(() => null)
+      providerController?.abort()
+      providerController = new AbortController()
+      const providerMatch = await fetchProviderMatchDetails(result.data, providerController.signal).catch(() => null)
       if (active) {
         setState({
           loading: false,
@@ -248,6 +250,7 @@ export default function FootballMatchDetailsPage() {
 
     return () => {
       active = false
+      providerController?.abort()
       window.clearInterval(timer)
     }
   }, [matchId, pollingStatus])
