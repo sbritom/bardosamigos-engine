@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1616" height="140" viewBox="0 0 1616 140">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1616" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#03060B"/>
+      <stop offset=".55" stop-color="#07101C"/>
+      <stop offset="1" stop-color="#09192A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="280" y1="30" x2="650" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B78FF"/>
+      <stop offset=".6" stop-color="#15C9FF"/>
+      <stop offset="1" stop-color="#8D5CFF"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1325 70) rotate(180) scale(330 150)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B78FF" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#0B78FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1616" height="140" fill="url(#bg)"/>
+  <rect width="1616" height="140" fill="url(#glow)"/>
+  <circle cx="1370" cy="70" r="48" fill="none" stroke="#15C9FF" stroke-opacity=".25" stroke-width="2"/>
+  <circle cx="1370" cy="70" r="29" fill="none" stroke="#8D5CFF" stroke-opacity=".20" stroke-width="2"/>
+  <path d="M1328 70c0-18 14-32 31-32 18 0 31 14 43 32 12 18 25 32 43 32 17 0 31-14 31-32s-14-32-31-32c-18 0-31 14-43 32-12 18-25 32-43 32-17 0-31-14-31-32Z" fill="none" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+  <text x="280" y="67" fill="#F5F9FF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="-1">IMORTAL0800</text>
+  <text x="282" y="92" fill="#8FA4BC" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="1.2">TV • XAT • FUTEBOL • GAMES • RÁDIO</text>
+</svg>
