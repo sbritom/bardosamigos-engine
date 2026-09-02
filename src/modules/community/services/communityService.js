@@ -3,6 +3,7 @@ import { listPublishedEvents } from '../../events/services/eventsService'
 
 const COMMUNITY_ENDPOINT = '/api/community/overview'
 const WALL_TOKEN_STORAGE_KEY = 'imortal0800.community.wall-edit-tokens'
+const BIRTHDAY_TOKEN_STORAGE_KEY = 'imortal0800.community.birthday-edit-tokens'
 
 async function parseResponse(response, fallbackMessage) {
   const payload = await response.json().catch(() => ({}))
@@ -21,36 +22,43 @@ async function getOptionalAccessToken() {
   return data?.session?.access_token || ''
 }
 
-function getWallTokens() {
+function getStoredMap(key) {
   if (typeof window === 'undefined') return {}
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(WALL_TOKEN_STORAGE_KEY) || '{}')
+    const parsed = JSON.parse(window.localStorage.getItem(key) || '{}')
     return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
   } catch {
     return {}
   }
 }
 
-function saveWallToken(id, token) {
+function saveStoredToken(key, id, token) {
   if (typeof window === 'undefined' || !id || !token) return
   try {
-    const current = getWallTokens()
+    const current = getStoredMap(key)
     current[id] = token
-    window.localStorage.setItem(WALL_TOKEN_STORAGE_KEY, JSON.stringify(current))
+    window.localStorage.setItem(key, JSON.stringify(current))
   } catch {}
 }
 
-function removeWallToken(id) {
+function removeStoredToken(key, id) {
   if (typeof window === 'undefined' || !id) return
   try {
-    const current = getWallTokens()
+    const current = getStoredMap(key)
     delete current[id]
-    window.localStorage.setItem(WALL_TOKEN_STORAGE_KEY, JSON.stringify(current))
+    window.localStorage.setItem(key, JSON.stringify(current))
   } catch {}
 }
 
-function getWallToken(id) {
-  return getWallTokens()[id] || ''
+function getStoredToken(key, id) {
+  return getStoredMap(key)[id] || ''
+}
+
+function decorateBirthday(item = {}) {
+  return {
+    ...item,
+    canEdit: Boolean(item.canEdit || getStoredToken(BIRTHDAY_TOKEN_STORAGE_KEY, item.id)),
+  }
 }
 
 async function loadOverview() {
@@ -75,16 +83,13 @@ async function loadWall() {
   const rows = Array.isArray(data) ? data : []
   return rows.map((post) => ({
     ...post,
-    canEdit: Boolean(post.canEdit || getWallToken(post.id)),
+    canEdit: Boolean(post.canEdit || getStoredToken(WALL_TOKEN_STORAGE_KEY, post.id)),
   }))
 }
 
 export async function submitCommunityWallPost({ body, authorName }) {
   const token = await getOptionalAccessToken()
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  }
+  const headers = { Accept: 'application/json', 'Content-Type': 'application/json' }
   if (token) headers.Authorization = 'Bearer ' + token
 
   const response = await fetch(COMMUNITY_ENDPOINT + '?section=wall', {
@@ -94,55 +99,134 @@ export async function submitCommunityWallPost({ body, authorName }) {
   })
 
   const data = await parseResponse(response, 'Não foi possível publicar o recado agora.')
-  if (data?.post?.id && data?.editToken) saveWallToken(data.post.id, data.editToken)
+  if (data?.post?.id && data?.editToken) {
+    saveStoredToken(WALL_TOKEN_STORAGE_KEY, data.post.id, data.editToken)
+  }
   return data?.post || data
 }
 
 export async function updateCommunityWallPost({ id, body }) {
   const token = await getOptionalAccessToken()
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  }
+  const headers = { Accept: 'application/json', 'Content-Type': 'application/json' }
   if (token) headers.Authorization = 'Bearer ' + token
 
   const response = await fetch(COMMUNITY_ENDPOINT + '?section=wall', {
     method: 'PATCH',
     headers,
-    body: JSON.stringify({ id, body, editToken: getWallToken(id) }),
+    body: JSON.stringify({
+      id,
+      body,
+      editToken: getStoredToken(WALL_TOKEN_STORAGE_KEY, id),
+    }),
   })
   return parseResponse(response, 'Não foi possível editar o recado agora.')
 }
 
 export async function deleteCommunityWallPost(id) {
   const token = await getOptionalAccessToken()
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  }
+  const headers = { Accept: 'application/json', 'Content-Type': 'application/json' }
   if (token) headers.Authorization = 'Bearer ' + token
 
   const response = await fetch(COMMUNITY_ENDPOINT + '?section=wall', {
     method: 'DELETE',
     headers,
-    body: JSON.stringify({ id, editToken: getWallToken(id) }),
+    body: JSON.stringify({
+      id,
+      editToken: getStoredToken(WALL_TOKEN_STORAGE_KEY, id),
+    }),
   })
 
   const data = await parseResponse(response, 'Não foi possível excluir o recado agora.')
-  removeWallToken(id)
+  removeStoredToken(WALL_TOKEN_STORAGE_KEY, id)
   return data
 }
 
 export async function submitCommunityBirthday({ displayName, day, month }) {
   const response = await fetch(COMMUNITY_ENDPOINT + '?section=birthday', {
     method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ displayName, day, month }),
+  })
+
+  const data = await parseResponse(response, 'Não foi possível cadastrar o aniversário agora.')
+  if (data?.birthday?.id && data?.editToken) {
+    saveStoredToken(BIRTHDAY_TOKEN_STORAGE_KEY, data.birthday.id, data.editToken)
+  }
+  return data?.birthday || data
+}
+
+export async function updateCommunityBirthday({ id, displayName, day, month }) {
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=birthday', {
+    method: 'PATCH',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
+      displayName,
+      day,
+      month,
+      editToken: getStoredToken(BIRTHDAY_TOKEN_STORAGE_KEY, id),
+    }),
+  })
+
+  return parseResponse(response, 'Não foi possível atualizar o aniversário agora.')
+}
+
+export async function deleteCommunityBirthday(id) {
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=birthday', {
+    method: 'DELETE',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
+      editToken: getStoredToken(BIRTHDAY_TOKEN_STORAGE_KEY, id),
+    }),
+  })
+
+  const data = await parseResponse(response, 'Não foi possível excluir o aniversário agora.')
+  removeStoredToken(BIRTHDAY_TOKEN_STORAGE_KEY, id)
+  return data
+}
+
+export async function loadCommunityModeration() {
+  const token = await getOptionalAccessToken()
+  if (!token) throw new Error('Sessão administrativa obrigatória.')
+
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=moderation', {
+    headers: { Accept: 'application/json', Authorization: 'Bearer ' + token },
+    cache: 'no-store',
+  })
+  return parseResponse(response, 'Não foi possível carregar a moderação da comunidade.')
+}
+
+export async function moderateCommunityItem({ resource, id, action }) {
+  const token = await getOptionalAccessToken()
+  if (!token) throw new Error('Sessão administrativa obrigatória.')
+
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=moderation', {
+    method: 'PATCH',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
     },
-    body: JSON.stringify({ displayName, day, month }),
+    body: JSON.stringify({ resource, id, action }),
   })
-  return parseResponse(response, 'Não foi possível cadastrar o aniversário agora.')
+  return parseResponse(response, 'Não foi possível moderar este item.')
+}
+
+export async function deleteCommunityModerationItem({ resource, id }) {
+  const token = await getOptionalAccessToken()
+  if (!token) throw new Error('Sessão administrativa obrigatória.')
+
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=moderation', {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+    body: JSON.stringify({ resource, id }),
+  })
+  return parseResponse(response, 'Não foi possível excluir este item.')
 }
 
 export async function loadCommunityPageData() {
@@ -165,7 +249,10 @@ export async function loadCommunityPageData() {
 
   return {
     events,
-    birthdays: Array.isArray(overview.birthdays) ? overview.birthdays : [],
+    birthdays: Array.isArray(overview.birthdays) ? overview.birthdays.map(decorateBirthday) : [],
+    birthdaysUpcoming: Array.isArray(overview.birthdaysUpcoming)
+      ? overview.birthdaysUpcoming.map(decorateBirthday)
+      : [],
     ranking: overview.ranking || null,
     achievements: Array.isArray(overview.achievements) ? overview.achievements : [],
     xat: overview.xat || { connected: false, onlineCount: null },
