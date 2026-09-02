@@ -1,7 +1,7 @@
 {
-  "name": "Bar dos Amigos",
-  "short_name": "Bar dos Amigos",
-  "description": "Portal Bar dos Amigos com radio ao vivo, TV, futebol, eventos, noticias, ferramentas e comunidade.",
+  "name": "IMORTAL0800",
+  "short_name": "IMORTAL0800",
+  "description": "TV, Xat, futebol, games, radio e entretenimento 24h.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
