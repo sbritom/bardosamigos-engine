@@ -19,17 +19,17 @@ const COMPETITION_PRIORITY = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC
 
 const COMPETITION_META = {
   WC: { short: 'WC', country: 'Mundial', name: 'FIFA World Cup', emblem: 'https://crests.football-data.org/world.png' },
-  CL: { short: 'UCL', country: 'Europa', name: 'UEFA Champions League' },
-  BL1: { short: 'GER', country: 'Alemanha', name: 'Bundesliga' },
-  DED: { short: 'NED', country: 'Holanda', name: 'Eredivisie' },
-  BSA: { short: 'BRA', country: 'Brasil', name: 'Campeonato Brasileiro Série A' },
-  PD: { short: 'ESP', country: 'Espanha', name: 'Primera Division' },
-  FL1: { short: 'FRA', country: 'França', name: 'Ligue 1' },
-  ELC: { short: 'ENG', country: 'Inglaterra', name: 'Championship' },
-  PPL: { short: 'POR', country: 'Portugal', name: 'Primeira Liga' },
-  EC: { short: 'EURO', country: 'Europa', name: 'European Championship' },
-  SA: { short: 'ITA', country: 'Itália', name: 'Serie A' },
-  PL: { short: 'ENG', country: 'Inglaterra', name: 'Premier League' },
+  CL: { short: 'UCL', country: 'Europa', name: 'UEFA Champions League', emblem: 'https://crests.football-data.org/CL.png' },
+  BL1: { short: 'GER', country: 'Alemanha', name: 'Bundesliga', emblem: 'https://crests.football-data.org/BL1.png' },
+  DED: { short: 'NED', country: 'Holanda', name: 'Eredivisie', emblem: 'https://crests.football-data.org/DED.png' },
+  BSA: { short: 'BRA', country: 'Brasil', name: 'Campeonato Brasileiro Série A', emblem: 'https://crests.football-data.org/bsa.png' },
+  PD: { short: 'ESP', country: 'Espanha', name: 'Primera Division', emblem: 'https://crests.football-data.org/PD.png' },
+  FL1: { short: 'FRA', country: 'França', name: 'Ligue 1', emblem: 'https://crests.football-data.org/FL1.png' },
+  ELC: { short: 'ENG', country: 'Inglaterra', name: 'Championship', emblem: 'https://crests.football-data.org/ELC.png' },
+  PPL: { short: 'POR', country: 'Portugal', name: 'Primeira Liga', emblem: 'https://crests.football-data.org/PPL.png' },
+  EC: { short: 'EURO', country: 'Europa', name: 'European Championship', emblem: 'https://crests.football-data.org/EC.png' },
+  SA: { short: 'ITA', country: 'Itália', name: 'Serie A', emblem: 'https://crests.football-data.org/SA.png' },
+  PL: { short: 'ENG', country: 'Inglaterra', name: 'Premier League', emblem: 'https://crests.football-data.org/PL.png' },
 }
 
 function normalizeCode(value) {
@@ -37,11 +37,23 @@ function normalizeCode(value) {
 }
 
 function competitionKey(match) {
-  return String(match?.competitionId || normalizeCode(match?.competitionCode) || match?.competitionName || 'competicao')
+  return String(normalizeCode(match?.competitionCode) || match?.competitionId || match?.competitionName || 'competicao')
 }
 
 function buildCompetitions(matches = []) {
-  const map = new Map()
+  const map = new Map(
+    COMPETITION_PRIORITY.map((code) => {
+      const meta = COMPETITION_META[code]
+      return [code, {
+        id: code,
+        code,
+        name: meta?.name || code,
+        country: meta?.country || '',
+        emblem: meta?.emblem || '',
+        matches: [],
+      }]
+    }),
+  )
 
   matches.forEach((match) => {
     const key = competitionKey(match)
