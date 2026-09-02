@@ -49,32 +49,68 @@ const RULE_CATEGORIES = [
   {
     id: 'convivencia',
     title: 'Convivência',
-    description: 'Regras gerais de respeito e convivência entre os participantes.',
+    description: 'Respeito e boa convivência entre os participantes.',
+    rules: [
+      'Respeite todos os participantes.',
+      'Ofensas, ameaças, perseguição e discriminação não são permitidas.',
+      'Não exponha dados pessoais ou conversas privadas.',
+      'Resenha é bem-vinda, desde que não ultrapasse o limite do respeito.',
+    ],
   },
   {
     id: 'xat',
     title: 'Xat',
-    description: 'Orientações específicas para participação na sala oficial.',
+    description: 'Regras da sala oficial e dos Termos do xat.com.',
+    rules: [
+      'Siga os Termos de Serviço do xat.com.',
+      'Sem flood, spam, golpes, phishing ou links maliciosos.',
+      'Não use contas alternativas para fugir de punições.',
+      'Scripts e automações não autorizadas são proibidos.',
+    ],
   },
   {
     id: 'games',
     title: 'Games da Comunidade',
-    description: 'Regras das atividades, resultados e participação nos games do Xat.',
+    description: 'Participação justa nos games realizados pelo Xat.',
+    rules: [
+      'Uma conta por participante.',
+      'Sem scripts, automações ou manipulação de resultados.',
+      'Bugs ou falhas não podem ser explorados.',
+      'Cada Game pode possuir regras próprias.',
+    ],
   },
   {
     id: 'eventos',
     title: 'Eventos',
-    description: 'Critérios de participação, horários e regulamentos dos eventos.',
+    description: 'Regras gerais para eventos e premiações.',
+    rules: [
+      'Respeite data, horário e regras específicas de cada evento.',
+      'Fraude, contas alternativas ou combinação de resultados geram desclassificação.',
+      'Em caso de erro técnico, a rodada poderá ser anulada ou refeita.',
+      'Premiações seguem o regulamento divulgado.',
+    ],
   },
   {
     id: 'conteudo',
     title: 'Conteúdo',
-    description: 'Orientações para mensagens, recados, links e outros conteúdos.',
+    description: 'Conteúdo publicado no Xat, mural e portal.',
+    rules: [
+      'Não publique conteúdo ilegal, ofensivo ou impróprio.',
+      'Sem spam, golpes ou divulgação não autorizada.',
+      'Não compartilhe dados pessoais de terceiros.',
+      'Conteúdos que violem as regras poderão ser removidos.',
+    ],
   },
   {
     id: 'moderacao',
     title: 'Moderação',
-    description: 'Como funcionam advertências, decisões e ações da equipe.',
+    description: 'Como funcionam advertências e punições.',
+    rules: [
+      'A equipe pode advertir, silenciar, remover ou banir conforme a gravidade.',
+      'Violações graves podem gerar punição imediata.',
+      'Tentar burlar uma punição poderá aumentar a penalidade.',
+      'Casos não previstos serão analisados pela equipe.',
+    ],
   },
 ]
 
@@ -409,7 +445,11 @@ export default function CommunityPage() {
                 <Sparkles size={15} className="imortal-community-rules__marker" />
               </summary>
               <div>
-                O regulamento desta categoria será publicado pela equipe do IMORTAL0800.
+                <ul className="imortal-community-rules__list">
+                  {category.rules.map((rule) => (
+                    <li key={rule}>{rule}</li>
+                  ))}
+                </ul>
               </div>
             </details>
           ))}

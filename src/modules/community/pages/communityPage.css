@@ -685,3 +685,27 @@
     padding-left: 15px;
   }
 }
+
+
+.imortal-community-rules__list {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  list-style: none;
+}
+
+.imortal-community-rules__list li {
+  position: relative;
+  padding-left: 14px;
+  color: #8195b2;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.imortal-community-rules__list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #5fc7ff;
+}
