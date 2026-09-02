@@ -5,10 +5,6 @@ import {
   isLiveStatus,
   nowUtcIso,
 } from '../../../../core/time/timeService.js'
-import {
-  getLiveMatchCenterPriority,
-  sortLiveMatchCenterMatches,
-} from '../../../../modules/competition/services/liveMatchCenterService.js'
 
 const TEAM_PLACEHOLDER_NAMES = new Set([
   'mandante',
@@ -39,16 +35,6 @@ function byMatchTimeDescending(left, right) {
   return getUtcTimestamp(getMatchDateValue(right)) - getUtcTimestamp(getMatchDateValue(left))
 }
 
-function getPreviousBrazilDateKey(now = nowUtcIso()) {
-  const today = getBrazilDateKey(now)
-  if (!today) return ''
-
-  const timestamp = Date.parse(`${today}T00:00:00Z`)
-  if (!Number.isFinite(timestamp)) return ''
-
-  return new Date(timestamp - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-}
-
 function getMatchBrazilDateKey(match = {}) {
   return getBrazilDateKey(getMatchDateValue(match))
     || match.localDateIso
@@ -73,13 +59,6 @@ export function isHomeFootballMatchToday(match = {}, now = nowUtcIso()) {
   const today = getBrazilDateKey(now)
 
   return Boolean(matchDate && today && matchDate === today)
-}
-
-function isHomeFootballMatchYesterday(match = {}, now = nowUtcIso()) {
-  const matchDate = getMatchBrazilDateKey(match)
-  const yesterday = getPreviousBrazilDateKey(now)
-
-  return Boolean(matchDate && yesterday && matchDate === yesterday)
 }
 
 export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIso(), limit = 3) {
