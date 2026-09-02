@@ -313,6 +313,134 @@ async function fetchCompetitionScorers({ competitionCode, apiKey }) {
     scorers: (payload.scorers || []).map(mapScorer),
   }
 }
+function eventMinute(item = {}) {
+  return Number(item.minute ?? item.time ?? item.elapsed ?? 0) || 0
+}
+
+function eventTeamName(item = {}) {
+  return item.team?.name || item.teamName || ''
+}
+
+function buildMatchEvents(match = {}) {
+  const goals = (match.goals || []).map((item) => ({
+    minute: eventMinute(item),
+    type: 'GOAL',
+    label: item.type === 'OWN' ? 'Gol contra' : item.type === 'PENALTY' ? 'Gol de pênalti' : 'Gol',
+    playerName: item.scorer?.name || '',
+    assistName: item.assist?.name || '',
+    teamName: eventTeamName(item),
+  }))
+  const bookings = (match.bookings || []).map((item) => ({
+    minute: eventMinute(item),
+    type: item.card || 'CARD',
+    label: item.card === 'RED_CARD' ? 'Cartão vermelho' : item.card === 'YELLOW_RED_CARD' ? 'Segundo amarelo' : 'Cartão amarelo',
+    playerName: item.player?.name || '',
+    teamName: eventTeamName(item),
+  }))
+  const substitutions = (match.substitutions || []).map((item) => ({
+    minute: eventMinute(item),
+    type: 'SUBSTITUTION',
+    label: 'Substituição',
+    playerName: [item.playerOut?.name, item.playerIn?.name].filter(Boolean).join(' → '),
+    teamName: eventTeamName(item),
+  }))
+
+  return [...goals, ...bookings, ...substitutions].sort((left, right) => left.minute - right.minute)
+}
+
+function countEventsByTeam(items = [], teamId) {
+  return items.filter((item) => item.team?.id === teamId).length
+}
+
+function mapDetailedMatch(match = {}) {
+  const base = mapMatch(match)
+  const homeId = match.homeTeam?.id
+  const awayId = match.awayTeam?.id
+  const mainReferee = (match.referees || []).find((item) => item.type === 'REFEREE') || (match.referees || [])[0] || null
+  const fullTime = match.score?.fullTime || {}
+  const halfTime = match.score?.halfTime || {}
+  const bookings = Array.isArray(match.bookings) ? match.bookings : []
+  const substitutions = Array.isArray(match.substitutions) ? match.substitutions : []
+  const penalties = Array.isArray(match.penalties) ? match.penalties : []
+
+  return {
+    providerMatchId: match.id ? String(match.id) : '',
+    homeTeam: base.homeParticipant,
+    awayTeam: base.awayParticipant,
+    homeCrest: base.homeCrest,
+    awayCrest: base.awayCrest,
+    homeScore: base.homeScore,
+    awayScore: base.awayScore,
+    startsAt: base.startsAt,
+    utcDate: base.utcDate,
+    localDate: base.localDate,
+    localDateIso: base.localDateIso,
+    localTime: base.localTime,
+    standardStatus: base.standardStatus,
+    status: base.status,
+    competitionName: base.competitionName,
+    competitionCode: base.competitionCode,
+    competitionLogo: base.competitionLogo,
+    country: base.country,
+    venue: match.venue || '',
+    attendance: match.attendance ?? null,
+    matchday: match.matchday ?? null,
+    stage: match.stage || '',
+    groupName: match.group || '',
+    minute: match.minute ?? null,
+    injuryTime: match.injuryTime ?? null,
+    referee: mainReferee?.name || '',
+    referees: match.referees || [],
+    scoreDetails: {
+      winner: match.score?.winner || '',
+      duration: match.score?.duration || '',
+      fullTime,
+      halfTime,
+    },
+    events: buildMatchEvents(match),
+    lineups: {
+      home: match.homeTeam?.lineup || [],
+      away: match.awayTeam?.lineup || [],
+      homeBench: match.homeTeam?.bench || [],
+      awayBench: match.awayTeam?.bench || [],
+      homeFormation: match.homeTeam?.formation || '',
+      awayFormation: match.awayTeam?.formation || '',
+      homeCoach: match.homeTeam?.coach || null,
+      awayCoach: match.awayTeam?.coach || null,
+    },
+    statistics: {
+      halfTime: (halfTime.home != null || halfTime.away != null) ? { home: halfTime.home, away: halfTime.away } : null,
+      goals: (fullTime.home != null || fullTime.away != null) ? { home: fullTime.home, away: fullTime.away } : null,
+      cards: { home: countEventsByTeam(bookings, homeId), away: countEventsByTeam(bookings, awayId) },
+      substitutions: { home: countEventsByTeam(substitutions, homeId), away: countEventsByTeam(substitutions, awayId) },
+      penalties: penalties.length ? { home: countEventsByTeam(penalties, homeId), away: countEventsByTeam(penalties, awayId) } : null,
+      attendance: match.attendance ?? null,
+      duration: match.score?.duration || '',
+    },
+    metadata: {
+      provider: 'football-data.org',
+      providerStatus: match.status || '',
+      raw: match,
+    },
+  }
+}
+
+async function fetchMatchDetails({ matchId, apiKey }) {
+  const response = await fetch(`${FOOTBALL_DATA_BASE_URL}/matches/${matchId}`, {
+    headers: {
+      'X-Auth-Token': apiKey,
+      'X-Unfold-Goals': 'true',
+    },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(payload.message || `Football-Data match request failed with status ${response.status}`)
+  }
+
+  return mapDetailedMatch(payload)
+}
 function findWorldCupCompetition(competitions = []) {
   return competitions.find((competition) => {
     const season = competition.currentSeason || {}
@@ -429,6 +557,31 @@ export default async function handler(request, response) {
   const resource = String(request.query?.resource || 'matches').trim().toLowerCase()
   const requestedCompetition = String(request.query?.competition || '').trim().toUpperCase()
 
+  if (resource === 'match') {
+    const requestedMatchId = String(request.query?.matchId || '').trim()
+    if (!MATCH_ID_RE.test(requestedMatchId)) {
+      response.status(400).json({ error: 'Invalid match id.' })
+      return
+    }
+
+    try {
+      const match = await fetchMatchDetails({ matchId: requestedMatchId, apiKey })
+      response.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
+      response.status(200).json({
+        source: 'football-data.org',
+        resource: 'match',
+        match,
+      })
+    } catch (error) {
+      response.status(502).json({
+        source: 'football-data.org',
+        resource: 'match',
+        matchId: requestedMatchId,
+        error: error.message || 'Football-Data match request failed.',
+      })
+    }
+    return
+  }
   if (resource === 'scorers') {
     if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
       response.status(400).json({ error: 'Invalid or unsupported competition.' })
