@@ -94,18 +94,34 @@ export default function FootballTeamPage() {
   const [state, setState] = useState({ loading: true, data: null, error: '', message: '' })
   const [officialStandings, setOfficialStandings] = useState([])
 
-  async function load() {
-    const result = await getFootballTeamDetails(teamId)
+  useEffect(() => {
+    let active = true
+
     setState((current) => ({
       ...current,
-      loading: false,
-      data: result.data,
-      error: result.error?.message || '',
+      loading: true,
+      data: null,
+      error: '',
+      message: '',
     }))
-  }
 
-  useEffect(() => {
-    load()
+    async function loadTeam() {
+      const result = await getFootballTeamDetails(teamId)
+      if (!active) return
+
+      setState((current) => ({
+        ...current,
+        loading: false,
+        data: result.data,
+        error: result.error?.message || '',
+      }))
+    }
+
+    loadTeam()
+
+    return () => {
+      active = false
+    }
   }, [teamId])
 
   const competitionCode = useMemo(() => {
