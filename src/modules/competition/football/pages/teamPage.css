@@ -1,0 +1,329 @@
+.imortal-team-page {
+  width: min(1380px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 20px 0 34px;
+  color: #f5f9ff;
+}
+
+.imortal-team-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.imortal-team-topbar button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(42, 143, 255, .18);
+  border-radius: 10px;
+  background: rgba(7, 16, 28, .78);
+  color: #dce9f8;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.imortal-team-topbar button:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.imortal-team-topbar button.is-favorite {
+  color: #67d9ff;
+}
+
+.imortal-team-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+  padding: 22px;
+  border: 1px solid rgba(42, 143, 255, .16);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(11, 120, 255, .14), transparent 32%),
+    linear-gradient(145deg, rgba(7, 15, 26, .96), rgba(3, 7, 13, .98));
+}
+
+.imortal-team-crest {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  place-items: center;
+  flex: none;
+  border: 1px solid rgba(42, 143, 255, .14);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.imortal-team-hero > div {
+  min-width: 0;
+}
+
+.imortal-team-hero > div > span,
+.imortal-team-panel > header > span {
+  color: #15c9ff;
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.imortal-team-hero h1 {
+  margin: 4px 0 2px;
+  color: #f5f9ff;
+  font-size: clamp(1.65rem, 4vw, 2.6rem);
+  letter-spacing: -.04em;
+}
+
+.imortal-team-hero p {
+  margin: 0;
+  color: rgba(203, 219, 239, .52);
+  font-size: .72rem;
+}
+
+.imortal-team-message {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(21, 201, 255, .16);
+  border-radius: 10px;
+  background: rgba(11, 120, 255, .07);
+  color: #67d9ff;
+  font-size: .67rem;
+  font-weight: 800;
+}
+
+.imortal-team-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.imortal-team-facts article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+  padding: 12px 13px;
+  border: 1px solid rgba(42, 143, 255, .12);
+  border-radius: 13px;
+  background: rgba(7, 14, 24, .76);
+}
+
+.imortal-team-facts svg {
+  flex: none;
+  color: #15c9ff;
+}
+
+.imortal-team-facts article > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.imortal-team-facts span {
+  color: rgba(203, 219, 239, .36);
+  font-size: .54rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.imortal-team-facts strong {
+  overflow: hidden;
+  color: #f5f9ff;
+  font-size: .67rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.imortal-team-panel {
+  overflow: hidden;
+  border: 1px solid rgba(42, 143, 255, .13);
+  border-radius: 15px;
+  background: rgba(6, 13, 23, .82);
+}
+
+.imortal-team-panel > header {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(42, 143, 255, .08);
+  background: rgba(11, 120, 255, .025);
+}
+
+.imortal-team-panel > header h2 {
+  margin: 2px 0 0;
+  color: #f5f9ff;
+  font-size: .90rem;
+}
+
+.imortal-team-match-list {
+  display: grid;
+}
+
+.imortal-team-match {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  padding: 11px 13px;
+  border: 0;
+  border-bottom: 1px solid rgba(42, 143, 255, .07);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.imortal-team-match:last-child {
+  border-bottom: 0;
+}
+
+.imortal-team-match:hover {
+  background: rgba(11, 120, 255, .05);
+}
+
+.imortal-team-match__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.imortal-team-match__top span {
+  color: #67d9ff;
+  font-size: .54rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.imortal-team-match__top small,
+.imortal-team-match > small {
+  color: rgba(203, 219, 239, .38);
+  font-size: .55rem;
+}
+
+.imortal-team-match > strong {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: #f5f9ff;
+  font-size: .68rem;
+}
+
+.imortal-team-match > strong > em {
+  color: #15c9ff;
+  font-size: .74rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.imortal-team-match > strong {
+  text-align: left;
+}
+
+.imortal-team-table-wrap {
+  overflow-x: auto;
+}
+
+.imortal-team-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  font-size: .64rem;
+}
+
+.imortal-team-table th,
+.imortal-team-table td {
+  padding: 9px 11px;
+  border-bottom: 1px solid rgba(42, 143, 255, .07);
+  text-align: left;
+}
+
+.imortal-team-table th {
+  color: rgba(203, 219, 239, .38);
+  background: rgba(11, 120, 255, .02);
+  font-size: .54rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.imortal-team-table td {
+  color: rgba(231, 240, 250, .68);
+}
+
+.imortal-team-table tr.is-current td {
+  background: rgba(11, 120, 255, .08);
+  color: #f5f9ff;
+}
+
+.imortal-team-table__club {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imortal-team-table__club > span {
+  width: 24px;
+  height: 24px;
+}
+
+.imortal-team-empty {
+  margin: 0;
+  padding: 22px 14px;
+  color: rgba(203, 219, 239, .42);
+  font-size: .65rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .imortal-team-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .imortal-team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .imortal-team-page {
+    width: min(100% - 20px, 1380px);
+    padding-top: 12px;
+  }
+
+  .imortal-team-hero {
+    align-items: flex-start;
+  }
+
+  .imortal-team-crest {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+  }
+
+  .imortal-team-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-team-topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .imortal-team-topbar button {
+    justify-content: center;
+    width: 100%;
+  }
+}
