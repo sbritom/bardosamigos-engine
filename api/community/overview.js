@@ -393,7 +393,7 @@ async function handleBirthdayPost(request, response, supabase) {
   const month = Number(body.month)
 
   if (displayName.length < 2) {
-    response.status(400).json({ ok: false, error: 'Informe seu nome.' })
+    response.status(400).json({ ok: false, error: 'Informe seu nome ou nick como aparece no Xat.' })
     return
   }
   if (!isValidBirthday(day, month)) {

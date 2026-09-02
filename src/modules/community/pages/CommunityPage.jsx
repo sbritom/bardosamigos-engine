@@ -117,6 +117,13 @@ const RULE_CATEGORIES = [
   },
 ]
 
+function formatBirthdayInput(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 4)
+  if (digits.length < 2) return digits
+  if (digits.length === 2) return digits + '/'
+  return digits.slice(0, 2) + '/' + digits.slice(2)
+}
+
 function formatWallDate(value) {
   if (!value) return ''
   const date = new Date(value)
@@ -560,7 +567,7 @@ export default function CommunityPage() {
           <CommunitySectionHeader
             eyebrow="Calendário"
             title="Aniversariantes do mês"
-            description="Quem frequenta o Xat pode cadastrar nome e aniversário sem precisar de conta."
+            description="Cadastre seu nome como aparece no Xat e sua data de aniversário."
             action={(
               <button
                 className="imortal-community-inline-action"
@@ -583,7 +590,8 @@ export default function CommunityPage() {
                 maxLength={50}
                 value={birthdayName}
                 onChange={(event) => setBirthdayName(event.target.value)}
-                placeholder="Seu nome"
+                placeholder="Nome/Nick no Xat"
+                aria-label="Nome ou nick usado no Xat"
                 required
                 disabled={birthdayBusy}
               />
@@ -591,7 +599,7 @@ export default function CommunityPage() {
                 type="text"
                 inputMode="numeric"
                 value={birthdayDate}
-                onChange={(event) => setBirthdayDate(event.target.value)}
+                onChange={(event) => setBirthdayDate(formatBirthdayInput(event.target.value))}
                 placeholder="DD/MM"
                 maxLength={5}
                 required
@@ -600,7 +608,7 @@ export default function CommunityPage() {
               <button type="submit" disabled={birthdayBusy || birthdayName.trim().length < 2}>
                 {birthdayBusy ? 'Enviando...' : 'Cadastrar'}
               </button>
-              <small>Somente dia e mês. O ano de nascimento não é solicitado.</small>
+              <small>Use exatamente o nome/nick que aparece no Xat. Informe apenas dia e mês.</small>
             </form>
           ) : null}
 
