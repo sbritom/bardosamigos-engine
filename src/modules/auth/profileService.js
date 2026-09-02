@@ -16,7 +16,7 @@ function fallbackDisplayName(user) {
   if (metadataName) return metadataName
 
   const email = String(user?.email || '')
-  return email.includes('@') ? email.split('@')[0] : 'Amigo do Bar'
+  return email.includes('@') ? email.split('@')[0] : 'Usuário IMORTAL0800'
 }
 
 function mapProfile(row, user) {

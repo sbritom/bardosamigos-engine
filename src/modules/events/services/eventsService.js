@@ -50,8 +50,8 @@ export function getEventActionUrl(event = {}) {
 
   if (configuredUrl) return configuredUrl
 
-  if (typeof event.location === 'string' && event.location.toLowerCase().includes('xat.com/bardosamigos')) {
-    return 'https://xat.com/BarDosAmigos'
+  if (typeof event.location === 'string' && event.location.toLowerCase().includes('xat.com/imortal0800')) {
+    return 'https://xat.com/Imortal0800'
   }
 
   return null

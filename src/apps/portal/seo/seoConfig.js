@@ -49,11 +49,6 @@ export const publicSeoPages = [
     description: 'Acompanhe notícias e destaques selecionados no IMORTAL0800.',
   },
   {
-    path: '/tools',
-    title: 'Ferramentas | IMORTAL0800',
-    description: 'Acesse as ferramentas disponíveis no IMORTAL0800.',
-  },
-  {
     path: '/community',
     title: 'Comunidade | IMORTAL0800',
     description: 'Conheça os espaços, atividades e recursos da comunidade IMORTAL0800.',

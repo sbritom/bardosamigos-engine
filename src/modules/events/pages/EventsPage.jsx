@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Clock3, FileText, PartyPopper, Sparkles, Trophy } from 'lucide-react'
-import { bingoBanner, rankingBanner } from '../../../assets/events/eventBanners'
-import { Button } from '../../../design-system'
-import { WorkspaceEmptyState, WorkspaceSkeleton } from '../../../shared/workspace'
 import {
+  CalendarDays,
+  Clock3,
+  ExternalLink,
+  MapPin,
+  MessageCircle,
+  PartyPopper,
+  RefreshCw,
+  Sparkles,
+} from 'lucide-react'
+
+import { WorkspaceSkeleton } from '../../../shared/workspace'
+import {
+  getEventActionUrl,
   getEventRecurrenceLabel,
   getEventSummary,
   getEventTimeLabel,
@@ -11,311 +20,274 @@ import {
   getParticipationRule,
   listPublishedEvents,
 } from '../services/eventsService'
-import { EventDetails } from './EventDetails'
-import { EventHighlightBanner } from './EventHighlightBanner'
-import './eventsPage.css'
 
-const HERO_TEXT = 'Bingos, rankings, brincadeiras e momentos especiais do Bar dos Amigos.'
+function temporalStatus(event = {}) {
+  const now = Date.now()
+  const startsAt = event.startsAt || event.starts_at
+  const endsAt = event.endsAt || event.ends_at
+  const start = startsAt ? new Date(startsAt).getTime() : null
+  const end = endsAt ? new Date(endsAt).getTime() : null
 
-const RANKING_RULES = [
-  'Apenas 1 conta por participante.',
-  'Proibido utilizar scripts, bots ou qualquer tipo de automacao.',
-  'Necessario estar ativo no xat.com/BarDosAmigos.',
-  'As BarCoins sao pessoais e intransferiveis.',
-  'Fraudes ou tentativa de manipulacao resultarao em desclassificacao.',
-  'A decisao da equipe do Bar dos Amigos e soberana.',
-]
-
-const BINGO_RULES = [
-  'Apenas 1 conta por participante.',
-  'O vencedor devera responder dentro do tempo informado.',
-  'Contas alternativas nao poderao receber premiacao.',
-  'Em caso de fraude ou descumprimento das regras, o premio sera cancelado.',
-]
-
-const JULY_RANKING = {
-  id: 'ranking-barcoins-2026-07',
-  title: 'Ranking de BarCoins',
-  slug: 'ranking-de-barcoins-julho-2026',
-  status: 'ended',
-  banner: rankingBanner,
-  location: 'xat.com/BarDosAmigos',
-  metadata: { type: 'Competicao', timeLabel: '23/07/2026 → 06/08/2026', summary: 'Primeira edicao do Ranking de BarCoins, encerrada apos 15 dias.' },
+  if (Number.isFinite(end) && end < now) return { id: 'ended', label: 'Encerrado' }
+  if (Number.isFinite(start) && start > now) return { id: 'upcoming', label: 'Em breve' }
+  return { id: 'active', label: 'Ativo' }
 }
 
-const NEXT_RANKING = {
-  id: 'ranking-barcoins-proxima-edicao',
-  title: 'Ranking de BarCoins',
-  slug: 'ranking-de-barcoins-proxima-edicao',
-  status: 'draft',
-  banner: rankingBanner,
-  location: 'xat.com/BarDosAmigos',
-  metadata: { type: 'Competicao', timeLabel: 'Data a definir', summary: 'Proxima edicao do Ranking de BarCoins. A data sera divulgada em breve.' },
-}
-
-const BINGO_EVENT = {
-  id: 'configured-bingo-do-bar-dos-amigos',
-  title: 'Bingo do Bar dos Amigos',
-  slug: 'bingo-do-bar-dos-amigos',
-  status: 'published',
-  banner: bingoBanner,
-  location: 'xat.com/BarDosAmigos',
-  metadata: { type: 'Bingo', timeLabel: 'Quartas-feiras ou fins de semana • horário divulgado no dia', summary: 'Bingo oficial do Bar dos Amigos com prêmios em days, xats e powers.' },
-}
-
-const HIGHLIGHT = {
-  slug: 'bingo-do-bar-dos-amigos',
-  eyebrow: 'Evento em destaque',
-  title: 'Bingo do Bar dos Amigos',
-  description: 'Música, bingo, brincadeiras e resenha com a galera do Bar.',
-  period: 'Quartas-feiras ou fins de semana • horário divulgado no dia',
-  prizeLabel: 'Days, xats e powers',
-  prizes: ['Days', 'Xats', 'Powers'],
-  actionLabel: 'Ver regulamento',
-}
-
-const DETAILS = {
-  'ranking-de-barcoins-julho-2026': {
-    title: 'Ranking de BarCoins — Julho/Agosto 2026',
-    banner: rankingBanner,
-    status: 'ended',
-    period: '23/07/2026 → 06/08/2026',
-    prizes: ['1º 2.000 xats', '2º 1.500 xats', '3º 1.000 xats'],
-    howToParticipate: 'Colete BarCoins participando das atividades do Bar dos Amigos durante o periodo do evento.',
-    rules: RANKING_RULES,
-    rankingTitle: 'Ranking Oficial',
-    ranking: 'O Ranking de BarCoins foi contabilizado automaticamente pelo EVOX Bot.',
-  },
-  'ranking-de-barcoins-proxima-edicao': {
-    title: 'Ranking de BarCoins — Próxima edição',
-    banner: rankingBanner,
-    status: 'upcoming',
-    period: 'Data a definir',
-    prizes: ['1º 5.000 xats', '2º 2.000 xats', '3º 1.000 xats'],
-    howToParticipate: 'Colete BarCoins participando das atividades do Bar dos Amigos durante o periodo do evento.',
-    rules: RANKING_RULES,
-    rankingTitle: 'Ranking Oficial',
-    ranking: 'O Ranking de BarCoins sera contabilizado automaticamente pelo EVOX Bot.',
-  },
-  'bingo-do-bar-dos-amigos': {
-    title: 'Bingo do Bar dos Amigos',
-    banner: bingoBanner,
-    status: 'active',
-    period: 'Quartas-feiras ou fins de semana • horário divulgado no dia',
-    prizes: ['Days', 'Xats', 'Powers'],
-    howToParticipate: 'Aguarde o inicio do bingo e siga as instrucoes da equipe.',
-    rules: BINGO_RULES,
-  },
-}
-
-function key(value = '') {
-  return String(value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-function isBingo(event = {}) {
-  return key(`${event.slug || ''} ${event.title || ''} ${getEventType(event) || ''}`).includes('bingo')
-}
-
-function isRanking(event = {}) {
-  return key(`${event.slug || ''} ${event.title || ''}`).includes('ranking')
-}
-
-function statusOf(event = {}) {
-  const status = String(event.status || '').toLowerCase()
-  if (['archived', 'ended', 'finished', 'closed'].includes(status)) return 'ended'
-  if (status === 'draft') return 'upcoming'
-  return 'active'
-}
-
-function detailOf(event = {}) {
-  const preset = DETAILS[event.slug] || {}
+function eventPeriod(event = {}) {
   const recurrence = getEventRecurrenceLabel(event)
-  const time = getEventTimeLabel(event)
+  const date = event.dateLabel || ''
+  const time = getEventTimeLabel(event) || event.timeLabel || ''
 
-  return {
-    id: event.id,
-    slug: event.slug,
-    title: preset.title || event.title || 'Evento',
-    description: getEventSummary(event) || event.description || null,
-    banner: preset.banner || event.banner || event.metadata?.banner || null,
-    status: preset.status || statusOf(event),
-    period: preset.period || [recurrence, time].filter(Boolean).join(' - ') || 'Periodo a definir',
-    howToParticipate: preset.howToParticipate || getParticipationRule(event) || 'Acompanhe as instrucoes da equipe.',
-    prizes: preset.prizes || 'Premiacao sera informada pela equipe.',
-    rules: preset.rules || ['Respeite as orientacoes da equipe.'],
-    rankingTitle: preset.rankingTitle || null,
-    ranking: preset.ranking || null,
-    type: getEventType(event),
-  }
+  return [recurrence || date, time].filter(Boolean).join(' • ') || 'Programação a definir'
 }
 
-function CompactEventList({ events, onSelect, emptyTitle }) {
-  if (!events.length) return <WorkspaceEmptyState title={emptyTitle} />
+function toList(value) {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split('\n').map((item) => item.trim()).filter(Boolean)
+  return []
+}
+
+function EventCard({ event, onOpen }) {
+  const status = temporalStatus(event)
+  const type = getEventType(event) || 'Evento'
+  const summary = getEventSummary(event) || 'Confira os detalhes deste evento do IMORTAL0800.'
+  const image = event.image || event.metadata?.imageUrl || event.metadata?.banner || ''
 
   return (
-    <div className="bds-events-compact-list">
-      {events.slice(0, 6).map((event) => {
-        const detail = detailOf(event)
-        return (
-          <button key={event.id || event.slug} type="button" onClick={() => onSelect(event)} className="bds-events-compact-item">
-            <span>
-              <strong>{detail.title}</strong>
-              <small>{detail.period}</small>
+    <article className="overflow-hidden rounded-3xl border border-white/10 bg-[var(--surface)] shadow-sm">
+      {image ? (
+        <div className="aspect-[16/6] overflow-hidden border-b border-white/10 bg-black/20">
+          <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+        </div>
+      ) : null}
+
+      <div className="p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--primary)]">
+            {type}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold text-[var(--text-secondary)]">
+            {status.label}
+          </span>
+        </div>
+
+        <h2 className="mt-3 text-lg font-black text-[var(--text)]">{event.title || 'Evento IMORTAL0800'}</h2>
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--text-secondary)]">{summary}</p>
+
+        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+            <Clock3 size={13} />
+            {eventPeriod(event)}
+          </span>
+          {event.location ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              <MapPin size={13} />
+              {event.location}
             </span>
-            <span className={`bds-events-status bds-events-status--${detail.status}`}>
-              {detail.status === 'ended' ? 'Encerrado' : detail.status === 'upcoming' ? 'Em breve' : 'Ativo'}
-            </span>
-          </button>
-        )
-      })}
-    </div>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onOpen(event)}
+          className="mt-5 w-full rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-110"
+        >
+          Ver detalhes
+        </button>
+      </div>
+    </article>
   )
 }
 
-function Regulations({ events, onSelect }) {
+function EventDetails({ event, onBack }) {
+  const rules = toList(event.metadata?.rules)
+  const prizes = toList(event.metadata?.prizes)
+  const participation = getParticipationRule(event)
+  const actionUrl = getEventActionUrl(event)
+  const type = getEventType(event) || 'Evento'
+
   return (
-    <div className="bds-events-regulations">
-      {events.map((event) => {
-        const detail = detailOf(event)
-        return (
-          <button key={event.id || event.slug} type="button" className="bds-events-regulation-card" onClick={() => onSelect(event)}>
-            <FileText size={18} aria-hidden="true" />
-            <span>
-              <strong>{detail.title}</strong>
-              <small>{detail.rules.length} regras principais</small>
-            </span>
-          </button>
-        )
-      })}
-    </div>
+    <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">{type}</span>
+          <h2 className="mt-2 text-2xl font-black text-[var(--text)]">{event.title || 'Evento IMORTAL0800'}</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
+            {getEventSummary(event) || event.description || 'Confira as informações do evento.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold text-[var(--text)] transition hover:bg-white/10"
+        >
+          Voltar
+        </button>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Quando</span>
+          <strong className="mt-2 block text-[var(--text)]">{eventPeriod(event)}</strong>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Onde</span>
+          <strong className="mt-2 block text-[var(--text)]">{event.location || 'Local informado pela equipe'}</strong>
+        </div>
+      </div>
+
+      {participation ? (
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Como participar</span>
+          <p className="mt-2 text-sm leading-6 text-[var(--text)]">{participation}</p>
+        </div>
+      ) : null}
+
+      {prizes.length ? (
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Premiação</span>
+          <ul className="mt-2 grid gap-2 text-sm text-[var(--text)]">
+            {prizes.map((item) => <li key={item}>• {item}</li>)}
+          </ul>
+        </div>
+      ) : null}
+
+      {rules.length ? (
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Regulamento</span>
+          <ul className="mt-2 grid gap-2 text-sm text-[var(--text)]">
+            {rules.map((item) => <li key={item}>• {item}</li>)}
+          </ul>
+        </div>
+      ) : null}
+
+      {actionUrl ? (
+        <a
+          href={actionUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
+        >
+          <ExternalLink size={16} />
+          Abrir participação
+        </a>
+      ) : null}
+    </section>
   )
 }
 
 export default function EventsPage() {
-  const [remote, setRemote] = useState([])
+  const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [remoteError, setRemoteError] = useState(null)
-  const [activeView, setActiveView] = useState(null)
+  const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
 
-  useEffect(() => {
-    let active = true
+  async function load() {
+    setLoading(true)
+    setError('')
 
-    async function loadEvents() {
-      setLoading(true)
-      setRemoteError(null)
-      try {
-        const result = await listPublishedEvents()
-        if (!active) return
-        setRemote(Array.isArray(result.data) ? result.data : [])
-        setRemoteError(result.error || null)
-      } catch (error) {
-        if (!active) return
-        setRemote([])
-        setRemoteError(error)
-      } finally {
-        if (active) setLoading(false)
-      }
+    try {
+      const result = await listPublishedEvents()
+      setEvents(Array.isArray(result.data) ? result.data : [])
+      if (result.error) setError('Não foi possível atualizar todos os eventos agora.')
+    } catch {
+      setEvents([])
+      setError('Não foi possível carregar os eventos agora.')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    loadEvents()
-    return () => { active = false }
+  useEffect(() => {
+    load()
   }, [])
 
-  const events = useMemo(() => {
-    const cleaned = remote.filter((event) => !isRanking(event) && !isBingo(event))
-    return [BINGO_EVENT, NEXT_RANKING, JULY_RANKING, ...cleaned]
-  }, [remote])
+  const counts = useMemo(() => {
+    return events.reduce((acc, event) => {
+      const status = temporalStatus(event).id
+      acc[status] += 1
+      return acc
+    }, { active: 0, upcoming: 0, ended: 0 })
+  }, [events])
 
-  const bingo = events.find((event) => event.slug === BINGO_EVENT.slug)
-  const activeEvents = events.filter((event) => statusOf(event) === 'active')
-  const upcomingEvents = events.filter((event) => statusOf(event) === 'upcoming')
-  const endedEvents = events.filter((event) => statusOf(event) === 'ended')
-  const selectedDetail = selected ? detailOf(selected) : null
-
-  function openEvent(event) {
-    setSelected(event)
-    setActiveView(null)
+  if (selected) {
+    return (
+      <main className="mx-auto w-full max-w-[1180px] px-4 py-4">
+        <EventDetails event={selected} onBack={() => setSelected(null)} />
+      </main>
+    )
   }
-
-  function openView(view) {
-    setSelected(null)
-    setActiveView((current) => current === view ? null : view)
-  }
-
-  function renderPanel() {
-    if (selectedDetail) return <EventDetails event={selectedDetail} onBack={() => setSelected(null)} />
-    if (!activeView) return null
-    if (activeView === 'active') return <CompactEventList events={activeEvents.filter((event) => event.slug !== BINGO_EVENT.slug)} onSelect={openEvent} emptyTitle="Nenhum outro evento ativo no momento." />
-    if (activeView === 'upcoming') return <CompactEventList events={upcomingEvents} onSelect={openEvent} emptyTitle="Os proximos eventos serao anunciados aqui." />
-    if (activeView === 'ended') return <CompactEventList events={endedEvents} onSelect={openEvent} emptyTitle="Nenhum evento encerrado." />
-    return <Regulations events={[bingo, NEXT_RANKING].filter(Boolean)} onSelect={openEvent} />
-  }
-
-  const quickActions = [
-    { id: 'active', label: 'Ativos', count: activeEvents.length, icon: Sparkles },
-    { id: 'upcoming', label: 'Próximos', count: upcomingEvents.length, icon: Clock3 },
-    { id: 'ended', label: 'Encerrados', count: endedEvents.length, icon: CheckCircle2 },
-    { id: 'rules', label: 'Regulamentos', count: 2, icon: FileText },
-  ]
 
   return (
-    <main className="bds-events-page bds-events-page--clean" aria-busy={loading}>
-      <header className="bds-events-clean-header">
-        <div>
-          <span>Agenda do Bar</span>
-          <h1>Eventos do Bar</h1>
-          <p>{HERO_TEXT}</p>
+    <main className="mx-auto w-full max-w-[1180px] px-4 py-4">
+      <header className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div>
+            <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">
+              <PartyPopper size={15} />
+              IMORTAL0800
+            </span>
+            <h1 className="mt-2 text-3xl font-black text-[var(--text)] md:text-4xl">Eventos do IMORTAL0800</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
+              Agenda oficial de atividades, encontros e eventos da comunidade.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-[var(--text)] transition hover:bg-white/10 disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Atualizar
+          </button>
         </div>
-        <div className="bds-events-header-stats" aria-label="Resumo dos eventos">
-          <span><PartyPopper size={15} aria-hidden="true" /> {activeEvents.length} ativo{activeEvents.length === 1 ? '' : 's'}</span>
-          <span><Trophy size={15} aria-hidden="true" /> {upcomingEvents.length} próximo{upcomingEvents.length === 1 ? '' : 's'}</span>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <Sparkles size={17} className="text-[var(--primary)]" />
+            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.active}</strong>
+            <span className="text-xs text-[var(--text-secondary)]">Ativos</span>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <CalendarDays size={17} className="text-[var(--primary)]" />
+            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.upcoming}</strong>
+            <span className="text-xs text-[var(--text-secondary)]">Próximos</span>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <Clock3 size={17} className="text-[var(--primary)]" />
+            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.ended}</strong>
+            <span className="text-xs text-[var(--text-secondary)]">Encerrados</span>
+          </div>
         </div>
       </header>
 
-      {loading ? <WorkspaceSkeleton rows={4} /> : (
-        <>
-          {remoteError ? (
-            <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100" role="status" aria-live="polite">
-              Nao foi possivel atualizar a agenda publicada agora. Exibindo apenas as informacoes que ja estao disponiveis no portal.
+      {error ? (
+        <p className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          {error}
+        </p>
+      ) : null}
+
+      <section className="mt-5">
+        {loading ? (
+          <WorkspaceSkeleton rows={4} />
+        ) : events.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {events.map((event) => <EventCard key={event.id} event={event} onOpen={setSelected} />)}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-white/15 bg-[var(--surface)] p-8 text-center">
+            <MessageCircle size={26} className="mx-auto text-[var(--primary)]" />
+            <h2 className="mt-3 text-lg font-black text-[var(--text)]">Nenhum evento publicado agora</h2>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Quando a equipe publicar um novo evento, ele aparecerá aqui automaticamente.
             </p>
-          ) : null}
-
-          {bingo ? <EventHighlightBanner highlight={HIGHLIGHT} event={bingo} onOpen={openEvent} /> : null}
-
-          <nav className="bds-events-quick-nav" aria-label="Navegação de eventos">
-            {quickActions.map(({ id, label, count, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                className={activeView === id ? 'is-active' : ''}
-                onClick={() => openView(id)}
-                aria-expanded={activeView === id}
-                aria-controls="events-dynamic-panel"
-              >
-                <Icon size={17} aria-hidden="true" />
-                <span>{label}</span>
-                <strong>{count}</strong>
-              </button>
-            ))}
-          </nav>
-
-          {(activeView || selectedDetail) ? (
-            <section id="events-dynamic-panel" className="bds-events-dynamic-panel" aria-live="polite">
-              <div className="bds-events-dynamic-panel__header">
-                <h2>{selectedDetail ? selectedDetail.title : quickActions.find((item) => item.id === activeView)?.label}</h2>
-                {activeView ? <Button variant="secondary" onClick={() => setActiveView(null)}>Fechar</Button> : null}
-              </div>
-              {renderPanel()}
-            </section>
-          ) : null}
-        </>
-      )}
+          </div>
+        )}
+      </section>
     </main>
   )
 }

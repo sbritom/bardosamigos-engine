@@ -9,11 +9,9 @@ import {
   Wrench,
   Gamepad2,
   Users,
-  Coins,
   CalendarDays,
   Shield,
   MessageCircle,
-  BookOpen,
   UserRound,
   Sparkles,
   Settings,
@@ -34,13 +32,10 @@ const FootballMatchDetailsPage = React.lazy(() => import("../../modules/competit
 const FootballTeamPage = React.lazy(() => import("../../modules/competition/football/pages/FootballTeamPage"));
 const NewsPage = React.lazy(() => import("../../modules/news/pages/NewsPage"));
 const CommunityPage = React.lazy(() => import("../../modules/community/pages/CommunityPage"));
-const BarStudioPage = React.lazy(() => import("../../modules/barstudio/pages/BarStudioPage"));
 const DesignerPage = React.lazy(() => import("../../modules/barstudio/designer/pages/DesignerPage"));
 const GamesPage = React.lazy(() => import("../../modules/games/pages/GamesPage"));
-const BarCoinsPage = React.lazy(() => import("../../modules/barcoins/pages/BarCoinsPage"));
 const EventsPage = React.lazy(() => import("../../modules/events/pages/EventsPage"));
 const EventsAdminPage = React.lazy(() => import("../../modules/events/admin/pages/EventsAdminPage"));
-const ManualPage = React.lazy(() => import("../../modules/manual/pages/ManualPage"));
 const AdminPage = React.lazy(() => import("../../modules/admin/pages/AdminPage"));
 const TVManager = React.lazy(() =>
   import("../../modules/tv/admin/TVManager").then((module) => ({ default: module.TVManager })),
@@ -157,38 +152,16 @@ export const plugins = [
     element: <LazyPluginPage component={FootballTeamPage} title="Time" />,
   },
 
-  {
-    id: "football-placeholder",
-    title: "Futebol",
-    path: "/football-placeholder",
-    icon: Trophy,
-    menu: false,
-    element: (
-      <PluginPage
-        icon="⚽"
-        title="Central do Futebol"
-        description="Jogos ao vivo, resultados e classificações."
-      />
-    ),
-  },
 
   {
     id: "news",
     title: "Notícias",
     path: "/news",
     icon: Newspaper,
-    menu: true,
+    menu: false,
     element: <LazyPluginPage component={NewsPage} title="Notícias" />,
   },
 
-  {
-    id: "tools",
-    title: "BarStudio",
-    path: "/tools",
-    icon: Wrench,
-    menu: true,
-    element: <LazyPluginPage component={BarStudioPage} title="BarStudio" />,
-  },
 
   {
     id: "barstudio-designer",
@@ -208,14 +181,6 @@ export const plugins = [
     element: <LazyPluginPage component={GamesPage} title="Games" />,
   },
 
-  {
-    id: "games-legacy",
-    title: "Games",
-    path: "/brincadeiras",
-    icon: Gamepad2,
-    menu: false,
-    element: <LazyPluginPage component={GamesPage} title="Games" />,
-  },
 
   {
     id: "community",
@@ -253,21 +218,13 @@ export const plugins = [
     element: <LazyPluginPage component={SettingsPage} title="Configuracoes" />,
   },
 
-  {
-    id: "barcoins",
-    title: "BarCoins",
-    path: "/barcoins",
-    icon: Coins,
-    menu: true,
-    element: <LazyPluginPage component={BarCoinsPage} title="BarCoins" />,
-  },
 
   {
     id: "events",
     title: "Eventos",
     path: "/events",
     icon: CalendarDays,
-    menu: true,
+    menu: false,
     element: <LazyPluginPage component={EventsPage} title="Eventos" />,
   },
 
@@ -280,14 +237,6 @@ export const plugins = [
     element: <AdminPluginPage component={EventsAdminPage} title="Eventos Admin" />,
   },
 
-  {
-    id: "manual",
-    title: "Manual",
-    path: "/manual",
-    icon: BookOpen,
-    menu: true,
-    element: <LazyPluginPage component={ManualPage} title="Manual" />,
-  },
 
   {
     id: "admin",
@@ -357,7 +306,7 @@ export const plugins = [
     title: "Chat",
     path: "/chat",
     icon: MessageCircle,
-    menu: true,
+    menu: false,
     element: (
       <React.Suspense fallback={<PluginPage title="Chat" description="Carregando chat oficial..." />}>
         <FullScreenChat />
@@ -433,7 +382,7 @@ export const plugins = [
     title: "Palpites",
     path: "/palpites",
     icon: Trophy,
-    menu: true,
+    menu: false,
     element: <LazyPluginPage component={CompetitionPredictionsPage} title="Palpites" />,
   },
 

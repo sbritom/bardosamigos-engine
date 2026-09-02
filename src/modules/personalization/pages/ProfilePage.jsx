@@ -26,7 +26,7 @@ function GuestProfile() {
         <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Acesso livre</span>
         <h2 className="mt-2 text-3xl font-black text-[var(--text)]">Voce esta navegando como visitante</h2>
         <p className="mt-4 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          Nao e preciso criar conta para ouvir a radio, pedir musica, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo Bar dos Amigos.
+          Nao e preciso criar conta para ouvir a radio, pedir musica, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo IMORTAL0800.
         </p>
         <p className="mt-3 leading-7 text-[var(--text-secondary)]">
           A conta so e solicitada quando voce quiser usar algo que precise guardar sua identidade ou seus dados, como favoritos, perfil personalizado e palpites.
@@ -182,7 +182,7 @@ function AuthenticatedProfile() {
 
           <div className="min-w-0">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Conta conectada</span>
-            <h2 className="truncate text-2xl font-black text-[var(--text)]">{displayName || 'Amigo do Bar'}</h2>
+            <h2 className="truncate text-2xl font-black text-[var(--text)]">{displayName || 'Usuário IMORTAL0800'}</h2>
             <p className="flex items-center gap-1 truncate text-sm font-semibold text-[var(--primary)]">
               <AtSign size={14} />
               {usernameLabel.replace(/^@/, '')}
@@ -293,7 +293,7 @@ function AuthenticatedProfile() {
 
         <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
           <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Identidade</span>
-          <strong className="mt-2 block text-lg text-[var(--text)]">{displayName || 'Amigo do Bar'}</strong>
+          <strong className="mt-2 block text-lg text-[var(--text)]">{displayName || 'Usuário IMORTAL0800'}</strong>
           <span className="text-sm text-[var(--primary)]">{profile?.username ? `@${profile.username}` : 'Sem @usuario definido'}</span>
           {profile?.bio && <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{profile.bio}</p>}
         </div>
@@ -333,7 +333,7 @@ export default function ProfilePage() {
   return (
     <PersonalizationShell
       eyebrow="Perfil e autenticacao"
-      title="Sua area no Bar dos Amigos"
+      title="Sua area no IMORTAL0800"
       description="Navegue livremente como visitante e use uma conta apenas quando quiser guardar uma experiencia pessoal."
       icon={<UserRound size={40} />}
     >

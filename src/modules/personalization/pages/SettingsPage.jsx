@@ -8,10 +8,10 @@ import { PersonalizationShell } from '../components/PersonalizationComponents'
 
 const INTERESTS = [
   { id: 'football', label: 'Futebol', description: 'Jogos, times e competicoes.', icon: Trophy },
-  { id: 'tv', label: 'TV', description: 'Canais e destaques da TV do Bar.', icon: Tv },
+  { id: 'tv', label: 'TV', description: 'Canais e destaques da TV do portal.', icon: Tv },
   { id: 'radio', label: 'Radio', description: 'Programacao e conteudos da radio.', icon: Radio },
   { id: 'news', label: 'Noticias', description: 'Noticias e assuntos em destaque.', icon: Newspaper },
-  { id: 'events', label: 'Eventos', description: 'Eventos e programacao do Bar.', icon: CalendarDays },
+  { id: 'events', label: 'Eventos', description: 'Eventos e programação do IMORTAL0800.', icon: CalendarDays },
 ]
 
 const DEFAULT_INTERESTS = INTERESTS.map((item) => item.id)
@@ -110,7 +110,7 @@ export default function SettingsPage() {
       }
     >
       {!isAuthenticated ? (
-        <GuestSettings onLogin={() => openAuth('Entre para salvar suas preferencias no Bar dos Amigos.', 'login')} />
+        <GuestSettings onLogin={() => openAuth('Entre para salvar suas preferencias no IMORTAL0800.', 'login')} />
       ) : (
         <form className="mx-auto grid w-full max-w-5xl gap-5" onSubmit={handleSave}>
           <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">

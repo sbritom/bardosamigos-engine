@@ -9,10 +9,10 @@ import { loadPersonalFavorites } from '../services/favoritesService'
 
 const QUICK_LINKS = [
   { id: 'football', title: 'Futebol', description: 'Jogos, times e competicoes.', path: '/football', icon: Trophy },
-  { id: 'tv', title: 'TV do Bar', description: 'Assista aos canais e salve seus favoritos.', path: '/tv', icon: Tv },
+  { id: 'tv', title: 'TV', description: 'Assista aos canais e salve seus favoritos.', path: '/tv', icon: Tv },
   { id: 'radio', title: 'Radio', description: 'Ouça a programacao e peça sua musica.', path: '/radio', icon: Radio },
   { id: 'news', title: 'Noticias', description: 'Veja as noticias em destaque.', path: '/news', icon: Newspaper },
-  { id: 'events', title: 'Eventos', description: 'Acompanhe a agenda do Bar.', path: '/events', icon: CalendarDays },
+  { id: 'events', title: 'Eventos', description: 'Acompanhe a agenda do IMORTAL0800.', path: '/events', icon: CalendarDays },
 ]
 
 function GuestForYou({ onLogin, onExplore }) {
@@ -179,7 +179,7 @@ export default function ForYouPage() {
             <FavoriteCard
               key={`tv-${channel.id}`}
               title={channel.name || 'Canal favorito'}
-              subtitle={channel.category?.name || channel.language || 'TV do Bar'}
+              subtitle={channel.category?.name || channel.language || 'TV'}
               image={channel.logo || ''}
               icon={Tv}
               onOpen={() => navigate('/tv')}

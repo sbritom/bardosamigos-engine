@@ -1,9 +1,9 @@
 export const profileConfig = {
-  name: "Visitante do Bar",
+  name: "Visitante IMORTAL0800",
   nickname: "@visitante",
   joinedAt: "",
-  summary: "Personalize sua experiencia no Portal Bar dos Amigos escolhendo seus favoritos.",
-  avatarFallback: "BA",
+  summary: "Personalize sua experiência no IMORTAL0800 escolhendo seus favoritos.",
+  avatarFallback: "IM",
 }
 
 export const preferenceSections = [
@@ -15,19 +15,19 @@ export const preferenceSections = [
   },
   {
     id: "football-competitions",
-    title: "Competicoes favoritas",
+    title: "Competições favoritas",
     description: "Acompanhe campeonatos com mais destaque.",
     type: "competition",
   },
   {
     id: "radio",
-    title: "Radio favorita",
-    description: "Base preparada para salvar sua radio principal.",
+    title: "Rádio favorita",
+    description: "Base preparada para salvar sua rádio principal.",
     type: "radio",
     options: [
       {
-        id: "bar-dos-amigos-radio",
-        label: "Radio Bar dos Amigos",
+        id: "imortal0800-radio",
+        label: "Rádio IMORTAL0800",
         meta: "Ao vivo no portal",
       },
     ],
@@ -39,9 +39,9 @@ export const preferenceSections = [
     type: "tv",
     options: [
       {
-        id: "bar-dos-amigos-tv",
-        label: "TV Bar dos Amigos",
-        meta: "Catalogo publico",
+        id: "imortal0800-tv",
+        label: "TV IMORTAL0800",
+        meta: "Catálogo público",
       },
     ],
   },
@@ -51,26 +51,26 @@ export const settingsSections = [
   {
     id: "theme",
     title: "Tema",
-    description: "Preferencia visual preparada para persistencia futura.",
+    description: "Preferência visual preparada para persistência futura.",
     options: ["Sistema", "Escuro"],
   },
   {
     id: "language",
     title: "Idioma",
     description: "Idioma principal do portal.",
-    options: ["Portugues do Brasil"],
+    options: ["Português do Brasil"],
   },
   {
     id: "sports",
-    title: "Preferencias esportivas",
-    description: "Prioridade para favoritos, competicoes e jogos ao vivo.",
+    title: "Preferências esportivas",
+    description: "Prioridade para favoritos, competições e jogos ao vivo.",
     options: ["Favoritos primeiro", "Ao vivo primeiro"],
   },
   {
     id: "notifications",
-    title: "Notificacoes",
+    title: "Notificações",
     description: "Estrutura preparada para avisos futuros.",
-    options: ["Jogos ao vivo", "Eventos", "Noticias"],
+    options: ["Jogos ao vivo", "Eventos", "Notícias"],
   },
 ]
 
@@ -78,21 +78,21 @@ export const forYouSections = [
   {
     id: "football",
     title: "Futebol",
-    description: "Jogos e competicoes favoritos aparecerao aqui.",
+    description: "Jogos e competições favoritos aparecerão aqui.",
   },
   {
     id: "radio",
-    title: "Radio",
-    description: "Programacoes e pedidos salvos aparecerao aqui.",
+    title: "Rádio",
+    description: "Programações e pedidos salvos aparecerão aqui.",
   },
   {
     id: "tv",
     title: "TV",
-    description: "Canais favoritos e destaques aparecerao aqui.",
+    description: "Canais favoritos e destaques aparecerão aqui.",
   },
   {
     id: "news",
-    title: "Noticias",
-    description: "Temas e fontes favoritos aparecerao aqui.",
+    title: "Notícias",
+    description: "Temas e fontes favoritos aparecerão aqui.",
   },
 ]
