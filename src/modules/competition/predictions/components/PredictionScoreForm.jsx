@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Target } from 'lucide-react'
 
-export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel = 'Salvar palpite' }) {
+export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel = 'Salvar palpite', disabled = false }) {
   const [score, setScore] = useState({
     homeScore: initialValue?.homeScore ?? 0,
     awayScore: initialValue?.awayScore ?? 0,
@@ -29,6 +29,7 @@ export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel
           <span>Mandante</span>
           <input
             type="number"
+            disabled={disabled}
             min="0"
             max="99"
             value={score.homeScore}
@@ -42,6 +43,7 @@ export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel
           <span>Visitante</span>
           <input
             type="number"
+            disabled={disabled}
             min="0"
             max="99"
             value={score.awayScore}
@@ -50,7 +52,7 @@ export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel
         </label>
       </div>
 
-      <button type="submit" className="imortal-prediction-form__submit">
+      <button type="submit" className="imortal-prediction-form__submit" disabled={disabled}>
         <Target size={16} />
         {submitLabel}
       </button>
