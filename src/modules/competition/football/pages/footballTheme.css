@@ -647,3 +647,29 @@
     border-bottom: 1px solid rgba(42, 143, 255, .08);
   }
 }
+
+
+.imortal-football-standings-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.imortal-football-standings-group h4 {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(42, 143, 255, .10);
+  color: #67caff;
+  font-size: .68rem;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.imortal-football-standings-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(42, 143, 255, .10);
+  color: rgba(203, 219, 239, .56);
+  font-size: .65rem;
+  line-height: 1.45;
+}
