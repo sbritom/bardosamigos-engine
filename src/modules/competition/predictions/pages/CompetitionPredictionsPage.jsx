@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, CheckCircle2, Clock3, Target, Trophy } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../../auth/AuthContext'
 import { Alert, EmptyState, Loading, Modal } from '../../../../design-system'
 import { MatchPredictionCard } from '../components/MatchPredictionCard'
 import { PredictionScoreForm } from '../components/PredictionScoreForm'
@@ -15,12 +16,15 @@ import './predictionsPage.css'
 
 export default function CompetitionPredictionsPage() {
   const navigate = useNavigate()
+  const { isAuthenticated, requireAuth } = useAuth()
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeMatch, setActiveMatch] = useState(null)
   const [mode, setMode] = useState('create')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [pendingAction, setPendingAction] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -37,23 +41,74 @@ export default function CompetitionPredictionsPage() {
     return () => window.clearInterval(refreshTimer)
   }, [])
 
-  async function submit(score) {
-    const result = await saveCompetitionPrediction(activeMatch, score, mode === 'edit' ? activeMatch.myPrediction : null)
-    if (result.error) {
-      setError(result.error.message)
+  function openPrediction(selectedMatch, nextMode = 'create') {
+    setMessage('')
+    setError('')
+
+    if (!isAuthenticated) {
+      setPendingAction({ match: selectedMatch, mode: nextMode })
+      requireAuth('Entre ou crie sua conta para participar do Bolão IMORTAL0800.')
       return
     }
-    setMessage(mode === 'edit' ? 'Palpite atualizado.' : 'Palpite registrado.')
-    setActiveMatch(null)
+
+    setMode(nextMode)
+    setActiveMatch(selectedMatch)
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated || !pendingAction) return
+
+    setMode(pendingAction.mode)
+    setActiveMatch(pendingAction.match)
+    setPendingAction(null)
     load()
+  }, [isAuthenticated, pendingAction])
+
+  async function submit(score) {
+    if (!activeMatch || submitting) return
+
+    setSubmitting(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const result = await saveCompetitionPrediction(
+        activeMatch,
+        score,
+        mode === 'edit' ? activeMatch.myPrediction : null,
+      )
+
+      if (result.error) {
+        if (!result.authenticated) {
+          setPendingAction({ match: activeMatch, mode })
+          setActiveMatch(null)
+          requireAuth('Sua sessão expirou. Entre novamente para confirmar o palpite.')
+        }
+        setError(result.error.message)
+        return
+      }
+
+      setMessage(mode === 'edit' ? 'Palpite atualizado.' : 'Palpite registrado.')
+      setActiveMatch(null)
+      await load()
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   async function deletePrediction(match) {
+    if (!isAuthenticated) {
+      requireAuth('Entre para gerenciar seus palpites.')
+      return
+    }
     if (!window.confirm('Deseja excluir este palpite?')) return
+
+    setMessage('')
+    setError('')
     const result = await removeCompetitionPrediction(match.myPrediction, match)
     if (result.error) setError(result.error.message)
     else setMessage('Palpite excluído.')
-    load()
+    await load()
   }
 
   const stats = useMemo(() => {
@@ -120,8 +175,8 @@ export default function CompetitionPredictionsPage() {
               <MatchPredictionCard
                 key={match.id}
                 match={match}
-                onPredict={(selectedMatch) => { setMode('create'); setActiveMatch(selectedMatch) }}
-                onEdit={(selectedMatch) => { setMode('edit'); setActiveMatch(selectedMatch) }}
+                onPredict={(selectedMatch) => openPrediction(selectedMatch, 'create')}
+                onEdit={(selectedMatch) => openPrediction(selectedMatch, 'edit')}
                 onDelete={deletePrediction}
               />
             ))}
@@ -133,7 +188,8 @@ export default function CompetitionPredictionsPage() {
         <PredictionScoreForm
           match={activeMatch}
           initialValue={activeMatch?.myPrediction?.prediction}
-          submitLabel={mode === 'edit' ? 'Atualizar palpite' : 'Confirmar palpite'}
+          submitLabel={submitting ? 'Salvando...' : mode === 'edit' ? 'Atualizar palpite' : 'Confirmar palpite'}
+          disabled={submitting}
           onSubmit={submit}
         />
       </Modal>
