@@ -16,6 +16,8 @@ import './gamesPage.css'
 
 const FILTERS = [
   ['all', 'Tudo'],
+  ['freefire', 'Free Fire'],
+  ['fortnite', 'Fortnite'],
   ['esports', 'Esports'],
   ['releases', 'Lançamentos'],
   ['championships', 'Campeonatos'],
@@ -42,7 +44,9 @@ function isChampionship(item = {}) {
 
 function classify(item = {}) {
   const text = normalize(`${item.title} ${item.description}`)
-  if (/esport|campeonato|torneio|competitiv|free fire|valorant|fortnite|league of legends|lol|cs2|counter strike/.test(text)) return 'esports'
+  if (/free fire|garena/.test(text)) return 'freefire'
+  if (/fortnite/.test(text)) return 'fortnite'
+  if (/esport|campeonato|torneio|competitiv|valorant|league of legends|lol|cs2|counter strike|dota/.test(text)) return 'esports'
   if (/gratis|gratuito|free to play|free-to-play|de graca|epic games store/.test(text)) return 'free'
   if (/lancamento|lanca|release|estreia|chega|novo jogo|nova temporada|atualizacao|update/.test(text)) return 'releases'
   return 'news'
@@ -257,6 +261,8 @@ export default function GamesPage() {
   const [payload, setPayload] = useState({
     news: [],
     featured: null,
+    freeFireNews: [],
+    fortniteNews: [],
     esportsNews: [],
     releasesNews: [],
     releases: [],
@@ -289,6 +295,8 @@ export default function GamesPage() {
     setPayload({
       news,
       featured: news[0] || null,
+      freeFireNews: news.filter((item) => item.kind === 'freefire').slice(0, 8),
+      fortniteNews: news.filter((item) => item.kind === 'fortnite').slice(0, 8),
       esportsNews: news.filter((item) => item.kind === 'esports').slice(0, 8),
       releasesNews: news.filter((item) => item.kind === 'releases').slice(0, 8),
       releases: releasesResult.ok && Array.isArray(releasesResult.data?.items) ? releasesResult.data.items : [],
@@ -360,9 +368,31 @@ export default function GamesPage() {
     [payload.esportsNews, term],
   )
 
+  const filteredFreeFireNews = useMemo(
+    () => payload.freeFireNews.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [payload.freeFireNews, term],
+  )
+
+  const filteredFortniteNews = useMemo(
+    () => payload.fortniteNews.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [payload.fortniteNews, term],
+  )
+
   const featured = payload.featured
 
   function renderFilteredContent() {
+    if (activeFilter === 'freefire') {
+      return filteredFreeFireNews.length
+        ? <div className="games-page__grid">{filteredFreeFireNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhuma notícia de Free Fire encontrada." description="Assim que houver novidades sincronizadas, elas aparecem aqui." />
+    }
+
+    if (activeFilter === 'fortnite') {
+      return filteredFortniteNews.length
+        ? <div className="games-page__grid">{filteredFortniteNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhuma notícia de Fortnite encontrada." description="Assim que houver novidades sincronizadas, elas aparecem aqui." />
+    }
+
     if (activeFilter === 'releases') {
       return filteredReleases.length
         ? <div className="games-page__source-grid">{filteredReleases.map((game) => <ReleaseCard key={game.id} game={game} />)}</div>
@@ -404,7 +434,7 @@ export default function GamesPage() {
         <div className="games-page__hero-copy">
           <span>IMORTAL0800</span>
           <h1>Games</h1>
-          <p>Notícias, esports, lançamentos e jogos grátis reunidos em uma central atualizada automaticamente.</p>
+          <p>Free Fire, Fortnite, esports, lançamentos, campeonatos e jogos grátis reunidos em uma central atualizada automaticamente.</p>
 
           <div className="games-page__hero-actions">
             <ActionButton icon={<Gamepad2 size={17} />} onClick={() => setActiveFilter('all')}>
@@ -417,9 +447,9 @@ export default function GamesPage() {
         </div>
 
         <div className="games-page__hero-art" aria-hidden="true">
+          <div><Gamepad2 size={28} /><span>FREE FIRE</span></div>
+          <div><Rocket size={28} /><span>FORTNITE</span></div>
           <div><Swords size={28} /><span>ESPORTS</span></div>
-          <div><Rocket size={28} /><span>LANÇAMENTOS</span></div>
-          <div><Gift size={28} /><span>JOGOS GRÁTIS</span></div>
         </div>
       </header>
 
@@ -488,19 +518,19 @@ export default function GamesPage() {
             <aside className="games-page__quick">
               <div className="games-page__quick-item">
                 <Swords size={20} />
-                <div><strong>Esports</strong><span>{esportsMatches.length || payload.esportsNews.length} destaques</span></div>
+                <div><strong>Esports</strong><span>{payload.esports.running.length} ao vivo agora</span></div>
+              </div>
+              <div className="games-page__quick-item">
+                <Gamepad2 size={20} />
+                <div><strong>Free Fire</strong><span>{payload.freeFireNews.length} novidades</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Rocket size={20} />
+                <div><strong>Fortnite</strong><span>{payload.fortniteNews.length} novidades</span></div>
+              </div>
+              <div className="games-page__quick-item">
+                <CalendarDays size={20} />
                 <div><strong>Lançamentos</strong><span>{payload.releases.length} próximos jogos</span></div>
-              </div>
-              <div className="games-page__quick-item">
-                <Trophy size={20} />
-                <div><strong>Campeonatos</strong><span>{championships.length} notícias encontradas</span></div>
-              </div>
-              <div className="games-page__quick-item">
-                <Gift size={20} />
-                <div><strong>Jogos grátis</strong><span>{payload.freeGames.length} ofertas ativas</span></div>
               </div>
             </aside>
           </section>
@@ -536,6 +566,42 @@ export default function GamesPage() {
             ) : (
               <EmptyPanel title="Sem novidades de Esports agora." description="As partidas aparecem quando a PandaScore estiver disponível; notícias continuam como fallback." />
             )}
+          </section>
+
+          <section className="games-page__two-columns games-page__game-focus">
+            <div className="games-page__section">
+              <div className="games-page__section-title">
+                <div>
+                  <span><Gamepad2 size={15} /> Battle royale</span>
+                  <h2>Free Fire</h2>
+                </div>
+                <button type="button" onClick={() => setActiveFilter('freefire')}>Ver tudo</button>
+              </div>
+              {payload.freeFireNews.length ? (
+                <div className="games-page__list">
+                  {payload.freeFireNews.slice(0, 4).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                </div>
+              ) : (
+                <EmptyPanel title="Sem novidades de Free Fire agora." description="Novas notícias aparecem aqui quando forem sincronizadas." />
+              )}
+            </div>
+
+            <div className="games-page__section">
+              <div className="games-page__section-title">
+                <div>
+                  <span><Rocket size={15} /> Battle royale</span>
+                  <h2>Fortnite</h2>
+                </div>
+                <button type="button" onClick={() => setActiveFilter('fortnite')}>Ver tudo</button>
+              </div>
+              {payload.fortniteNews.length ? (
+                <div className="games-page__list">
+                  {payload.fortniteNews.slice(0, 4).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                </div>
+              ) : (
+                <EmptyPanel title="Sem novidades de Fortnite agora." description="Novas notícias aparecem aqui quando forem sincronizadas." />
+              )}
+            </div>
           </section>
 
           <section className="games-page__section">
@@ -612,7 +678,7 @@ export default function GamesPage() {
 
           <div className="games-page__sources-note">
             <CalendarDays size={14} />
-            <span>Dados de lançamentos por RAWG, ofertas por GamerPower e esports por PandaScore quando configurada.</span>
+            <span>Dados de lançamentos por RAWG, ofertas por GamerPower e partidas de esports por PandaScore.</span>
           </div>
         </>
       )}
