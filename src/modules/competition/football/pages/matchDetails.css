@@ -1,0 +1,488 @@
+.imortal-match-page {
+  width: min(1380px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 20px 0 34px;
+  color: #f5f9ff;
+}
+
+.imortal-match-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.imortal-match-topbar > button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid rgba(42, 143, 255, .18);
+  border-radius: 10px;
+  color: #dce9f8;
+  background: rgba(7, 16, 28, .78);
+  font-size: .69rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.imortal-match-topbar > button:hover {
+  border-color: rgba(21, 201, 255, .38);
+  background: rgba(11, 120, 255, .08);
+}
+
+.imortal-match-topbar__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imortal-match-time {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(42, 143, 255, .15);
+  border-radius: 999px;
+  color: rgba(218, 232, 248, .70);
+  background: rgba(7, 16, 28, .78);
+  font-size: .63rem;
+  font-weight: 800;
+}
+
+.imortal-match-hero,
+.imortal-match-panel {
+  border: 1px solid rgba(42, 143, 255, .16);
+  border-radius: 18px;
+  background: rgba(6, 13, 23, .84);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .20);
+  overflow: hidden;
+}
+
+.imortal-match-hero {
+  margin-bottom: 14px;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(11, 120, 255, .13), transparent 31%),
+    radial-gradient(circle at 85% 0%, rgba(141, 92, 255, .08), transparent 28%),
+    linear-gradient(145deg, rgba(7, 15, 26, .96), rgba(3, 7, 13, .98));
+}
+
+.imortal-match-competition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 16px 4px;
+  text-align: left;
+}
+
+.imortal-match-competition img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.imortal-match-competition > div {
+  display: grid;
+  gap: 2px;
+}
+
+.imortal-match-competition span {
+  color: #15c9ff;
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .10em;
+}
+
+.imortal-match-competition strong {
+  color: #f5f9ff;
+  font-size: .82rem;
+}
+
+.imortal-match-competition small {
+  color: rgba(205, 220, 239, .44);
+  font-size: .60rem;
+}
+
+.imortal-match-scoreboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 24px 28px 26px;
+}
+
+.imortal-match-team {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.imortal-match-team__crest {
+  display: grid;
+  width: 86px;
+  height: 86px;
+  place-items: center;
+  border: 1px solid rgba(42, 143, 255, .13);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.imortal-match-team strong {
+  overflow: hidden;
+  max-width: 100%;
+  color: #f5f9ff;
+  font-size: clamp(.95rem, 2vw, 1.30rem);
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-match-score {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.imortal-match-score small {
+  color: rgba(205, 220, 239, .36);
+  font-size: .55rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.imortal-match-score > strong {
+  min-width: 130px;
+  color: #f5f9ff;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 950;
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+
+.imortal-match-score > span {
+  color: #15c9ff;
+  font-size: .68rem;
+  font-weight: 850;
+}
+
+.imortal-match-quickinfo {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(42, 143, 255, .10);
+  background: rgba(11, 120, 255, .025);
+}
+
+.imortal-match-quickinfo > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 7px;
+  align-items: center;
+  min-height: 58px;
+  padding: 9px 13px;
+  border-right: 1px solid rgba(42, 143, 255, .08);
+}
+
+.imortal-match-quickinfo > div:last-child {
+  border-right: 0;
+}
+
+.imortal-match-quickinfo svg {
+  grid-row: 1 / span 2;
+  color: #15c9ff;
+}
+
+.imortal-match-quickinfo span {
+  color: rgba(205, 220, 239, .36);
+  font-size: .56rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.imortal-match-quickinfo strong {
+  overflow: hidden;
+  color: #eaf3ff;
+  font-size: .68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-match-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.imortal-match-panel {
+  margin-bottom: 14px;
+}
+
+.imortal-match-grid .imortal-match-panel {
+  margin-bottom: 0;
+}
+
+.imortal-match-panel > header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(42, 143, 255, .10);
+  background: rgba(11, 120, 255, .025);
+}
+
+.imortal-match-panel > header > span {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  flex: none;
+  border: 1px solid rgba(21, 201, 255, .16);
+  border-radius: 9px;
+  color: #15c9ff;
+  background: rgba(11, 120, 255, .06);
+}
+
+.imortal-match-panel > header > div {
+  display: grid;
+  gap: 1px;
+}
+
+.imortal-match-panel > header strong {
+  color: #f5f9ff;
+  font-size: .80rem;
+}
+
+.imortal-match-panel > header small {
+  color: rgba(205, 220, 239, .40);
+  font-size: .59rem;
+}
+
+.imortal-match-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.imortal-match-stats article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 9px 13px;
+  border-bottom: 1px solid rgba(42, 143, 255, .07);
+}
+
+.imortal-match-stats article:nth-child(odd) {
+  border-right: 1px solid rgba(42, 143, 255, .07);
+}
+
+.imortal-match-stats span {
+  color: rgba(205, 220, 239, .48);
+  font-size: .64rem;
+}
+
+.imortal-match-stats strong {
+  color: #f5f9ff;
+  font-size: .78rem;
+}
+
+.imortal-match-timeline {
+  display: grid;
+}
+
+.imortal-match-timeline > div {
+  display: grid;
+  grid-template-columns: 44px 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(42, 143, 255, .07);
+}
+
+.imortal-match-timeline__minute {
+  color: #15c9ff;
+  font-size: .65rem;
+  font-weight: 850;
+  text-align: right;
+}
+
+.imortal-match-timeline__mark {
+  display: grid;
+  width: 30px;
+  height: 24px;
+  place-items: center;
+  border-radius: 7px;
+  color: #cfe8ff;
+  background: rgba(11, 120, 255, .08);
+  font-size: .57rem;
+  font-weight: 850;
+}
+
+.imortal-match-timeline strong {
+  overflow: hidden;
+  color: rgba(232, 241, 251, .78);
+  font-size: .66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-match-lineups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.imortal-match-lineups article {
+  padding: 15px;
+}
+
+.imortal-match-lineups article:first-child {
+  border-right: 1px solid rgba(42, 143, 255, .08);
+}
+
+.imortal-match-lineups article > span {
+  color: #15c9ff;
+  font-size: .57rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.imortal-match-lineups h3 {
+  margin: 4px 0 12px;
+  color: #f5f9ff;
+  font-size: .86rem;
+}
+
+.imortal-match-lineups ol {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.imortal-match-lineups li {
+  color: rgba(205, 220, 239, .60);
+  font-size: .65rem;
+  line-height: 1.45;
+}
+
+.imortal-match-info {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.imortal-match-info article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 7px;
+  align-items: center;
+  min-height: 62px;
+  padding: 10px 13px;
+  border-right: 1px solid rgba(42, 143, 255, .07);
+  border-bottom: 1px solid rgba(42, 143, 255, .07);
+}
+
+.imortal-match-info svg {
+  grid-row: 1 / span 2;
+  color: #15c9ff;
+}
+
+.imortal-match-info span {
+  color: rgba(205, 220, 239, .38);
+  font-size: .56rem;
+  text-transform: uppercase;
+}
+
+.imortal-match-info strong {
+  overflow: hidden;
+  color: #eaf3ff;
+  font-size: .67rem;
+  text-overflow: ellipsis;
+}
+
+.imortal-match-empty {
+  margin: 0;
+  padding: 22px 16px;
+  color: rgba(205, 220, 239, .42);
+  font-size: .67rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .imortal-match-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+
+  .imortal-match-quickinfo,
+  .imortal-match-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .imortal-match-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .imortal-match-page {
+    width: min(100% - 20px, 1380px);
+    padding-top: 12px;
+  }
+
+  .imortal-match-topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .imortal-match-topbar__status {
+    justify-content: flex-end;
+  }
+
+  .imortal-match-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+    gap: 8px;
+    padding: 20px 10px 22px;
+  }
+
+  .imortal-match-team__crest {
+    width: 62px;
+    height: 62px;
+    border-radius: 17px;
+  }
+
+  .imortal-match-team strong {
+    font-size: .74rem;
+  }
+
+  .imortal-match-score > strong {
+    min-width: 70px;
+    font-size: 2rem;
+  }
+
+  .imortal-match-quickinfo,
+  .imortal-match-info,
+  .imortal-match-stats,
+  .imortal-match-lineups {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-match-quickinfo > div,
+  .imortal-match-info article,
+  .imortal-match-stats article,
+  .imortal-match-lineups article:first-child {
+    border-right: 0;
+  }
+
+  .imortal-match-lineups article:first-child {
+    border-bottom: 1px solid rgba(42, 143, 255, .08);
+  }
+}
