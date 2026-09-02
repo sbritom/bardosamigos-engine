@@ -138,13 +138,9 @@ export async function listLatestCompetitionRanking(scope = 'general') {
   const client = getSupabaseClient()
   if (!client) return { data: null, error: configError() }
 
-  const { data: ranking, error } = await client
-    .from('competition_rankings')
-    .select('*, competition_ranking_items(*, profiles(display_name, username, avatar_url))')
-    .eq('scope', scope)
-    .order('generated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const { data: ranking, error } = await client.rpc('imortal_get_latest_prediction_ranking', {
+    p_scope: scope,
+  })
 
   return { data: ranking ? toCamelCase(ranking) : null, error }
 }
