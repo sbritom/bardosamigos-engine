@@ -19,6 +19,7 @@ import {
   loadCommunityPageData,
   submitCommunityWallPost,
 } from '../services/communityService'
+import { useCommunityPresence } from '../presence/CommunityPresenceContext'
 import './communityPage.css'
 
 const COMMUNITY_GAMES = [
@@ -146,6 +147,7 @@ function WallCard({ post }) {
 export default function CommunityPage() {
   const navigate = useNavigate()
   const { isAuthenticated, openAuth } = useAuth()
+  const { connected: presenceConnected, onlineCount } = useCommunityPresence()
   const [data, setData] = useState({
     events: [],
     birthdays: [],
@@ -174,11 +176,11 @@ export default function CommunityPage() {
   }, [load])
 
   const onlineLabel = useMemo(() => {
-    if (data.xat?.connected && Number.isFinite(Number(data.xat?.onlineCount))) {
-      return String(Number(data.xat.onlineCount))
+    if (presenceConnected && Number.isFinite(Number(onlineCount))) {
+      return String(Number(onlineCount))
     }
     return '—'
-  }, [data.xat])
+  }, [presenceConnected, onlineCount])
 
   async function handleWallSubmit(event) {
     event.preventDefault()
@@ -220,9 +222,7 @@ export default function CommunityPage() {
           <span>Imortais ativos</span>
           <strong>{onlineLabel}</strong>
           <small>
-            {data.xat?.connected
-              ? 'Agora no Xat'
-              : 'Contagem será sincronizada diretamente com o Xat'}
+            {presenceConnected ? 'Conectados ao portal agora' : 'Sincronizando presença'}
           </small>
         </div>
       </header>

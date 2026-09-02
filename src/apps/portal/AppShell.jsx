@@ -6,6 +6,7 @@ import Footer from "./layouts/Footer";
 import PortalSeo from "./seo/PortalSeo";
 import AuthDialog from "../../modules/auth/AuthDialog";
 import { AuthProvider } from "../../modules/auth/AuthContext";
+import { CommunityPresenceProvider } from "../../modules/community/presence/CommunityPresenceContext";
 
 const portalBackground = {
   backgroundImage: 'url("/backgrounds/portal-bg.webp")',
@@ -58,7 +59,8 @@ export default function AppShell() {
 
   return (
     <AuthProvider>
-      <div className="bds-portal-shell min-h-screen text-[var(--text)]" style={portalBackground}>
+      <CommunityPresenceProvider pathname={pathname}>
+        <div className="bds-portal-shell min-h-screen text-[var(--text)]" style={portalBackground}>
         <PortalSeo />
 
         <a className="bds-skip-link" href="#portal-main-content">
@@ -74,8 +76,9 @@ export default function AppShell() {
         </div>
 
         <Footer />
-        <AuthDialog />
-      </div>
+          <AuthDialog />
+        </div>
+      </CommunityPresenceProvider>
     </AuthProvider>
   );
 }
