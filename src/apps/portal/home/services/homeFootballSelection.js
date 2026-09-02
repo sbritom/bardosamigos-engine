@@ -93,20 +93,17 @@ export function selectHomeFootballMatchesByPriority(matches = [], now = nowUtcIs
     })
   }
 
-  // Mantem a Home com a mesma prioridade usada pelo Hero:
-  // ao vivo -> resultado recente -> proxima partida.
-  pushGroup(sortLiveMatchCenterMatches(displayableMatches, now)
-    .filter((match) => getLiveMatchCenterPriority(match, now) <= 2))
-
-  // Fallback visual para preencher o card caso a janela principal nao tenha 3 jogos.
+  // "Jogos Recentes" deve priorizar o que ja esta acontecendo ou terminou.
+  // Jogos agendados entram somente quando nao houver resultados suficientes.
   pushGroup(displayableMatches
-    .filter((match) => isHomeFootballMatchToday(match, now) && isFinishedStatus(match.standardStatus || match.status))
-    .sort(byMatchTimeDescending))
+    .filter((match) => isLiveStatus(match.standardStatus || match.status))
+    .sort(byMatchTimeAscending))
 
   pushGroup(displayableMatches
-    .filter((match) => isHomeFootballMatchYesterday(match, now) && isFinishedStatus(match.standardStatus || match.status))
+    .filter((match) => isFinishedStatus(match.standardStatus || match.status))
     .sort(byMatchTimeDescending))
 
+  // Ultimo fallback: proximas partidas, apenas para evitar card vazio.
   pushGroup(displayableMatches
     .filter((match) => {
       const status = match.standardStatus || match.status
