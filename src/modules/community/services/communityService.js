@@ -197,7 +197,7 @@ export async function loadCommunityModeration() {
   return parseResponse(response, 'Não foi possível carregar a moderação da comunidade.')
 }
 
-export async function moderateCommunityItem({ resource, id, action }) {
+export async function moderateCommunityItem({ resource, id, action, ...extra }) {
   const token = await getOptionalAccessToken()
   if (!token) throw new Error('Sessão administrativa obrigatória.')
 
@@ -208,7 +208,7 @@ export async function moderateCommunityItem({ resource, id, action }) {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + token,
     },
-    body: JSON.stringify({ resource, id, action }),
+    body: JSON.stringify({ resource, id, action, ...extra }),
   })
   return parseResponse(response, 'Não foi possível moderar este item.')
 }
