@@ -121,7 +121,7 @@ export async function removeCompetitionPrediction(prediction, match) {
 
   const { user } = await getUser(client)
   if (!user) return { data: null, error: new Error('Entre para excluir seu palpite.'), authenticated: false }
-  if (prediction.profileId !== user.id) return { data: null, error: new Error('Este palpite nao pertence ao usuário atual.'), authenticated: true }
+  if (prediction.profileId !== user.id) return { data: null, error: new Error('Este palpite não pertence ao usuário atual.'), authenticated: true }
   if (isClosed(match) || prediction.lockedAt) return { data: null, error: new Error('Este palpite já está fechado.'), authenticated: true }
 
   const { data, error } = await client
