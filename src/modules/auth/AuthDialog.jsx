@@ -1,4 +1,14 @@
-import { KeyRound, LogIn, UserPlus, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  KeyRound,
+  LockKeyhole,
+  LogIn,
+  User,
+  UserPlus,
+  X,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { useAuth } from './AuthContext'
@@ -12,6 +22,52 @@ const initialForm = {
 
 function getAuthErrorMessage(error) {
   return String(error?.message || 'Não foi possível concluir a autenticação.')
+}
+
+function AuthField({
+  label,
+  icon: Icon,
+  name,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  minLength,
+  maxLength,
+  required = true,
+  trailing,
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-[#8EA6C9]">
+        {label}
+      </span>
+
+      <div className="group flex min-h-[52px] items-center gap-3 rounded-2xl border border-[#2A8FFF]/15 bg-[#07111E]/85 px-4 transition duration-200 focus-within:border-[#15C9FF]/65 focus-within:bg-[#081624] focus-within:shadow-[0_0_0_4px_rgba(21,201,255,0.07)]">
+        <Icon
+          size={18}
+          className="shrink-0 text-[#5C85C7] transition group-focus-within:text-[#15C9FF]"
+          aria-hidden="true"
+        />
+
+        <input
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          minLength={minLength}
+          maxLength={maxLength}
+          required={required}
+          className="h-[50px] min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] font-semibold text-white outline-none placeholder:font-medium placeholder:text-[#536A8C]"
+        />
+
+        {trailing}
+      </div>
+    </label>
+  )
 }
 
 export default function AuthDialog() {
@@ -28,6 +84,8 @@ export default function AuthDialog() {
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [recoveryCode, setRecoveryCode] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const mode = ['signup', 'recover'].includes(authDialog.mode) ? authDialog.mode : 'login'
 
@@ -36,6 +94,8 @@ export default function AuthDialog() {
     setForm(initialForm)
     setFeedback('')
     setRecoveryCode('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }, [authDialog.open, mode])
 
   if (!authDialog.open) return null
@@ -44,6 +104,8 @@ export default function AuthDialog() {
     setAuthDialog((current) => ({ ...current, mode: nextMode }))
     setFeedback('')
     setRecoveryCode('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }
 
   function handleChange(event) {
@@ -117,15 +179,42 @@ export default function AuthDialog() {
     }
   }
 
-  const title = mode === 'signup'
-    ? 'Criar conta'
+  const isLogin = mode === 'login'
+  const isSignup = mode === 'signup'
+  const title = isSignup ? 'Criar conta' : mode === 'recover' ? 'Recuperar senha' : 'Entrar'
+  const subtitle = isSignup
+    ? 'Crie seu usuário para participar dos recursos pessoais.'
     : mode === 'recover'
-      ? 'Recuperar senha'
-      : 'Login'
+      ? 'Use seu código de recuperação para definir uma nova senha.'
+      : 'Acesse sua conta IMORTAL0800.'
+
+  const passwordToggle = (
+    <button
+      type="button"
+      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+      title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+      onClick={() => setShowPassword((current) => !current)}
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#6685AF] transition hover:bg-white/[0.04] hover:text-[#15C9FF]"
+    >
+      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+    </button>
+  )
+
+  const confirmPasswordToggle = (
+    <button
+      type="button"
+      aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+      title={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+      onClick={() => setShowConfirmPassword((current) => !current)}
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#6685AF] transition hover:bg-white/[0.04] hover:text-[#15C9FF]"
+    >
+      {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+    </button>
+  )
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#01050B]/80 px-4 py-6 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-labelledby="imortal-auth-title"
@@ -133,136 +222,193 @@ export default function AuthDialog() {
         if (event.target === event.currentTarget && !busy) closeAuth()
       }}
     >
-      <section className="w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#07101c] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-          <h2 id="imortal-auth-title" className="text-xl font-black text-white">{title}</h2>
-          <button
-            type="button"
-            aria-label="Fechar"
-            onClick={closeAuth}
-            disabled={busy}
-            className="rounded-lg p-2 text-white/55 transition hover:bg-white/5 hover:text-white"
-          >
-            <X size={18} />
-          </button>
+      <section className="relative w-full max-w-[410px] overflow-hidden rounded-[28px] border border-[#2A8FFF]/20 bg-[#050B14]/95 shadow-[0_28px_90px_rgba(0,0,0,0.58)]">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0B78FF]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-20 h-48 w-48 rounded-full bg-[#15C9FF]/10 blur-3xl" />
+
+        <div className="relative border-b border-[#2A8FFF]/10 px-6 pb-5 pt-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center rounded-full border border-[#2A8FFF]/20 bg-[#0B78FF]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#72B5FF]">
+                IMORTAL0800
+              </span>
+
+              <h2
+                id="imortal-auth-title"
+                className="mt-4 text-[28px] font-black leading-none tracking-[-0.035em] text-white"
+              >
+                {title}
+              </h2>
+
+              <p className="mt-2 max-w-[300px] text-[13px] leading-5 text-[#7F93B1]">
+                {subtitle}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={closeAuth}
+              disabled={busy}
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-[#7287A6] transition hover:border-[#2A8FFF]/20 hover:bg-[#0B78FF]/10 hover:text-white disabled:cursor-wait disabled:opacity-50"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
-        <form className="space-y-4 px-5 py-5" onSubmit={handleSubmit}>
+        <form className="relative space-y-4 px-6 py-6" onSubmit={handleSubmit}>
           {!recoveryCode ? (
             <>
-              <label className="block text-sm font-semibold text-white/80">
-                Usuário
-                <input
-                  name="username"
-                  type="text"
-                  required
-                  minLength={3}
-                  maxLength={20}
-                  autoComplete="username"
-                  value={form.username}
-                  onChange={handleChange}
-                  placeholder="GIAN"
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#15C9FF]"
-                />
-              </label>
+              <AuthField
+                label="Usuário"
+                icon={User}
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                placeholder="Usuário"
+                autoComplete="username"
+                minLength={3}
+                maxLength={20}
+              />
 
               {mode === 'recover' && (
-                <label className="block text-sm font-semibold text-white/80">
-                  Código de recuperação
-                  <input
-                    name="recoveryCode"
-                    type="text"
-                    required
-                    value={form.recoveryCode}
-                    onChange={handleChange}
-                    placeholder="XXXX-XXXX-XXXX"
-                    className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#15C9FF]"
-                  />
-                </label>
+                <AuthField
+                  label="Código de recuperação"
+                  icon={KeyRound}
+                  name="recoveryCode"
+                  value={form.recoveryCode}
+                  onChange={handleChange}
+                  placeholder="XXXX-XXXX-XXXX"
+                  autoComplete="off"
+                />
               )}
 
-              <label className="block text-sm font-semibold text-white/80">
-                {mode === 'recover' ? 'Nova senha' : 'Senha'}
-                <input
-                  name="password"
-                  type="password"
-                  minLength={6}
-                  required
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="••••••"
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#15C9FF]"
-                />
-              </label>
+              <AuthField
+                label={mode === 'recover' ? 'Nova senha' : 'Senha'}
+                icon={LockKeyhole}
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Senha"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                minLength={6}
+                trailing={passwordToggle}
+              />
 
-              {(mode === 'signup' || mode === 'recover') && (
-                <label className="block text-sm font-semibold text-white/80">
-                  Confirmar senha
-                  <input
-                    name="confirmPassword"
-                    type="password"
-                    minLength={6}
-                    required
-                    autoComplete="new-password"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="••••••"
-                    className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition placeholder:text-white/25 focus:border-[#15C9FF]"
-                  />
-                </label>
+              {(isSignup || mode === 'recover') && (
+                <AuthField
+                  label="Confirmar senha"
+                  icon={LockKeyhole}
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirmar senha"
+                  autoComplete="new-password"
+                  minLength={6}
+                  trailing={confirmPasswordToggle}
+                />
               )}
             </>
           ) : (
-            <div className="rounded-xl border border-[#15C9FF]/20 bg-[#0B78FF]/10 p-4 text-center">
-              <span className="text-xs font-bold uppercase tracking-[.08em] text-white/45">Código de recuperação</span>
-              <strong className="mt-2 block text-xl tracking-[.08em] text-[#15C9FF]">{recoveryCode}</strong>
-              <p className="mt-2 text-xs leading-5 text-white/50">Guarde este código. Ele será necessário caso você esqueça a senha.</p>
+            <div className="rounded-2xl border border-[#15C9FF]/20 bg-[#0B78FF]/10 p-5 text-center">
+              <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#7EA8D8]">
+                Código de recuperação
+              </span>
+              <strong className="mt-3 block text-[20px] font-black tracking-[0.10em] text-[#15C9FF]">
+                {recoveryCode}
+              </strong>
+              <p className="mt-3 text-[12px] leading-5 text-[#8BA0BD]">
+                Guarde este código. Ele será necessário caso você esqueça a senha.
+              </p>
             </div>
           )}
 
           {feedback && (
-            <p className="rounded-xl bg-white/5 px-4 py-3 text-sm text-white/70">{feedback}</p>
+            <p
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3 text-[12px] font-medium leading-5 text-[#B6C5DB]"
+              role="status"
+            >
+              {feedback}
+            </p>
           )}
 
           {!recoveryCode ? (
             <button
               type="submit"
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0B78FF] px-4 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[#3DA8FF]/35 bg-[linear-gradient(135deg,#0B78FF,#0759CB)] px-4 text-[14px] font-black text-white shadow-[0_14px_30px_rgba(11,120,255,0.22)] transition duration-200 hover:-translate-y-px hover:brightness-110 hover:shadow-[0_18px_36px_rgba(11,120,255,0.28)] disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60"
             >
-              {mode === 'signup' ? <UserPlus size={17} /> : mode === 'recover' ? <KeyRound size={17} /> : <LogIn size={17} />}
-              {busy ? 'Aguarde...' : mode === 'signup' ? 'Criar conta' : mode === 'recover' ? 'Alterar senha' : 'Entrar'}
+              {isSignup ? <UserPlus size={17} /> : mode === 'recover' ? <KeyRound size={17} /> : <LogIn size={17} />}
+              {busy ? 'Aguarde...' : isSignup ? 'Criar conta' : mode === 'recover' ? 'Alterar senha' : 'Entrar'}
             </button>
           ) : (
             <button
               type="button"
               onClick={closeAuth}
-              className="w-full rounded-xl bg-[#0B78FF] px-4 py-3 font-bold text-white transition hover:brightness-110"
+              className="min-h-[52px] w-full rounded-2xl border border-[#3DA8FF]/35 bg-[linear-gradient(135deg,#0B78FF,#0759CB)] px-4 text-[14px] font-black text-white transition hover:brightness-110"
             >
               Concluir
             </button>
           )}
 
-          {!recoveryCode && (
-            <div className="flex items-center justify-between gap-3 text-sm">
-              {mode === 'login' ? (
-                <>
-                  <button type="button" onClick={() => changeMode('signup')} className="font-semibold text-[#15C9FF] hover:underline">
-                    Criar conta
-                  </button>
-                  <button type="button" onClick={() => changeMode('recover')} className="text-white/55 hover:text-white">
-                    Recuperar senha
-                  </button>
-                </>
-              ) : (
-                <button type="button" onClick={() => changeMode('login')} className="font-semibold text-[#15C9FF] hover:underline">
-                  Voltar ao login
+          {!recoveryCode && isLogin && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => changeMode('signup')}
+                  className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
+                >
+                  <UserPlus size={15} />
+                  Criar conta
                 </button>
-              )}
-            </div>
+
+                <button
+                  type="button"
+                  onClick={() => changeMode('recover')}
+                  className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
+                >
+                  <KeyRound size={15} />
+                  Recuperar senha
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 py-1">
+                <span className="h-px flex-1 bg-[#2A8FFF]/10" />
+                <span className="text-[9px] font-black uppercase tracking-[0.16em] text-[#536A8C]">ou</span>
+                <span className="h-px flex-1 bg-[#2A8FFF]/10" />
+              </div>
+
+              <button
+                type="button"
+                onClick={closeAuth}
+                className="min-h-[44px] w-full rounded-2xl border border-dashed border-[#2A8FFF]/18 bg-transparent px-4 text-[12px] font-bold text-[#7692B8] transition hover:border-[#15C9FF]/30 hover:bg-[#0B78FF]/[0.05] hover:text-[#A8CFFF]"
+              >
+                Continuar como visitante
+              </button>
+            </>
+          )}
+
+          {!recoveryCode && !isLogin && (
+            <button
+              type="button"
+              onClick={() => changeMode('login')}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-4 text-[12px] font-bold text-[#A9BDD7] transition hover:border-[#2A8FFF]/25 hover:text-white"
+            >
+              <ArrowLeft size={15} />
+              Voltar ao login
+            </button>
           )}
         </form>
+
+        <div className="relative flex items-center justify-center border-t border-[#2A8FFF]/10 bg-[#03070D]/45 px-6 py-3">
+          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-[#415574]">
+            Sua conta • Seu acesso • IMORTAL0800
+          </span>
+        </div>
       </section>
     </div>
   )
