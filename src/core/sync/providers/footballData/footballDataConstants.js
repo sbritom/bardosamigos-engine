@@ -28,7 +28,7 @@ export const FOOTBALL_DATA_MATCH_STATUSES = Object.freeze([
 
 export const FOOTBALL_DATA_LIVE_STATUSES = Object.freeze(['LIVE', 'IN_PLAY', 'PAUSED'])
 
-export const FOOTBALL_DATA_DEFAULT_COMPETITIONS = Object.freeze(['WC', 'BSA', 'CL', 'PL', 'CDB', 'CLI'])
+export const FOOTBALL_DATA_DEFAULT_COMPETITIONS = Object.freeze(['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL'])
 
 export const FOOTBALL_DATA_WORLD_CUP_CODE = 'WC'
 export const FOOTBALL_DATA_WORLD_CUP_SEASON = 2026
