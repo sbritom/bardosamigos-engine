@@ -486,3 +486,41 @@
     border-bottom: 1px solid rgba(42, 143, 255, .08);
   }
 }
+
+
+.imortal-match-lineup-meta {
+  margin: -5px 0 12px;
+  color: rgba(205, 220, 239, .46);
+  font-size: .61rem;
+  line-height: 1.45;
+}
+
+.imortal-match-lineup-title {
+  display: block;
+  margin: 0 0 7px;
+  color: rgba(205, 220, 239, .42);
+  font-size: .56rem;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.imortal-match-bench {
+  margin-top: 12px;
+  border-top: 1px solid rgba(42, 143, 255, .08);
+  padding-top: 10px;
+}
+
+.imortal-match-bench summary {
+  color: #67d9ff;
+  font-size: .61rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.imortal-match-bench p {
+  margin: 8px 0 0;
+  color: rgba(205, 220, 239, .48);
+  font-size: .61rem;
+  line-height: 1.55;
+}
