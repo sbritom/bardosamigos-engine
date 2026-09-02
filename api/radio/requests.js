@@ -90,6 +90,39 @@ async function requireAdmin(request, supabase) {
   return { ok: true, user: data.user }
 }
 
+async function getRequesterIdentity(supabase, user, guestName = '') {
+  if (user?.id) {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, username, display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (error) throw error
+
+    const username = cleanText(profile?.username, 40)
+    const displayName = cleanText(profile?.display_name, 80)
+    const requesterName = username || displayName || 'Usuário IMORTAL0800'
+
+    return {
+      requesterProfileId: user.id,
+      requesterName,
+      requesterKind: 'user',
+    }
+  }
+
+  const requesterName = cleanText(guestName, 40)
+  if (requesterName.length < 2) {
+    throw Object.assign(new Error('Informe seu nome para enviar como visitante.'), { status: 400 })
+  }
+
+  return {
+    requesterProfileId: null,
+    requesterName,
+    requesterKind: 'guest',
+  }
+}
+
 async function readBody(request) {
   if (request.body && typeof request.body === 'object') return request.body
   if (typeof request.body === 'string') {
@@ -112,6 +145,7 @@ async function handlePost(request, response, supabase) {
   const body = await readBody(request)
   const songAndArtist = cleanText(body.songAndArtist, 180)
   const message = cleanText(body.message, 500)
+  const identity = await getRequesterIdentity(supabase, requester.user, body.requesterName)
 
   if (songAndArtist.length < 3) {
     response.status(400).json({
@@ -152,6 +186,9 @@ async function handlePost(request, response, supabase) {
       source: requester.user ? 'authenticated_radio_page' : 'public_radio_page',
       request_fingerprint: fingerprint,
       requester_user_agent: getUserAgent(request) || null,
+      requester_profile_id: identity.requesterProfileId,
+      requester_name: identity.requesterName,
+      requester_kind: identity.requesterKind,
     })
     .select('id, status')
     .single()
@@ -176,7 +213,7 @@ async function handleGet(request, response, supabase) {
   const status = cleanText(request.query?.status, 30)
   let query = supabase
     .from(TABLE)
-    .select('id, song_and_artist, message, status, source, admin_note, handled_by, created_at, updated_at')
+    .select('id, song_and_artist, message, status, source, requester_profile_id, requester_name, requester_kind, admin_note, handled_by, created_at, updated_at')
     .order('created_at', { ascending: false })
     .limit(100)
 
@@ -318,9 +355,9 @@ export default async function handler(request, response) {
     })
   } catch (error) {
     console.error('Radio music request API error:', error.message)
-    response.status(500).json({
+    response.status(error.status || 500).json({
       ok: false,
-      error: 'Nao foi possivel processar o pedido agora.',
+      error: error.message || 'Não foi possível processar o pedido agora.',
     })
   }
 }
