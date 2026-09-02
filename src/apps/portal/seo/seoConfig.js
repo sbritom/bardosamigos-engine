@@ -1,64 +1,74 @@
-export const SITE_URL = 'https://www.radiobardosamigos.com.br'
-export const SITE_NAME = 'Bar dos Amigos'
-export const DEFAULT_SOCIAL_IMAGE = '/social/bar-dos-amigos-social.jpg'
-export const DEFAULT_SOCIAL_IMAGE_WIDTH = '600'
-export const DEFAULT_SOCIAL_IMAGE_HEIGHT = '315'
-export const DEFAULT_SOCIAL_IMAGE_TYPE = 'image/jpeg'
-export const DEFAULT_SOCIAL_IMAGE_ALT = 'Bar dos Amigos — Rádio, TV, Futebol e Comunidade'
+export const SITE_URL = 'https://imortal0800.com'
+export const SITE_NAME = 'IMORTAL0800'
+export const DEFAULT_SOCIAL_IMAGE = '/banners/imortal0800-portal.webp'
+export const DEFAULT_SOCIAL_IMAGE_WIDTH = '1920'
+export const DEFAULT_SOCIAL_IMAGE_HEIGHT = '1080'
+export const DEFAULT_SOCIAL_IMAGE_TYPE = 'image/webp'
+export const DEFAULT_SOCIAL_IMAGE_ALT = 'IMORTAL0800 — Entretenimento 24h'
 export const THEME_COLOR = '#010A26'
 
 export const publicSeoPages = [
   {
     path: '/',
-    title: 'Bar dos Amigos | Portal da Comunidade',
-    description: 'Portal Bar dos Amigos com rádio ao vivo, TV, futebol, eventos, notícias, ferramentas e comunidade.',
+    title: 'IMORTAL0800 | Entretenimento 24h',
+    description: 'TV, Xat, futebol, games, rádio, notícias e entretenimento em um só lugar.',
   },
   {
     path: '/football',
-    title: 'Central do Futebol | Bar dos Amigos',
-    description: 'Acompanhe partidas ao vivo, resultados, próximos jogos, classificações e estatísticas no Bar dos Amigos.',
+    title: 'Central do Futebol | IMORTAL0800',
+    description: 'Acompanhe partidas ao vivo, próximos jogos, resultados, classificações, artilharia, estatísticas, escalações e bolão no IMORTAL0800.',
   },
   {
     path: '/radio',
-    title: 'Rádio Bar dos Amigos | Ao Vivo',
-    description: 'Ouça a Rádio Bar dos Amigos ao vivo, acompanhe a música atual e envie seu pedido musical para o locutor.',
+    title: 'Rádio | IMORTAL0800',
+    description: 'Ouça a rádio ao vivo, acompanhe a programação e envie seu pedido musical como usuário ou visitante.',
   },
   {
     path: '/tv',
-    title: 'TV Bar dos Amigos | Canais ao Vivo',
-    description: 'Assista aos canais da TV Bar dos Amigos em uma experiência organizada, moderna e integrada ao portal.',
+    title: 'TV | IMORTAL0800',
+    description: 'Assista aos canais e acompanhe a programação da TV no IMORTAL0800.',
+  },
+  {
+    path: '/games',
+    title: 'Games | IMORTAL0800',
+    description: 'Acompanhe Free Fire, Fortnite, esports, lançamentos, campeonatos e jogos gratuitos no IMORTAL0800.',
+  },
+  {
+    path: '/chat',
+    title: 'Xat | IMORTAL0800',
+    description: 'Entre no Xat oficial do IMORTAL0800 e participe da comunidade.',
   },
   {
     path: '/events',
-    title: 'Eventos do Bar | Bar dos Amigos',
-    description: 'Veja a agenda de eventos do Bar dos Amigos, destaques, bingos, programações especiais e regulamentos.',
+    title: 'Eventos | IMORTAL0800',
+    description: 'Confira eventos, destaques e programações especiais do IMORTAL0800.',
   },
   {
     path: '/news',
-    title: 'Notícias | Bar dos Amigos',
-    description: 'Leia as principais notícias selecionadas para a comunidade do Bar dos Amigos.',
+    title: 'Notícias | IMORTAL0800',
+    description: 'Acompanhe notícias e destaques selecionados no IMORTAL0800.',
   },
   {
     path: '/tools',
-    title: 'BarStudio | Ferramentas do Bar dos Amigos',
-    description: 'Acesse ferramentas do BarStudio para criar, ajustar e preparar conteúdos da comunidade.',
+    title: 'Ferramentas | IMORTAL0800',
+    description: 'Acesse as ferramentas disponíveis no IMORTAL0800.',
   },
   {
     path: '/community',
-    title: 'Comunidade | Bar dos Amigos',
-    description: 'Conheça os canais, atividades e espaços oficiais da comunidade Bar dos Amigos.',
+    title: 'Comunidade | IMORTAL0800',
+    description: 'Conheça os espaços, atividades e recursos da comunidade IMORTAL0800.',
   },
 ]
 
 export const defaultSeo = publicSeoPages[0]
 
 export function getCanonicalUrl(path = '/') {
-  const normalizedPath = path === '/' ? '/' : `/${String(path).replace(/^\/+|\/+$/g, '')}`
+  const normalizedPath = path === '/' ? '/' : `/${String(path).replace(/^\\/+|\\/+$/g, '')}`
   return `${SITE_URL}${normalizedPath === '/' ? '' : normalizedPath}`
 }
 
 export function getSeoForPath(pathname = '/') {
-  const normalizedPath = pathname.replace(/\/+$/g, '') || '/'
+  const normalizedPath = pathname.replace(/\\/+$/g, '') || '/'
   const page = publicSeoPages.find((item) => item.path === normalizedPath)
 
   if (page) {
