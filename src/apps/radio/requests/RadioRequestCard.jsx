@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Check, Clock3, Music2 } from "lucide-react";
+import { Check, Clock3, Music2, UserRound } from "lucide-react";
 
 const STATUS_LABELS = {
   pending: "NOVO",
@@ -31,6 +31,12 @@ function RadioRequestCard({ request, busy, onMarkRead }) {
           {request.songAndArtist || "Pedido sem musica"}
         </strong>
         {request.message && <p>{request.message}</p>}
+        {request.requesterName && (
+          <small className="radio-request-card__requester">
+            <UserRound size={14} />
+            {request.requesterKind === "user" ? `@${request.requesterName}` : `Visitante: ${request.requesterName}`}
+          </small>
+        )}
         <small>
           <Clock3 size={14} />
           {formatRequestDate(request.createdAt)}
