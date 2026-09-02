@@ -709,3 +709,131 @@
   left: 0;
   color: #5fc7ff;
 }
+
+
+/* Ajustes compactos solicitados */
+.imortal-community-section--events {
+  min-height: 100px;
+  padding: 10px 14px;
+}
+
+.imortal-community-section--events .imortal-community-section-header {
+  margin-bottom: 7px;
+  align-items: center;
+}
+
+.imortal-community-section--events .imortal-community-section-header p {
+  display: none;
+}
+
+.imortal-community-section--events .imortal-community-inline-action {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 9px;
+  font-size: 0.66rem;
+}
+
+.imortal-community-section--events .imortal-community-events-grid {
+  gap: 8px;
+}
+
+.imortal-community-section--events .imortal-community-event-card {
+  min-height: 50px;
+  padding: 7px 9px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title button"
+    "meta button";
+  align-items: center;
+  column-gap: 10px;
+}
+
+.imortal-community-section--events .imortal-community-event-card__top,
+.imortal-community-section--events .imortal-community-event-card > p {
+  display: none;
+}
+
+.imortal-community-section--events .imortal-community-event-card h3 {
+  grid-area: title;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-community-section--events .imortal-community-event-card__meta {
+  grid-area: meta;
+  margin: 3px 0 0;
+  gap: 4px;
+}
+
+.imortal-community-section--events .imortal-community-event-card__meta span {
+  padding: 0;
+  background: transparent;
+  font-size: 0.58rem;
+}
+
+.imortal-community-section--events .imortal-community-event-card button {
+  grid-area: button;
+  width: auto;
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 9px;
+  font-size: 0.64rem;
+}
+
+.imortal-community-xat-cta {
+  min-height: 45px;
+  height: 45px;
+  padding: 5px 10px 5px 14px;
+  border-radius: 14px;
+  gap: 12px;
+}
+
+.imortal-community-xat-cta > div {
+  display: flex;
+  align-items: center;
+}
+
+.imortal-community-xat-cta strong,
+.imortal-community-xat-cta p {
+  display: none;
+}
+
+.imortal-community-xat-cta button {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 9px;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 620px) {
+  .imortal-community-section--events {
+    min-height: 100px;
+    padding: 10px;
+  }
+
+  .imortal-community-section--events .imortal-community-events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-community-section--events .imortal-community-event-card:nth-child(n + 2) {
+    display: none;
+  }
+
+  .imortal-community-xat-cta {
+    height: 45px;
+    min-height: 45px;
+    padding: 5px 8px 5px 12px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .imortal-community-xat-cta button {
+    width: auto;
+    white-space: nowrap;
+  }
+}

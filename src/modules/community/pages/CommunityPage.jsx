@@ -336,7 +336,7 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      <section className="imortal-community-section">
+      <section className="imortal-community-section imortal-community-section--events">
         <CommunitySectionHeader
           eyebrow="Eventos do IMORTAL0800"
           title=""
