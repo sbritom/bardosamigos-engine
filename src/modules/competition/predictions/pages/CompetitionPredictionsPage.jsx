@@ -166,10 +166,10 @@ function RankingView({ ranking, loading, error, isComplete = false }) {
   )
 }
 
-export default function CompetitionPredictionsPage() {
+export default function CompetitionPredictionsPage({ initialTab = 'games' }) {
   const navigate = useNavigate()
   const { isAuthenticated, requireAuth } = useAuth()
-  const [activeTab, setActiveTab] = useState('games')
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [matches, setMatches] = useState([])
   const [myPredictions, setMyPredictions] = useState([])
   const [ranking, setRanking] = useState(null)
