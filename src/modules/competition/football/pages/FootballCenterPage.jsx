@@ -47,6 +47,20 @@ function withPreviewAccess(path) {
   return `${url.pathname}${url.search}`
 }
 
+async function fetchOfficialScorers(competitionCode, signal) {
+  const url = withPreviewAccess(`/api/football/matches?resource=scorers&competition=${encodeURIComponent(competitionCode)}`)
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+    signal,
+  })
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) throw new Error('Resposta inválida da artilharia.')
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.error || 'Artilharia oficial indisponível.')
+  return payload
+}
+
 async function fetchOfficialStandings(competitionCode, signal) {
   const url = withPreviewAccess(`/api/football/matches?resource=standings&competition=${encodeURIComponent(competitionCode)}`)
   const response = await fetch(url, {
@@ -168,6 +182,51 @@ function MatchGroup({ title, icon: Icon, matches, onOpen, limit = 8 }) {
   )
 }
 
+function ScorersTable({ scorers = [], loading = false, error = '' }) {
+  if (loading && !scorers.length) {
+    return <p className="bds-football-center-empty">Carregando artilharia oficial...</p>
+  }
+
+  if (!scorers.length) {
+    return <p className="bds-football-center-empty">{error || 'Artilharia ainda não disponível para esta competição.'}</p>
+  }
+
+  return (
+    <div className="bds-football-center-table-wrap">
+      <table className="bds-football-center-table imortal-football-scorers-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jogador</th>
+            <th>Time</th>
+            <th>J</th>
+            <th>Gols</th>
+            <th>Ast.</th>
+            <th>Pên.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {scorers.map((item, index) => (
+            <tr key={item.player?.id || `${item.player?.name}-${item.team?.id || index}`}>
+              <td><strong>{index + 1}</strong></td>
+              <td><strong>{item.player?.name || 'Jogador'}</strong></td>
+              <td>
+                <span className="bds-football-center-table-team">
+                  <MiniCrest src={item.team?.crest} name={item.team?.name} />
+                  <strong>{item.team?.shortName || item.team?.name}</strong>
+                </span>
+              </td>
+              <td>{item.playedMatches}</td>
+              <td><strong>{item.goals}</strong></td>
+              <td>{item.assists ?? '-'}</td>
+              <td>{item.penalties ?? '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 function StandingsRows({ rows, compact = false }) {
   const visibleRows = compact ? rows.slice(0, 6) : rows
 
@@ -326,6 +385,9 @@ export default function FootballCenterPage() {
   const [standingsByCode, setStandingsByCode] = useState({})
   const [standingsLoadingCode, setStandingsLoadingCode] = useState('')
   const [standingsErrors, setStandingsErrors] = useState({})
+  const [scorersByCode, setScorersByCode] = useState({})
+  const [scorersLoadingCode, setScorersLoadingCode] = useState('')
+  const [scorersErrors, setScorersErrors] = useState({})
   const hasLiveMatchRef = useRef(false)
 
   async function load({ syncFirst = false } = {}) {
@@ -398,6 +460,29 @@ export default function FootballCenterPage() {
     return () => controller.abort()
   }, [selectedCompetition?.code, standingsByCode])
 
+  useEffect(() => {
+    if (activeTab !== 'scorers' || !selectedCompetition?.code || scorersByCode[selectedCompetition.code]) return undefined
+
+    const controller = new AbortController()
+    const code = selectedCompetition.code
+    setScorersLoadingCode(code)
+    setScorersErrors((current) => ({ ...current, [code]: '' }))
+
+    fetchOfficialScorers(code, controller.signal)
+      .then((payload) => {
+        setScorersByCode((current) => ({ ...current, [code]: payload.scorers || [] }))
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setScorersErrors((current) => ({ ...current, [code]: error.message || 'Artilharia oficial indisponível.' }))
+        }
+      })
+      .finally(() => {
+        setScorersLoadingCode((current) => current === code ? '' : current)
+      })
+
+    return () => controller.abort()
+  }, [activeTab, selectedCompetition?.code, scorersByCode])
   function selectCompetition(id) {
     setSelectedCompetitionId(id)
     setActiveTab('summary')
@@ -489,6 +574,7 @@ export default function FootballCenterPage() {
           <button type="button" className={activeTab === 'summary' ? 'is-active' : ''} onClick={() => setActiveTab('summary')}>Resumo</button>
           <button type="button" className={activeTab === 'matches' ? 'is-active' : ''} onClick={() => setActiveTab('matches')}>Jogos</button>
           <button type="button" className={activeTab === 'standings' ? 'is-active' : ''} onClick={() => setActiveTab('standings')}>Classificação</button>
+          <button type="button" className={activeTab === 'scorers' ? 'is-active' : ''} onClick={() => setActiveTab('scorers')}>Artilharia</button>
         </nav>
 
         <div className="bds-football-center-content">
@@ -510,6 +596,16 @@ export default function FootballCenterPage() {
                 officialStandings={standingsByCode[selectedCompetition.code] || []}
                 loading={standingsLoadingCode === selectedCompetition.code}
                 error={standingsErrors[selectedCompetition.code] || ''}
+              />
+            </section>
+          )}
+          {activeTab === 'scorers' && (
+            <section className="bds-football-center-block">
+              <header className="bds-football-center-block__header"><span><Trophy size={15} /></span><h3>Artilharia</h3></header>
+              <ScorersTable
+                scorers={scorersByCode[selectedCompetition.code] || []}
+                loading={scorersLoadingCode === selectedCompetition.code}
+                error={scorersErrors[selectedCompetition.code] || ''}
               />
             </section>
           )}
