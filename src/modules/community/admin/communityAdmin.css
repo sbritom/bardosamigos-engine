@@ -1,0 +1,142 @@
+.community-admin-page {
+  width: min(1100px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 24px 0 48px;
+  display: grid;
+  gap: 16px;
+  color: var(--text, #f5f9ff);
+}
+
+.community-admin-header,
+.community-admin-panel {
+  border: 1px solid rgba(42,143,255,.16);
+  border-radius: 18px;
+  background: rgba(7,14,24,.96);
+}
+
+.community-admin-header {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.community-admin-header span {
+  color: #5fc7ff;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.community-admin-header h1 {
+  margin: 3px 0;
+  font-size: 1.45rem;
+}
+
+.community-admin-header p,
+.community-admin-panel p {
+  margin: 0;
+  color: #7186a4;
+  font-size: .74rem;
+}
+
+.community-admin-header > div:last-child,
+.community-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.community-admin-header button,
+.community-admin-actions button {
+  min-height: 32px;
+  border: 1px solid rgba(42,143,255,.18);
+  border-radius: 9px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #9bd2ff;
+  background: rgba(11,120,255,.07);
+  font: inherit;
+  font-size: .67rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.community-admin-actions button.is-danger {
+  color: #ff9b9b;
+  border-color: rgba(255,90,90,.18);
+}
+
+.community-admin-panel {
+  padding: 16px;
+}
+
+.community-admin-panel__title {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #5fc7ff;
+}
+
+.community-admin-panel__title h2 {
+  margin: 0;
+  color: #f5f9ff;
+  font-size: 1rem;
+}
+
+.community-admin-list {
+  display: grid;
+  gap: 8px;
+}
+
+.community-admin-list article {
+  padding: 11px 12px;
+  border: 1px solid rgba(42,143,255,.1);
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  background: rgba(255,255,255,.02);
+}
+
+.community-admin-list strong,
+.community-admin-list span {
+  display: block;
+}
+
+.community-admin-list strong {
+  font-size: .76rem;
+}
+
+.community-admin-list span {
+  margin-top: 2px;
+  color: #7186a4;
+  font-size: .64rem;
+}
+
+.community-admin-list article p {
+  margin-top: 5px;
+  max-width: 650px;
+}
+
+.community-admin-feedback {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #a7d5ff;
+  background: rgba(11,120,255,.08);
+  font-size: .72rem;
+}
+
+@media (max-width: 720px) {
+  .community-admin-header,
+  .community-admin-list article {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

@@ -1,4 +1,4 @@
-import { CalendarDays, Radio, Shield, Tv } from 'lucide-react'
+import { CalendarDays, Radio, Shield, Tv, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
 
@@ -11,9 +11,15 @@ const modules = [
   },
   {
     title: 'TV Admin',
-    description: 'Canais, categorias, destaques e configuracoes da TV do Bar.',
+    description: 'Canais, categorias, destaques e configurações da TV do IMORTAL0800.',
     icon: Tv,
     path: '/admin/tv',
+  },
+  {
+    title: 'Comunidade Admin',
+    description: 'Moderação de recados, aniversariantes e acesso rápido aos eventos.',
+    icon: Users,
+    path: '/admin/community',
   },
   {
     title: 'Eventos Admin',

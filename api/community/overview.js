@@ -630,13 +630,29 @@ async function handleModerationPatch(request, response, supabase) {
   }
 
   if (resource === 'wall') {
-    if (!['publish', 'hide'].includes(action)) {
+    if (!['publish', 'hide', 'edit'].includes(action)) {
       response.status(400).json({ ok: false, error: 'Ação de moderação inválida.' })
       return
     }
-    const status = action === 'publish' ? 'published' : 'hidden'
+
+    const wallUpdate = action === 'edit'
+      ? {
+          author_name: cleanText(body.authorName, 50),
+          body: cleanText(body.bodyText, 280),
+          updated_at: new Date().toISOString(),
+        }
+      : {
+          status: action === 'publish' ? 'published' : 'hidden',
+          updated_at: new Date().toISOString(),
+        }
+
+    if (action === 'edit' && (wallUpdate.author_name.length < 2 || wallUpdate.body.length < 2)) {
+      response.status(400).json({ ok: false, error: 'Recado inválido.' })
+      return
+    }
+
     const { data, error } = await supabase.from(WALL_TABLE)
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(wallUpdate)
       .eq('id', id)
       .select('id,author_name,xat_id,body,source,status,created_at,updated_at')
       .single()
@@ -645,14 +661,36 @@ async function handleModerationPatch(request, response, supabase) {
     return
   }
 
-  if (!['approve', 'hide', 'publish'].includes(action)) {
+  if (!['approve', 'hide', 'publish', 'edit'].includes(action)) {
     response.status(400).json({ ok: false, error: 'Ação de moderação inválida.' })
     return
   }
 
-  const status = action === 'hide' ? 'hidden' : 'published'
+  let birthdayUpdate
+  if (action === 'edit') {
+    const displayName = cleanText(body.displayName, 50)
+    const day = Number(body.day)
+    const month = Number(body.month)
+    if (displayName.length < 2 || !isValidBirthday(day, month)) {
+      response.status(400).json({ ok: false, error: 'Aniversário inválido.' })
+      return
+    }
+    birthdayUpdate = {
+      display_name: displayName,
+      birth_day: day,
+      birth_month: month,
+      status: ['pending', 'published', 'hidden'].includes(body.status) ? body.status : 'pending',
+      updated_at: new Date().toISOString(),
+    }
+  } else {
+    birthdayUpdate = {
+      status: action === 'hide' ? 'hidden' : 'published',
+      updated_at: new Date().toISOString(),
+    }
+  }
+
   const { data, error } = await supabase.from(BIRTHDAY_TABLE)
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(birthdayUpdate)
     .eq('id', id)
     .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
     .single()

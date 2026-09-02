@@ -32,6 +32,7 @@ const FootballMatchDetailsPage = React.lazy(() => import("../../modules/competit
 const FootballTeamPage = React.lazy(() => import("../../modules/competition/football/pages/FootballTeamPage"));
 const NewsPage = React.lazy(() => import("../../modules/news/pages/NewsPage"));
 const CommunityPage = React.lazy(() => import("../../modules/community/pages/CommunityPage"));
+const CommunityAdminPage = React.lazy(() => import("../../modules/community/admin/CommunityAdminPage"));
 const DesignerPage = React.lazy(() => import("../../modules/barstudio/designer/pages/DesignerPage"));
 const GamesPage = React.lazy(() => import("../../modules/games/pages/GamesPage"));
 const EventsPage = React.lazy(() => import("../../modules/events/pages/EventsPage"));
@@ -245,6 +246,15 @@ export const plugins = [
     icon: Shield,
     menu: false,
     element: <AdminPluginPage component={AdminPage} title="Admin" />,
+  },
+
+  {
+    id: "admin-community",
+    title: "Comunidade Admin",
+    path: "/admin/community",
+    icon: Users,
+    menu: false,
+    element: <AdminPluginPage component={CommunityAdminPage} title="Comunidade Admin" />,
   },
 
   {

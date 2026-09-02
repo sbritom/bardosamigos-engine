@@ -943,3 +943,101 @@
     grid-column: 1 / -1;
   }
 }
+
+
+/* Refinos finais da Comunidade */
+.imortal-community-empty {
+  min-height: 48px;
+  padding: 11px 13px;
+}
+
+.imortal-community-birthday-highlights {
+  margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.imortal-community-birthday-highlights > div {
+  min-height: 42px;
+  padding: 7px 9px;
+  border: 1px solid rgba(42, 143, 255, 0.12);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.06);
+}
+
+.imortal-community-birthday-highlights strong,
+.imortal-community-birthday-highlights small {
+  display: block;
+}
+
+.imortal-community-birthday-highlights strong {
+  color: #e8f4ff;
+  font-size: 0.66rem;
+}
+
+.imortal-community-birthday-highlights small {
+  margin-top: 1px;
+  color: #7890ae;
+  font-size: 0.6rem;
+}
+
+.imortal-community-birthday-actions,
+.imortal-community-birthday-editor {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+}
+
+.imortal-community-birthday-actions button,
+.imortal-community-birthday-editor button {
+  min-height: 27px;
+  border: 1px solid rgba(42, 143, 255, 0.15);
+  border-radius: 8px;
+  padding: 0 8px;
+  color: #8cc8ff;
+  background: rgba(11, 120, 255, 0.06);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.imortal-community-birthday-actions button.is-danger {
+  color: #ff9b9b;
+  border-color: rgba(255, 90, 90, 0.18);
+}
+
+.imortal-community-birthday-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px auto auto;
+}
+
+.imortal-community-birthday-editor input {
+  min-width: 0;
+  border: 1px solid rgba(42, 143, 255, 0.13);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: #f5f9ff;
+  background: rgba(4, 11, 20, 0.7);
+  font: inherit;
+  font-size: 0.65rem;
+}
+
+@media (max-width: 620px) {
+  .imortal-community-birthday-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-community-birthday-editor {
+    grid-template-columns: 1fr 72px;
+  }
+
+  .imortal-community-birthday-editor button {
+    grid-row: 2;
+  }
+}

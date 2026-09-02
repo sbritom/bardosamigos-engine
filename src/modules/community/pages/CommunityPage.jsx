@@ -18,8 +18,10 @@ import { useAuth } from '../../auth/AuthContext'
 import {
   deleteCommunityWallPost,
   loadCommunityPageData,
+  deleteCommunityBirthday,
   submitCommunityBirthday,
   submitCommunityWallPost,
+  updateCommunityBirthday,
   updateCommunityWallPost,
 } from '../services/communityService'
 import { useCommunityPresence } from '../presence/CommunityPresenceContext'
@@ -154,8 +156,46 @@ function EmptyState({ children }) {
   return <div className="imortal-community-empty">{children}</div>
 }
 
+function getNextBingoLabel() {
+  const now = new Date()
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Maceio',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now)
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
+  const currentWeekday = weekdayMap[values.weekday] ?? 0
+  const currentMinutes = Number(values.hour) * 60 + Number(values.minute)
+  let daysUntil = (4 - currentWeekday + 7) % 7
+
+  if (daysUntil === 0 && currentMinutes >= (20 * 60 + 30)) daysUntil = 7
+
+  const target = new Date(Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day) + daysUntil,
+  ))
+
+  const date = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+  }).format(target)
+
+  return 'Próximo: ' + date
+}
+
 function EventCard({ event, onOpen }) {
-  const date = event.homeDateLabel || event.dateLabel || 'Data a definir'
+  const date = event.slug === 'bingo-imortal0800'
+    ? getNextBingoLabel()
+    : (event.homeDateLabel || event.dateLabel || 'Data a definir')
   const time = event.homeTimeLabel || event.timeLabel || ''
 
   return (
@@ -239,6 +279,7 @@ export default function CommunityPage() {
   const [data, setData] = useState({
     events: [],
     birthdays: [],
+    birthdaysUpcoming: [],
     ranking: null,
     achievements: [],
     wall: [],
@@ -257,6 +298,9 @@ export default function CommunityPage() {
   const [birthdayDate, setBirthdayDate] = useState('')
   const [birthdayBusy, setBirthdayBusy] = useState(false)
   const [birthdayFeedback, setBirthdayFeedback] = useState('')
+  const [editingBirthdayId, setEditingBirthdayId] = useState('')
+  const [editingBirthdayName, setEditingBirthdayName] = useState('')
+  const [editingBirthdayDate, setEditingBirthdayDate] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -366,10 +410,62 @@ export default function CommunityPage() {
       setBirthdayName('')
       setBirthdayDate('')
       setBirthdayOpen(false)
-      setBirthdayFeedback('Aniversário cadastrado.')
+      setBirthdayFeedback('Cadastro enviado para aprovação da equipe.')
       await load()
     } catch (error) {
       setBirthdayFeedback(error.message || 'Não foi possível cadastrar o aniversário agora.')
+    } finally {
+      setBirthdayBusy(false)
+    }
+  }
+
+  function startBirthdayEdit(person) {
+    setEditingBirthdayId(person.id)
+    setEditingBirthdayName(person.displayName || '')
+    setEditingBirthdayDate(
+      String(person.day).padStart(2, '0') + '/' + String(person.month).padStart(2, '0'),
+    )
+    setBirthdayFeedback('')
+  }
+
+  async function saveBirthdayEdit() {
+    const match = editingBirthdayDate.trim().match(/^(\d{1,2})\/(\d{1,2})$/)
+    if (!match || !editingBirthdayId) {
+      setBirthdayFeedback('Use o formato DD/MM.')
+      return
+    }
+
+    setBirthdayBusy(true)
+    setBirthdayFeedback('')
+    try {
+      await updateCommunityBirthday({
+        id: editingBirthdayId,
+        displayName: editingBirthdayName,
+        day: Number(match[1]),
+        month: Number(match[2]),
+      })
+      setEditingBirthdayId('')
+      setBirthdayFeedback('Alteração enviada para nova aprovação.')
+      await load()
+    } catch (error) {
+      setBirthdayFeedback(error.message || 'Não foi possível atualizar o aniversário.')
+    } finally {
+      setBirthdayBusy(false)
+    }
+  }
+
+  async function removeBirthday(person) {
+    if (typeof window !== 'undefined' && !window.confirm('Excluir seu aniversário?')) return
+
+    setBirthdayBusy(true)
+    setBirthdayFeedback('')
+    try {
+      await deleteCommunityBirthday(person.id)
+      setEditingBirthdayId('')
+      setBirthdayFeedback('Aniversário excluído.')
+      await load()
+    } catch (error) {
+      setBirthdayFeedback(error.message || 'Não foi possível excluir o aniversário.')
     } finally {
       setBirthdayBusy(false)
     }
@@ -418,58 +514,6 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      <section className="imortal-community-grid-section">
-        <div className="imortal-community-panel">
-          <CommunitySectionHeader
-            eyebrow="Competição"
-            title="Ranking de Imortais"
-            description="Resultados dos Games da Comunidade sincronizados com o Xat."
-          />
-
-          {data.ranking?.entries?.length ? (
-            <div className="imortal-community-ranking">
-              {data.ranking.entries.slice(0, 8).map((entry) => (
-                <div key={entry.id} className="imortal-community-ranking__row">
-                  <strong>{entry.position || '—'}</strong>
-                  <span>{entry.displayName || entry.username || 'Imortal'}</span>
-                  <b>{entry.score}</b>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState>
-              O ranking aparecerá quando os resultados dos Games da Comunidade começarem a ser enviados pelo Xat.
-            </EmptyState>
-          )}
-        </div>
-
-        <div className="imortal-community-panel">
-          <CommunitySectionHeader
-            eyebrow="Participação"
-            title="Conquistas"
-            description="Selos conquistados nas atividades da comunidade."
-          />
-
-          {data.achievements?.length ? (
-            <div className="imortal-community-achievements">
-              {data.achievements.slice(0, 6).map((achievement) => (
-                <div key={achievement.id}>
-                  <Medal size={18} />
-                  <span>
-                    <strong>{achievement.name}</strong>
-                    <small>{achievement.description || 'Conquista da comunidade'}</small>
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState>
-              As conquistas serão liberadas conforme os Games e eventos do Xat forem integrados.
-            </EmptyState>
-          )}
-        </div>
-      </section>
-
       <section className="imortal-community-section imortal-community-section--events">
         <CommunitySectionHeader
           eyebrow="Eventos do IMORTAL0800"
@@ -500,7 +544,7 @@ export default function CommunityPage() {
           <CommunitySectionHeader
             eyebrow="Comunidade"
             title="Mural de Recados"
-            description="Recados curtos da comunidade, sem transformar a página em uma rede social."
+            description="Deixe seu recado usando o mesmo nome/nick que aparece no Xat."
           />
 
           <form className="imortal-community-wall-form" onSubmit={handleWallSubmit}>
@@ -510,8 +554,8 @@ export default function CommunityPage() {
               maxLength={50}
               value={wallName}
               onChange={(event) => setWallName(event.target.value)}
-              placeholder="Seu nome"
-              aria-label="Seu nome"
+              placeholder="Nome/Nick no Xat"
+              aria-label="Nome ou nick usado no Xat"
               required
               disabled={wallBusy}
             />
@@ -525,7 +569,7 @@ export default function CommunityPage() {
               disabled={wallBusy}
             />
             <div>
-              <small>Identificação obrigatória • {wallText.length}/280</small>
+              <small>Use o mesmo nick do Xat • {wallText.length}/280</small>
               <button
                 type="submit"
                 disabled={wallBusy || wallName.trim().length < 2 || wallText.trim().length < 2}
@@ -582,6 +626,20 @@ export default function CommunityPage() {
             )}
           />
 
+          {data.birthdaysUpcoming?.length ? (
+            <div className="imortal-community-birthday-highlights">
+              {data.birthdaysUpcoming.slice(0, 3).map((person) => (
+                <div key={'upcoming-' + person.id}>
+                  <Cake size={15} />
+                  <span>
+                    <strong>{person.distance === 0 ? 'Hoje' : person.distance === 1 ? 'Amanhã' : 'Em ' + person.distance + ' dias'}</strong>
+                    <small>{person.displayName}</small>
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           {birthdayOpen ? (
             <form className="imortal-community-birthday-form" onSubmit={handleBirthdaySubmit}>
               <input
@@ -620,7 +678,36 @@ export default function CommunityPage() {
                 <div key={person.id}>
                   <span><Cake size={17} /></span>
                   <strong>{String(person.day).padStart(2, '0')}</strong>
-                  <p>{person.displayName || person.username || 'Imortal'}</p>
+                  <p>{person.displayName || 'Imortal'}</p>
+
+                  {person.canEdit ? (
+                    editingBirthdayId === person.id ? (
+                      <div className="imortal-community-birthday-editor">
+                        <input
+                          type="text"
+                          maxLength={50}
+                          value={editingBirthdayName}
+                          onChange={(event) => setEditingBirthdayName(event.target.value)}
+                          placeholder="Nome/Nick no Xat"
+                        />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={5}
+                          value={editingBirthdayDate}
+                          onChange={(event) => setEditingBirthdayDate(formatBirthdayInput(event.target.value))}
+                          placeholder="DD/MM"
+                        />
+                        <button type="button" onClick={saveBirthdayEdit} disabled={birthdayBusy}>Salvar</button>
+                        <button type="button" onClick={() => setEditingBirthdayId('')} disabled={birthdayBusy}>Cancelar</button>
+                      </div>
+                    ) : (
+                      <div className="imortal-community-birthday-actions">
+                        <button type="button" onClick={() => startBirthdayEdit(person)}>Editar</button>
+                        <button type="button" className="is-danger" onClick={() => removeBirthday(person)}>Excluir</button>
+                      </div>
+                    )
+                  ) : null}
                 </div>
               ))}
             </div>
