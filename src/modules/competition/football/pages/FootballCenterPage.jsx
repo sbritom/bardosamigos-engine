@@ -15,19 +15,21 @@ import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRe
 import './footballMotion.css'
 import './footballTheme.css'
 
-const COMPETITION_PRIORITY = ['BSA', 'CL', 'PL', 'PD', 'SA', 'BL1', 'FL1', 'PPL', 'DED', 'WC']
+const COMPETITION_PRIORITY = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL']
 
 const COMPETITION_META = {
-  BSA: { short: 'BRA', country: 'Brasil' },
-  CL: { short: 'UCL', country: 'Europa' },
-  PL: { short: 'ENG', country: 'Inglaterra' },
-  PD: { short: 'ESP', country: 'Espanha' },
-  SA: { short: 'ITA', country: 'Itália' },
-  BL1: { short: 'ALE', country: 'Alemanha' },
-  FL1: { short: 'FRA', country: 'França' },
-  PPL: { short: 'POR', country: 'Portugal' },
-  DED: { short: 'HOL', country: 'Holanda' },
-  WC: { short: 'MUN', country: 'Mundial' },
+  WC: { short: 'WC', country: 'Mundial', name: 'FIFA World Cup', emblem: 'https://crests.football-data.org/world.png' },
+  CL: { short: 'UCL', country: 'Europa', name: 'UEFA Champions League' },
+  BL1: { short: 'GER', country: 'Alemanha', name: 'Bundesliga' },
+  DED: { short: 'NED', country: 'Holanda', name: 'Eredivisie' },
+  BSA: { short: 'BRA', country: 'Brasil', name: 'Campeonato Brasileiro Série A' },
+  PD: { short: 'ESP', country: 'Espanha', name: 'Primera Division' },
+  FL1: { short: 'FRA', country: 'França', name: 'Ligue 1' },
+  ELC: { short: 'ENG', country: 'Inglaterra', name: 'Championship' },
+  PPL: { short: 'POR', country: 'Portugal', name: 'Primeira Liga' },
+  EC: { short: 'EURO', country: 'Europa', name: 'European Championship' },
+  SA: { short: 'ITA', country: 'Itália', name: 'Serie A' },
+  PL: { short: 'ENG', country: 'Inglaterra', name: 'Premier League' },
 }
 
 function normalizeCode(value) {
@@ -47,16 +49,16 @@ function buildCompetitions(matches = []) {
     const current = map.get(key) || {
       id: key,
       code,
-      name: match.competitionName || code || 'Competição',
+      name: match.competitionName || COMPETITION_META[code]?.name || code || 'Competição',
       country: match.country || COMPETITION_META[code]?.country || '',
-      emblem: match.competitionLogo || match.competitionEmblem || '',
+      emblem: match.competitionLogo || match.competitionEmblem || COMPETITION_META[code]?.emblem || '',
       matches: [],
     }
 
     current.code = current.code || code
-    current.name = current.name || match.competitionName
+    current.name = current.name || match.competitionName || COMPETITION_META[code]?.name
     current.country = current.country || match.country || COMPETITION_META[code]?.country || ''
-    current.emblem = current.emblem || match.competitionLogo || match.competitionEmblem || ''
+    current.emblem = current.emblem || match.competitionLogo || match.competitionEmblem || COMPETITION_META[code]?.emblem || ''
     current.matches.push(match)
     map.set(key, current)
   })
