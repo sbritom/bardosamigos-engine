@@ -14,10 +14,10 @@ function getAuthErrorMessage(error) {
 
   if (/invalid login credentials/i.test(message)) return 'E-mail ou senha incorretos.'
   if (/email not confirmed/i.test(message)) return 'Confirme seu e-mail antes de entrar.'
-  if (/user already registered/i.test(message)) return 'Ja existe uma conta com este e-mail.'
+  if (/user already registered/i.test(message)) return 'Já existe uma conta com este e-mail.'
   if (/password/i.test(message) && /characters/i.test(message)) return 'A senha precisa ter pelo menos 6 caracteres.'
   if (/rate limit/i.test(message)) return 'Muitas tentativas. Aguarde um pouco e tente novamente.'
-  return message || 'Nao foi possivel concluir a autenticacao agora.'
+  return message || 'Não foi possível concluir a autenticacao agora.'
 }
 
 export default function AuthDialog() {
@@ -94,7 +94,7 @@ export default function AuthDialog() {
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
           <div>
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
-              Bar dos Amigos
+              IMORTAL0800
             </span>
             <h2 id="bds-auth-title" className="mt-1 text-2xl font-black text-[var(--text)]">
               {mode === 'signup' ? 'Criar sua conta' : 'Entrar na sua conta'}
@@ -114,7 +114,7 @@ export default function AuthDialog() {
         <div className="px-6 py-5">
           <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-[var(--text-secondary)]">
             <strong className="block text-[var(--text)]">O site continua livre para visitantes.</strong>
-            Voce so precisa de uma conta para recursos pessoais, como favoritos, perfil e palpites. Pedidos de musica tambem podem ser enviados como visitante.
+            Você só precisa de uma conta para recursos pessoais, como favoritos, perfil e palpites.
           </div>
 
           {authDialog.reason && (
@@ -136,7 +136,7 @@ export default function AuthDialog() {
                   autoComplete="name"
                   value={form.displayName}
                   onChange={handleChange}
-                  placeholder="Seu nome no Bar"
+                  placeholder="Seu nome no IMORTAL0800"
                   className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary)]"
                 />
               </label>
@@ -166,7 +166,7 @@ export default function AuthDialog() {
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={form.password}
                 onChange={handleChange}
-                placeholder="Minimo de 6 caracteres"
+                placeholder="Mínimo de 6 caracteres"
                 className="mt-2 w-full rounded-xl border border-white/15 bg-black/15 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-white/35 focus:border-[var(--primary)]"
               />
             </label>
@@ -193,7 +193,7 @@ export default function AuthDialog() {
               onClick={() => changeMode(mode === 'signup' ? 'login' : 'signup')}
               className="font-semibold text-[var(--primary)] hover:underline"
             >
-              {mode === 'signup' ? 'Ja tenho conta' : 'Criar uma conta'}
+              {mode === 'signup' ? 'Já tenho conta' : 'Criar uma conta'}
             </button>
             <button
               type="button"
