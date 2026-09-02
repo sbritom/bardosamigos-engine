@@ -106,6 +106,10 @@
     {
       "path": "/api/cron/sync-news",
       "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/football/matches",
+      "schedule": "15 6 * * *"
     }
   ],
   "rewrites": [
