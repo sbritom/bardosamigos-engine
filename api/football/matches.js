@@ -268,6 +268,51 @@ async function fetchCompetitionStandings({ competitionCode, apiKey }) {
 
   return { competition, season: payload.season || null, standings }
 }
+function mapScorer(item = {}) {
+  const player = item.player || {}
+  const team = normalizeTeam(item.team, 'Time', '')
+  return {
+    player: {
+      id: player.id || null,
+      name: player.name || 'Jogador',
+      firstName: player.firstName || '',
+      lastName: player.lastName || '',
+      nationality: player.nationality || '',
+      position: player.position || '',
+      dateOfBirth: player.dateOfBirth || '',
+    },
+    team,
+    playedMatches: Number(item.playedMatches) || 0,
+    goals: Number(item.goals) || 0,
+    assists: item.assists == null ? null : Number(item.assists),
+    penalties: item.penalties == null ? null : Number(item.penalties),
+  }
+}
+
+async function fetchCompetitionScorers({ competitionCode, apiKey }) {
+  const url = new URL(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/scorers`)
+  url.searchParams.set('limit', '20')
+  const response = await fetch(url, {
+    headers: { 'X-Auth-Token': apiKey },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(payload.message || `Football-Data scorers request failed with status ${response.status}`)
+  }
+
+  return {
+    competition: {
+      id: payload.competition?.id || null,
+      code: payload.competition?.code || competitionCode,
+      name: payload.competition?.name || competitionCode,
+      emblem: payload.competition?.emblem || '',
+    },
+    season: payload.season || null,
+    scorers: (payload.scorers || []).map(mapScorer),
+  }
+}
 function findWorldCupCompetition(competitions = []) {
   return competitions.find((competition) => {
     const season = competition.currentSeason || {}
@@ -384,6 +429,30 @@ export default async function handler(request, response) {
   const resource = String(request.query?.resource || 'matches').trim().toLowerCase()
   const requestedCompetition = String(request.query?.competition || '').trim().toUpperCase()
 
+  if (resource === 'scorers') {
+    if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
+      response.status(400).json({ error: 'Invalid or unsupported competition.' })
+      return
+    }
+
+    try {
+      const result = await fetchCompetitionScorers({ competitionCode: requestedCompetition, apiKey })
+      response.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800')
+      response.status(200).json({
+        source: 'football-data.org',
+        resource: 'scorers',
+        ...result,
+      })
+    } catch (error) {
+      response.status(502).json({
+        source: 'football-data.org',
+        resource: 'scorers',
+        competition: requestedCompetition,
+        error: error.message || 'Football-Data scorers request failed.',
+      })
+    }
+    return
+  }
   if (resource === 'standings') {
     if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
       response.status(400).json({ error: 'Invalid or unsupported competition.' })
