@@ -3,7 +3,7 @@ import { getUtcTimestamp, isFinishedStatus, nowUtcIso } from '../../../core/time
 import { listCurrentFootballMatches } from './footballMatchQueryService'
 
 function configError() {
-  return new Error('Supabase nao esta configurado.')
+  return new Error('Supabase não está configurado.')
 }
 
 async function getUser(client) {
@@ -21,11 +21,11 @@ function validateScore(score = {}, match = {}) {
   const awayScore = Number(score.awayScore)
 
   if (!Number.isInteger(homeScore) || !Number.isInteger(awayScore) || homeScore < 0 || awayScore < 0) {
-    return 'Informe placares inteiros e nao negativos.'
+    return 'Informe placares inteiros e não negativos.'
   }
 
   if (match.metadata?.allowDraw === false && homeScore === awayScore) {
-    return 'Esta competicao nao permite empate.'
+    return 'Esta competição não permite empate.'
   }
 
   return null
@@ -71,16 +71,22 @@ export async function saveCompetitionPrediction(match, score, existingPrediction
   const scoreError = validateScore(score, match)
   if (scoreError) return { data: null, error: new Error(scoreError), authenticated: true }
 
-  if (!existingPrediction) {
-    const { data: duplicate } = await client
+  let predictionToUpdate = existingPrediction
+
+  if (!predictionToUpdate) {
+    const { data: duplicate, error: duplicateError } = await client
       .from('competition_predictions')
-      .select('id')
+      .select('*')
       .eq('match_id', match.id)
       .eq('profile_id', user.id)
       .is('deleted_at', null)
       .maybeSingle()
 
-    if (duplicate) return { data: null, error: new Error('Voce ja possui um palpite para este jogo.'), authenticated: true }
+    if (duplicateError) {
+      return { data: null, error: duplicateError, authenticated: true }
+    }
+
+    if (duplicate) predictionToUpdate = toCamelCase(duplicate)
   }
 
   const payload = toSnakeCase({
@@ -93,8 +99,16 @@ export async function saveCompetitionPrediction(match, score, existingPrediction
     status: 'confirmed',
   })
 
-  const request = existingPrediction
-    ? client.from('competition_predictions').update({ prediction: payload.prediction }).eq('id', existingPrediction.id)
+  const request = predictionToUpdate
+    ? client
+      .from('competition_predictions')
+      .update({
+        prediction: payload.prediction,
+        status: 'confirmed',
+        deleted_at: null,
+      })
+      .eq('id', predictionToUpdate.id)
+      .eq('profile_id', user.id)
     : client.from('competition_predictions').insert(payload)
 
   const { data, error } = await request.select('*').single()
@@ -107,8 +121,8 @@ export async function removeCompetitionPrediction(prediction, match) {
 
   const { user } = await getUser(client)
   if (!user) return { data: null, error: new Error('Entre para excluir seu palpite.'), authenticated: false }
-  if (prediction.profileId !== user.id) return { data: null, error: new Error('Este palpite nao pertence ao usuario atual.'), authenticated: true }
-  if (isClosed(match) || prediction.lockedAt) return { data: null, error: new Error('Este palpite ja esta fechado.'), authenticated: true }
+  if (prediction.profileId !== user.id) return { data: null, error: new Error('Este palpite nao pertence ao usuário atual.'), authenticated: true }
+  if (isClosed(match) || prediction.lockedAt) return { data: null, error: new Error('Este palpite já está fechado.'), authenticated: true }
 
   const { data, error } = await client
     .from('competition_predictions')
