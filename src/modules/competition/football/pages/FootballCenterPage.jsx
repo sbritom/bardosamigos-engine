@@ -36,6 +36,30 @@ function normalizeCode(value) {
   return String(value || '').trim().toUpperCase()
 }
 
+function withPreviewAccess(path) {
+  if (typeof window === 'undefined') return path
+
+  const shareToken = new URLSearchParams(window.location.search).get('_vercel_share')
+  if (!shareToken) return path
+
+  const url = new URL(path, window.location.origin)
+  url.searchParams.set('_vercel_share', shareToken)
+  return `${url.pathname}${url.search}`
+}
+
+async function fetchOfficialStandings(competitionCode, signal) {
+  const url = withPreviewAccess(`/api/football/matches?resource=standings&competition=${encodeURIComponent(competitionCode)}`)
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+    signal,
+  })
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) throw new Error('Resposta inválida da classificação.')
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.error || 'Classificação oficial indisponível.')
+  return payload
+}
 function competitionKey(match) {
   return String(normalizeCode(match?.competitionCode) || match?.competitionId || match?.competitionName || 'competicao')
 }
@@ -144,13 +168,8 @@ function MatchGroup({ title, icon: Icon, matches, onOpen, limit = 8 }) {
   )
 }
 
-function StandingsTable({ matches, compact = false }) {
-  const rows = useMemo(() => calculateStandings(matches), [matches])
+function StandingsRows({ rows, compact = false }) {
   const visibleRows = compact ? rows.slice(0, 6) : rows
-
-  if (!rows.length) {
-    return <p className="bds-football-center-empty">Classificação ainda não disponível para esta competição.</p>
-  }
 
   return (
     <div className="bds-football-center-table-wrap">
@@ -169,12 +188,12 @@ function StandingsTable({ matches, compact = false }) {
         </thead>
         <tbody>
           {visibleRows.map((row) => (
-            <tr key={row.name}>
+            <tr key={row.team?.id || row.name}>
               <td><strong>{row.position}</strong></td>
               <td>
                 <span className="bds-football-center-table-team">
-                  <MiniCrest src={row.crest} name={row.name} />
-                  <strong>{row.name}</strong>
+                  <MiniCrest src={row.crest || row.team?.crest} name={row.name || row.team?.name} />
+                  <strong>{row.name || row.team?.name}</strong>
                 </span>
               </td>
               <td>{row.played}</td>
@@ -191,7 +210,45 @@ function StandingsTable({ matches, compact = false }) {
   )
 }
 
-function CompetitionSummary({ competition, onOpen }) {
+function StandingsTable({ matches, officialStandings = [], compact = false, loading = false, error = '' }) {
+  const fallbackRows = useMemo(() => calculateStandings(matches), [matches])
+  const officialGroups = useMemo(() => {
+    const total = officialStandings.filter((standing) => String(standing.type || '').toUpperCase() === 'TOTAL')
+    return (total.length ? total : officialStandings).filter((standing) => standing.rows?.length)
+  }, [officialStandings])
+
+  if (loading && !officialGroups.length && !fallbackRows.length) {
+    return <p className="bds-football-center-empty">Carregando classificação oficial...</p>
+  }
+
+  if (officialGroups.length) {
+    const groups = compact ? officialGroups.slice(0, 1) : officialGroups
+    return (
+      <div className="imortal-football-standings-groups">
+        {groups.map((standing, index) => (
+          <section key={`${standing.stage}-${standing.group}-${index}`} className="imortal-football-standings-group">
+            {!compact && (standing.group || officialGroups.length > 1) ? (
+              <h4>{standing.group || standing.stage || 'Classificação'}</h4>
+            ) : null}
+            <StandingsRows rows={standing.rows} compact={compact} />
+          </section>
+        ))}
+      </div>
+    )
+  }
+
+  if (fallbackRows.length) {
+    return (
+      <>
+        {error ? <p className="imortal-football-standings-note">Tabela oficial indisponível; exibindo classificação calculada pelos jogos sincronizados.</p> : null}
+        <StandingsRows rows={fallbackRows} compact={compact} />
+      </>
+    )
+  }
+
+  return <p className="bds-football-center-empty">{error || 'Classificação ainda não disponível para esta competição.'}</p>
+}
+function CompetitionSummary({ competition, onOpen, officialStandings, standingsLoading, standingsError }) {
   const now = nowUtcIso()
   const matches = competition.matches
   const live = matches.filter((match) => isLiveStatus(match.status))
@@ -225,7 +282,13 @@ function CompetitionSummary({ competition, onOpen }) {
           <span><TableProperties size={15} /></span>
           <h3>Classificação</h3>
         </header>
-        <StandingsTable matches={matches} compact />
+        <StandingsTable
+          matches={matches}
+          officialStandings={officialStandings}
+          loading={standingsLoading}
+          error={standingsError}
+          compact
+        />
       </section>
     </div>
   )
@@ -260,6 +323,9 @@ export default function FootballCenterPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [selectedCompetitionId, setSelectedCompetitionId] = useState('')
   const [activeTab, setActiveTab] = useState('summary')
+  const [standingsByCode, setStandingsByCode] = useState({})
+  const [standingsLoadingCode, setStandingsLoadingCode] = useState('')
+  const [standingsErrors, setStandingsErrors] = useState({})
   const hasLiveMatchRef = useRef(false)
 
   async function load({ syncFirst = false } = {}) {
@@ -307,6 +373,30 @@ export default function FootballCenterPage() {
   }, [competitions, selectedCompetitionId])
 
   const selectedCompetition = competitions.find((item) => item.id === selectedCompetitionId) || competitions[0]
+
+  useEffect(() => {
+    if (!selectedCompetition?.code || standingsByCode[selectedCompetition.code]) return undefined
+
+    const controller = new AbortController()
+    const code = selectedCompetition.code
+    setStandingsLoadingCode(code)
+    setStandingsErrors((current) => ({ ...current, [code]: '' }))
+
+    fetchOfficialStandings(code, controller.signal)
+      .then((payload) => {
+        setStandingsByCode((current) => ({ ...current, [code]: payload.standings || [] }))
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setStandingsErrors((current) => ({ ...current, [code]: error.message || 'Classificação oficial indisponível.' }))
+        }
+      })
+      .finally(() => {
+        setStandingsLoadingCode((current) => current === code ? '' : current)
+      })
+
+    return () => controller.abort()
+  }, [selectedCompetition?.code, standingsByCode])
 
   function selectCompetition(id) {
     setSelectedCompetitionId(id)
@@ -402,12 +492,25 @@ export default function FootballCenterPage() {
         </nav>
 
         <div className="bds-football-center-content">
-          {activeTab === 'summary' && <CompetitionSummary competition={selectedCompetition} onOpen={openMatch} />}
+          {activeTab === 'summary' && (
+            <CompetitionSummary
+              competition={selectedCompetition}
+              onOpen={openMatch}
+              officialStandings={standingsByCode[selectedCompetition.code] || []}
+              standingsLoading={standingsLoadingCode === selectedCompetition.code}
+              standingsError={standingsErrors[selectedCompetition.code] || ''}
+            />
+          )}
           {activeTab === 'matches' && <CompetitionMatches competition={selectedCompetition} onOpen={openMatch} />}
           {activeTab === 'standings' && (
             <section className="bds-football-center-block">
               <header className="bds-football-center-block__header"><span><TableProperties size={15} /></span><h3>Classificação completa</h3></header>
-              <StandingsTable matches={selectedCompetition.matches} />
+              <StandingsTable
+                matches={selectedCompetition.matches}
+                officialStandings={standingsByCode[selectedCompetition.code] || []}
+                loading={standingsLoadingCode === selectedCompetition.code}
+                error={standingsErrors[selectedCompetition.code] || ''}
+              />
             </section>
           )}
         </div>
