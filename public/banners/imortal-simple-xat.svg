@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1616" height="140" viewBox="0 0 1616 140">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1616" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#03060B"/>
+      <stop offset=".55" stop-color="#07101C"/>
+      <stop offset="1" stop-color="#0A1726"/>
+    </linearGradient>
+    <linearGradient id="a" x1="1320" y1="35" x2="1450" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B78FF"/>
+      <stop offset="1" stop-color="#15C9FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1616" height="140" fill="url(#bg)"/>
+  <circle cx="1385" cy="70" r="92" fill="#0B78FF" fill-opacity=".06"/>
+  <path d="M1322 43h106c12 0 22 10 22 22v19c0 12-10 22-22 22h-48l-26 18 7-18h-39c-12 0-22-10-22-22V65c0-12 10-22 22-22Z" fill="none" stroke="url(#a)" stroke-width="3"/>
+  <circle cx="1342" cy="75" r="4" fill="#15C9FF"/><circle cx="1375" cy="75" r="4" fill="#15C9FF"/><circle cx="1408" cy="75" r="4" fill="#15C9FF"/>
+  <text x="280" y="67" fill="#F5F9FF" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800">XAT OFICIAL</text>
+  <text x="282" y="92" fill="#8FA4BC" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600">Entre na resenha.</text>
+</svg>
