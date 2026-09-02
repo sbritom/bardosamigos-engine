@@ -340,7 +340,7 @@ export default function CommunityPage() {
 
   async function handleBirthdaySubmit(event) {
     event.preventDefault()
-    const match = birthdayDate.trim().match(/^(\\d{1,2})\\/(\\d{1,2})$/)
+    const match = birthdayDate.trim().match(/^(\d{1,2})\/(\d{1,2})$/)
 
     if (!match) {
       setBirthdayFeedback('Use o formato DD/MM.')
