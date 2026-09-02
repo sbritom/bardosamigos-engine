@@ -420,3 +420,218 @@
     height: 180px;
   }
 }
+
+
+/* Fontes estruturadas: RAWG, GamerPower e PandaScore */
+.games-page__source-grid,
+.games-page__esports-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.games-page__data-card {
+  display: grid;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid rgba(68, 136, 238, .11);
+  border-radius: 14px;
+  background: rgba(9, 17, 29, .66);
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.games-page__data-card:hover {
+  border-color: rgba(62, 151, 255, .3);
+  transform: translateY(-1px);
+}
+
+.games-page__data-card:disabled {
+  cursor: default;
+}
+
+.games-page__data-cover {
+  display: block;
+  width: 100%;
+  height: 126px;
+  border: 0;
+  border-bottom: 1px solid rgba(68, 136, 238, .10);
+  background: rgba(12, 22, 37, .78);
+  object-fit: cover;
+}
+
+.games-page__data-copy {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.games-page__data-copy > strong {
+  overflow: hidden;
+  color: #f2f7fd;
+  font-size: .82rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.games-page__chips {
+  display: flex;
+  min-height: 22px;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.games-page__chips > span {
+  border: 1px solid rgba(70, 143, 255, .12);
+  border-radius: 999px;
+  background: rgba(11, 25, 43, .72);
+  color: rgba(218, 231, 247, .62);
+  padding: 4px 7px;
+  font-size: .59rem;
+  font-weight: 750;
+}
+
+.games-page__esports-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(68, 136, 238, .11);
+  border-radius: 14px;
+  background: rgba(9, 17, 29, .66);
+  padding: 11px;
+}
+
+.games-page__esports-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.games-page__esports-head > span {
+  color: #6dccff;
+  font-size: .63rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.games-page__esports-head > strong {
+  overflow: hidden;
+  color: rgba(229, 238, 250, .66);
+  font-size: .64rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.games-page__versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.games-page__team {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.games-page__team img,
+.games-page__team > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(70, 143, 255, .15);
+  border-radius: 11px;
+  background: rgba(10, 23, 40, .8);
+  color: #79ccff;
+  object-fit: contain;
+  font-size: .66rem;
+  font-weight: 850;
+}
+
+.games-page__team strong {
+  width: 100%;
+  overflow: hidden;
+  color: #f2f7fd;
+  font-size: .69rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.games-page__score {
+  display: flex;
+  min-width: 58px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: rgba(222, 232, 245, .60);
+  font-size: .7rem;
+}
+
+.games-page__score strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.games-page__match-status {
+  justify-self: center;
+  border: 1px solid rgba(70, 143, 255, .13);
+  border-radius: 999px;
+  background: rgba(11, 24, 41, .72);
+  color: rgba(221, 231, 244, .6);
+  padding: 4px 8px;
+  font-size: .57rem;
+  font-weight: 850;
+  letter-spacing: .06em;
+}
+
+.games-page__match-status.is-live {
+  border-color: rgba(21, 201, 255, .28);
+  color: #6ee0ff;
+}
+
+.games-page__attribution {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(151, 206, 255, .68);
+  font-size: .64rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.games-page__sources-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: rgba(205, 220, 238, .48);
+  font-size: .63rem;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .games-page__source-grid,
+  .games-page__esports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .games-page__source-grid,
+  .games-page__esports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .games-page__data-cover {
+    height: 150px;
+  }
+}
