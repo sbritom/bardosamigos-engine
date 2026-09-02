@@ -87,14 +87,20 @@ function mergeMatchDetails(base, provider) {
   }
 }
 
-function TeamBlock({ name, crest }) {
+function TeamBlock({ name, crest, teamId, onOpen }) {
   return (
-    <div className="imortal-match-team">
+    <button
+      type="button"
+      className="imortal-match-team"
+      disabled={!teamId}
+      onClick={() => teamId && onOpen?.(teamId)}
+    >
       <span className="imortal-match-team__crest">
         <FootballCrest src={crest} name={name} iconSize={32} />
       </span>
       <strong>{name || 'Time'}</strong>
-    </div>
+      {teamId ? <small>Ver time</small> : null}
+    </button>
   )
 }
 
@@ -289,7 +295,12 @@ export default function FootballMatchDetailsPage() {
         </div>
 
         <div className="imortal-match-scoreboard">
-          <TeamBlock name={match.homeTeam} crest={match.homeCrest} />
+          <TeamBlock
+            name={match.homeTeam}
+            crest={match.homeCrest}
+            teamId={match.metadata?.raw?.homeTeam?.id || match.homeTeamId}
+            onOpen={(id) => navigate(`/football/times/${id}`)}
+          />
 
           <div className="imortal-match-score">
             <small>PLACAR</small>
@@ -303,7 +314,12 @@ export default function FootballMatchDetailsPage() {
             <span>{match.localTime || getFootballMatchTime(match)}</span>
           </div>
 
-          <TeamBlock name={match.awayTeam} crest={match.awayCrest} />
+          <TeamBlock
+            name={match.awayTeam}
+            crest={match.awayCrest}
+            teamId={match.metadata?.raw?.awayTeam?.id || match.awayTeamId}
+            onOpen={(id) => navigate(`/football/times/${id}`)}
+          />
         </div>
 
         {matchInfo.length ? (
