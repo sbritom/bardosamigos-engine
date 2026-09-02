@@ -17,6 +17,9 @@ function normalizeRequest(row = {}) {
     message: row.message || "",
     status: row.status || "pending",
     source: row.source || "",
+    requesterProfileId: row.requester_profile_id || row.requesterProfileId || "",
+    requesterName: row.requester_name || row.requesterName || "",
+    requesterKind: row.requester_kind || row.requesterKind || "guest",
     adminNote: row.admin_note || row.adminNote || "",
     handledBy: row.handled_by || row.handledBy || "",
     createdAt: row.created_at || row.createdAt || "",
@@ -67,7 +70,7 @@ async function getOptionalUserAccessToken() {
   return data?.session?.access_token || "";
 }
 
-export async function submitRadioMusicRequest({ songAndArtist, message }) {
+export async function submitRadioMusicRequest({ songAndArtist, message, requesterName = "" }) {
   const token = await getOptionalUserAccessToken();
   const headers = {
     "Content-Type": "application/json",
@@ -81,7 +84,7 @@ export async function submitRadioMusicRequest({ songAndArtist, message }) {
   const response = await fetch(REQUESTS_ENDPOINT, {
     method: "POST",
     headers,
-    body: JSON.stringify({ songAndArtist, message }),
+    body: JSON.stringify({ songAndArtist, message, requesterName }),
   });
 
   return parseResponse(response);
