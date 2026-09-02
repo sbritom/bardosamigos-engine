@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   CalendarDays,
+  ExternalLink,
   Gamepad2,
   Gift,
   Newspaper,
@@ -28,12 +29,16 @@ function normalize(value) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
+function includesTerm(values = [], term = '') {
+  if (!term) return true
+  return normalize(values.filter(Boolean).join(' ')).includes(term)
+}
+
 function isChampionship(item = {}) {
   return /campeonato|torneio|liga|final|mundial|qualificat|circuito|copa/.test(
     normalize(`${item.title} ${item.description}`)
   )
 }
-
 
 function classify(item = {}) {
   const text = normalize(`${item.title} ${item.description}`)
@@ -43,7 +48,7 @@ function classify(item = {}) {
   return 'news'
 }
 
-function formatDate(value) {
+function formatDate(value, options = {}) {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
@@ -51,7 +56,23 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: 'short',
+    ...(options.year ? { year: 'numeric' } : {}),
+    ...(options.time ? { hour: '2-digit', minute: '2-digit' } : {}),
   }).format(date)
+}
+
+async function fetchJson(url) {
+  try {
+    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+    const data = await response.json().catch(() => ({}))
+    return {
+      ok: response.ok,
+      data,
+      error: response.ok ? null : new Error(data.error || `Falha ao carregar ${url}`),
+    }
+  } catch (error) {
+    return { ok: false, data: {}, error }
+  }
 }
 
 function GameCover({ item, className = '' }) {
@@ -78,9 +99,33 @@ function GameCover({ item, className = '' }) {
   )
 }
 
-function openArticle(item) {
-  if (!item?.url) return
-  window.open(item.url, '_blank', 'noopener,noreferrer')
+function DataCover({ src, alt = '', className = '' }) {
+  const [failed, setFailed] = useState(false)
+
+  if (!src || failed) {
+    return (
+      <div className={`games-page__data-cover games-page__cover--fallback ${className}`}>
+        <Gamepad2 size={24} />
+        <span>IMORTAL0800 GAMES</span>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      className={`games-page__data-cover ${className}`}
+      src={src}
+      alt={alt}
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+function openExternal(url) {
+  if (!url) return
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 function NewsCard({ item, compact = false }) {
@@ -88,7 +133,7 @@ function NewsCard({ item, compact = false }) {
     <button
       className={compact ? 'games-page__news-card is-compact' : 'games-page__news-card'}
       type="button"
-      onClick={() => openArticle(item)}
+      onClick={() => openExternal(item?.url)}
       disabled={!item?.url}
     >
       <GameCover item={item} />
@@ -104,6 +149,100 @@ function NewsCard({ item, compact = false }) {
   )
 }
 
+function ReleaseCard({ game }) {
+  return (
+    <button
+      className="games-page__data-card"
+      type="button"
+      onClick={() => openExternal(game?.url)}
+      disabled={!game?.url}
+    >
+      <DataCover src={game?.image} alt="" />
+      <span className="games-page__data-copy">
+        <span className="games-page__meta">
+          <span>{formatDate(game?.released, { year: true }) || 'Data a confirmar'}</span>
+          <span>RAWG</span>
+        </span>
+        <strong>{game?.name || 'Jogo'}</strong>
+        <span className="games-page__chips">
+          {(game?.platforms || []).slice(0, 3).map((platform) => <span key={platform}>{platform}</span>)}
+        </span>
+      </span>
+    </button>
+  )
+}
+
+function FreeGameCard({ item }) {
+  const target = item?.openGiveawayUrl || item?.gamerPowerUrl
+
+  return (
+    <button
+      className="games-page__data-card"
+      type="button"
+      onClick={() => openExternal(target)}
+      disabled={!target}
+    >
+      <DataCover src={item?.image || item?.thumbnail} alt="" />
+      <span className="games-page__data-copy">
+        <span className="games-page__meta">
+          <span>{item?.worth || 'Grátis'}</span>
+          {item?.endDate && item.endDate !== 'N/A' ? <span>até {formatDate(item.endDate)}</span> : null}
+        </span>
+        <strong>{item?.title || 'Jogo grátis'}</strong>
+        <span className="games-page__chips">
+          {(item?.platforms || []).slice(0, 3).map((platform) => <span key={platform}>{platform}</span>)}
+        </span>
+      </span>
+    </button>
+  )
+}
+
+function EsportsMatchCard({ match }) {
+  const opponents = Array.isArray(match?.opponents) ? match.opponents : []
+  const first = opponents[0] || { name: 'A definir' }
+  const second = opponents[1] || { name: 'A definir' }
+  const scores = new Map((match?.results || []).map((result) => [result.teamId, result.score]))
+  const running = String(match?.status || '').toLowerCase() === 'running'
+  const finished = ['finished', 'canceled'].includes(String(match?.status || '').toLowerCase())
+
+  return (
+    <article className="games-page__esports-card">
+      <div className="games-page__esports-head">
+        <span>{match?.videogame || 'Esports'}</span>
+        <strong>{match?.league || match?.tournament || 'Competição'}</strong>
+      </div>
+
+      <div className="games-page__versus">
+        <div className="games-page__team">
+          {first.image ? <img src={first.image} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{String(first.name).slice(0, 2).toUpperCase()}</span>}
+          <strong>{first.name}</strong>
+        </div>
+
+        <div className="games-page__score">
+          {finished || running ? (
+            <>
+              <strong>{scores.get(first.id) ?? '-'}</strong>
+              <span>x</span>
+              <strong>{scores.get(second.id) ?? '-'}</strong>
+            </>
+          ) : (
+            <span>{formatDate(match?.scheduledAt || match?.beginAt, { time: true }) || 'Em breve'}</span>
+          )}
+        </div>
+
+        <div className="games-page__team">
+          {second.image ? <img src={second.image} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{String(second.name).slice(0, 2).toUpperCase()}</span>}
+          <strong>{second.name}</strong>
+        </div>
+      </div>
+
+      <div className={`games-page__match-status ${running ? 'is-live' : ''}`}>
+        {running ? 'AO VIVO' : finished ? 'FINALIZADO' : 'AGENDADO'}
+      </div>
+    </article>
+  )
+}
+
 function EmptyPanel({ title, description }) {
   return (
     <div className="games-page__empty">
@@ -116,48 +255,58 @@ function EmptyPanel({ title, description }) {
 
 export default function GamesPage() {
   const [payload, setPayload] = useState({
-    items: [],
+    news: [],
     featured: null,
-    esports: [],
+    esportsNews: [],
+    releasesNews: [],
     releases: [],
-    free: [],
+    freeGames: [],
+    esports: { running: [], upcoming: [], past: [] },
   })
   const [activeFilter, setActiveFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [warnings, setWarnings] = useState([])
 
   async function loadGames() {
     setLoading(true)
-    setError(null)
+    setWarnings([])
 
-    try {
-      const response = await fetch('/api/news?category=Games&limit=30', {
-        headers: { Accept: 'application/json' },
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data.error || 'Não foi possível carregar Games.')
+    const [newsResult, releasesResult, freeResult, esportsResult] = await Promise.all([
+      fetchJson('/api/news?category=Games&limit=30'),
+      fetchJson('/api/news?games=releases'),
+      fetchJson('/api/news?games=free'),
+      fetchJson('/api/news?games=esports'),
+    ])
 
-      const items = (Array.isArray(data.articles) ? data.articles : []).map((item) => ({
-        ...item,
-        description: item.description || item.summary || '',
-        publishedAt: item.publishedAt || item.date || '',
-        kind: classify(item),
-      }))
+    const news = (Array.isArray(newsResult.data?.articles) ? newsResult.data.articles : []).map((item) => ({
+      ...item,
+      description: item.description || item.summary || '',
+      publishedAt: item.publishedAt || item.date || '',
+      kind: classify(item),
+    }))
 
-      setPayload({
-        items,
-        featured: items[0] || null,
-        esports: items.filter((item) => item.kind === 'esports').slice(0, 6),
-        releases: items.filter((item) => item.kind === 'releases').slice(0, 6),
-        free: items.filter((item) => item.kind === 'free').slice(0, 6),
-      })
-    } catch (loadError) {
-      setError(loadError)
-      setPayload({ items: [], featured: null, esports: [], releases: [], free: [] })
-    } finally {
-      setLoading(false)
-    }
+    setPayload({
+      news,
+      featured: news[0] || null,
+      esportsNews: news.filter((item) => item.kind === 'esports').slice(0, 8),
+      releasesNews: news.filter((item) => item.kind === 'releases').slice(0, 8),
+      releases: releasesResult.ok && Array.isArray(releasesResult.data?.items) ? releasesResult.data.items : [],
+      freeGames: freeResult.ok && Array.isArray(freeResult.data?.items) ? freeResult.data.items : [],
+      esports: {
+        running: esportsResult.ok && Array.isArray(esportsResult.data?.running) ? esportsResult.data.running : [],
+        upcoming: esportsResult.ok && Array.isArray(esportsResult.data?.upcoming) ? esportsResult.data.upcoming : [],
+        past: esportsResult.ok && Array.isArray(esportsResult.data?.past) ? esportsResult.data.past : [],
+      },
+    })
+
+    const nextWarnings = []
+    if (!newsResult.ok) nextWarnings.push('notícias')
+    if (!releasesResult.ok) nextWarnings.push('lançamentos')
+    if (!freeResult.ok) nextWarnings.push('jogos grátis')
+    if (!esportsResult.ok) nextWarnings.push('esports')
+    setWarnings(nextWarnings)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -165,29 +314,89 @@ export default function GamesPage() {
   }, [])
 
   const championships = useMemo(
-    () => payload.items.filter(isChampionship).slice(0, 6),
-    [payload.items],
+    () => payload.news.filter(isChampionship).slice(0, 8),
+    [payload.news],
   )
 
-  const filteredItems = useMemo(() => {
-    const term = normalize(search)
-    let items = payload.items
+  const esportsMatches = useMemo(
+    () => [...payload.esports.running, ...payload.esports.upcoming, ...payload.esports.past].slice(0, 12),
+    [payload.esports],
+  )
 
-    if (activeFilter === 'esports') items = payload.esports
-    if (activeFilter === 'releases') items = payload.releases
-    if (activeFilter === 'championships') items = championships
-    if (activeFilter === 'free') items = payload.free
+  const term = normalize(search)
 
-    if (!term) return items
+  const filteredNews = useMemo(
+    () => payload.news.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [payload.news, term],
+  )
 
-    return items.filter((item) => normalize(
-      [item.title, item.description, item.source].filter(Boolean).join(' ')
-    ).includes(term))
-  }, [activeFilter, championships, payload, search])
+  const filteredReleases = useMemo(
+    () => payload.releases.filter((game) => includesTerm([game.name, ...(game.platforms || []), ...(game.genres || [])], term)),
+    [payload.releases, term],
+  )
 
-  const featured = search || activeFilter !== 'all'
-    ? filteredItems[0] || null
-    : payload.featured
+  const filteredFreeGames = useMemo(
+    () => payload.freeGames.filter((item) => includesTerm([item.title, item.description, ...(item.platforms || [])], term)),
+    [payload.freeGames, term],
+  )
+
+  const filteredEsports = useMemo(
+    () => esportsMatches.filter((match) => includesTerm([
+      match.videogame,
+      match.league,
+      match.tournament,
+      ...(match.opponents || []).map((team) => team.name),
+    ], term)),
+    [esportsMatches, term],
+  )
+
+  const filteredChampionshipNews = useMemo(
+    () => championships.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [championships, term],
+  )
+
+  const filteredEsportsNews = useMemo(
+    () => payload.esportsNews.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [payload.esportsNews, term],
+  )
+
+  const featured = payload.featured
+
+  function renderFilteredContent() {
+    if (activeFilter === 'releases') {
+      return filteredReleases.length
+        ? <div className="games-page__source-grid">{filteredReleases.map((game) => <ReleaseCard key={game.id} game={game} />)}</div>
+        : <EmptyPanel title="Nenhum lançamento encontrado." description="Tente outro termo de busca." />
+    }
+
+    if (activeFilter === 'free') {
+      return filteredFreeGames.length
+        ? <div className="games-page__source-grid">{filteredFreeGames.map((item) => <FreeGameCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhum jogo grátis encontrado." description="Tente outro termo ou atualize a página." />
+    }
+
+    if (activeFilter === 'esports') {
+      if (filteredEsports.length) {
+        return <div className="games-page__esports-grid">{filteredEsports.map((match) => <EsportsMatchCard key={match.id} match={match} />)}</div>
+      }
+      return filteredEsportsNews.length
+        ? <div className="games-page__grid">{filteredEsportsNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhum conteúdo de Esports encontrado." description="Assim que houver partidas ou notícias, elas aparecem aqui." />
+    }
+
+    if (activeFilter === 'championships') {
+      if (filteredEsports.length) {
+        return <div className="games-page__esports-grid">{filteredEsports.map((match) => <EsportsMatchCard key={match.id} match={match} />)}</div>
+      }
+      return filteredChampionshipNews.length
+        ? <div className="games-page__grid">{filteredChampionshipNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhum campeonato encontrado." description="Tente novamente mais tarde." />
+    }
+
+    return filteredNews.length
+      ? <div className="games-page__grid">{filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+      : <EmptyPanel title="Nenhum resultado encontrado." description="Tente outro termo de busca." />
+  }
 
   return (
     <main className="games-page">
@@ -195,7 +404,7 @@ export default function GamesPage() {
         <div className="games-page__hero-copy">
           <span>IMORTAL0800</span>
           <h1>Games</h1>
-          <p>Esports, lançamentos, notícias rápidas, campeonatos e jogos gratuitos em um só lugar.</p>
+          <p>Notícias, esports, lançamentos e jogos grátis reunidos em uma central atualizada automaticamente.</p>
 
           <div className="games-page__hero-actions">
             <ActionButton icon={<Gamepad2 size={17} />} onClick={() => setActiveFilter('all')}>
@@ -210,7 +419,7 @@ export default function GamesPage() {
         <div className="games-page__hero-art" aria-hidden="true">
           <div><Swords size={28} /><span>ESPORTS</span></div>
           <div><Rocket size={28} /><span>LANÇAMENTOS</span></div>
-          <div><Trophy size={28} /><span>CAMPEONATOS</span></div>
+          <div><Gift size={28} /><span>JOGOS GRÁTIS</span></div>
         </div>
       </header>
 
@@ -240,9 +449,9 @@ export default function GamesPage() {
         </label>
       </section>
 
-      {error ? (
+      {warnings.length ? (
         <div className="games-page__notice" role="status">
-          A fonte de Games está indisponível agora. Você pode tentar atualizar novamente.
+          Algumas fontes estão temporariamente indisponíveis: {warnings.join(', ')}.
         </div>
       ) : null}
 
@@ -255,12 +464,12 @@ export default function GamesPage() {
               <div className="games-page__section-title">
                 <div>
                   <span>Destaque</span>
-                  <h2>{activeFilter === 'all' ? 'Agora em Games' : FILTERS.find(([id]) => id === activeFilter)?.[1]}</h2>
+                  <h2>Agora em Games</h2>
                 </div>
               </div>
 
               {featured ? (
-                <button className="games-page__featured-card" type="button" onClick={() => openArticle(featured)}>
+                <button className="games-page__featured-card" type="button" onClick={() => openExternal(featured.url)}>
                   <GameCover item={featured} className="games-page__featured-cover" />
                   <span className="games-page__featured-copy">
                     <span className="games-page__meta">
@@ -279,22 +488,34 @@ export default function GamesPage() {
             <aside className="games-page__quick">
               <div className="games-page__quick-item">
                 <Swords size={20} />
-                <div><strong>Esports</strong><span>{payload.esports.length} destaques recentes</span></div>
+                <div><strong>Esports</strong><span>{esportsMatches.length || payload.esportsNews.length} destaques</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Rocket size={20} />
-                <div><strong>Lançamentos</strong><span>{payload.releases.length} novidades recentes</span></div>
+                <div><strong>Lançamentos</strong><span>{payload.releases.length} próximos jogos</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Trophy size={20} />
-                <div><strong>Campeonatos</strong><span>{championships.length} conteúdos encontrados</span></div>
+                <div><strong>Campeonatos</strong><span>{championships.length} notícias encontradas</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Gift size={20} />
-                <div><strong>Jogos grátis</strong><span>{payload.free.length} oportunidades recentes</span></div>
+                <div><strong>Jogos grátis</strong><span>{payload.freeGames.length} ofertas ativas</span></div>
               </div>
             </aside>
           </section>
+
+          {search || activeFilter !== 'all' ? (
+            <section className="games-page__section">
+              <div className="games-page__section-title">
+                <div>
+                  <span><Search size={15} /> Resultados</span>
+                  <h2>{FILTERS.find(([id]) => id === activeFilter)?.[1] || 'Tudo'}</h2>
+                </div>
+              </div>
+              {renderFilteredContent()}
+            </section>
+          ) : null}
 
           <section className="games-page__section">
             <div className="games-page__section-title">
@@ -304,29 +525,54 @@ export default function GamesPage() {
               </div>
               <button type="button" onClick={() => setActiveFilter('esports')}>Ver Esports</button>
             </div>
-            {payload.esports.length ? (
+            {esportsMatches.length ? (
+              <div className="games-page__esports-grid">
+                {esportsMatches.slice(0, 3).map((match) => <EsportsMatchCard key={match.id} match={match} />)}
+              </div>
+            ) : payload.esportsNews.length ? (
               <div className="games-page__grid">
-                {payload.esports.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+                {payload.esportsNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
               </div>
             ) : (
-              <EmptyPanel title="Sem novidades de Esports agora." description="A seção será preenchida automaticamente quando surgirem novos conteúdos." />
+              <EmptyPanel title="Sem novidades de Esports agora." description="As partidas aparecem quando a PandaScore estiver disponível; notícias continuam como fallback." />
             )}
           </section>
 
           <section className="games-page__section">
             <div className="games-page__section-title">
               <div>
-                <span><Trophy size={15} /> Destaques</span>
-                <h2>Campeonatos</h2>
+                <span><Rocket size={15} /> Calendário</span>
+                <h2>Próximos lançamentos</h2>
               </div>
-              <button type="button" onClick={() => setActiveFilter('championships')}>Ver campeonatos</button>
+              <a className="games-page__attribution" href="https://rawg.io/" target="_blank" rel="noreferrer">
+                RAWG <ExternalLink size={12} />
+              </a>
             </div>
-            {championships.length ? (
-              <div className="games-page__list">
-                {championships.slice(0, 4).map((item) => <NewsCard key={item.id} item={item} compact />)}
+            {payload.releases.length ? (
+              <div className="games-page__source-grid">
+                {payload.releases.slice(0, 6).map((game) => <ReleaseCard key={game.id} game={game} />)}
               </div>
             ) : (
-              <EmptyPanel title="Nenhum campeonato em destaque agora." description="Não vamos inventar eventos: os destaques aparecem quando houver notícias sincronizadas." />
+              <EmptyPanel title="Lançamentos indisponíveis." description="A RAWG será consultada novamente ao atualizar." />
+            )}
+          </section>
+
+          <section className="games-page__section">
+            <div className="games-page__section-title">
+              <div>
+                <span><Gift size={15} /> Gratuitos</span>
+                <h2>Jogos grátis</h2>
+              </div>
+              <a className="games-page__attribution" href="https://www.gamerpower.com/" target="_blank" rel="noreferrer">
+                GamerPower <ExternalLink size={12} />
+              </a>
+            </div>
+            {payload.freeGames.length ? (
+              <div className="games-page__source-grid">
+                {payload.freeGames.slice(0, 6).map((item) => <FreeGameCard key={item.id} item={item} />)}
+              </div>
+            ) : (
+              <EmptyPanel title="Nenhuma oferta ativa detectada." description="Novos jogos gratuitos aparecem aqui automaticamente." />
             )}
           </section>
 
@@ -334,53 +580,40 @@ export default function GamesPage() {
             <div className="games-page__section">
               <div className="games-page__section-title">
                 <div>
-                  <span><Newspaper size={15} /> Radar gamer</span>
-                  <h2>Lançamentos & notícias</h2>
+                  <span><Trophy size={15} /> Destaques</span>
+                  <h2>Campeonatos</h2>
                 </div>
               </div>
-              {payload.items.length ? (
+              {championships.length ? (
                 <div className="games-page__list">
-                  {payload.items.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                  {championships.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
                 </div>
               ) : (
-                <EmptyPanel title="Sem notícias disponíveis." description="Tente atualizar novamente em alguns instantes." />
+                <EmptyPanel title="Nenhum campeonato em destaque agora." description="Os destaques aparecem quando houver notícias sincronizadas." />
               )}
             </div>
 
             <div className="games-page__section">
               <div className="games-page__section-title">
                 <div>
-                  <span><Gift size={15} /> Gratuitos</span>
-                  <h2>Jogos grátis</h2>
+                  <span><Newspaper size={15} /> Radar gamer</span>
+                  <h2>Últimas notícias</h2>
                 </div>
               </div>
-              {payload.free.length ? (
+              {payload.news.length ? (
                 <div className="games-page__list">
-                  {payload.free.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                  {payload.news.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
                 </div>
               ) : (
-                <EmptyPanel title="Nenhum jogo gratuito detectado agora." description="Novas ofertas e anúncios aparecem aqui quando forem publicados." />
+                <EmptyPanel title="Sem notícias disponíveis." description="Tente atualizar novamente em alguns instantes." />
               )}
             </div>
           </section>
 
-          {search || activeFilter !== 'all' ? (
-            <section className="games-page__section">
-              <div className="games-page__section-title">
-                <div>
-                  <span><CalendarDays size={15} /> Resultados</span>
-                  <h2>Conteúdo filtrado</h2>
-                </div>
-              </div>
-              {filteredItems.length ? (
-                <div className="games-page__grid">
-                  {filteredItems.map((item) => <NewsCard key={item.id} item={item} />)}
-                </div>
-              ) : (
-                <EmptyPanel title="Nenhum resultado encontrado." description="Tente outro filtro ou termo de busca." />
-              )}
-            </section>
-          ) : null}
+          <div className="games-page__sources-note">
+            <CalendarDays size={14} />
+            <span>Dados de lançamentos por RAWG, ofertas por GamerPower e esports por PandaScore quando configurada.</span>
+          </div>
         </>
       )}
     </main>
