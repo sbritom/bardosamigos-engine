@@ -190,7 +190,6 @@ function getMatchInfo(match) {
   return [
     { label: 'Estádio', value: match.venue, icon: MapPin },
     { label: 'Cidade', value: match.city, icon: MapPin },
-    { label: 'Árbitro', value: match.referee, icon: CircleDot },
     { label: 'Rodada', value: match.round?.name || (match.matchday ? `Rodada ${match.matchday}` : ''), icon: Trophy },
     { label: 'Fase', value: match.stage, icon: Trophy },
     { label: 'Competição', value: match.competitionName, icon: Trophy },
