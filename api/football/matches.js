@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js'
+
 const FOOTBALL_DATA_BASE_URL = 'https://api.football-data.org/v4'
 const DEFAULT_COMPETITIONS = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL']
 const ALLOWED_COMPETITIONS = new Set(DEFAULT_COMPETITIONS)
@@ -10,6 +12,69 @@ const MAX_COMPETITIONS = 12
 const REQUEST_TIMEOUT_MS = 8000
 const COMPETITION_CODE_RE = /^[A-Z0-9]{2,6}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const MATCH_ID_RE = /^\d{1,12}$/
+
+function getSupabaseAdmin() {
+  const url = String(process.env.SUPABASE_URL || '').trim()
+  const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim()
+  if (!url || !key) return null
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
+async function settleFinishedMatches(matches = []) {
+  const supabase = getSupabaseAdmin()
+  if (!supabase) {
+    return { enabled: false, attempted: 0, settled: 0, scoredPredictions: 0, errors: [] }
+  }
+
+  const finished = matches
+    .filter((match) => (
+      FINISHED_STATUSES.has(String(match.metadata?.providerStatus || '').toUpperCase())
+      && match.providerMatchId
+      && Number.isInteger(match.homeScore)
+      && Number.isInteger(match.awayScore)
+    ))
+    .slice(0, 40)
+
+  let settled = 0
+  let scoredPredictions = 0
+  const errors = []
+
+  for (const match of finished) {
+    const { data, error } = await supabase.rpc('imortal_settle_football_match', {
+      p_external_ref: String(match.providerMatchId),
+      p_home_score: match.homeScore,
+      p_away_score: match.awayScore,
+      p_provider_metadata: {
+        footballDataStatus: match.metadata?.providerStatus || 'FINISHED',
+        competitionCode: match.competitionCode || '',
+        autoSettlementCheckedAt: new Date().toISOString(),
+      },
+    })
+
+    if (error) {
+      errors.push(`${match.providerMatchId}: ${error.message || 'settlement failed'}`)
+      continue
+    }
+
+    if (data?.found && !data?.alreadySettled) settled += 1
+    scoredPredictions += Number(data?.scoredPredictions || 0)
+  }
+
+  return {
+    enabled: true,
+    attempted: finished.length,
+    settled,
+    scoredPredictions,
+    errors,
+  }
+}
 
 function getApiKey() {
   return String(process.env.FOOTBALL_DATA_API_KEY || '').trim()
@@ -53,12 +118,14 @@ function toMaceioDateOnly(date) {
 
 function createDateWindow() {
   const now = new Date()
+  const from = new Date(now)
   const to = new Date(now)
+  from.setDate(from.getDate() - 2)
   to.setDate(to.getDate() + 14)
 
   return {
     today: toMaceioDateOnly(now),
-    dateFrom: toMaceioDateOnly(now),
+    dateFrom: toMaceioDateOnly(from),
     dateTo: toMaceioDateOnly(to),
   }
 }
@@ -136,6 +203,7 @@ function mapMatch(match = {}) {
 
   return {
     id: `football-data-${match.id || `${match.utcDate}-${homeTeam.name}-${awayTeam.name}`}`,
+    providerMatchId: match.id ? String(match.id) : '',
     homeParticipant: homeTeam.name,
     awayParticipant: awayTeam.name,
     homeTeam,
@@ -657,6 +725,7 @@ export default async function handler(request, response) {
       })
 
       if (isWorldCupActive({ competition: worldCupCompetition, matches: worldCupMatches })) {
+        const settlement = await settleFinishedMatches(worldCupMatches)
         response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
         response.status(worldCupMatches.length ? 200 : 502).json({
           source: 'football-data.org',
@@ -673,6 +742,7 @@ export default async function handler(request, response) {
             dateTo: worldCupCompetition.currentSeason?.endDate || window.dateTo,
           },
           matches: selectWorldCupMatches(worldCupMatches, today),
+          settlement,
           errors: [],
         })
         return
@@ -691,6 +761,7 @@ export default async function handler(request, response) {
     const errors = results
       .filter((item) => item.status === 'rejected')
       .map((item) => item.reason?.message || 'Unknown Football-Data error')
+    const settlement = await settleFinishedMatches(matches)
 
     response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
     response.status(matches.length ? 200 : 502).json({
@@ -701,6 +772,7 @@ export default async function handler(request, response) {
         dateTo: dateRange.dateTo,
       },
       matches: selectRelevantMatches(matches, today),
+      settlement,
       errors,
     })
   } catch (error) {
