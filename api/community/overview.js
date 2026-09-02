@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
-import { applyApiCors } from '../_lib/security.js'
+import { applyApiCors, rejectOversizedBody } from '../_lib/security.js'
+
+const WALL_TABLE = 'community_wall_posts'
+const WALL_COOLDOWN_SECONDS = 20
 
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL
@@ -15,6 +18,32 @@ function getSupabaseAdmin() {
       autoRefreshToken: false,
     },
   })
+}
+
+function cleanText(value, maxLength) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength)
+}
+
+function getBearerToken(request) {
+  const header = request.headers.authorization || ''
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+}
+
+async function readBody(request) {
+  if (request.body && typeof request.body === 'object') return request.body
+
+  if (typeof request.body === 'string') {
+    try {
+      return JSON.parse(request.body)
+    } catch {
+      return {}
+    }
+  }
+
+  return {}
 }
 
 function isBirthdayVisible(preferences) {
@@ -34,6 +63,17 @@ function mapBirthday(profile) {
     username: profile.username || '',
     month,
     day,
+  }
+}
+
+function mapWallPost(row = {}) {
+  return {
+    id: row.id,
+    authorName: row.author_name || 'Imortal',
+    xatId: row.xat_id || '',
+    body: row.body || '',
+    source: row.source || 'portal',
+    createdAt: row.created_at || '',
   }
 }
 
@@ -108,10 +148,121 @@ async function getCommunityAchievements(supabase) {
   return data || []
 }
 
+async function handleOverview(response, supabase) {
+  const [birthdays, ranking, achievements] = await Promise.all([
+    getBirthdays(supabase),
+    getCommunityRanking(supabase),
+    getCommunityAchievements(supabase),
+  ])
+
+  response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+  response.status(200).json({
+    ok: true,
+    data: {
+      birthdays,
+      ranking,
+      achievements,
+      xat: {
+        connected: false,
+        onlineCount: null,
+      },
+    },
+  })
+}
+
+async function handleWallGet(response, supabase) {
+  const { data, error } = await supabase
+    .from(WALL_TABLE)
+    .select('id,author_name,xat_id,body,source,created_at')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+    .limit(30)
+
+  if (error) throw error
+
+  response.setHeader('Cache-Control', 'private, no-store, max-age=0')
+  response.status(200).json({
+    ok: true,
+    data: (data || []).map(mapWallPost),
+  })
+}
+
+async function handleWallPost(request, response, supabase) {
+  const token = getBearerToken(request)
+
+  if (!token) {
+    response.status(401).json({ ok: false, error: 'Entre para publicar um recado.' })
+    return
+  }
+
+  const { data: authData, error: authError } = await supabase.auth.getUser(token)
+  const user = authData?.user
+
+  if (authError || !user?.id) {
+    response.status(401).json({ ok: false, error: 'Sua sessão expirou. Entre novamente.' })
+    return
+  }
+
+  const body = await readBody(request)
+  const text = cleanText(body.body, 280)
+
+  if (text.length < 2) {
+    response.status(400).json({ ok: false, error: 'Escreva pelo menos 2 caracteres.' })
+    return
+  }
+
+  const since = new Date(Date.now() - WALL_COOLDOWN_SECONDS * 1000).toISOString()
+  const { data: recent, error: recentError } = await supabase
+    .from(WALL_TABLE)
+    .select('id')
+    .eq('profile_id', user.id)
+    .gte('created_at', since)
+    .limit(1)
+
+  if (recentError) throw recentError
+
+  if (recent?.length) {
+    response.status(429).json({
+      ok: false,
+      error: 'Aguarde alguns segundos antes de publicar outro recado.',
+    })
+    return
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('display_name,username')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profileError) throw profileError
+
+  const authorName = cleanText(profile?.display_name || profile?.username || 'Imortal', 80)
+
+  const { data, error } = await supabase
+    .from(WALL_TABLE)
+    .insert({
+      profile_id: user.id,
+      author_name: authorName,
+      body: text,
+      source: 'portal',
+      status: 'published',
+    })
+    .select('id,author_name,xat_id,body,source,created_at')
+    .single()
+
+  if (error) throw error
+
+  response.status(201).json({
+    ok: true,
+    data: mapWallPost(data),
+  })
+}
+
 export default async function handler(request, response) {
   if (!applyApiCors(request, response, {
-    methods: 'GET, OPTIONS',
-    headers: 'Content-Type',
+    methods: 'GET, POST, OPTIONS',
+    headers: 'Content-Type, Authorization',
   })) {
     response.status(403).json({ ok: false, error: 'Origin not allowed.' })
     return
@@ -122,38 +273,41 @@ export default async function handler(request, response) {
     return
   }
 
-  if (request.method !== 'GET') {
-    response.status(405).json({ ok: false, error: 'Method not allowed' })
+  const section = cleanText(request.query?.section, 30)
+
+  if (request.method === 'POST' && rejectOversizedBody(request, response, 4 * 1024)) {
     return
   }
 
   try {
     const supabase = getSupabaseAdmin()
 
-    const [birthdays, ranking, achievements] = await Promise.all([
-      getBirthdays(supabase),
-      getCommunityRanking(supabase),
-      getCommunityAchievements(supabase),
-    ])
+    if (section === 'wall') {
+      if (request.method === 'GET') {
+        await handleWallGet(response, supabase)
+        return
+      }
 
-    response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
-    response.status(200).json({
-      ok: true,
-      data: {
-        birthdays,
-        ranking,
-        achievements,
-        xat: {
-          connected: false,
-          onlineCount: null,
-        },
-      },
-    })
+      if (request.method === 'POST') {
+        await handleWallPost(request, response, supabase)
+        return
+      }
+
+      response.status(405).json({ ok: false, error: 'Method not allowed' })
+      return
+    }
+
+    if (request.method === 'GET') {
+      await handleOverview(response, supabase)
+      return
+    }
+
+    response.status(405).json({ ok: false, error: 'Method not allowed' })
   } catch (error) {
-    console.error('Community overview API error:', error.message)
+    console.error('Community API error:', error.message)
     response.status(500).json({
       ok: false,
-      error: 'Não foi possível carregar os dados da comunidade agora.',
+      error: 'Não foi possível processar a comunidade agora.',
     })
   }
 }

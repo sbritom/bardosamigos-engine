@@ -1,8 +1,7 @@
 import { getSupabaseClient } from '../../../core/database/client/supabaseClient.js'
 import { listPublishedEvents } from '../../events/services/eventsService'
 
-const COMMUNITY_OVERVIEW_ENDPOINT = '/api/community/overview'
-const COMMUNITY_WALL_ENDPOINT = '/api/community/wall'
+const COMMUNITY_ENDPOINT = '/api/community/overview'
 
 async function parseResponse(response, fallbackMessage) {
   const payload = await response.json().catch(() => ({}))
@@ -17,7 +16,7 @@ async function parseResponse(response, fallbackMessage) {
 }
 
 async function loadOverview() {
-  const response = await fetch(COMMUNITY_OVERVIEW_ENDPOINT, {
+  const response = await fetch(COMMUNITY_ENDPOINT, {
     headers: { Accept: 'application/json' },
     cache: 'no-store',
   })
@@ -26,7 +25,7 @@ async function loadOverview() {
 }
 
 async function loadWall() {
-  const response = await fetch(COMMUNITY_WALL_ENDPOINT, {
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=wall', {
     headers: { Accept: 'application/json' },
     cache: 'no-store',
   })
@@ -45,7 +44,7 @@ export async function submitCommunityWallPost({ body }) {
   const token = data?.session?.access_token || ''
   if (!token) throw new Error('Entre na sua conta para publicar um recado.')
 
-  const response = await fetch(COMMUNITY_WALL_ENDPOINT, {
+  const response = await fetch(COMMUNITY_ENDPOINT + '?section=wall', {
     method: 'POST',
     headers: {
       Accept: 'application/json',
