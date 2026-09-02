@@ -314,7 +314,20 @@ export default function FootballCenterPage() {
   const upcomingCount = selectedCompetition.matches.length - liveCount - finishedCount
 
   return (
-    <section className="bds-football-page bds-football-center">
+    <section className="bds-football-page">
+      <header className="imortal-football-intro">
+        <div>
+          <span>IMORTAL0800</span>
+          <h1>Central do Futebol</h1>
+          <p>Jogos, resultados, classificação, estatísticas, escalações e bolão em um só lugar.</p>
+        </div>
+        <button type="button" className="imortal-football-pool" onClick={() => navigate('/palpites')}>
+          <Trophy size={16} />
+          Ir para o Bolão
+        </button>
+      </header>
+
+      <div className="bds-football-center">
       <aside className="bds-football-leagues">
         <div className="bds-football-leagues__title">
           <Trophy size={18} />
@@ -359,6 +372,15 @@ export default function FootballCenterPage() {
           <span><strong>{finishedCount}</strong> finalizados</span>
         </div>
 
+        <div className="imortal-football-features" aria-label="Recursos do futebol">
+          <span><strong>Estatísticas</strong><small>abra uma partida para ver os dados disponíveis</small></span>
+          <span><strong>Escalações</strong><small>disponíveis dentro dos detalhes da partida</small></span>
+          <button type="button" onClick={() => navigate('/palpites')}>
+            <strong>Bolão</strong>
+            <small>faça seus palpites</small>
+          </button>
+        </div>
+
         <nav className="bds-football-center-tabs" aria-label="Seções da competição">
           <button type="button" className={activeTab === 'summary' ? 'is-active' : ''} onClick={() => setActiveTab('summary')}>Resumo</button>
           <button type="button" className={activeTab === 'matches' ? 'is-active' : ''} onClick={() => setActiveTab('matches')}>Jogos</button>
@@ -376,6 +398,7 @@ export default function FootballCenterPage() {
           )}
         </div>
       </main>
+      </div>
     </section>
   )
 }
