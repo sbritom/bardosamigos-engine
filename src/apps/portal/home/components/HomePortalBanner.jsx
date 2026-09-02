@@ -1,5 +1,6 @@
 import './homePortalBanner.css'
 
+// banner vazio temporariamente
 export function HomePortalBanner() {
   return (
     <section
