@@ -126,35 +126,71 @@ export function AuthProvider({ children }) {
     return false
   }, [openAuth, session?.user])
 
-  const signIn = useCallback(async ({ email, password }) => {
-    const supabase = getSupabaseClient()
-    if (!supabase) throw new Error('A autenticacao nao esta configurada neste ambiente.')
+  async function usernameAuthRequest(payload) {
+    const response = await fetch('/api/profile', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    const data = await response.json().catch(() => ({}))
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: String(email || '').trim(),
-      password,
+    if (!response.ok || data?.ok === false) {
+      throw new Error(data?.error || 'Não foi possível concluir a autenticação.')
+    }
+
+    return data
+  }
+
+  async function applyUsernameSession(supabase, session) {
+    if (!session?.accessToken || !session?.refreshToken) {
+      throw new Error('Não foi possível iniciar sua sessão.')
+    }
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token: session.accessToken,
+      refresh_token: session.refreshToken,
     })
 
     if (error) throw error
     return data
+  }
+
+  const signIn = useCallback(async ({ username, password }) => {
+    const supabase = getSupabaseClient()
+    if (!supabase) throw new Error('A autenticação não está configurada neste ambiente.')
+
+    const data = await usernameAuthRequest({
+      action: 'username-login',
+      username,
+      password,
+    })
+    const sessionData = await applyUsernameSession(supabase, data.session)
+    return { ...sessionData, recoveryCode: data.recoveryCode || '' }
   }, [])
 
-  const signUp = useCallback(async ({ displayName, email, password }) => {
+  const signUp = useCallback(async ({ username, password }) => {
     const supabase = getSupabaseClient()
-    if (!supabase) throw new Error('A autenticacao nao esta configurada neste ambiente.')
+    if (!supabase) throw new Error('A autenticação não está configurada neste ambiente.')
 
-    const { data, error } = await supabase.auth.signUp({
-      email: String(email || '').trim(),
+    const data = await usernameAuthRequest({
+      action: 'username-signup',
+      username,
       password,
-      options: {
-        data: {
-          display_name: String(displayName || '').trim(),
-        },
-      },
     })
+    const sessionData = await applyUsernameSession(supabase, data.session)
+    return { ...sessionData, recoveryCode: data.recoveryCode || '' }
+  }, [])
 
-    if (error) throw error
-    return data
+  const recoverPassword = useCallback(async ({ username, recoveryCode, password }) => {
+    return usernameAuthRequest({
+      action: 'username-recover',
+      username,
+      recoveryCode,
+      password,
+    })
   }, [])
 
   const signOut = useCallback(async () => {
@@ -228,12 +264,13 @@ export function AuthProvider({ children }) {
     requireAuth,
     signIn,
     signUp,
+    recoverPassword,
     signOut,
     refreshProfile,
     updateProfile,
     updatePreferences,
     uploadAvatar,
-  }), [authDialog, closeAuth, displayName, loading, openAuth, profile, profileError, profileLoading, refreshProfile, requireAuth, session, signIn, signOut, signUp, updatePreferences, updateProfile, uploadAvatar])
+  }), [authDialog, closeAuth, displayName, loading, openAuth, profile, profileError, profileLoading, recoverPassword, refreshProfile, requireAuth, session, signIn, signOut, signUp, updatePreferences, updateProfile, uploadAvatar])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
