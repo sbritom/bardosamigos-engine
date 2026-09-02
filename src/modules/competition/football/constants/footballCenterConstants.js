@@ -32,17 +32,18 @@ export const FOOTBALL_COMPETITION_FILTERS = [
 ]
 
 export const FOOTBALL_COMPETITION_NAV = [
-  { id: 'BSA', slug: 'brasileirao', label: 'Brasileirao', icon: Shield, codes: ['bsa'], patterns: ['brasileir', 'serie a brasil', 'série a brasil'] },
-  { id: 'CDB', slug: 'copa-do-brasil', label: 'Copa do Brasil', icon: Trophy, codes: ['cdb', 'copa_do_brasil'], patterns: ['copa do brasil'] },
-  { id: 'CLI', slug: 'libertadores', label: 'Libertadores', icon: Trophy, codes: ['cli'], patterns: ['libertadores'] },
-  { id: 'CSA', slug: 'sul-americana', label: 'Sul-Americana', icon: Trophy, codes: ['csa', 'sudamericana'], patterns: ['sul-americana', 'sul americana', 'sudamericana'] },
-  { id: 'WC', slug: 'world-cup', label: 'Copa do Mundo', icon: Globe2, codes: ['wc'], patterns: ['copa do mundo', 'world cup'] },
-  { id: 'CL', slug: 'champions', label: 'Champions League', icon: Star, codes: ['cl'], patterns: ['champions'] },
-  { id: 'PL', slug: 'premier-league', label: 'Premier League', icon: Flag, codes: ['pl'], patterns: ['premier'] },
-  { id: 'PD', slug: 'la-liga', label: 'La Liga', icon: Flag, codes: ['pd'], patterns: ['la liga', 'primera division'] },
-  { id: 'SA', slug: 'serie-a', label: 'Serie A', icon: Flag, codes: ['sa'], patterns: ['serie a italiana', 'serie a tim'] },
-  { id: 'FL1', slug: 'ligue-1', label: 'Ligue 1', icon: Flag, codes: ['fl1'], patterns: ['ligue 1'] },
+  { id: 'WC', slug: 'world-cup', label: 'FIFA World Cup', icon: Globe2, codes: ['wc'], patterns: ['copa do mundo', 'world cup'] },
+  { id: 'CL', slug: 'champions', label: 'UEFA Champions League', icon: Star, codes: ['cl'], patterns: ['champions'] },
   { id: 'BL1', slug: 'bundesliga', label: 'Bundesliga', icon: Flag, codes: ['bl1'], patterns: ['bundesliga'] },
+  { id: 'DED', slug: 'eredivisie', label: 'Eredivisie', icon: Flag, codes: ['ded'], patterns: ['eredivisie'] },
+  { id: 'BSA', slug: 'brasileirao', label: 'Brasileirão Série A', icon: Shield, codes: ['bsa'], patterns: ['brasileir', 'serie a brasil', 'série a brasil'] },
+  { id: 'PD', slug: 'primera-division', label: 'Primera Division', icon: Flag, codes: ['pd'], patterns: ['la liga', 'primera division'] },
+  { id: 'FL1', slug: 'ligue-1', label: 'Ligue 1', icon: Flag, codes: ['fl1'], patterns: ['ligue 1'] },
+  { id: 'ELC', slug: 'championship', label: 'Championship', icon: Flag, codes: ['elc'], patterns: ['championship'] },
+  { id: 'PPL', slug: 'primeira-liga', label: 'Primeira Liga', icon: Flag, codes: ['ppl'], patterns: ['primeira liga'] },
+  { id: 'EC', slug: 'european-championship', label: 'European Championship', icon: Trophy, codes: ['ec'], patterns: ['european championship', 'euro'] },
+  { id: 'SA', slug: 'serie-a', label: 'Serie A', icon: Flag, codes: ['sa'], patterns: ['serie a italiana', 'serie a tim'] },
+  { id: 'PL', slug: 'premier-league', label: 'Premier League', icon: Flag, codes: ['pl'], patterns: ['premier'] },
 ]
 
 export const FOOTBALL_WORLD_CUP_STAGES = ['Grupos', '16 avos', 'Oitavas', 'Quartas', 'Semifinais', 'Final']
