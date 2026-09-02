@@ -1,12 +1,12 @@
 const FOOTBALL_DATA_BASE_URL = 'https://api.football-data.org/v4'
-const DEFAULT_COMPETITIONS = ['BSA', 'CLI', 'WC', 'CL', 'PL', 'PD']
+const DEFAULT_COMPETITIONS = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL']
 const ALLOWED_COMPETITIONS = new Set(DEFAULT_COMPETITIONS)
 const LIVE_STATUSES = new Set(['LIVE', 'IN_PLAY', 'PAUSED'])
 const FINISHED_STATUSES = new Set(['FINISHED'])
 const UPCOMING_STATUSES = new Set(['SCHEDULED', 'TIMED'])
 const DISPLAY_LIMIT = 12
 const WORLD_CUP_YEAR = 2026
-const MAX_COMPETITIONS = 8
+const MAX_COMPETITIONS = 12
 const REQUEST_TIMEOUT_MS = 8000
 const COMPETITION_CODE_RE = /^[A-Z0-9]{2,6}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
