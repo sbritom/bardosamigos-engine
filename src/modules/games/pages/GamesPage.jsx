@@ -186,6 +186,7 @@ function FreeGameCard({ item }) {
       <span className="games-page__data-copy">
         <span className="games-page__meta">
           <span>{item?.worth || 'Grátis'}</span>
+          {item?.type ? <span>{item.type}</span> : null}
           {item?.endDate && item.endDate !== 'N/A' ? <span>até {formatDate(item.endDate)}</span> : null}
         </span>
         <strong>{item?.title || 'Jogo grátis'}</strong>
@@ -240,6 +241,28 @@ function EsportsMatchCard({ match }) {
         {running ? 'AO VIVO' : finished ? 'FINALIZADO' : 'AGENDADO'}
       </div>
     </article>
+  )
+}
+
+function ChampionshipRow({ match }) {
+  const opponents = Array.isArray(match?.opponents) ? match.opponents : []
+  const names = opponents.map((team) => team.name).filter(Boolean).join(' x ')
+  const running = String(match?.status || '').toLowerCase() === 'running'
+
+  return (
+    <div className="games-page__championship-row">
+      <span className="games-page__championship-icon">
+        {match?.leagueImage ? <img src={match.leagueImage} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <Trophy size={18} />}
+      </span>
+      <span className="games-page__championship-copy">
+        <span className="games-page__meta">
+          <span>{match?.videogame || 'Esports'}</span>
+          <span>{running ? 'AO VIVO' : formatDate(match?.scheduledAt || match?.beginAt, { time: true }) || 'Agenda'}</span>
+        </span>
+        <strong>{match?.league || match?.tournament || 'Campeonato'}</strong>
+        <small>{match?.serie || match?.tournament || names || 'Competição em destaque'}</small>
+      </span>
+    </div>
   )
 }
 
@@ -313,7 +336,7 @@ export default function GamesPage() {
     loadGames()
   }, [])
 
-  const championships = useMemo(
+  const championshipNews = useMemo(
     () => payload.news.filter(isChampionship).slice(0, 8),
     [payload.news],
   )
@@ -322,6 +345,36 @@ export default function GamesPage() {
     () => [...payload.esports.running, ...payload.esports.upcoming, ...payload.esports.past].slice(0, 12),
     [payload.esports],
   )
+
+  const championshipMatches = useMemo(() => {
+    const seen = new Set()
+    return esportsMatches.filter((match) => {
+      const key = [match.videogame, match.league, match.serie, match.tournament].join('|')
+      if (!key || seen.has(key)) return false
+      seen.add(key)
+      return true
+    }).slice(0, 6)
+  }, [esportsMatches])
+
+  const freeNews = useMemo(
+    () => payload.news.filter((item) => item.kind === 'free').slice(0, 8),
+    [payload.news],
+  )
+
+  const radarItems = useMemo(() => {
+    if (payload.news.length) return payload.news
+
+    return payload.releases.map((game) => ({
+      id: `release-${game.id}`,
+      title: game.name,
+      description: `Próximo lançamento para ${(game.platforms || []).slice(0, 3).join(', ') || 'plataformas a confirmar'}.`,
+      source: 'RAWG',
+      publishedAt: game.released,
+      image: game.image,
+      url: game.url,
+      kind: 'releases',
+    }))
+  }, [payload.news, payload.releases])
 
   const term = normalize(search)
 
@@ -351,8 +404,19 @@ export default function GamesPage() {
   )
 
   const filteredChampionshipNews = useMemo(
-    () => championships.filter((item) => includesTerm([item.title, item.description, item.source], term)),
-    [championships, term],
+    () => championshipNews.filter((item) => includesTerm([item.title, item.description, item.source], term)),
+    [championshipNews, term],
+  )
+
+  const filteredChampionshipMatches = useMemo(
+    () => championshipMatches.filter((match) => includesTerm([
+      match.videogame,
+      match.league,
+      match.serie,
+      match.tournament,
+      ...(match.opponents || []).map((team) => team.name),
+    ], term)),
+    [championshipMatches, term],
   )
 
   const filteredEsportsNews = useMemo(
@@ -360,7 +424,7 @@ export default function GamesPage() {
     [payload.esportsNews, term],
   )
 
-  const featured = payload.featured
+  const featured = payload.featured || radarItems[0] || null
 
   function renderFilteredContent() {
     if (activeFilter === 'releases') {
@@ -370,9 +434,14 @@ export default function GamesPage() {
     }
 
     if (activeFilter === 'free') {
-      return filteredFreeGames.length
-        ? <div className="games-page__source-grid">{filteredFreeGames.map((item) => <FreeGameCard key={item.id} item={item} />)}</div>
-        : <EmptyPanel title="Nenhum jogo grátis encontrado." description="Tente outro termo ou atualize a página." />
+      if (filteredFreeGames.length) {
+        return <div className="games-page__source-grid">{filteredFreeGames.map((item) => <FreeGameCard key={item.id} item={item} />)}</div>
+      }
+
+      const matchingFreeNews = freeNews.filter((item) => includesTerm([item.title, item.description, item.source], term))
+      return matchingFreeNews.length
+        ? <div className="games-page__grid">{matchingFreeNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
+        : <EmptyPanel title="Nenhuma oferta encontrada para esta busca." description="Tente outro termo." />
     }
 
     if (activeFilter === 'esports') {
@@ -385,12 +454,12 @@ export default function GamesPage() {
     }
 
     if (activeFilter === 'championships') {
-      if (filteredEsports.length) {
-        return <div className="games-page__esports-grid">{filteredEsports.map((match) => <EsportsMatchCard key={match.id} match={match} />)}</div>
+      if (filteredChampionshipMatches.length) {
+        return <div className="games-page__championship-list">{filteredChampionshipMatches.map((match) => <ChampionshipRow key={match.id} match={match} />)}</div>
       }
       return filteredChampionshipNews.length
         ? <div className="games-page__grid">{filteredChampionshipNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
-        : <EmptyPanel title="Nenhum campeonato encontrado." description="Tente novamente mais tarde." />
+        : <EmptyPanel title="Nenhum campeonato encontrado para esta busca." description="Tente outro termo." />
     }
 
     return filteredNews.length
@@ -496,7 +565,7 @@ export default function GamesPage() {
               </div>
               <div className="games-page__quick-item">
                 <Trophy size={20} />
-                <div><strong>Campeonatos</strong><span>{championships.length} notícias encontradas</span></div>
+                <div><strong>Campeonatos</strong><span>{championshipMatches.length || championshipNews.length} em destaque</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Gift size={20} />
@@ -552,8 +621,14 @@ export default function GamesPage() {
               <div className="games-page__source-grid">
                 {payload.releases.slice(0, 6).map((game) => <ReleaseCard key={game.id} game={game} />)}
               </div>
+            ) : payload.releasesNews.length ? (
+              <div className="games-page__grid">
+                {payload.releasesNews.slice(0, 6).map((item) => <NewsCard key={item.id} item={item} />)}
+              </div>
             ) : (
-              <EmptyPanel title="Lançamentos indisponíveis." description="A RAWG será consultada novamente ao atualizar." />
+              <div className="games-page__grid">
+                {radarItems.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+              </div>
             )}
           </section>
 
@@ -571,8 +646,14 @@ export default function GamesPage() {
               <div className="games-page__source-grid">
                 {payload.freeGames.slice(0, 6).map((item) => <FreeGameCard key={item.id} item={item} />)}
               </div>
+            ) : freeNews.length ? (
+              <div className="games-page__grid">
+                {freeNews.slice(0, 6).map((item) => <NewsCard key={item.id} item={item} />)}
+              </div>
             ) : (
-              <EmptyPanel title="Nenhuma oferta ativa detectada." description="Novos jogos gratuitos aparecem aqui automaticamente." />
+              <div className="games-page__grid">
+                {radarItems.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+              </div>
             )}
           </section>
 
@@ -584,12 +665,14 @@ export default function GamesPage() {
                   <h2>Campeonatos</h2>
                 </div>
               </div>
-              {championships.length ? (
-                <div className="games-page__list">
-                  {championships.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+              {championshipMatches.length ? (
+                <div className="games-page__championship-list">
+                  {championshipMatches.slice(0, 5).map((match) => <ChampionshipRow key={match.id} match={match} />)}
                 </div>
               ) : (
-                <EmptyPanel title="Nenhum campeonato em destaque agora." description="Os destaques aparecem quando houver notícias sincronizadas." />
+                <div className="games-page__list">
+                  {championshipNews.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                </div>
               )}
             </div>
 
@@ -600,13 +683,9 @@ export default function GamesPage() {
                   <h2>Últimas notícias</h2>
                 </div>
               </div>
-              {payload.news.length ? (
-                <div className="games-page__list">
-                  {payload.news.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
-                </div>
-              ) : (
-                <EmptyPanel title="Sem notícias disponíveis." description="Tente atualizar novamente em alguns instantes." />
-              )}
+              <div className="games-page__list">
+                {radarItems.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+              </div>
             </div>
           </section>
 
