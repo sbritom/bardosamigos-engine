@@ -1,165 +1,169 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  Activity,
+  Cake,
   CalendarDays,
-  Eye,
-  EyeOff,
+  Gamepad2,
   MessageCircle,
-  Music2,
-  Radio,
+  Medal,
   RefreshCw,
-  Tv,
-  UserRound,
-  Users,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import {
-  ActionButton,
-  HeroCard,
-  SectionHeader,
-  StatCard,
-  StatusBadge,
-} from '../../../design-system'
 import { useAuth } from '../../auth/AuthContext'
-import { loadCommunityPageData } from '../services/communityService'
+import {
+  loadCommunityPageData,
+  submitCommunityWallPost,
+} from '../services/communityService'
+import './communityPage.css'
 
-function formatNumber(value) {
-  return Number(value || 0).toLocaleString('pt-BR')
+const COMMUNITY_GAMES = [
+  {
+    id: 'quiz',
+    title: 'Quiz',
+    description: 'Perguntas e respostas iniciadas e respondidas diretamente no Xat.',
+  },
+  {
+    id: 'dice',
+    title: 'Dice',
+    description: 'Rodadas rápidas com resultado registrado a partir das atividades do Xat.',
+  },
+  {
+    id: 'music',
+    title: 'Adivinhe a música',
+    description: 'Desafios musicais para os participantes da sala.',
+  },
+  {
+    id: 'lucky',
+    title: 'Número da sorte',
+    description: 'Participação e resultado centralizados no Xat.',
+  },
+]
+
+const RULE_CATEGORIES = [
+  {
+    id: 'convivencia',
+    title: 'Convivência',
+    description: 'Regras gerais de respeito e convivência entre os participantes.',
+  },
+  {
+    id: 'xat',
+    title: 'Xat',
+    description: 'Orientações específicas para participação na sala oficial.',
+  },
+  {
+    id: 'games',
+    title: 'Games da Comunidade',
+    description: 'Regras das atividades, resultados e participação nos games do Xat.',
+  },
+  {
+    id: 'eventos',
+    title: 'Eventos',
+    description: 'Critérios de participação, horários e regulamentos dos eventos.',
+  },
+  {
+    id: 'conteudo',
+    title: 'Conteúdo',
+    description: 'Orientações para mensagens, recados, links e outros conteúdos.',
+  },
+  {
+    id: 'moderacao',
+    title: 'Moderação',
+    description: 'Como funcionam advertências, decisões e ações da equipe.',
+  },
+]
+
+function formatWallDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }
 
-function CommunityHero({ onChat, onEvents }) {
+function CommunitySectionHeader({ eyebrow, title, description, action }) {
   return (
-    <HeroCard className="bds-community-hero">
-      <div className="bds-community-hero__seal" aria-hidden="true">
-        <Users size={42} />
+    <div className="imortal-community-section-header">
+      <div>
+        <span>{eyebrow}</span>
+        <h2>{title}</h2>
+        {description ? <p>{description}</p> : null}
       </div>
-      <div className="bds-community-hero__content">
-        <StatusBadge status="COMUNIDADE">Comunidade aberta</StatusBadge>
-        <h1>Comunidade Bar dos Amigos</h1>
-        <p>
-          Um ponto de encontro do portal para descobrir eventos, acessar o chat e conhecer membros que escolheram aparecer publicamente.
-        </p>
-        <div className="bds-community-hero__actions">
-          <ActionButton icon={<MessageCircle size={18} />} onClick={onChat}>Entrar no Chat Oficial</ActionButton>
-          <ActionButton variant="outline" icon={<CalendarDays size={18} />} onClick={onEvents}>Ver eventos</ActionButton>
-        </div>
-      </div>
-    </HeroCard>
+      {action ? <div>{action}</div> : null}
+    </div>
   )
+}
+
+function EmptyState({ children }) {
+  return <div className="imortal-community-empty">{children}</div>
 }
 
 function EventCard({ event, onOpen }) {
-  const dateLabel = event.homeDateLabel || event.dateLabel || 'Programacao'
-  const timeLabel = event.homeTimeLabel || event.timeLabel || ''
+  const date = event.homeDateLabel || event.dateLabel || 'Data a definir'
+  const time = event.homeTimeLabel || event.timeLabel || ''
 
   return (
-    <article className="rounded-3xl border border-white/10 bg-[var(--surface)] p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)]/12 text-[var(--primary)]">
-          <CalendarDays size={22} />
-        </div>
-        <StatusBadge status={event.featured ? 'DESTAQUE' : 'EVENTO'}>
-          {event.featured ? 'Destaque' : 'Evento'}
-        </StatusBadge>
+    <article className="imortal-community-event-card">
+      <div className="imortal-community-event-card__top">
+        <span><CalendarDays size={15} /> Evento</span>
+        {event.featured ? <strong>Destaque</strong> : null}
       </div>
-      <h3 className="mt-4 text-lg font-black text-[var(--text)]">{event.title}</h3>
-      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--text-secondary)]">
-        {event.summary || event.description || 'Confira os detalhes na agenda do Bar dos Amigos.'}
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{dateLabel}</span>
-        {timeLabel && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{timeLabel}</span>}
+      <h3>{event.title}</h3>
+      <p>{event.summary || event.description || 'Confira os detalhes na agenda oficial.'}</p>
+      <div className="imortal-community-event-card__meta">
+        <span>{date}</span>
+        {time ? <span>{time}</span> : null}
       </div>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="mt-5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-[var(--text)] transition hover:bg-white/10"
-      >
-        Ver na agenda
-      </button>
+      <button type="button" onClick={onOpen}>Ver evento</button>
     </article>
   )
 }
 
-function MemberCard({ member }) {
+function WallCard({ post }) {
   return (
-    <article className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[var(--primary)]/12 text-[var(--primary)]">
-        {member.avatarUrl ? (
-          <img src={member.avatarUrl} alt={`Foto de ${member.displayName}`} className="h-full w-full object-cover" />
-        ) : (
-          <UserRound size={26} />
-        )}
+    <article className="imortal-community-wall-post">
+      <div className="imortal-community-wall-post__meta">
+        <strong>{post.authorName || 'Imortal'}</strong>
+        <span>{post.source === 'xat' ? 'Xat' : formatWallDate(post.createdAt)}</span>
       </div>
-      <div className="min-w-0">
-        <strong className="block truncate text-[var(--text)]">{member.displayName}</strong>
-        <span className="mt-0.5 block truncate text-sm font-semibold text-[var(--primary)]">
-          {member.username ? `@${member.username}` : 'Membro da comunidade'}
-        </span>
-        {member.bio && (
-          <p className="mt-2 line-clamp-2 text-sm leading-5 text-[var(--text-secondary)]">{member.bio}</p>
-        )}
-      </div>
+      <p>{post.body}</p>
+      {post.source === 'xat' && post.createdAt ? (
+        <small>{formatWallDate(post.createdAt)}</small>
+      ) : null}
     </article>
-  )
-}
-
-function ParticipationCard({ isAuthenticated, visible, busy, onLogin, onToggle }) {
-  return (
-    <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-sm">
-      <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Sua presenca</span>
-      <h2 className="mt-1 text-xl font-black text-[var(--text)]">
-        {isAuthenticated ? 'Voce decide se quer aparecer' : 'Participe quando quiser'}
-      </h2>
-      <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-        {isAuthenticated
-          ? 'A lista publica mostra somente nome, @usuario, foto e bio. Seu e-mail e outros dados da conta nunca aparecem aqui.'
-          : 'Nao precisa criar conta para acessar a comunidade, eventos ou chat. A conta e usada apenas se voce quiser ter perfil e aparecer na lista de membros.'}
-      </p>
-
-      {isAuthenticated ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onToggle}
-          className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold transition disabled:opacity-60 ${visible ? 'border border-white/15 bg-white/5 text-[var(--text)] hover:bg-white/10' : 'bg-[var(--primary)] text-white hover:brightness-110'}`}
-        >
-          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
-          {busy ? 'Salvando...' : visible ? 'Ocultar meu perfil da comunidade' : 'Aparecer na comunidade'}
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onLogin}
-          className="mt-5 w-full rounded-xl bg-[var(--primary)] px-4 py-3 font-bold text-white transition hover:brightness-110"
-        >
-          Entrar para configurar meu perfil
-        </button>
-      )}
-    </section>
   )
 }
 
 export default function CommunityPage() {
   const navigate = useNavigate()
-  const {
-    isAuthenticated,
-    preferences,
-    openAuth,
-    updatePreferences,
-  } = useAuth()
-  const [data, setData] = useState({ stats: {}, members: [], events: [], errors: [] })
+  const { isAuthenticated, openAuth } = useAuth()
+  const [data, setData] = useState({
+    events: [],
+    birthdays: [],
+    ranking: null,
+    achievements: [],
+    wall: [],
+    xat: { connected: false, onlineCount: null },
+    errors: [],
+  })
   const [loading, setLoading] = useState(true)
-  const [visibilityBusy, setVisibilityBusy] = useState(false)
-  const [feedback, setFeedback] = useState('')
-
-  const communityVisible = preferences?.community?.visible === true
+  const [wallText, setWallText] = useState('')
+  const [wallBusy, setWallBusy] = useState(false)
+  const [wallFeedback, setWallFeedback] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const next = await loadCommunityPageData()
-      setData(next)
+      setData(await loadCommunityPageData())
     } finally {
       setLoading(false)
     }
@@ -169,147 +173,283 @@ export default function CommunityPage() {
     load()
   }, [load])
 
-  async function toggleVisibility() {
-    setVisibilityBusy(true)
-    setFeedback('')
+  const onlineLabel = useMemo(() => {
+    if (data.xat?.connected && Number.isFinite(Number(data.xat?.onlineCount))) {
+      return String(Number(data.xat.onlineCount))
+    }
+    return '—'
+  }, [data.xat])
+
+  async function handleWallSubmit(event) {
+    event.preventDefault()
+
+    if (!isAuthenticated) {
+      openAuth('Entre para publicar um recado no mural.', 'login')
+      return
+    }
+
+    setWallBusy(true)
+    setWallFeedback('')
+
     try {
-      await updatePreferences({
-        community: {
-          ...(preferences?.community || {}),
-          visible: !communityVisible,
-        },
-      })
-      setFeedback(communityVisible
-        ? 'Seu perfil nao aparecera mais na lista publica.'
-        : 'Seu perfil agora pode aparecer na comunidade.')
+      await submitCommunityWallPost({ body: wallText })
+      setWallText('')
+      setWallFeedback('Recado publicado.')
       await load()
     } catch (error) {
-      setFeedback(error.message || 'Nao foi possivel alterar sua visibilidade agora.')
+      setWallFeedback(error.message || 'Não foi possível publicar o recado agora.')
     } finally {
-      setVisibilityBusy(false)
+      setWallBusy(false)
     }
   }
 
-  const stats = useMemo(() => ([
-    { label: 'Membros cadastrados', value: formatNumber(data.stats.members), hint: 'contas ativas no portal', icon: <Users size={18} /> },
-    { label: 'Eventos publicados', value: formatNumber(data.stats.publishedEvents), hint: 'agenda oficial', icon: <CalendarDays size={18} /> },
-    { label: 'Canais de TV', value: formatNumber(data.stats.tvChannels), hint: 'disponiveis no portal', icon: <Tv size={18} /> },
-    { label: 'Pedidos em 7 dias', value: formatNumber(data.stats.musicRequests7d), hint: 'participacao na radio', icon: <Music2 size={18} /> },
-  ]), [data.stats])
-
   return (
-    <main className="bds-community-page">
-      <CommunityHero onChat={() => navigate('/chat')} onEvents={() => navigate('/events')} />
+    <main className="imortal-community-page" aria-busy={loading}>
+      <header className="imortal-community-hero">
+        <div className="imortal-community-hero__content">
+          <span className="imortal-community-eyebrow">
+            <MessageCircle size={15} />
+            COMUNIDADE IMORTAL0800
+          </span>
+          <h1>A comunidade continua no Xat.</h1>
+          <p>
+            Games, ranking, eventos, conquistas e recados organizados em um só lugar,
+            sempre conectados à sala oficial.
+          </p>
+          <div className="imortal-community-hero__actions">
+            <button type="button" onClick={() => navigate('/chat')}>
+              <MessageCircle size={17} />
+              Entrar no Xat
+            </button>
+            <button type="button" className="is-secondary" onClick={() => navigate('/events')}>
+              <CalendarDays size={17} />
+              Ver eventos
+            </button>
+          </div>
+        </div>
 
-      <section className="bds-community-section">
-        <SectionHeader
-          eyebrow="Dados reais do portal"
-          title="Comunidade em numeros"
-          subtitle="Sem estimativas de usuarios online ou mensagens do Xat: mostramos apenas o que o nosso sistema consegue medir de verdade."
-          action={(
-            <ActionButton variant="outline" icon={<RefreshCw size={16} />} onClick={load} disabled={loading}>
-              Atualizar
-            </ActionButton>
-          )}
+        <div className="imortal-community-active-widget" aria-label="Imortais ativos">
+          <div className="imortal-community-active-widget__icon">
+            <Activity size={22} />
+          </div>
+          <span>Imortais ativos</span>
+          <strong>{onlineLabel}</strong>
+          <small>
+            {data.xat?.connected
+              ? 'Agora no Xat'
+              : 'Contagem será sincronizada diretamente com o Xat'}
+          </small>
+        </div>
+      </header>
+
+      <section className="imortal-community-section">
+        <CommunitySectionHeader
+          eyebrow="Interação no Xat"
+          title="Games da Comunidade"
+          description="Os games acontecem no Xat; o portal organiza status, resultados e histórico."
         />
-        <div className="bds-community-stats-grid">
-          {stats.map((item) => <StatCard key={item.label} {...item} />)}
+
+        <div className="imortal-community-games-grid">
+          {COMMUNITY_GAMES.map((game) => (
+            <article key={game.id} className="imortal-community-game-card">
+              <div className="imortal-community-game-card__icon">
+                <Gamepad2 size={20} />
+              </div>
+              <span>Via Xat</span>
+              <h3>{game.title}</h3>
+              <p>{game.description}</p>
+              <small>Integração em preparação</small>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="bds-community-section">
-        <SectionHeader
-          eyebrow="Agenda oficial"
-          title="Proximos eventos"
-          subtitle="Eventos publicados no mesmo banco usado pela pagina de Eventos."
-          action={<ActionButton onClick={() => navigate('/events')}>Ver agenda completa</ActionButton>}
+      <section className="imortal-community-grid-section">
+        <div className="imortal-community-panel">
+          <CommunitySectionHeader
+            eyebrow="Competição"
+            title="Ranking de Imortais"
+            description="Resultados dos Games da Comunidade sincronizados com o Xat."
+          />
+
+          {data.ranking?.entries?.length ? (
+            <div className="imortal-community-ranking">
+              {data.ranking.entries.slice(0, 8).map((entry) => (
+                <div key={entry.id} className="imortal-community-ranking__row">
+                  <strong>{entry.position || '—'}</strong>
+                  <span>{entry.displayName || entry.username || 'Imortal'}</span>
+                  <b>{entry.score}</b>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState>
+              O ranking aparecerá quando os resultados dos Games da Comunidade começarem a ser enviados pelo Xat.
+            </EmptyState>
+          )}
+        </div>
+
+        <div className="imortal-community-panel">
+          <CommunitySectionHeader
+            eyebrow="Participação"
+            title="Conquistas"
+            description="Selos conquistados nas atividades da comunidade."
+          />
+
+          {data.achievements?.length ? (
+            <div className="imortal-community-achievements">
+              {data.achievements.slice(0, 6).map((achievement) => (
+                <div key={achievement.id}>
+                  <Medal size={18} />
+                  <span>
+                    <strong>{achievement.name}</strong>
+                    <small>{achievement.description || 'Conquista da comunidade'}</small>
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState>
+              As conquistas serão liberadas conforme os Games e eventos do Xat forem integrados.
+            </EmptyState>
+          )}
+        </div>
+      </section>
+
+      <section className="imortal-community-section">
+        <CommunitySectionHeader
+          eyebrow="Agenda"
+          title="Eventos do IMORTAL0800"
+          description="Os próximos eventos publicados no portal."
+          action={(
+            <button className="imortal-community-inline-action" type="button" onClick={() => navigate('/events')}>
+              Ver agenda
+            </button>
+          )}
         />
+
         {loading ? (
-          <div className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 text-sm text-[var(--text-secondary)]">Carregando eventos...</div>
-        ) : data.events.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {data.events.map((event) => (
+          <EmptyState>Carregando eventos...</EmptyState>
+        ) : data.events?.length ? (
+          <div className="imortal-community-events-grid">
+            {data.events.slice(0, 3).map((event) => (
               <EventCard key={event.id} event={event} onOpen={() => navigate('/events')} />
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-white/15 bg-[var(--surface)] p-6">
-            <p className="font-bold text-[var(--text)]">Nenhum evento publicado agora.</p>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">Quando a equipe publicar um evento, ele aparecera aqui automaticamente.</p>
-          </div>
+          <EmptyState>Nenhum evento publicado no momento.</EmptyState>
         )}
       </section>
 
-      <section className="bds-community-section">
-        <SectionHeader
-          eyebrow="Membros"
-          title="Quem escolheu aparecer"
-          subtitle="Participacao publica e opcional. Perfis privados nunca sao listados."
-        />
-        <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-          <div className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
-            {loading ? (
-              <p className="text-sm text-[var(--text-secondary)]">Carregando membros...</p>
-            ) : data.members.length ? (
-              <div className="grid gap-3 md:grid-cols-2">
-                {data.members.map((member) => <MemberCard key={member.id} member={member} />)}
-              </div>
+      <section className="imortal-community-grid-section imortal-community-grid-section--social">
+        <div className="imortal-community-panel">
+          <CommunitySectionHeader
+            eyebrow="Comunidade"
+            title="Mural de Recados"
+            description="Recados curtos da comunidade, sem transformar a página em uma rede social."
+          />
+
+          <form className="imortal-community-wall-form" onSubmit={handleWallSubmit}>
+            <textarea
+              rows={3}
+              minLength={2}
+              maxLength={280}
+              value={wallText}
+              onChange={(event) => setWallText(event.target.value)}
+              placeholder={isAuthenticated ? 'Escreva um recado...' : 'Entre para publicar um recado'}
+              disabled={wallBusy || !isAuthenticated}
+            />
+            <div>
+              <small>{wallText.length}/280</small>
+              <button
+                type="submit"
+                disabled={wallBusy || (isAuthenticated && wallText.trim().length < 2)}
+              >
+                <Send size={15} />
+                {wallBusy ? 'Publicando...' : isAuthenticated ? 'Publicar' : 'Entrar para publicar'}
+              </button>
+            </div>
+          </form>
+
+          {wallFeedback ? <p className="imortal-community-feedback">{wallFeedback}</p> : null}
+
+          <div className="imortal-community-wall-list">
+            {data.wall?.length ? (
+              data.wall.slice(0, 8).map((post) => <WallCard key={post.id} post={post} />)
             ) : (
-              <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-5">
-                <p className="font-bold text-[var(--text)]">Ainda nao ha perfis publicos.</p>
-                <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">A lista cresce somente quando cada pessoa escolhe aparecer.</p>
-              </div>
+              <EmptyState>O mural ainda não tem recados.</EmptyState>
             )}
           </div>
+        </div>
 
-          <ParticipationCard
-            isAuthenticated={isAuthenticated}
-            visible={communityVisible}
-            busy={visibilityBusy}
-            onLogin={() => openAuth('Entre para escolher se seu perfil deve aparecer na comunidade.', 'login')}
-            onToggle={toggleVisibility}
+        <div className="imortal-community-panel">
+          <CommunitySectionHeader
+            eyebrow="Calendário"
+            title="Aniversariantes do mês"
+            description="Apenas participantes que autorizaram a exibição aparecem aqui."
           />
+
+          {data.birthdays?.length ? (
+            <div className="imortal-community-birthdays">
+              {data.birthdays.map((person) => (
+                <div key={person.id}>
+                  <span><Cake size={17} /></span>
+                  <strong>{String(person.day).padStart(2, '0')}</strong>
+                  <p>{person.displayName || person.username || 'Imortal'}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState>Nenhum aniversário público neste mês.</EmptyState>
+          )}
         </div>
-        {feedback && (
-          <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-[var(--text)]">{feedback}</p>
-        )}
       </section>
 
-      <section className="bds-community-section">
-        <SectionHeader
-          eyebrow="Participe"
-          title="Onde a comunidade acontece"
-          subtitle="O portal organiza os acessos; a conversa continua no Chat Oficial e as atividades nas areas correspondentes."
+      <section className="imortal-community-section">
+        <CommunitySectionHeader
+          eyebrow="Organização"
+          title="Regras"
+          description="As regras ficam separadas por categoria para facilitar a consulta."
         />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <button type="button" onClick={() => navigate('/chat')} className="rounded-3xl border border-white/10 bg-[var(--surface)] p-5 text-left transition hover:border-[var(--primary)]/40">
-            <MessageCircle size={22} className="text-[var(--primary)]" />
-            <strong className="mt-4 block text-[var(--text)]">Chat Oficial</strong>
-            <span className="mt-1 block text-sm leading-6 text-[var(--text-secondary)]">Entre na sala oficial sem sair do portal.</span>
-          </button>
-          <button type="button" onClick={() => navigate('/events')} className="rounded-3xl border border-white/10 bg-[var(--surface)] p-5 text-left transition hover:border-[var(--primary)]/40">
-            <CalendarDays size={22} className="text-[var(--primary)]" />
-            <strong className="mt-4 block text-[var(--text)]">Eventos</strong>
-            <span className="mt-1 block text-sm leading-6 text-[var(--text-secondary)]">Confira a programacao oficial e as proximas atividades.</span>
-          </button>
-          <button type="button" onClick={() => navigate('/radio')} className="rounded-3xl border border-white/10 bg-[var(--surface)] p-5 text-left transition hover:border-[var(--primary)]/40">
-            <Radio size={22} className="text-[var(--primary)]" />
-            <strong className="mt-4 block text-[var(--text)]">Radio</strong>
-            <span className="mt-1 block text-sm leading-6 text-[var(--text-secondary)]">Ouça a radio e envie pedidos de musica, inclusive como visitante.</span>
-          </button>
-          <button type="button" onClick={() => navigate('/profile')} className="rounded-3xl border border-white/10 bg-[var(--surface)] p-5 text-left transition hover:border-[var(--primary)]/40">
-            <UserRound size={22} className="text-[var(--primary)]" />
-            <strong className="mt-4 block text-[var(--text)]">Meu Perfil</strong>
-            <span className="mt-1 block text-sm leading-6 text-[var(--text-secondary)]">Edite seu nome, @usuario, foto, bio e preferencias.</span>
-          </button>
+
+        <div className="imortal-community-rules">
+          {RULE_CATEGORIES.map((category) => (
+            <details key={category.id}>
+              <summary>
+                <span className="imortal-community-rules__icon">
+                  <ShieldCheck size={18} />
+                </span>
+                <span>
+                  <strong>{category.title}</strong>
+                  <small>{category.description}</small>
+                </span>
+                <Sparkles size={15} className="imortal-community-rules__marker" />
+              </summary>
+              <div>
+                O regulamento desta categoria será publicado pela equipe do IMORTAL0800.
+              </div>
+            </details>
+          ))}
         </div>
       </section>
 
-      {data.errors.length > 0 && (
-        <p className="bds-community-section rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Parte dos dados da comunidade nao pode ser atualizada agora. O chat e as demais areas continuam disponiveis.
+      <section className="imortal-community-xat-cta">
+        <div>
+          <span>XAT OFICIAL</span>
+          <strong>A resenha continua por lá.</strong>
+          <p>Entre na sala para participar dos Games, eventos e atividades da comunidade.</p>
+        </div>
+        <button type="button" onClick={() => navigate('/chat')}>
+          <MessageCircle size={18} />
+          Entrar no Xat
+        </button>
+      </section>
+
+      {data.errors?.length ? (
+        <p className="imortal-community-page-error">
+          Parte dos dados não pôde ser atualizada agora. As demais áreas continuam disponíveis.
         </p>
-      )}
+      ) : null}
     </main>
   )
 }

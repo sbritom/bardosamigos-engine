@@ -17,19 +17,95 @@ function getSupabaseAdmin() {
   })
 }
 
-function isCommunityVisible(preferences) {
+function isBirthdayVisible(preferences) {
   if (!preferences || typeof preferences !== 'object' || Array.isArray(preferences)) return false
-  return preferences.community?.visible === true
+  return preferences.community?.birthdayVisible === true
 }
 
-function publicMember(profile) {
+function mapBirthday(profile) {
+  const value = String(profile.birth_date || '')
+  const parts = value.split('-')
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+
   return {
     id: profile.id,
-    displayName: profile.display_name || 'Amigo do Bar',
+    displayName: profile.display_name || '',
     username: profile.username || '',
-    avatarUrl: profile.avatar_url || '',
-    bio: profile.bio || '',
+    month,
+    day,
   }
+}
+
+async function getBirthdays(supabase) {
+  const month = new Date().getMonth() + 1
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id,display_name,username,birth_date,preferences,status')
+    .eq('status', 'active')
+    .not('birth_date', 'is', null)
+    .limit(500)
+
+  if (error) throw error
+
+  return (data || [])
+    .filter((profile) => isBirthdayVisible(profile.preferences))
+    .map(mapBirthday)
+    .filter((profile) => profile.month === month && profile.day > 0)
+    .sort((left, right) => left.day - right.day)
+}
+
+async function getCommunityRanking(supabase) {
+  const { data: board, error: boardError } = await supabase
+    .from('ranking_boards')
+    .select('id,name,slug,scope,status,metadata,updated_at')
+    .eq('scope', 'community')
+    .eq('status', 'published')
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (boardError) throw boardError
+  if (!board) return null
+
+  const { data: entries, error: entriesError } = await supabase
+    .from('ranking_entries')
+    .select('id,position,score,metadata,profile_id,profiles(display_name,username)')
+    .eq('ranking_board_id', board.id)
+    .order('position', { ascending: true })
+    .order('score', { ascending: false })
+    .limit(20)
+
+  if (entriesError) throw entriesError
+
+  return {
+    id: board.id,
+    name: board.name,
+    slug: board.slug,
+    entries: (entries || []).map((entry) => ({
+      id: entry.id,
+      position: entry.position,
+      score: entry.score,
+      displayName: entry.profiles?.display_name || entry.metadata?.displayName || '',
+      username: entry.profiles?.username || entry.metadata?.username || '',
+    })),
+  }
+}
+
+async function getCommunityAchievements(supabase) {
+  const { data, error } = await supabase
+    .from('competition_achievements')
+    .select('id,name,slug,description,metadata')
+    .eq('is_active', true)
+    .is('deleted_at', null)
+    .contains('metadata', { scope: 'community' })
+    .order('created_at', { ascending: false })
+    .limit(12)
+
+  if (error) throw error
+  return data || []
 }
 
 export default async function handler(request, response) {
@@ -53,46 +129,31 @@ export default async function handler(request, response) {
 
   try {
     const supabase = getSupabaseAdmin()
-    const since = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString()
 
-    const [membersCount, eventsCount, tvCount, requestsCount, profiles] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').is('deleted_at', null),
-      supabase.from('tv_channels').select('id', { count: 'exact', head: true }).eq('enabled', true),
-      supabase.from('radio_music_requests').select('id', { count: 'exact', head: true }).gte('created_at', since),
-      supabase
-        .from('profiles')
-        .select('id,display_name,username,avatar_url,bio,preferences,created_at,status')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(200),
+    const [birthdays, ranking, achievements] = await Promise.all([
+      getBirthdays(supabase),
+      getCommunityRanking(supabase),
+      getCommunityAchievements(supabase),
     ])
 
-    const failed = [membersCount, eventsCount, tvCount, requestsCount, profiles].find((item) => item.error)
-    if (failed?.error) throw failed.error
-
-    const visibleMembers = (profiles.data || [])
-      .filter((profile) => isCommunityVisible(profile.preferences))
-      .map(publicMember)
-      .slice(0, 12)
-
+    response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
     response.status(200).json({
       ok: true,
       data: {
-        stats: {
-          members: membersCount.count || 0,
-          publishedEvents: eventsCount.count || 0,
-          tvChannels: tvCount.count || 0,
-          musicRequests7d: requestsCount.count || 0,
+        birthdays,
+        ranking,
+        achievements,
+        xat: {
+          connected: false,
+          onlineCount: null,
         },
-        members: visibleMembers,
       },
     })
   } catch (error) {
     console.error('Community overview API error:', error.message)
     response.status(500).json({
       ok: false,
-      error: 'Nao foi possivel carregar os dados da comunidade agora.',
+      error: 'Não foi possível carregar os dados da comunidade agora.',
     })
   }
 }

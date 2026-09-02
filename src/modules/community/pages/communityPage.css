@@ -1,0 +1,681 @@
+.imortal-community-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 48px;
+  display: grid;
+  gap: 18px;
+  color: #f5f9ff;
+}
+
+.imortal-community-hero,
+.imortal-community-panel,
+.imortal-community-section,
+.imortal-community-xat-cta {
+  border: 1px solid rgba(42, 143, 255, 0.16);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(11, 120, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(8, 15, 25, 0.97), rgba(4, 8, 14, 0.99));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+}
+
+.imortal-community-hero {
+  min-height: 250px;
+  padding: 30px;
+  border-radius: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: center;
+  gap: 28px;
+}
+
+.imortal-community-eyebrow,
+.imortal-community-section-header > div:first-child > span,
+.imortal-community-game-card > span,
+.imortal-community-xat-cta span {
+  color: #5fc7ff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.imortal-community-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.imortal-community-hero h1 {
+  margin: 10px 0 8px;
+  max-width: 720px;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.imortal-community-hero p {
+  max-width: 690px;
+  margin: 0;
+  color: #8ea2bf;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.imortal-community-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.imortal-community-hero__actions button,
+.imortal-community-xat-cta button,
+.imortal-community-inline-action,
+.imortal-community-event-card button,
+.imortal-community-wall-form button {
+  min-height: 42px;
+  border: 1px solid rgba(61, 168, 255, 0.28);
+  border-radius: 13px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  background: linear-gradient(135deg, #0b78ff, #0759cb);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.imortal-community-hero__actions button:hover,
+.imortal-community-xat-cta button:hover,
+.imortal-community-inline-action:hover,
+.imortal-community-event-card button:hover,
+.imortal-community-wall-form button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.imortal-community-hero__actions .is-secondary {
+  color: #b9c8dd;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.imortal-community-active-widget {
+  min-height: 170px;
+  padding: 20px;
+  border: 1px solid rgba(42, 143, 255, 0.16);
+  border-radius: 20px;
+  background: rgba(5, 14, 25, 0.72);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.imortal-community-active-widget__icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 15px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.1);
+}
+
+.imortal-community-active-widget > span {
+  color: #8196b5;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.imortal-community-active-widget > strong {
+  margin: 3px 0;
+  color: #fff;
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.imortal-community-active-widget > small {
+  color: #607694;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.imortal-community-section,
+.imortal-community-panel {
+  padding: 24px;
+  border-radius: 22px;
+}
+
+.imortal-community-section-header {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.imortal-community-section-header h2 {
+  margin: 5px 0 0;
+  color: #f5f9ff;
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  letter-spacing: -0.025em;
+}
+
+.imortal-community-section-header p {
+  max-width: 680px;
+  margin: 7px 0 0;
+  color: #768ba9;
+  font-size: 0.79rem;
+  line-height: 1.55;
+}
+
+.imortal-community-games-grid,
+.imortal-community-events-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.imortal-community-events-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.imortal-community-game-card,
+.imortal-community-event-card,
+.imortal-community-wall-post {
+  border: 1px solid rgba(42, 143, 255, 0.12);
+  border-radius: 17px;
+  background: rgba(7, 17, 30, 0.7);
+}
+
+.imortal-community-game-card {
+  min-height: 190px;
+  padding: 17px;
+}
+
+.imortal-community-game-card__icon {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.1);
+}
+
+.imortal-community-game-card h3 {
+  margin: 6px 0 5px;
+  color: #f5f9ff;
+  font-size: 1rem;
+}
+
+.imortal-community-game-card p {
+  margin: 0;
+  color: #7186a4;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.imortal-community-game-card > small {
+  display: block;
+  margin-top: 15px;
+  color: #5b7190;
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.imortal-community-grid-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.imortal-community-grid-section--social {
+  grid-template-columns: 1.35fr 0.65fr;
+}
+
+.imortal-community-empty {
+  min-height: 92px;
+  padding: 18px;
+  border: 1px dashed rgba(42, 143, 255, 0.14);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  color: #6f83a1;
+  background: rgba(4, 11, 20, 0.45);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.imortal-community-ranking {
+  display: grid;
+  gap: 7px;
+}
+
+.imortal-community-ranking__row {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(42, 143, 255, 0.1);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  background: rgba(7, 17, 30, 0.58);
+}
+
+.imortal-community-ranking__row > strong {
+  color: #5fc7ff;
+}
+
+.imortal-community-ranking__row > span {
+  overflow: hidden;
+  color: #dce7f7;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-community-ranking__row > b {
+  color: #89a0bf;
+  font-size: 0.73rem;
+}
+
+.imortal-community-achievements {
+  display: grid;
+  gap: 8px;
+}
+
+.imortal-community-achievements > div {
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1px solid rgba(42, 143, 255, 0.1);
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #5fc7ff;
+  background: rgba(7, 17, 30, 0.58);
+}
+
+.imortal-community-achievements span {
+  min-width: 0;
+}
+
+.imortal-community-achievements strong,
+.imortal-community-achievements small {
+  display: block;
+}
+
+.imortal-community-achievements strong {
+  color: #dce7f7;
+  font-size: 0.77rem;
+}
+
+.imortal-community-achievements small {
+  margin-top: 2px;
+  color: #6f83a1;
+  font-size: 0.66rem;
+}
+
+.imortal-community-event-card {
+  padding: 17px;
+}
+
+.imortal-community-event-card__top,
+.imortal-community-event-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.imortal-community-event-card__top {
+  justify-content: space-between;
+}
+
+.imortal-community-event-card__top span,
+.imortal-community-event-card__top strong,
+.imortal-community-event-card__meta span {
+  color: #7087a7;
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.imortal-community-event-card__top span {
+  display: inline-flex;
+  align-items: center;
+  color: #5fc7ff;
+}
+
+.imortal-community-event-card h3 {
+  margin: 14px 0 6px;
+  color: #f5f9ff;
+  font-size: 0.95rem;
+}
+
+.imortal-community-event-card p {
+  min-height: 48px;
+  margin: 0;
+  color: #7186a4;
+  font-size: 0.73rem;
+  line-height: 1.55;
+}
+
+.imortal-community-event-card__meta {
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.imortal-community-event-card__meta span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.imortal-community-event-card button {
+  width: 100%;
+  min-height: 37px;
+  background: rgba(11, 120, 255, 0.08);
+  color: #8cc8ff;
+}
+
+.imortal-community-wall-form {
+  margin-bottom: 15px;
+}
+
+.imortal-community-wall-form textarea {
+  width: 100%;
+  min-height: 88px;
+  resize: vertical;
+  border: 1px solid rgba(42, 143, 255, 0.13);
+  border-radius: 15px;
+  padding: 13px 14px;
+  outline: 0;
+  color: #f5f9ff;
+  background: rgba(4, 11, 20, 0.7);
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.imortal-community-wall-form textarea:focus {
+  border-color: rgba(21, 201, 255, 0.42);
+  box-shadow: 0 0 0 3px rgba(21, 201, 255, 0.05);
+}
+
+.imortal-community-wall-form textarea:disabled {
+  opacity: 0.55;
+}
+
+.imortal-community-wall-form > div {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.imortal-community-wall-form small {
+  color: #526884;
+  font-size: 0.66rem;
+}
+
+.imortal-community-wall-form button {
+  min-height: 37px;
+  font-size: 0.7rem;
+}
+
+.imortal-community-wall-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.imortal-community-feedback {
+  margin: 0 0 12px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  color: #a7d5ff;
+  background: rgba(11, 120, 255, 0.08);
+  font-size: 0.7rem;
+}
+
+.imortal-community-wall-list {
+  display: grid;
+  gap: 8px;
+}
+
+.imortal-community-wall-post {
+  padding: 12px 13px;
+}
+
+.imortal-community-wall-post__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.imortal-community-wall-post__meta strong {
+  color: #bcd8f5;
+  font-size: 0.72rem;
+}
+
+.imortal-community-wall-post__meta span,
+.imortal-community-wall-post > small {
+  color: #526884;
+  font-size: 0.61rem;
+}
+
+.imortal-community-wall-post p {
+  margin: 7px 0 0;
+  color: #8ea2bf;
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.imortal-community-birthdays {
+  display: grid;
+  gap: 8px;
+}
+
+.imortal-community-birthdays > div {
+  min-height: 48px;
+  padding: 9px 11px;
+  border: 1px solid rgba(42, 143, 255, 0.1);
+  border-radius: 13px;
+  display: grid;
+  grid-template-columns: 32px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  background: rgba(7, 17, 30, 0.58);
+}
+
+.imortal-community-birthdays > div > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.1);
+}
+
+.imortal-community-birthdays strong {
+  color: #fff;
+  font-size: 0.83rem;
+}
+
+.imortal-community-birthdays p {
+  margin: 0;
+  overflow: hidden;
+  color: #8297b5;
+  font-size: 0.73rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-community-rules {
+  display: grid;
+  gap: 8px;
+}
+
+.imortal-community-rules details {
+  border: 1px solid rgba(42, 143, 255, 0.11);
+  border-radius: 14px;
+  background: rgba(7, 17, 30, 0.58);
+  overflow: hidden;
+}
+
+.imortal-community-rules summary {
+  min-height: 58px;
+  padding: 10px 13px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.imortal-community-rules summary::-webkit-details-marker {
+  display: none;
+}
+
+.imortal-community-rules__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.09);
+}
+
+.imortal-community-rules summary strong,
+.imortal-community-rules summary small {
+  display: block;
+}
+
+.imortal-community-rules summary strong {
+  color: #dce7f7;
+  font-size: 0.77rem;
+}
+
+.imortal-community-rules summary small {
+  margin-top: 3px;
+  color: #647a99;
+  font-size: 0.65rem;
+}
+
+.imortal-community-rules__marker {
+  color: #4e6788;
+}
+
+.imortal-community-rules details > div {
+  padding: 0 15px 14px 61px;
+  color: #7086a4;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.imortal-community-xat-cta {
+  padding: 22px 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.imortal-community-xat-cta strong {
+  display: block;
+  margin-top: 4px;
+  color: #f5f9ff;
+  font-size: 1.1rem;
+}
+
+.imortal-community-xat-cta p {
+  margin: 5px 0 0;
+  color: #7186a4;
+  font-size: 0.75rem;
+}
+
+.imortal-community-page-error {
+  margin: 0;
+  padding: 10px 13px;
+  border: 1px solid rgba(255, 196, 87, 0.18);
+  border-radius: 12px;
+  color: #d6b879;
+  background: rgba(255, 174, 0, 0.05);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 980px) {
+  .imortal-community-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-community-active-widget {
+    min-height: auto;
+  }
+
+  .imortal-community-games-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .imortal-community-events-grid,
+  .imortal-community-grid-section,
+  .imortal-community-grid-section--social {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .imortal-community-page {
+    width: min(100% - 20px, 1180px);
+    padding-top: 8px;
+  }
+
+  .imortal-community-hero,
+  .imortal-community-section,
+  .imortal-community-panel {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .imortal-community-games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-community-section-header,
+  .imortal-community-xat-cta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .imortal-community-section-header {
+    display: flex;
+  }
+
+  .imortal-community-xat-cta button,
+  .imortal-community-inline-action {
+    width: 100%;
+  }
+
+  .imortal-community-hero__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .imortal-community-rules details > div {
+    padding-left: 15px;
+  }
+}
