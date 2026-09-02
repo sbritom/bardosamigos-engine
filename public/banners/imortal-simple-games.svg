@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1616" height="140" viewBox="0 0 1616 140">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1616" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#03060B"/>
+      <stop offset=".55" stop-color="#07101C"/>
+      <stop offset="1" stop-color="#0C1528"/>
+    </linearGradient>
+    <linearGradient id="a" x1="1320" y1="40" x2="1450" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B78FF"/>
+      <stop offset=".55" stop-color="#15C9FF"/>
+      <stop offset="1" stop-color="#8D5CFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1616" height="140" fill="url(#bg)"/>
+  <circle cx="1385" cy="70" r="94" fill="#8D5CFF" fill-opacity=".05"/>
+  <path d="M1328 62c4-17 18-28 35-28h44c17 0 31 11 35 28l9 36c3 13-11 23-22 15l-22-17h-44l-22 17c-11 8-25-2-22-15l9-36Z" fill="none" stroke="url(#a)" stroke-width="3"/>
+  <path d="M1353 58v24m-12-12h24" stroke="#15C9FF" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="1412" cy="64" r="4" fill="#8D5CFF"/><circle cx="1424" cy="78" r="4" fill="#15C9FF"/>
+  <text x="280" y="67" fill="#F5F9FF" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800">GAMES</text>
+  <text x="282" y="92" fill="#8FA4BC" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600">Esports e novidades.</text>
+</svg>
