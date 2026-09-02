@@ -92,7 +92,7 @@ function MyPredictionCard({ prediction }) {
   )
 }
 
-function RankingView({ ranking, loading, error }) {
+function RankingView({ ranking, loading, error, isComplete = false }) {
   if (loading) return <Loading label="Carregando ranking" />
   if (error) return <Alert status="danger" title="Erro">{error}</Alert>
 
@@ -112,7 +112,7 @@ function RankingView({ ranking, loading, error }) {
   return (
     <>
       <section className="imortal-prediction-leader">
-        <span>LÍDER ATUAL DO BOLÃO</span>
+        <span>{isComplete ? 'CAMPEÃO DO BOLÃO' : 'LÍDER ATUAL DO BOLÃO'}</span>
         <Trophy size={26} />
         <strong>{getRankingName(podium[0])}</strong>
         <small>{Number(podium[0]?.points || 0)} pontos</small>
@@ -432,7 +432,12 @@ export default function CompetitionPredictionsPage() {
           </div>
 
           <div className="imortal-ranking-content">
-            <RankingView ranking={ranking} loading={secondaryLoading} error={secondaryError} />
+            <RankingView
+              ranking={ranking}
+              loading={secondaryLoading}
+              error={secondaryError}
+              isComplete={stats.total > 0 && stats.open === 0}
+            />
           </div>
         </section>
       )}
