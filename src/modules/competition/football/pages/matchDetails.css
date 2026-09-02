@@ -524,3 +524,27 @@
   font-size: .61rem;
   line-height: 1.55;
 }
+
+
+.imortal-match-team {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.imortal-match-team:disabled {
+  cursor: default;
+}
+
+.imortal-match-team:not(:disabled):hover .imortal-match-team__crest {
+  border-color: rgba(21, 201, 255, .34);
+  background: rgba(11, 120, 255, .07);
+}
+
+.imortal-match-team > small {
+  color: rgba(103, 217, 255, .52);
+  font-size: .55rem;
+  font-weight: 800;
+}
