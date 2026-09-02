@@ -635,3 +635,63 @@
     height: 150px;
   }
 }
+
+
+.games-page__championship-list {
+  display: grid;
+  gap: 8px;
+}
+
+.games-page__championship-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+  border: 1px solid rgba(68, 136, 238, .1);
+  border-radius: 12px;
+  background: rgba(9, 17, 29, .62);
+  padding: 9px;
+}
+
+.games-page__championship-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(70, 143, 255, .14);
+  border-radius: 11px;
+  background: rgba(10, 23, 40, .78);
+  color: #77ccff;
+}
+
+.games-page__championship-icon img {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  object-fit: contain;
+}
+
+.games-page__championship-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.games-page__championship-copy > strong,
+.games-page__championship-copy > small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.games-page__championship-copy > strong {
+  color: #f3f7fc;
+  font-size: .76rem;
+}
+
+.games-page__championship-copy > small {
+  color: rgba(220, 231, 245, .54);
+  font-size: .64rem;
+}
