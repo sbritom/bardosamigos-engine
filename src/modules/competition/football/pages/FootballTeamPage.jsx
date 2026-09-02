@@ -1,44 +1,90 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, CalendarDays, Globe2, MapPin, Trophy } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Badge, Button, Card, EmptyState, Loading, StatCard, Table } from '../../../../design-system'
+import { EmptyState, Loading } from '../../../../design-system'
 import { formatBrazilFullDateTime } from '../../../../core/time'
 import { getSportsStatusLabel } from '../../../../core/sports'
 import { useAuth } from '../../../auth/AuthContext'
 import { getFootballTeamDetails, toggleFootballFavorite } from '../../services/footballCenterService'
 import { FootballCrest } from '../components/FootballCrest'
+import './teamPage.css'
+
+function withPreviewAccess(path) {
+  if (typeof window === 'undefined') return path
+  const shareToken = new URLSearchParams(window.location.search).get('_vercel_share')
+  if (!shareToken) return path
+  const url = new URL(path, window.location.origin)
+  url.searchParams.set('_vercel_share', shareToken)
+  return `${url.pathname}${url.search}`
+}
 
 function score(match) {
-  return match.hasScore ? `${match.homeScore} x ${match.awayScore}` : 'VS'
+  return match.hasScore ? `${match.homeScore} x ${match.awayScore}` : 'x'
 }
 
 function MatchRow({ match, onOpen }) {
   return (
-    <button className="w-full rounded-xl border border-[var(--bds-color-border)] bg-[var(--bds-color-background)] p-3 text-left" type="button" onClick={() => onOpen(match.id)}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge>{getSportsStatusLabel(match.status)}</Badge>
-        <span className="text-xs font-bold uppercase text-[var(--bds-color-text-secondary)]">{match.competitionName}</span>
+    <button className="imortal-team-match" type="button" onClick={() => onOpen(match.id)}>
+      <div className="imortal-team-match__top">
+        <span>{getSportsStatusLabel(match.status)}</span>
+        <small>{match.competitionName || 'Futebol'}</small>
       </div>
-      <div className="mt-2 font-black">{match.homeTeam} <span className="text-[var(--bds-color-primary-hover)]">{score(match)}</span> {match.awayTeam}</div>
-      <div className="mt-1 text-sm text-[var(--bds-color-text-secondary)]">{formatBrazilFullDateTime(match.startsAt)}</div>
+      <strong>
+        {match.homeTeam}
+        <em>{score(match)}</em>
+        {match.awayTeam}
+      </strong>
+      <small>{formatBrazilFullDateTime(match.startsAt)}</small>
     </button>
   )
 }
 
-function TeamStandings({ rows, teamName }) {
-  const filtered = rows.filter((row) => row.name === teamName || rows.length <= 8)
-  const columns = [
-    { key: 'position', label: '#' },
-    { key: 'name', label: 'Time' },
-    { key: 'points', label: 'Pts' },
-    { key: 'played', label: 'J' },
-    { key: 'wins', label: 'V' },
-    { key: 'draws', label: 'E' },
-    { key: 'losses', label: 'D' },
-    { key: 'goalDifference', label: 'SG' },
-    { key: 'lastFive', label: 'Últimos 5', render: (row) => row.lastFive.join(' ') || '-' },
-  ]
+function StandingsTable({ rows, teamName }) {
+  if (!rows.length) {
+    return <p className="imortal-team-empty">Classificação ainda não disponível.</p>
+  }
 
-  return filtered.length ? <Table columns={columns} rows={filtered} getRowKey={(row) => row.name} /> : <EmptyState title="Classificação indisponível" description="Sem resultados suficientes para calcular a posição." />
+  return (
+    <div className="imortal-team-table-wrap">
+      <table className="imortal-team-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>J</th>
+            <th>V</th>
+            <th>E</th>
+            <th>D</th>
+            <th>SG</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const name = row.name || row.team?.name || ''
+            const active = name === teamName
+            return (
+              <tr key={row.team?.id || name} className={active ? 'is-current' : ''}>
+                <td><strong>{row.position}</strong></td>
+                <td>
+                  <span className="imortal-team-table__club">
+                    <FootballCrest src={row.crest || row.team?.crest} name={name} iconSize={14} />
+                    <strong>{name}</strong>
+                  </span>
+                </td>
+                <td>{row.played ?? row.playedGames ?? 0}</td>
+                <td>{row.wins ?? row.won ?? 0}</td>
+                <td>{row.draws ?? row.draw ?? 0}</td>
+                <td>{row.losses ?? row.lost ?? 0}</td>
+                <td>{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference ?? 0}</td>
+                <td><strong>{row.points ?? 0}</strong></td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 export default function FootballTeamPage() {
@@ -46,31 +92,81 @@ export default function FootballTeamPage() {
   const navigate = useNavigate()
   const { openAuth } = useAuth()
   const [state, setState] = useState({ loading: true, data: null, error: '', message: '' })
+  const [officialStandings, setOfficialStandings] = useState([])
 
   async function load() {
     const result = await getFootballTeamDetails(teamId)
-    setState((current) => ({ ...current, loading: false, data: result.data, error: result.error?.message || '' }))
+    setState((current) => ({
+      ...current,
+      loading: false,
+      data: result.data,
+      error: result.error?.message || '',
+    }))
   }
 
   useEffect(() => {
     load()
   }, [teamId])
 
+  const competitionCode = useMemo(() => {
+    const team = state.data?.team || {}
+    return String(
+      team.competitions?.code
+      || team.competitions?.metadata?.code
+      || team.metadata?.competitionCode
+      || team.metadata?.code
+      || '',
+    ).toUpperCase()
+  }, [state.data?.team])
+
+  useEffect(() => {
+    if (!competitionCode) {
+      setOfficialStandings([])
+      return undefined
+    }
+
+    const controller = new AbortController()
+    fetch(withPreviewAccess(`/api/football/matches?resource=standings&competition=${encodeURIComponent(competitionCode)}`), {
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
+      signal: controller.signal,
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        const groups = payload?.standings || []
+        const total = groups.find((item) => String(item.type || '').toUpperCase() === 'TOTAL')
+        setOfficialStandings(total?.rows || groups[0]?.rows || [])
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') setOfficialStandings([])
+      })
+
+    return () => controller.abort()
+  }, [competitionCode])
+
   async function favorite() {
     const team = state.data?.team
     if (!team) return
+
     const result = await toggleFootballFavorite({
       type: 'team',
       id: team.id,
-      metadata: { name: team.name, crest: team.crestUrl || team.logoUrl, country: team.country },
+      metadata: {
+        name: team.name,
+        crest: team.crestUrl || team.logoUrl,
+        country: team.country,
+      },
     })
 
     if (!result.authenticated) {
-      openAuth('Entre para salvar este time nos seus favoritos. A area de Futebol continua livre para visitantes.', 'login')
+      openAuth('Entre para favoritar este time.', 'login')
       return
     }
 
-    setState((current) => ({ ...current, message: result.error?.message || (result.favorited ? 'Time favoritado.' : 'Favorito removido.') }))
+    setState((current) => ({
+      ...current,
+      message: result.error?.message || (result.favorited ? 'Time favoritado.' : 'Favorito removido.'),
+    }))
   }
 
   if (state.loading) return <Loading label="Carregando time" />
@@ -79,56 +175,87 @@ export default function FootballTeamPage() {
 
   const { team, upcoming, finished, standings } = state.data
   const crest = team.crestUrl || team.crest_url || team.logoUrl || team.logo_url || team.metadata?.crest || ''
+  const tableRows = officialStandings.length ? officialStandings : standings
 
   return (
-    <section className="space-y-5">
-      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <span className="block h-20 w-20 shrink-0">
-              <FootballCrest src={crest} name={team.name} iconSize={28} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs font-black uppercase text-[var(--bds-color-primary-hover)]">Equipe</p>
-              <h1 className="truncate text-3xl font-black">{team.name}</h1>
-              <p className="mt-1 text-sm text-[var(--bds-color-text-secondary)]">{team.country || '-'} · {team.competitionName || team.competitions?.name || '-'}</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={favorite}>Favoritar</Button>
-            <Button variant="secondary" onClick={() => navigate('/football')}>Voltar</Button>
-          </div>
-        </div>
-        {state.message && <p className="mt-3 text-sm font-bold text-[var(--bds-color-primary-hover)]">{state.message}</p>}
-      </Card>
-
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Estádio" value={team.venue || '-'} />
-        <StatCard label="Website" value={team.website || '-'} />
-        <StatCard label="Fundação" value={team.founded || '-'} />
-        <StatCard label="Cores" value={team.clubColors || team.club_colors || '-'} />
+    <main className="imortal-team-page">
+      <div className="imortal-team-topbar">
+        <button type="button" onClick={() => navigate('/football')}>
+          <ArrowLeft size={16} />
+          Voltar ao Futebol
+        </button>
+        <button type="button" className="is-favorite" onClick={favorite}>Favoritar</button>
       </div>
 
-      <section className="grid gap-5 xl:grid-cols-2">
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="mb-4 text-xl font-black">Próximos Jogos</h2>
-          <div className="space-y-3">
-            {upcoming.length ? upcoming.slice(0, 8).map((match) => <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />) : <EmptyState title="Sem jogos futuros" description="Novas partidas aparecerão após a sincronização." />}
-          </div>
-        </Card>
-
-        <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-          <h2 className="mb-4 text-xl font-black">Últimos Jogos</h2>
-          <div className="space-y-3">
-            {finished.length ? finished.map((match) => <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />) : <EmptyState title="Sem resultados" description="Resultados sincronizados aparecem aqui." />}
-          </div>
-        </Card>
+      <section className="imortal-team-hero">
+        <span className="imortal-team-crest">
+          <FootballCrest src={crest} name={team.name} iconSize={42} />
+        </span>
+        <div>
+          <span>IMORTAL0800 • FUTEBOL</span>
+          <h1>{team.name}</h1>
+          <p>{team.country || 'Futebol'} · {team.competitionName || team.competitions?.name || 'Competição'}</p>
+        </div>
       </section>
 
-      <Card className="rounded-[var(--radius)] border border-[var(--bds-color-border)] bg-[var(--bds-color-surface)] p-5">
-        <h2 className="mb-4 text-xl font-black">Classificação</h2>
-        <TeamStandings rows={standings} teamName={team.name} />
-      </Card>
-    </section>
+      {state.message ? <p className="imortal-team-message">{state.message}</p> : null}
+
+      <section className="imortal-team-facts">
+        <article>
+          <MapPin size={17} />
+          <div><span>Estádio</span><strong>{team.venue || 'Não informado'}</strong></div>
+        </article>
+        <article>
+          <Globe2 size={17} />
+          <div><span>Website</span><strong>{team.website || 'Não informado'}</strong></div>
+        </article>
+        <article>
+          <CalendarDays size={17} />
+          <div><span>Fundação</span><strong>{team.founded || 'Não informado'}</strong></div>
+        </article>
+        <article>
+          <Trophy size={17} />
+          <div><span>Cores</span><strong>{team.clubColors || team.club_colors || 'Não informado'}</strong></div>
+        </article>
+      </section>
+
+      <section className="imortal-team-grid">
+        <article className="imortal-team-panel">
+          <header>
+            <span>PRÓXIMOS JOGOS</span>
+            <h2>Agenda</h2>
+          </header>
+          <div className="imortal-team-match-list">
+            {upcoming.length
+              ? upcoming.slice(0, 8).map((match) => (
+                <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />
+              ))
+              : <p className="imortal-team-empty">Nenhum jogo futuro disponível.</p>}
+          </div>
+        </article>
+
+        <article className="imortal-team-panel">
+          <header>
+            <span>ÚLTIMOS RESULTADOS</span>
+            <h2>Forma recente</h2>
+          </header>
+          <div className="imortal-team-match-list">
+            {finished.length
+              ? finished.slice(0, 8).map((match) => (
+                <MatchRow key={match.id} match={match} onOpen={(id) => navigate(`/football/jogos/${id}`)} />
+              ))
+              : <p className="imortal-team-empty">Nenhum resultado disponível.</p>}
+          </div>
+        </article>
+      </section>
+
+      <section className="imortal-team-panel">
+        <header>
+          <span>{officialStandings.length ? 'TABELA OFICIAL' : 'CLASSIFICAÇÃO'}</span>
+          <h2>Posição na competição</h2>
+        </header>
+        <StandingsTable rows={tableRows} teamName={team.name} />
+      </section>
+    </main>
   )
 }
