@@ -54,11 +54,7 @@ const MatchResultsPage = React.lazy(() => import("../../modules/competition/admi
 const CompetitionPredictionsPage = React.lazy(() =>
   import("../../modules/competition/predictions/pages/CompetitionPredictionsPage"),
 );
-const MyPredictionsPage = React.lazy(() => import("../../modules/competition/predictions/pages/MyPredictionsPage"));
-const MyPredictionResultPage = React.lazy(() =>
-  import("../../modules/competition/predictions/pages/MyPredictionResultPage"),
-);
-const CompetitionRankingPage = React.lazy(() => import("../../modules/competition/ranking/pages/CompetitionRankingPage"));
+
 const ProfilePage = React.lazy(() => import("../../modules/personalization/pages/ProfilePage"));
 const ForYouPage = React.lazy(() => import("../../modules/personalization/pages/ForYouPage"));
 const SettingsPage = React.lazy(() => import("../../modules/personalization/pages/SettingsPage"));
@@ -429,7 +425,7 @@ export const plugins = [
     path: "/meus-palpites/resultados",
     icon: Trophy,
     menu: false,
-    element: <LazyPluginPage component={MyPredictionResultPage} title="Meus Palpites" />,
+    element: <LazyPluginPage component={CompetitionPredictionsPage} title="Meus Palpites" initialTab="mine" />,
   },
 
   {
@@ -446,8 +442,8 @@ export const plugins = [
     title: "Meus Palpites",
     path: "/meus-palpites",
     icon: Trophy,
-    menu: true,
-    element: <LazyPluginPage component={MyPredictionsPage} title="Meus Palpites" />,
+    menu: false,
+    element: <LazyPluginPage component={CompetitionPredictionsPage} title="Meus Palpites" initialTab="mine" />,
   },
 
   {
@@ -455,8 +451,8 @@ export const plugins = [
     title: "Ranking",
     path: "/competition/ranking",
     icon: Trophy,
-    menu: true,
-    element: <LazyPluginPage component={CompetitionRankingPage} title="Ranking" />,
+    menu: false,
+    element: <LazyPluginPage component={CompetitionPredictionsPage} title="Ranking" initialTab="ranking" />,
   },
 ];
 
