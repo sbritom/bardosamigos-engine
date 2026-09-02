@@ -34,9 +34,58 @@ const STAT_LABELS = {
   possession: 'Posse de bola',
   offsides: 'Impedimentos',
   substitutions: 'Substituições',
+  goals: 'Gols',
+  halfTime: 'Intervalo',
+  penalties: 'Pênaltis',
+  attendance: 'Público',
+  duration: 'Duração',
 }
 
-const STAT_PRIORITY = ['shots', 'shotsOnTarget', 'corners', 'fouls', 'cards', 'possession', 'offsides', 'substitutions']
+const STAT_PRIORITY = ['goals', 'halfTime', 'cards', 'substitutions', 'penalties', 'attendance', 'duration', 'shots', 'shotsOnTarget', 'corners', 'fouls', 'possession', 'offsides']
+
+function withPreviewAccess(path) {
+  if (typeof window === 'undefined') return path
+  const shareToken = new URLSearchParams(window.location.search).get('_vercel_share')
+  if (!shareToken) return path
+  const url = new URL(path, window.location.origin)
+  url.searchParams.set('_vercel_share', shareToken)
+  return `${url.pathname}${url.search}`
+}
+
+async function fetchProviderMatchDetails(match, signal) {
+  const providerId = String(match?.externalRef || match?.external_ref || match?.providerMatchId || '').replace(/^football-data-/, '')
+  if (!/^\d{1,12}$/.test(providerId)) return null
+
+  const url = withPreviewAccess(`/api/football/matches?resource=match&matchId=${encodeURIComponent(providerId)}`)
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+    signal,
+  })
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) return null
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) return null
+  return payload.match || null
+}
+
+function mergeMatchDetails(base, provider) {
+  if (!provider) return base
+  return {
+    ...base,
+    ...provider,
+    id: base.id,
+    externalRef: base.externalRef || base.external_ref || provider.providerMatchId,
+    round: {
+      ...(base.round || {}),
+      name: base.round?.name || (provider.matchday ? `Rodada ${provider.matchday}` : ''),
+    },
+    metadata: {
+      ...(base.metadata || {}),
+      ...(provider.metadata || {}),
+    },
+  }
+}
 
 function TeamBlock({ name, crest }) {
   return (
@@ -93,9 +142,23 @@ function formatLineupSide(value) {
 
 function getLineupSides(match, lineups) {
   return [
-    { label: 'Mandante', team: match.homeTeam, players: formatLineupSide(lineups?.home || lineups?.homeTeam || lineups?.homeStartingXI) },
-    { label: 'Visitante', team: match.awayTeam, players: formatLineupSide(lineups?.away || lineups?.awayTeam || lineups?.awayStartingXI) },
-  ].filter((side) => side.players.length)
+    {
+      label: 'Mandante',
+      team: match.homeTeam,
+      players: formatLineupSide(lineups?.home || lineups?.homeTeam || lineups?.homeStartingXI),
+      bench: formatLineupSide(lineups?.homeBench),
+      formation: lineups?.homeFormation || '',
+      coach: lineups?.homeCoach?.name || '',
+    },
+    {
+      label: 'Visitante',
+      team: match.awayTeam,
+      players: formatLineupSide(lineups?.away || lineups?.awayTeam || lineups?.awayStartingXI),
+      bench: formatLineupSide(lineups?.awayBench),
+      formation: lineups?.awayFormation || '',
+      coach: lineups?.awayCoach?.name || '',
+    },
+  ].filter((side) => side.players.length || side.bench.length || side.formation || side.coach)
 }
 
 function formatStatValue(value) {
@@ -111,7 +174,7 @@ function formatStatValue(value) {
 
 function getStatistics(match) {
   const entries = Object.entries(match.statistics || {})
-    .filter(([key, value]) => value !== null && value !== undefined && value !== '' && key !== 'attendance' && key !== 'referee')
+    .filter(([key, value]) => value !== null && value !== undefined && value !== '' && key !== 'referee')
     .map(([key, value]) => ({ key, label: STAT_LABELS[key] || key, value: formatStatValue(value) }))
 
   return entries.sort((left, right) => {
@@ -128,8 +191,11 @@ function getMatchInfo(match) {
     { label: 'Estádio', value: match.venue, icon: MapPin },
     { label: 'Cidade', value: match.city, icon: MapPin },
     { label: 'Árbitro', value: match.referee, icon: CircleDot },
-    { label: 'Rodada', value: match.round?.name, icon: Trophy },
+    { label: 'Rodada', value: match.round?.name || (match.matchday ? `Rodada ${match.matchday}` : ''), icon: Trophy },
+    { label: 'Fase', value: match.stage, icon: Trophy },
     { label: 'Competição', value: match.competitionName, icon: Trophy },
+    { label: 'Árbitro', value: match.referee, icon: CircleDot },
+    { label: 'Público', value: match.attendance ? Number(match.attendance).toLocaleString('pt-BR') : '', icon: Users },
     { label: 'Data', value: dateLabel, icon: CalendarDays },
     { label: 'Horário', value: match.localTime || getFootballMatchTime(match), icon: Clock3 },
   ].filter((item) => Boolean(item.value))
@@ -156,7 +222,20 @@ export default function FootballMatchDetailsPage() {
 
     async function load() {
       const result = await getFootballMatchDetails(matchId)
-      if (active) setState({ loading: false, match: result.data, error: result.error?.message || '' })
+      if (!result.data) {
+        if (active) setState({ loading: false, match: null, error: result.error?.message || '' })
+        return
+      }
+
+      const controller = new AbortController()
+      const providerMatch = await fetchProviderMatchDetails(result.data, controller.signal).catch(() => null)
+      if (active) {
+        setState({
+          loading: false,
+          match: mergeMatchDetails(result.data, providerMatch),
+          error: result.error?.message || '',
+        })
+      }
     }
 
     load()
@@ -296,9 +375,25 @@ export default function FootballMatchDetailsPage() {
               <article key={side.label}>
                 <span>{side.label}</span>
                 <h3>{side.team}</h3>
-                <ol>
-                  {side.players.map((player, index) => <li key={`${player}-${index}`}>{player}</li>)}
-                </ol>
+                {(side.formation || side.coach) ? (
+                  <p className="imortal-match-lineup-meta">
+                    {[side.formation ? `Formação: ${side.formation}` : '', side.coach ? `Técnico: ${side.coach}` : ''].filter(Boolean).join(' • ')}
+                  </p>
+                ) : null}
+                {side.players.length ? (
+                  <>
+                    <strong className="imortal-match-lineup-title">Titulares</strong>
+                    <ol>
+                      {side.players.map((player, index) => <li key={`${player}-${index}`}>{player}</li>)}
+                    </ol>
+                  </>
+                ) : null}
+                {side.bench.length ? (
+                  <details className="imortal-match-bench">
+                    <summary>Banco ({side.bench.length})</summary>
+                    <p>{side.bench.join(', ')}</p>
+                  </details>
+                ) : null}
               </article>
             ))}
           </div>
