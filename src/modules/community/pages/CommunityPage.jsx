@@ -95,7 +95,7 @@ function CommunitySectionHeader({ eyebrow, title, description, action }) {
     <div className="imortal-community-section-header">
       <div>
         <span>{eyebrow}</span>
-        <h2>{title}</h2>
+        {title ? <h2>{title}</h2> : null}
         {description ? <p>{description}</p> : null}
       </div>
       {action ? <div>{action}</div> : null}
@@ -211,21 +211,6 @@ export default function CommunityPage() {
             <MessageCircle size={15} />
             COMUNIDADE IMORTAL0800
           </span>
-          <h1>A comunidade continua no Xat.</h1>
-          <p>
-            Games, ranking, eventos, conquistas e recados organizados em um só lugar,
-            sempre conectados à sala oficial.
-          </p>
-          <div className="imortal-community-hero__actions">
-            <button type="button" onClick={() => navigate('/chat')}>
-              <MessageCircle size={17} />
-              Entrar no Xat
-            </button>
-            <button type="button" className="is-secondary" onClick={() => navigate('/events')}>
-              <CalendarDays size={17} />
-              Ver eventos
-            </button>
-          </div>
         </div>
 
         <div className="imortal-community-active-widget" aria-label="Imortais ativos">
@@ -242,11 +227,10 @@ export default function CommunityPage() {
         </div>
       </header>
 
-      <section className="imortal-community-section">
+      <section className="imortal-community-section imortal-community-section--games">
         <CommunitySectionHeader
-          eyebrow="Interação no Xat"
-          title="Games da Comunidade"
-          description="Os games acontecem no Xat; o portal organiza status, resultados e histórico."
+          eyebrow="Games da Comunidade"
+          title=""
         />
 
         <div className="imortal-community-games-grid">
@@ -318,8 +302,8 @@ export default function CommunityPage() {
 
       <section className="imortal-community-section">
         <CommunitySectionHeader
-          eyebrow="Agenda"
-          title="Eventos do IMORTAL0800"
+          eyebrow="Eventos do IMORTAL0800"
+          title=""
           description="Os próximos eventos publicados no portal."
           action={(
             <button className="imortal-community-inline-action" type="button" onClick={() => navigate('/events')}>
@@ -407,9 +391,8 @@ export default function CommunityPage() {
 
       <section className="imortal-community-section">
         <CommunitySectionHeader
-          eyebrow="Organização"
-          title="Regras"
-          description="As regras ficam separadas por categoria para facilitar a consulta."
+          eyebrow="REGRAS"
+          title=""
         />
 
         <div className="imortal-community-rules">
