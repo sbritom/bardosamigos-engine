@@ -19,6 +19,7 @@ import {
   getRadioMetadataInterval,
 } from "./mxcastRadioApi";
 import { submitRadioMusicRequest } from "./requests/radioRequestsApi";
+import { useAuth } from "../../modules/auth/AuthContext";
 import "./radioUi.css";
 
 const INITIAL_METADATA = {
@@ -59,6 +60,7 @@ function getListenerLabel(count) {
 }
 
 export default function RadioPage() {
+  const { isAuthenticated, profile, displayName, openAuth } = useAuth();
   const audioRef = useRef(null);
   const requestCloseTimerRef = useRef(null);
   const requestInputRef = useRef(null);
@@ -76,6 +78,7 @@ export default function RadioPage() {
   const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
   const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [requestForm, setRequestForm] = useState({
+    requesterName: "",
     songAndArtist: "",
     message: "",
   });
@@ -198,10 +201,13 @@ export default function RadioPage() {
 
     try {
       setRequestSubmitting(true);
-      await submitRadioMusicRequest(requestForm);
+      await submitRadioMusicRequest({
+        ...requestForm,
+        requesterName: isAuthenticated ? "" : requestForm.requesterName,
+      });
       setRequestFeedback("Seu pedido foi enviado ao locutor.");
       setRequestFeedbackTone("success");
-      setRequestForm({ songAndArtist: "", message: "" });
+      setRequestForm({ requesterName: "", songAndArtist: "", message: "" });
       window.clearTimeout(requestCloseTimerRef.current);
       requestCloseTimerRef.current = window.setTimeout(() => {
         closeRequestFlow();
@@ -220,7 +226,7 @@ export default function RadioPage() {
     } finally {
       setRequestSubmitting(false);
     }
-  }, [closeRequestFlow, requestForm]);
+  }, [closeRequestFlow, isAuthenticated, requestForm]);
 
   return (
     <main className="imortal-radio-page">
@@ -394,7 +400,41 @@ export default function RadioPage() {
             </div>
 
             <form className="imortal-radio-request-form" onSubmit={handleRequestSubmit} aria-busy={requestSubmitting}>
-              <p>Você pode pedir como visitante. O pedido será enviado ao painel do locutor.</p>
+              {isAuthenticated ? (
+                <div className="imortal-radio-request-identity is-user">
+                  <div>
+                    <span>Pedido identificado</span>
+                    <strong>@{String(profile?.username || displayName || "usuario").toUpperCase()}</strong>
+                  </div>
+                  <small>Seu pedido ficará vinculado à sua conta.</small>
+                </div>
+              ) : (
+                <>
+                  <div className="imortal-radio-request-identity is-guest">
+                    <div>
+                      <span>Modo visitante</span>
+                      <strong>Continuar como visitante</strong>
+                    </div>
+                    <button type="button" onClick={() => openAuth("", "login")}>
+                      Entrar
+                    </button>
+                  </div>
+
+                  <label>
+                    Seu nome
+                    <input
+                      name="requesterName"
+                      type="text"
+                      placeholder="Nome que aparecerá no pedido"
+                      minLength={2}
+                      maxLength={40}
+                      required
+                      value={requestForm.requesterName}
+                      onChange={handleRequestChange}
+                    />
+                  </label>
+                </>
+              )}
 
               <label>
                 Música e artista
