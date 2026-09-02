@@ -6,7 +6,7 @@ import { loadUserProfile, saveUserPreferences, saveUserProfile, uploadUserAvatar
 const AuthContext = createContext(null)
 
 function getMetadataDisplayName(user) {
-  return String(user?.user_metadata?.display_name || user?.user_metadata?.name || '').trim()
+  return String(user?.user_metadata?.display_name || user?.user_metadata?.username || user?.user_metadata?.name || '').trim()
 }
 
 function getFallbackDisplayName(user) {
@@ -14,7 +14,7 @@ function getFallbackDisplayName(user) {
   if (metadataName) return metadataName
 
   const email = String(user?.email || '')
-  return email.includes('@') ? email.split('@')[0] : 'Amigo do Bar'
+  return email.includes('@') ? email.split('@')[0] : 'Usuário IMORTAL0800'
 }
 
 function mergePreferences(current = {}, patch = {}) {
