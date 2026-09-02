@@ -77,9 +77,10 @@ function normalizeEsportsMatch(match = {}) {
   }
 }
 
-async function fetchPandaMatches(path, token, perPage) {
+async function fetchPandaMatches(path, token, perPage, sort = '') {
   const url = new URL(`${PANDASCORE_BASE_URL}${path}`)
   url.searchParams.set('per_page', String(perPage))
+  if (sort) url.searchParams.set('sort', sort)
 
   const result = await fetch(url, {
     headers: {
@@ -172,8 +173,8 @@ export async function listPandaScoreMatches() {
 
   const [running, upcoming, past] = await Promise.all([
     fetchPandaMatches('/matches/running', token, 8),
-    fetchPandaMatches('/matches/upcoming', token, 12),
-    fetchPandaMatches('/matches/past', token, 12),
+    fetchPandaMatches('/matches/upcoming', token, 12, 'begin_at'),
+    fetchPandaMatches('/matches/past', token, 12, '-begin_at'),
   ])
 
   return {
