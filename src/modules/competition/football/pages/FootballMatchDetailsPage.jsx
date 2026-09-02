@@ -9,7 +9,7 @@ import {
   MapPin,
   Trophy,
   Users,
-  Whistle,
+  CircleDot,
 } from 'lucide-react'
 import { EmptyState, Loading } from '../../../../design-system'
 import { formatBrazilFullDateTime, isLiveStatus } from '../../../../core/time'
@@ -127,7 +127,7 @@ function getMatchInfo(match) {
   return [
     { label: 'Estádio', value: match.venue, icon: MapPin },
     { label: 'Cidade', value: match.city, icon: MapPin },
-    { label: 'Árbitro', value: match.referee, icon: Whistle },
+    { label: 'Árbitro', value: match.referee, icon: CircleDot },
     { label: 'Rodada', value: match.round?.name, icon: Trophy },
     { label: 'Competição', value: match.competitionName, icon: Trophy },
     { label: 'Data', value: dateLabel, icon: CalendarDays },
