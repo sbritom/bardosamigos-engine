@@ -221,6 +221,53 @@ async function fetchCompetitions({ apiKey }) {
   return payload.competitions || []
 }
 
+function mapStandingRow(row = {}) {
+  const team = normalizeTeam(row.team, 'Time', '')
+  return {
+    position: Number(row.position) || 0,
+    team,
+    name: team.name,
+    crest: team.crest,
+    played: Number(row.playedGames) || 0,
+    wins: Number(row.won) || 0,
+    draws: Number(row.draw) || 0,
+    losses: Number(row.lost) || 0,
+    points: Number(row.points) || 0,
+    goalsFor: Number(row.goalsFor) || 0,
+    goalsAgainst: Number(row.goalsAgainst) || 0,
+    goalDifference: Number(row.goalDifference) || 0,
+  }
+}
+
+async function fetchCompetitionStandings({ competitionCode, apiKey }) {
+  const response = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/standings`, {
+    headers: {
+      'X-Auth-Token': apiKey,
+    },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok) {
+    throw new Error(payload.message || `Football-Data standings request failed with status ${response.status}`)
+  }
+
+  const competition = {
+    id: payload.competition?.id || null,
+    code: payload.competition?.code || competitionCode,
+    name: payload.competition?.name || competitionCode,
+    emblem: payload.competition?.emblem || '',
+  }
+
+  const standings = (payload.standings || []).map((standing) => ({
+    stage: standing.stage || '',
+    type: standing.type || 'TOTAL',
+    group: standing.group || '',
+    rows: (standing.table || []).map(mapStandingRow),
+  }))
+
+  return { competition, season: payload.season || null, standings }
+}
 function findWorldCupCompetition(competitions = []) {
   return competitions.find((competition) => {
     const season = competition.currentSeason || {}
@@ -334,6 +381,33 @@ export default async function handler(request, response) {
     return
   }
 
+  const resource = String(request.query?.resource || 'matches').trim().toLowerCase()
+  const requestedCompetition = String(request.query?.competition || '').trim().toUpperCase()
+
+  if (resource === 'standings') {
+    if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
+      response.status(400).json({ error: 'Invalid or unsupported competition.' })
+      return
+    }
+
+    try {
+      const result = await fetchCompetitionStandings({ competitionCode: requestedCompetition, apiKey })
+      response.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800')
+      response.status(200).json({
+        source: 'football-data.org',
+        resource: 'standings',
+        ...result,
+      })
+    } catch (error) {
+      response.status(502).json({
+        source: 'football-data.org',
+        resource: 'standings',
+        competition: requestedCompetition,
+        error: error.message || 'Football-Data standings request failed.',
+      })
+    }
+    return
+  }
   const window = createDateWindow()
   const competitions = String(request.query?.competitions || process.env.FOOTBALL_DATA_COMPETITION_CODE || DEFAULT_COMPETITIONS.join(','))
     .split(',')
