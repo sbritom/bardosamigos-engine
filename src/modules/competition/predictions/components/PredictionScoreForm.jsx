@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Button, Input } from '../../../../design-system'
+import { Target } from 'lucide-react'
 
-export function PredictionScoreForm({ initialValue, onSubmit, submitLabel = 'Salvar palpite' }) {
+export function PredictionScoreForm({ match, initialValue, onSubmit, submitLabel = 'Salvar palpite' }) {
   const [score, setScore] = useState({
     homeScore: initialValue?.homeScore ?? 0,
     awayScore: initialValue?.awayScore ?? 0,
@@ -13,12 +13,47 @@ export function PredictionScoreForm({ initialValue, onSubmit, submitLabel = 'Sal
   }
 
   return (
-    <form className="grid gap-3" onSubmit={submit}>
-      <div className="grid grid-cols-2 gap-3">
-        <Input label="Mandante" type="number" min="0" value={score.homeScore} onChange={(event) => setScore({ ...score, homeScore: event.target.value })} />
-        <Input label="Visitante" type="number" min="0" value={score.awayScore} onChange={(event) => setScore({ ...score, awayScore: event.target.value })} />
+    <form className="imortal-prediction-form" onSubmit={submit}>
+      {match ? (
+        <div className="imortal-prediction-form__teams">
+          <strong>{match.homeParticipant || 'Mandante'}</strong>
+          <span>×</span>
+          <strong>{match.awayParticipant || 'Visitante'}</strong>
+        </div>
+      ) : null}
+
+      <p>Digite o placar que você acredita que terminará a partida.</p>
+
+      <div className="imortal-prediction-form__score">
+        <label>
+          <span>Mandante</span>
+          <input
+            type="number"
+            min="0"
+            max="99"
+            value={score.homeScore}
+            onChange={(event) => setScore({ ...score, homeScore: event.target.value })}
+          />
+        </label>
+
+        <strong>×</strong>
+
+        <label>
+          <span>Visitante</span>
+          <input
+            type="number"
+            min="0"
+            max="99"
+            value={score.awayScore}
+            onChange={(event) => setScore({ ...score, awayScore: event.target.value })}
+          />
+        </label>
       </div>
-      <Button type="submit">{submitLabel}</Button>
+
+      <button type="submit" className="imortal-prediction-form__submit">
+        <Target size={16} />
+        {submitLabel}
+      </button>
     </form>
   )
 }
