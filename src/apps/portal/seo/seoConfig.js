@@ -63,12 +63,12 @@ export const publicSeoPages = [
 export const defaultSeo = publicSeoPages[0]
 
 export function getCanonicalUrl(path = '/') {
-  const normalizedPath = path === '/' ? '/' : `/${String(path).replace(/^\\/+|\\/+$/g, '')}`
+  const normalizedPath = path === '/' ? '/' : `/${String(path).replace(/^\/+|\/+$/g, '')}`
   return `${SITE_URL}${normalizedPath === '/' ? '' : normalizedPath}`
 }
 
 export function getSeoForPath(pathname = '/') {
-  const normalizedPath = pathname.replace(/\\/+$/g, '') || '/'
+  const normalizedPath = pathname.replace(/\/+$/g, '') || '/'
   const page = publicSeoPages.find((item) => item.path === normalizedPath)
 
   if (page) {
