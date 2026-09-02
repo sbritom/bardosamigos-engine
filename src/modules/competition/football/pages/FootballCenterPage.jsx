@@ -61,6 +61,19 @@ async function fetchOfficialScorers(competitionCode, signal) {
   return payload
 }
 
+async function triggerAutomaticFootballSettlement(signal) {
+  const url = withPreviewAccess('/api/football/matches')
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+    signal,
+  })
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) return null
+  const payload = await response.json().catch(() => ({}))
+  return response.ok ? payload.settlement || null : null
+}
+
 async function fetchOfficialStandings(competitionCode, signal) {
   const url = withPreviewAccess(`/api/football/matches?resource=standings&competition=${encodeURIComponent(competitionCode)}`)
   const response = await fetch(url, {
@@ -389,6 +402,7 @@ export default function FootballCenterPage() {
   const [scorersLoadingCode, setScorersLoadingCode] = useState('')
   const [scorersErrors, setScorersErrors] = useState({})
   const hasLiveMatchRef = useRef(false)
+  const lastSettlementCheckRef = useRef(0)
 
   async function load({ syncFirst = false } = {}) {
     try {
@@ -410,7 +424,19 @@ export default function FootballCenterPage() {
 
     async function safeLoad() {
       await syncFootballBeforeRead({ hasLiveMatch: hasLiveMatchRef.current })
-      const result = await listFootballCenterData()
+
+      let settlement = null
+      const now = Date.now()
+      if (now - lastSettlementCheckRef.current >= 5 * 60 * 1000) {
+        lastSettlementCheckRef.current = now
+        settlement = await triggerAutomaticFootballSettlement().catch(() => null)
+      }
+
+      let result = await listFootballCenterData()
+      if ((settlement?.settled || settlement?.scoredPredictions) && active) {
+        result = await listFootballCenterData()
+      }
+
       if (active) {
         hasLiveMatchRef.current = hasLiveFootballMatch(result.data)
         setState({ loading: false, data: result.data, error: result.error?.message || '' })
