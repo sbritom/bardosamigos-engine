@@ -2,133 +2,39 @@
   position: relative;
   box-sizing: border-box;
   width: 100%;
+  min-height: 120px;
+  height: 140px;
   overflow: hidden;
-  border: 1px solid rgba(28, 124, 255, 0.22);
+  border: 1px solid rgba(28, 124, 255, 0.18);
   border-radius: 18px;
-  background: #03060c;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
-}
-
-.imortal-home-banner__image {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: none;
-  margin: 0;
-  image-rendering: auto;
-  animation: imortal-banner-image-enter 280ms ease;
-}
-
-.imortal-home-banner__fallback {
-  min-height: 140px;
-  display: grid;
-  place-items: center;
   background:
-    radial-gradient(circle at 78% 50%, rgba(91, 75, 255, 0.18), transparent 30%),
-    linear-gradient(100deg, rgba(3, 7, 14, 0.98), rgba(8, 24, 45, 0.94));
-  color: #f7fbff;
+    radial-gradient(circle at 20% 45%, rgba(11, 120, 255, 0.08), transparent 32%),
+    radial-gradient(circle at 82% 45%, rgba(21, 201, 255, 0.04), transparent 28%),
+    linear-gradient(180deg, #050a12 0%, #03060b 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.20);
 }
 
-.imortal-home-banner__fallback strong {
-  font-size: clamp(1rem, 2vw, 1.5rem);
-  font-weight: 900;
-}
-
-.imortal-home-banner__action-hotspot {
+.imortal-home-banner--empty::after {
+  content: "";
   position: absolute;
   inset: 0;
-  z-index: 2;
-  min-width: 0;
-  min-height: 0;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  cursor: pointer;
-  opacity: 0;
-}
-
-.imortal-home-banner__dot-hotspots {
-  position: absolute;
-  z-index: 3;
-  right: 18px;
-  bottom: 10px;
-  display: flex;
-  gap: 7px;
-}
-
-.imortal-home-banner__dot-hotspots button {
-  width: 24px;
-  height: 5px;
-  min-width: 0;
-  min-height: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  cursor: pointer;
-  opacity: 0.78;
-  transition: 160ms ease;
-}
-
-.imortal-home-banner__dot-hotspots button[aria-current="true"] {
-  background: linear-gradient(90deg, #1687ff, #7655ff);
-  opacity: 1;
-}
-
-.imortal-home-banner__action-hotspot:focus-visible {
-  opacity: 1;
-  outline: 2px solid #58c8ff;
-  outline-offset: -3px;
-}
-
-.imortal-home-banner__dot-hotspots button:focus-visible {
-  outline: 2px solid #58c8ff;
-  outline-offset: 3px;
-}
-
-@keyframes imortal-banner-image-enter {
-  from { opacity: 0.48; }
-  to { opacity: 1; }
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.018), transparent);
 }
 
 @media (max-width: 900px) {
   .imortal-home-banner {
+    height: 120px;
+    min-height: 120px;
     border-radius: 15px;
-  }
-
-  .imortal-home-banner__dot-hotspots {
-    right: 12px;
-    bottom: 8px;
-  }
-
-  .imortal-home-banner__dot-hotspots button {
-    width: 20px;
   }
 }
 
 @media (max-width: 520px) {
   .imortal-home-banner {
+    height: 95px;
+    min-height: 95px;
     border-radius: 13px;
-  }
-
-  .imortal-home-banner__dot-hotspots {
-    right: 8px;
-    bottom: 6px;
-    gap: 4px;
-  }
-
-  .imortal-home-banner__dot-hotspots button {
-    width: 14px;
-    height: 4px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .imortal-home-banner__image {
-    animation: none;
-  }
-
-  .imortal-home-banner__dot-hotspots button {
-    transition: none;
   }
 }
