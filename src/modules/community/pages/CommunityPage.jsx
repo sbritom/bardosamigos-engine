@@ -3,7 +3,6 @@ import {
   Activity,
   Cake,
   CalendarDays,
-  Gamepad2,
   MessageCircle,
   Medal,
   RefreshCw,
@@ -28,28 +27,6 @@ import {
 import { useCommunityPresence } from '../presence/CommunityPresenceContext'
 import './communityPage.css'
 
-const COMMUNITY_GAMES = [
-  {
-    id: 'quiz',
-    title: 'Quiz',
-    description: 'Perguntas e respostas iniciadas e respondidas diretamente no Xat.',
-  },
-  {
-    id: 'dice',
-    title: 'Dice',
-    description: 'Rodadas rápidas com resultado registrado a partir das atividades do Xat.',
-  },
-  {
-    id: 'music',
-    title: 'Adivinhe a música',
-    description: 'Desafios musicais para os participantes da sala.',
-  },
-  {
-    id: 'lucky',
-    title: 'Número da sorte',
-    description: 'Participação e resultado centralizados no Xat.',
-  },
-]
 
 const RULE_CATEGORIES = [
   {
@@ -180,22 +157,18 @@ function EvoxCommunitySection({ evox = {}, loading, onRefresh }) {
 
   return (
     <section className="imortal-community-section">
-      <CommunitySectionHeader
-        eyebrow="EVOX BOT"
-        title="Atividade e Ranking"
-        description="Dados automáticos da comunidade no Xat, sem misturar com a presença de visitantes do portal."
-        action={(
-          <button
-            className="imortal-community-inline-action"
-            type="button"
-            onClick={onRefresh}
-            disabled={loading}
-          >
-            <RefreshCw size={14} />
-            {loading ? 'Atualizando...' : 'Atualizar'}
-          </button>
-        )}
-      />
+      <div className="mb-3 flex justify-end">
+        <button
+          className="imortal-community-inline-action"
+          type="button"
+          onClick={onRefresh}
+          disabled={loading}
+          aria-label="Atualizar dados da comunidade"
+        >
+          <RefreshCw size={14} />
+          {loading ? 'Atualizando...' : 'Atualizar'}
+        </button>
+      </div>
 
       <div className="grid gap-3 lg:grid-cols-12">
         <article className="rounded-2xl border border-[rgba(42,143,255,0.12)] bg-[rgba(7,17,30,0.58)] p-4 lg:col-span-3">
@@ -206,11 +179,9 @@ function EvoxCommunitySection({ evox = {}, loading, onRefresh }) {
           <div className="mt-4 text-3xl font-black text-white">
             {hasOnline ? formatEvoxNumber(evox.onlineNow) : '—'}
           </div>
-          <p className="mt-2 text-xs leading-5 text-[#7186a4]">
-            {hasOnline
-              ? 'Online no Xat segundo o EVOX.'
-              : 'Aguardando a leitura do Analytics do EVOX.'}
-          </p>
+          {!hasOnline ? (
+            <p className="mt-2 text-xs text-[#7186a4]">Sem dados no momento.</p>
+          ) : null}
         </article>
 
         <article className="rounded-2xl border border-[rgba(42,143,255,0.12)] bg-[rgba(7,17,30,0.58)] p-4 lg:col-span-4">
@@ -239,7 +210,7 @@ function EvoxCommunitySection({ evox = {}, loading, onRefresh }) {
             </ol>
           ) : (
             <div className="mt-3 rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs leading-5 text-[#7186a4]">
-              Aguardando a leitura do Top 10 do Analytics do EVOX.
+              Sem dados no momento.
             </div>
           )}
         </article>
@@ -277,9 +248,7 @@ function EvoxCommunitySection({ evox = {}, loading, onRefresh }) {
             </ol>
           ) : (
             <div className="mt-3 rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs leading-5 text-[#7186a4]">
-              {evox.error
-                ? 'Conexão segura preparada. O ranking aparecerá assim que a integração EVOX estiver autorizada.'
-                : 'Nenhuma pontuação retornada pelo EVOX no momento.'}
+              Sem dados no momento.
             </div>
           )}
         </article>
@@ -639,27 +608,6 @@ export default function CommunityPage() {
         loading={loading}
         onRefresh={load}
       />
-
-      <section className="imortal-community-section imortal-community-section--games">
-        <CommunitySectionHeader
-          eyebrow="Games da Comunidade"
-          title=""
-        />
-
-        <div className="imortal-community-games-grid">
-          {COMMUNITY_GAMES.map((game) => (
-            <article key={game.id} className="imortal-community-game-card">
-              <div className="imortal-community-game-card__icon">
-                <Gamepad2 size={20} />
-              </div>
-              <span>Via Xat</span>
-              <h3>{game.title}</h3>
-              <p>{game.description}</p>
-              <small>Integração em preparação</small>
-            </article>
-          ))}
-        </div>
-      </section>
 
       <section className="imortal-community-section imortal-community-section--events">
         <CommunitySectionHeader
