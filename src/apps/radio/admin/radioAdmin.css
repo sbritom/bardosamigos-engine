@@ -890,3 +890,353 @@
     padding: 0 8px;
   }
 }
+
+
+/* IMORTAL0800 - gerenciamento de programas e grade */
+.radio-admin-sections {
+  margin-top: 14px;
+  padding: 5px;
+  border: 1px solid rgba(48, 147, 255, 0.14);
+  border-radius: 14px;
+  display: inline-grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 5px;
+  background: rgba(4, 10, 18, 0.72);
+}
+
+.radio-admin-sections button {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--bds-color-text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.radio-admin-sections button.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(23, 137, 255, .24), rgba(5, 85, 186, .18));
+  box-shadow: inset 0 0 0 1px rgba(64, 160, 255, .16);
+}
+
+.radio-content-manager {
+  grid-column: span 12;
+}
+
+.radio-content-manager__intro {
+  margin: -5px 0 16px;
+}
+
+.radio-program-form {
+  padding: 14px;
+  border: 1px solid rgba(48, 147, 255, .12);
+  border-radius: 14px;
+  background: rgba(255,255,255,.018);
+}
+
+.radio-program-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.radio-program-form label,
+.radio-schedule-editor__row label {
+  display: grid;
+  gap: 6px;
+  color: var(--bds-color-text-secondary);
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.radio-program-form input,
+.radio-program-form textarea,
+.radio-schedule-editor__row input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(48, 147, 255, .14);
+  border-radius: 10px;
+  outline: 0;
+  color: var(--bds-color-text);
+  background: rgba(2, 10, 20, .66);
+  font: inherit;
+}
+
+.radio-program-form input,
+.radio-schedule-editor__row input {
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.radio-program-form textarea {
+  min-height: 82px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.radio-program-form input:focus,
+.radio-program-form textarea:focus,
+.radio-schedule-editor__row input:focus {
+  border-color: rgba(74, 174, 255, .42);
+  box-shadow: 0 0 0 3px rgba(21, 201, 255, .05);
+}
+
+.radio-program-form__wide {
+  grid-column: 1 / -1;
+}
+
+.radio-program-form__input-with-icon {
+  min-height: 40px;
+  padding-left: 10px;
+  border: 1px solid rgba(48, 147, 255, .14);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #6d84a2;
+  background: rgba(2, 10, 20, .66);
+}
+
+.radio-program-form__input-with-icon input {
+  min-width: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.radio-program-form__toggle,
+.radio-schedule-editor__toggle {
+  align-content: center;
+  grid-template-columns: auto 1fr !important;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.radio-program-form__toggle input,
+.radio-schedule-editor__toggle input {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+}
+
+.radio-program-form__actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.radio-program-form__actions button,
+.radio-program-card__actions button,
+.radio-schedule-editor__save {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(48, 147, 255, .14);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--bds-color-text);
+  background: rgba(255,255,255,.03);
+  font: inherit;
+  font-size: .69rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.radio-program-form__actions button.is-primary,
+.radio-schedule-editor__save {
+  border-color: rgba(58, 159, 255, .28);
+  color: #fff;
+  background: linear-gradient(180deg, #168cff, #0755c8);
+}
+
+.radio-program-card__actions button.is-danger {
+  color: #ff8b97;
+  border-color: rgba(255, 89, 105, .18);
+  background: rgba(255, 89, 105, .05);
+}
+
+.radio-content-manager__error,
+.radio-content-manager__success {
+  margin: 12px 0 0;
+  padding: 9px 11px;
+  border-radius: 9px;
+  font-size: .7rem;
+}
+
+.radio-content-manager__error {
+  border: 1px solid rgba(255, 89, 105, .2);
+  color: #ff98a2;
+  background: rgba(255, 89, 105, .06);
+}
+
+.radio-content-manager__success {
+  border: 1px solid rgba(46, 210, 125, .18);
+  color: #70dca5;
+  background: rgba(46, 210, 125, .06);
+}
+
+.radio-program-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 9px;
+}
+
+.radio-program-card {
+  padding: 12px;
+  border: 1px solid rgba(48, 147, 255, .1);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  background: rgba(255,255,255,.018);
+}
+
+.radio-program-card__main {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.radio-program-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-program-card__title strong {
+  color: var(--bds-color-text);
+}
+
+.radio-program-card__title span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--bds-color-text-secondary);
+  background: rgba(255,255,255,.04);
+  font-size: .58rem;
+  font-weight: 850;
+}
+
+.radio-program-card__title span.is-active {
+  color: #6fdda3;
+  background: rgba(46, 210, 125, .07);
+}
+
+.radio-program-card p {
+  margin: 0;
+}
+
+.radio-program-card small {
+  color: var(--bds-color-text-secondary);
+}
+
+.radio-program-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.radio-content-manager__empty {
+  min-height: 130px;
+  border: 1px dashed rgba(48, 147, 255, .14);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  color: var(--bds-color-text-secondary);
+}
+
+.radio-content-manager__empty p {
+  margin: 0;
+}
+
+.radio-schedule-editor {
+  display: grid;
+  gap: 9px;
+}
+
+.radio-schedule-editor__row {
+  padding: 11px;
+  border: 1px solid rgba(48, 147, 255, .1);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 120px minmax(160px, 1fr) minmax(160px, .8fr) 74px auto;
+  align-items: end;
+  gap: 10px;
+  background: rgba(255,255,255,.018);
+}
+
+.radio-schedule-editor__day {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #72cfff;
+}
+
+.radio-schedule-editor__day strong {
+  color: var(--bds-color-text);
+  font-size: .78rem;
+}
+
+.radio-schedule-editor__save {
+  align-self: end;
+}
+
+@media (max-width: 900px) {
+  .radio-schedule-editor__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .radio-schedule-editor__day,
+  .radio-schedule-editor__save {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .radio-admin-sections {
+    width: 100%;
+    box-sizing: border-box;
+    grid-template-columns: 1fr 1fr 1.25fr;
+  }
+
+  .radio-admin-sections button {
+    min-width: 0;
+    padding-inline: 7px;
+    font-size: .64rem;
+  }
+
+  .radio-program-form__grid,
+  .radio-program-card,
+  .radio-schedule-editor__row {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-program-form__wide,
+  .radio-schedule-editor__day,
+  .radio-schedule-editor__save {
+    grid-column: auto;
+  }
+
+  .radio-program-card__actions,
+  .radio-program-form__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .radio-program-form__actions button:only-child {
+    grid-column: 1 / -1;
+  }
+}
