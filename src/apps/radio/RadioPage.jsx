@@ -36,7 +36,13 @@ const INITIAL_METADATA = {
   track: "Programação ao vivo",
   artist: "IMORTAL0800",
   listeners: 0,
+  listenerLimit: 0,
   peakListeners: 0,
+  bitrate: 0,
+  bitrateLabel: "",
+  genre: "",
+  statusLabel: "",
+  provider: "",
   serverTitle: "IMORTAL0800",
   streamUrl: getMxCastStreamUrl(),
   cover: "",
@@ -434,6 +440,18 @@ export default function RadioPage() {
               <Headphones size={16} />
               {getListenerLabel(metadata.listeners)}
             </span>
+
+            {metadata.bitrate || metadata.bitrateLabel ? (
+              <span className="imortal-radio-stream-detail">
+                {metadata.bitrateLabel || `${metadata.bitrate} Kbps`}
+              </span>
+            ) : null}
+
+            {metadata.genre ? (
+              <span className="imortal-radio-stream-detail">
+                {metadata.genre}
+              </span>
+            ) : null}
           </div>
 
           <div className="imortal-radio-track">
