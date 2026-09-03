@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Cake, CalendarDays, Check, Eye, EyeOff, MessageCircle, Pencil, RefreshCw, Trash2 } from 'lucide-react'
+import { Activity, Cake, CalendarDays, Check, Eye, EyeOff, MessageCircle, Pencil, RefreshCw, Save, Trash2, Trophy, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -14,10 +14,59 @@ function statusLabel(status) {
   return labels[status] || status || '-'
 }
 
+function serializeTopActive(rows = []) {
+  return (Array.isArray(rows) ? rows : [])
+    .map((item) => [item.name || item.user?.displayName || '', item.activity ?? 0].join(' | '))
+    .join('\n')
+}
+
+function serializeRanking(rows = []) {
+  return (Array.isArray(rows) ? rows : [])
+    .map((item) => [
+      item.user?.displayName || item.name || '',
+      item.user?.xatId || item.xatId || '',
+      item.points ?? 0,
+    ].join(' | '))
+    .join('\n')
+}
+
+function parseTopActive(text) {
+  return String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 10)
+    .map((line) => {
+      const [name = '', activity = '0'] = line.split('|').map((part) => part.trim())
+      return { name, activity: Math.max(0, Number(activity) || 0) }
+    })
+    .filter((item) => item.name.length >= 2)
+}
+
+function parseRanking(text) {
+  return String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 20)
+    .map((line) => {
+      const [name = '', xatId = '', points = '0'] = line.split('|').map((part) => part.trim())
+      return {
+        name,
+        xatId: Number(xatId) > 0 ? Number(xatId) : null,
+        points: Math.max(0, Number(points) || 0),
+      }
+    })
+    .filter((item) => item.name.length >= 2)
+}
+
 export default function CommunityAdminPage() {
   const navigate = useNavigate()
-  const [data, setData] = useState({ wall: [], birthdays: [] })
+  const [data, setData] = useState({ wall: [], birthdays: [], evoxManual: null })
   const [loading, setLoading] = useState(true)
+  const [onlineNow, setOnlineNow] = useState('')
+  const [topActiveText, setTopActiveText] = useState('')
+  const [rankingText, setRankingText] = useState('')
   const [busyId, setBusyId] = useState('')
   const [feedback, setFeedback] = useState('')
 
@@ -26,10 +75,15 @@ export default function CommunityAdminPage() {
     setFeedback('')
     try {
       const next = await loadCommunityModeration()
+      const manual = next.evoxManual || {}
       setData({
         wall: Array.isArray(next.wall) ? next.wall : [],
         birthdays: Array.isArray(next.birthdays) ? next.birthdays : [],
+        evoxManual: manual,
       })
+      setOnlineNow(manual.onlineNow === null || manual.onlineNow === undefined ? '' : String(manual.onlineNow))
+      setTopActiveText(serializeTopActive(manual.topActive))
+      setRankingText(serializeRanking(manual.ranking))
     } catch (error) {
       setFeedback(error.message || 'Não foi possível carregar a moderação.')
     } finally {
@@ -99,6 +153,27 @@ export default function CommunityAdminPage() {
     })
   }
 
+  async function saveManualEvox() {
+    setBusyId('evox-manual')
+    setFeedback('')
+    try {
+      await moderateCommunityItem({
+        resource: 'evox-manual',
+        id: 'imortal0800',
+        action: 'save',
+        onlineNow: onlineNow.trim() === '' ? null : Math.max(0, Number(onlineNow) || 0),
+        topActive: parseTopActive(topActiveText),
+        ranking: parseRanking(rankingText),
+      })
+      setFeedback('Dados manuais do EVOX salvos.')
+      await load()
+    } catch (error) {
+      setFeedback(error.message || 'Não foi possível salvar os dados manuais do EVOX.')
+    } finally {
+      setBusyId('')
+    }
+  }
+
   return (
     <main className="community-admin-page">
       <header className="community-admin-header">
@@ -114,6 +189,64 @@ export default function CommunityAdminPage() {
       </header>
 
       {feedback ? <p className="community-admin-feedback">{feedback}</p> : null}
+
+      <section className="community-admin-panel">
+        <div className="community-admin-panel__title">
+          <Activity size={18} />
+          <div>
+            <h2>EVOX — modo manual temporário</h2>
+            <p>Use estes dados enquanto a API não estiver autorizada. Quando o EVOX automático funcionar, ele terá prioridade.</p>
+          </div>
+        </div>
+
+        <div className="community-admin-evox-grid">
+          <label>
+            <span><Activity size={14} /> Usuários online agora</span>
+            <input
+              type="number"
+              min="0"
+              inputMode="numeric"
+              value={onlineNow}
+              onChange={(event) => setOnlineNow(event.target.value)}
+              placeholder="Ex.: 5"
+            />
+          </label>
+
+          <label>
+            <span><Users size={14} /> Top 10 Usuários Mais Ativos</span>
+            <textarea
+              rows={8}
+              value={topActiveText}
+              onChange={(event) => setTopActiveText(event.target.value)}
+              placeholder={'Nome | Atividades\nEx.: iGianLucca | 1807'}
+            />
+            <small>Uma pessoa por linha: Nome | Atividades. Máximo de 10.</small>
+          </label>
+
+          <label>
+            <span><Trophy size={14} /> Ranking de Pontos</span>
+            <textarea
+              rows={8}
+              value={rankingText}
+              onChange={(event) => setRankingText(event.target.value)}
+              placeholder={'Nome | ID do Xat | Pontos\nEx.: iGianLucca | 1544927716 | 12500'}
+            />
+            <small>Uma pessoa por linha: Nome | ID do Xat | Pontos. A ordem das linhas define a posição.</small>
+          </label>
+        </div>
+
+        <div className="community-admin-evox-actions">
+          <small>
+            Última atualização: {data.evoxManual?.updatedAt
+              ? new Date(data.evoxManual.updatedAt).toLocaleString('pt-BR')
+              : 'ainda não salvo'}
+          </small>
+          <button type="button" onClick={saveManualEvox} disabled={busyId === 'evox-manual'}>
+            <Save size={15} />
+            {busyId === 'evox-manual' ? 'Salvando...' : 'Salvar dados manuais'}
+          </button>
+        </div>
+      </section>
 
       <section className="community-admin-panel">
         <div className="community-admin-panel__title">
