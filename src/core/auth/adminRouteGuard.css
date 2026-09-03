@@ -64,6 +64,7 @@
 }
 
 .admin-access-card__subtitle {
+  max-width: 275px;
   margin: 7px 0 0;
   color: #768ba9;
   font-size: 0.71rem;
