@@ -114,17 +114,11 @@ export const plugins = [
 
   {
     id: "radio-admin",
-    title: "Radio Admin",
+    title: "Painel da Rádio",
     path: "/radio/admin",
     icon: Shield,
     menu: false,
-    element: (
-      <AdminPluginPage
-        component={RadioAdminPage}
-        title="Radio Admin"
-        allowedRoles={RADIO_ADMIN_ROLES}
-      />
-    ),
+    element: <LazyPluginPage component={RadioAdminPage} title="Painel da Rádio" />,
   },
 
   {
