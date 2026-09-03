@@ -181,11 +181,11 @@ export default function AuthDialog() {
 
   const isLogin = mode === 'login'
   const isSignup = mode === 'signup'
-  const title = isSignup ? 'Criar conta' : mode === 'recover' ? 'Recuperar senha' : 'Entrar'
+  const title = isSignup ? 'Criar conta' : mode === 'recover' ? 'Redefinir senha' : 'Entrar'
   const subtitle = isSignup
     ? 'Crie seu usuário para participar dos recursos pessoais.'
     : mode === 'recover'
-      ? 'Use seu código de recuperação para definir uma nova senha.'
+      ? 'Informe seu usuário e código de recuperação para criar uma nova senha.'
       : 'Acesse sua conta IMORTAL0800.'
 
   const passwordToggle = (
@@ -342,7 +342,7 @@ export default function AuthDialog() {
               className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[#3DA8FF]/35 bg-[linear-gradient(135deg,#0B78FF,#0759CB)] px-4 text-[14px] font-black text-white shadow-[0_14px_30px_rgba(11,120,255,0.22)] transition duration-200 hover:-translate-y-px hover:brightness-110 hover:shadow-[0_18px_36px_rgba(11,120,255,0.28)] disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60"
             >
               {isSignup ? <UserPlus size={17} /> : mode === 'recover' ? <KeyRound size={17} /> : <LogIn size={17} />}
-              {busy ? 'Aguarde...' : isSignup ? 'Criar conta' : mode === 'recover' ? 'Alterar senha' : 'Entrar'}
+              {busy ? 'Aguarde...' : isSignup ? 'Criar conta' : mode === 'recover' ? 'Redefinir senha' : 'Entrar'}
             </button>
           ) : (
             <button
@@ -372,7 +372,7 @@ export default function AuthDialog() {
                   className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
                 >
                   <KeyRound size={15} />
-                  Recuperar senha
+                  Redefinir senha
                 </button>
               </div>
 
