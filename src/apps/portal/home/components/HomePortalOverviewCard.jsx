@@ -71,7 +71,16 @@ const PORTAL_AREAS = [
   },
 ]
 
-export function HomePortalOverviewCard() {
+export function HomePortalOverviewCard({ events = [] }) {
+  const nextEvent = Array.isArray(events) ? events[0] : null
+  const areas = PORTAL_AREAS.map((area) => {
+    if (area.id !== 'events' || !nextEvent?.title) return area
+    return {
+      ...area,
+      description: `Próximo destaque: ${nextEvent.title}.`,
+    }
+  })
+
   return (
     <FeatureCard
       className="bds-home-card-full imortal-home-overview"
@@ -87,10 +96,11 @@ export function HomePortalOverviewCard() {
         data-designer-id="portal.overview"
         data-designer-label="Portal / Visão geral"
       >
-        {PORTAL_AREAS.map(({ id, title, description, path, icon: Icon }) => (
+        {areas.map(({ id, title, description, path, icon: Icon }) => (
           <button
             key={id}
             className="imortal-home-overview__item"
+            data-portal-area={id}
             type="button"
             onClick={() => { window.location.href = path }}
           >
