@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js'
+
 const ICECAST_STATS_URL =
   'https://s01.svrdedicado.org:7956/status-json.xsl'
 
@@ -7,6 +9,64 @@ const RADIO_STREAM_URL =
 const REQUEST_TIMEOUT_MS = 8000
 const ARTWORK_CACHE_TTL_MS = 6 * 60 * 60 * 1000
 const artworkCache = new Map()
+
+function getSupabaseAdmin() {
+  const url = process.env.SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!url || !key) return null
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
+async function getProviderIntegration() {
+  const supabase = getSupabaseAdmin()
+  if (!supabase) return null
+
+  const { data, error } = await supabase
+    .from('radio_provider_integrations')
+    .select('provider,json_url,xml_url,enabled')
+    .eq('id', 'imortal0800-primary')
+    .maybeSingle()
+
+  if (error || !data?.enabled || !data?.json_url) return null
+  return data
+}
+
+function describePayloadShape(value, depth = 0) {
+  if (depth > 3) return typeof value
+  if (Array.isArray(value)) {
+    return value.length ? [describePayloadShape(value[0], depth + 1)] : []
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).slice(0, 50).map(([key, child]) => [
+        key,
+        describePayloadShape(child, depth + 1),
+      ]),
+    )
+  }
+  return typeof value
+}
+
+async function inspectProviderPayload() {
+  const integration = await getProviderIntegration()
+  if (!integration) return null
+
+  const response = await fetchWithTimeout(integration.json_url)
+  if (!response.ok) {
+    throw new Error(`VOX API returned HTTP ${response.status}`)
+  }
+
+  const payload = await response.json()
+  console.info('VOX API payload shape:', JSON.stringify(describePayloadShape(payload)))
+  return payload
+}
 
 async function fetchWithTimeout(url) {
   const controller = new AbortController()
@@ -153,6 +213,12 @@ export default async function handler(request, response) {
   }
 
   try {
+    try {
+      await inspectProviderPayload()
+    } catch (providerError) {
+      console.warn('VOX API inspection unavailable:', providerError?.message || providerError)
+    }
+
     const data = await getIcecastStats()
 
     response.setHeader(
