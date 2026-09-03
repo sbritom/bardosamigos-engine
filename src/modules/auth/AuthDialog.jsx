@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { useAuth } from './AuthContext'
+import './authDialog.css'
 
 const initialForm = {
   username: '',
@@ -39,18 +40,11 @@ function AuthField({
   trailing,
 }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-[#8EA6C9]">
-        {label}
-      </span>
+    <label className="imortal-auth-field">
+      <span>{label}</span>
 
-      <div className="group flex min-h-[52px] items-center gap-3 rounded-2xl border border-[#2A8FFF]/15 bg-[#07111E]/85 px-4 transition duration-200 focus-within:border-[#15C9FF]/65 focus-within:bg-[#081624] focus-within:shadow-[0_0_0_4px_rgba(21,201,255,0.07)]">
-        <Icon
-          size={18}
-          className="shrink-0 text-[#5C85C7] transition group-focus-within:text-[#15C9FF]"
-          aria-hidden="true"
-        />
-
+      <div>
+        <Icon size={17} aria-hidden="true" />
         <input
           name={name}
           type={type}
@@ -61,9 +55,7 @@ function AuthField({
           minLength={minLength}
           maxLength={maxLength}
           required={required}
-          className="h-[50px] min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] font-semibold text-white outline-none placeholder:font-medium placeholder:text-[#536A8C]"
         />
-
         {trailing}
       </div>
     </label>
@@ -183,38 +175,38 @@ export default function AuthDialog() {
   const isSignup = mode === 'signup'
   const title = isSignup ? 'Criar conta' : mode === 'recover' ? 'Redefinir senha' : 'Entrar'
   const subtitle = isSignup
-    ? 'Crie seu usuário para participar dos recursos pessoais.'
+    ? 'Escolha um usuário e uma senha.'
     : mode === 'recover'
-      ? 'Informe seu usuário e código de recuperação para criar uma nova senha.'
+      ? 'Use seu código de recuperação para criar uma nova senha.'
       : 'Acesse sua conta IMORTAL0800.'
 
   const passwordToggle = (
     <button
       type="button"
+      className="imortal-auth-password-toggle"
       aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
       title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
       onClick={() => setShowPassword((current) => !current)}
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#6685AF] transition hover:bg-white/[0.04] hover:text-[#15C9FF]"
     >
-      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
     </button>
   )
 
   const confirmPasswordToggle = (
     <button
       type="button"
+      className="imortal-auth-password-toggle"
       aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
       title={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
       onClick={() => setShowConfirmPassword((current) => !current)}
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#6685AF] transition hover:bg-white/[0.04] hover:text-[#15C9FF]"
     >
-      {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
     </button>
   )
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#01050B]/80 px-4 py-6 backdrop-blur-md"
+      className="imortal-auth-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="imortal-auth-title"
@@ -222,42 +214,26 @@ export default function AuthDialog() {
         if (event.target === event.currentTarget && !busy) closeAuth()
       }}
     >
-      <section className="relative max-h-[calc(100dvh-32px)] w-full max-w-[410px] overflow-y-auto rounded-[28px] border border-[#2A8FFF]/20 bg-[#050B14]/95 shadow-[0_28px_90px_rgba(0,0,0,0.58)]">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0B78FF]/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-20 h-48 w-48 rounded-full bg-[#15C9FF]/10 blur-3xl" />
-
-        <div className="relative border-b border-[#2A8FFF]/10 px-6 pb-5 pt-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <span className="inline-flex items-center rounded-full border border-[#2A8FFF]/20 bg-[#0B78FF]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#72B5FF]">
-                IMORTAL0800
-              </span>
-
-              <h2
-                id="imortal-auth-title"
-                className="mt-4 text-[28px] font-black leading-none tracking-[-0.035em] text-white"
-              >
-                {title}
-              </h2>
-
-              <p className="mt-2 max-w-[300px] text-[13px] leading-5 text-[#7F93B1]">
-                {subtitle}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              aria-label="Fechar"
-              onClick={closeAuth}
-              disabled={busy}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-[#7287A6] transition hover:border-[#2A8FFF]/20 hover:bg-[#0B78FF]/10 hover:text-white disabled:cursor-wait disabled:opacity-50"
-            >
-              <X size={18} />
-            </button>
+      <section className="imortal-auth-dialog">
+        <header className="imortal-auth-dialog__header">
+          <div>
+            <span>CONTA IMORTAL0800</span>
+            <h2 id="imortal-auth-title">{title}</h2>
+            <p>{subtitle}</p>
           </div>
-        </div>
 
-        <form className="relative space-y-4 px-6 py-6" onSubmit={handleSubmit}>
+          <button
+            type="button"
+            className="imortal-auth-close"
+            aria-label="Fechar"
+            onClick={closeAuth}
+            disabled={busy}
+          >
+            <X size={17} />
+          </button>
+        </header>
+
+        <form className="imortal-auth-form" onSubmit={handleSubmit}>
           {!recoveryCode ? (
             <>
               <AuthField
@@ -266,13 +242,13 @@ export default function AuthDialog() {
                 name="username"
                 value={form.username}
                 onChange={handleChange}
-                placeholder="Usuário"
+                placeholder="Seu usuário"
                 autoComplete="username"
                 minLength={3}
                 maxLength={20}
               />
 
-              {mode === 'recover' && (
+              {mode === 'recover' ? (
                 <AuthField
                   label="Código de recuperação"
                   icon={KeyRound}
@@ -282,7 +258,7 @@ export default function AuthDialog() {
                   placeholder="XXXX-XXXX-XXXX"
                   autoComplete="off"
                 />
-              )}
+              ) : null}
 
               <AuthField
                 label={mode === 'recover' ? 'Nova senha' : 'Senha'}
@@ -291,24 +267,24 @@ export default function AuthDialog() {
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={handleChange}
-                placeholder="Senha"
+                placeholder={mode === 'recover' ? 'Nova senha' : 'Sua senha'}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
                 minLength={6}
                 trailing={passwordToggle}
               />
 
-              {isLogin && (
+              {isLogin ? (
                 <button
                   type="button"
+                  className="imortal-auth-recover-link"
                   onClick={() => changeMode('recover')}
-                  className="ml-auto flex items-center gap-2 rounded-xl px-1 py-1 text-[12px] font-extrabold text-[#72B5FF] transition hover:text-[#15C9FF]"
                 >
-                  <KeyRound size={14} />
-                  Esqueci minha senha / Redefinir senha
+                  <KeyRound size={13} />
+                  Recuperar senha
                 </button>
-              )}
+              ) : null}
 
-              {(isSignup || mode === 'recover') && (
+              {(isSignup || mode === 'recover') ? (
                 <AuthField
                   label="Confirmar senha"
                   icon={LockKeyhole}
@@ -316,99 +292,59 @@ export default function AuthDialog() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  placeholder="Confirmar senha"
+                  placeholder="Repita a senha"
                   autoComplete="new-password"
                   minLength={6}
                   trailing={confirmPasswordToggle}
                 />
-              )}
+              ) : null}
             </>
           ) : (
-            <div className="rounded-2xl border border-[#15C9FF]/20 bg-[#0B78FF]/10 p-5 text-center">
-              <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#7EA8D8]">
-                Código de recuperação
-              </span>
-              <strong className="mt-3 block text-[20px] font-black tracking-[0.10em] text-[#15C9FF]">
-                {recoveryCode}
-              </strong>
-              <p className="mt-3 text-[12px] leading-5 text-[#8BA0BD]">
-                Guarde este código. Ele será necessário caso você esqueça a senha.
-              </p>
+            <div className="imortal-auth-recovery-code">
+              <span>Código de recuperação</span>
+              <strong>{recoveryCode}</strong>
+              <p>Guarde este código em um local seguro. Ele será necessário se você esquecer sua senha.</p>
             </div>
           )}
 
-          {feedback && (
-            <p
-              className="rounded-2xl border border-white/[0.06] bg-white/[0.035] px-4 py-3 text-[12px] font-medium leading-5 text-[#B6C5DB]"
-              role="status"
-            >
-              {feedback}
-            </p>
-          )}
+          {feedback ? (
+            <p className="imortal-auth-feedback" role="status">{feedback}</p>
+          ) : null}
 
           {!recoveryCode ? (
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[#3DA8FF]/35 bg-[linear-gradient(135deg,#0B78FF,#0759CB)] px-4 text-[14px] font-black text-white shadow-[0_14px_30px_rgba(11,120,255,0.22)] transition duration-200 hover:-translate-y-px hover:brightness-110 hover:shadow-[0_18px_36px_rgba(11,120,255,0.28)] disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60"
-            >
-              {isSignup ? <UserPlus size={17} /> : mode === 'recover' ? <KeyRound size={17} /> : <LogIn size={17} />}
+            <button type="submit" disabled={busy} className="imortal-auth-primary">
+              {isSignup ? <UserPlus size={16} /> : mode === 'recover' ? <KeyRound size={16} /> : <LogIn size={16} />}
               {busy ? 'Aguarde...' : isSignup ? 'Criar conta' : mode === 'recover' ? 'Redefinir senha' : 'Entrar'}
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={closeAuth}
-              className="min-h-[52px] w-full rounded-2xl border border-[#3DA8FF]/35 bg-[linear-gradient(135deg,#0B78FF,#0759CB)] px-4 text-[14px] font-black text-white transition hover:brightness-110"
-            >
+            <button type="button" className="imortal-auth-primary" onClick={closeAuth}>
               Concluir
             </button>
           )}
 
-          {!recoveryCode && isLogin && (
-            <>
-              <button
-                type="button"
-                onClick={() => changeMode('signup')}
-                className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
-              >
+          {!recoveryCode && isLogin ? (
+            <div className="imortal-auth-secondary-actions">
+              <button type="button" onClick={() => changeMode('signup')}>
                 <UserPlus size={15} />
                 Criar conta
               </button>
-
-              <div className="flex items-center gap-3 py-1">
-                <span className="h-px flex-1 bg-[#2A8FFF]/10" />
-                <span className="text-[9px] font-black uppercase tracking-[0.16em] text-[#536A8C]">ou</span>
-                <span className="h-px flex-1 bg-[#2A8FFF]/10" />
-              </div>
-
-              <button
-                type="button"
-                onClick={closeAuth}
-                className="min-h-[44px] w-full rounded-2xl border border-dashed border-[#2A8FFF]/18 bg-transparent px-4 text-[12px] font-bold text-[#7692B8] transition hover:border-[#15C9FF]/30 hover:bg-[#0B78FF]/[0.05] hover:text-[#A8CFFF]"
-              >
+              <button type="button" className="is-visitor" onClick={closeAuth}>
                 Continuar como visitante
               </button>
-            </>
-          )}
+            </div>
+          ) : null}
 
-          {!recoveryCode && !isLogin && (
+          {!recoveryCode && !isLogin ? (
             <button
               type="button"
+              className="imortal-auth-back"
               onClick={() => changeMode('login')}
-              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-4 text-[12px] font-bold text-[#A9BDD7] transition hover:border-[#2A8FFF]/25 hover:text-white"
             >
-              <ArrowLeft size={15} />
+              <ArrowLeft size={14} />
               Voltar ao login
             </button>
-          )}
+          ) : null}
         </form>
-
-        <div className="relative flex items-center justify-center border-t border-[#2A8FFF]/10 bg-[#03070D]/45 px-6 py-3">
-          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-[#415574]">
-            Sua conta • Seu acesso • IMORTAL0800
-          </span>
-        </div>
       </section>
     </div>
   )
