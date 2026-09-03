@@ -222,7 +222,7 @@ export default function AuthDialog() {
         if (event.target === event.currentTarget && !busy) closeAuth()
       }}
     >
-      <section className="relative w-full max-w-[410px] overflow-hidden rounded-[28px] border border-[#2A8FFF]/20 bg-[#050B14]/95 shadow-[0_28px_90px_rgba(0,0,0,0.58)]">
+      <section className="relative max-h-[calc(100dvh-32px)] w-full max-w-[410px] overflow-y-auto rounded-[28px] border border-[#2A8FFF]/20 bg-[#050B14]/95 shadow-[0_28px_90px_rgba(0,0,0,0.58)]">
         <div className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0B78FF]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-48 w-48 rounded-full bg-[#15C9FF]/10 blur-3xl" />
 
@@ -297,6 +297,17 @@ export default function AuthDialog() {
                 trailing={passwordToggle}
               />
 
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => changeMode('recover')}
+                  className="ml-auto flex items-center gap-2 rounded-xl px-1 py-1 text-[12px] font-extrabold text-[#72B5FF] transition hover:text-[#15C9FF]"
+                >
+                  <KeyRound size={14} />
+                  Esqueci minha senha / Redefinir senha
+                </button>
+              )}
+
               {(isSignup || mode === 'recover') && (
                 <AuthField
                   label="Confirmar senha"
@@ -356,25 +367,14 @@ export default function AuthDialog() {
 
           {!recoveryCode && isLogin && (
             <>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => changeMode('signup')}
-                  className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
-                >
-                  <UserPlus size={15} />
-                  Criar conta
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => changeMode('recover')}
-                  className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
-                >
-                  <KeyRound size={15} />
-                  Redefinir senha
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => changeMode('signup')}
+                className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-2xl border border-[#2A8FFF]/12 bg-[#08111D] px-3 text-[12px] font-bold text-[#B6C7DE] transition hover:border-[#2A8FFF]/28 hover:bg-[#0B1726] hover:text-white"
+              >
+                <UserPlus size={15} />
+                Criar conta
+              </button>
 
               <div className="flex items-center gap-3 py-1">
                 <span className="h-px flex-1 bg-[#2A8FFF]/10" />
