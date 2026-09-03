@@ -70,7 +70,12 @@ async function getOptionalUserAccessToken() {
   return data?.session?.access_token || "";
 }
 
-export async function submitRadioMusicRequest({ songAndArtist, message, requesterName = "" }) {
+export async function submitRadioMusicRequest({
+  songAndArtist,
+  message,
+  requesterName = "",
+  providerTrackFile = "",
+}) {
   const token = await getOptionalUserAccessToken();
   const headers = {
     "Content-Type": "application/json",
@@ -84,7 +89,7 @@ export async function submitRadioMusicRequest({ songAndArtist, message, requeste
   const response = await fetch(REQUESTS_ENDPOINT, {
     method: "POST",
     headers,
-    body: JSON.stringify({ songAndArtist, message, requesterName }),
+    body: JSON.stringify({ songAndArtist, message, requesterName, providerTrackFile }),
   });
 
   return parseResponse(response);
@@ -97,6 +102,22 @@ export async function getRadioPublicContent() {
   });
 
   return parseResponse(response);
+}
+
+export async function searchRadioProviderCatalog(query) {
+  const normalized = String(query || "").trim();
+  if (normalized.length < 2) return [];
+
+  const response = await fetch(
+    `${REQUESTS_ENDPOINT}?section=provider-catalog&q=${encodeURIComponent(normalized)}`,
+    {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    },
+  );
+
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data : [];
 }
 
 export async function listRadioProgramsAdmin() {
