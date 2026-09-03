@@ -21,7 +21,10 @@ import {
   getMxCastStreamUrl,
   getRadioMetadataInterval,
 } from "./mxcastRadioApi";
-import { submitRadioMusicRequest } from "./requests/radioRequestsApi";
+import {
+  getRadioPublicContent,
+  submitRadioMusicRequest,
+} from "./requests/radioRequestsApi";
 import { useAuth } from "../../modules/auth/AuthContext";
 import "./radioUi.css";
 
@@ -38,59 +41,16 @@ const INITIAL_METADATA = {
   updatedAt: null,
 };
 
-const RADIO_SECTIONS = [
-  {
-    id: "ranking",
-    icon: ListMusic,
-    eyebrow: "Mais tocadas",
-    title: "Ranking musical",
-    description: "As músicas que estão se destacando na rádio e nos pedidos.",
-    empty: "Ainda não há um ranking musical publicado.",
-  },
-  {
-    id: "novidades",
-    icon: Newspaper,
-    eyebrow: "Música",
-    title: "Novidades",
-    description: "Lançamentos, destaques e novidades do universo musical.",
-    empty: "As próximas novidades musicais aparecerão aqui.",
-  },
-];
 
 
-const RADIO_SCHEDULE = [
-  { day: "Segunda", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Terça", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Quarta", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Quinta", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Sexta", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Sábado", locutor: "Locutor a definir", time: "Horário a definir" },
-  { day: "Domingo", locutor: "Locutor a definir", time: "Horário a definir" },
-];
-
-
-const RADIO_PROGRAMS = [
-  {
-    id: "programa-1",
-    eyebrow: "PROGRAMA 01",
-    title: "Nome a definir",
-    description: "Descrição do programa será publicada aqui.",
-    schedule: "Dias e horários a definir",
-  },
-  {
-    id: "programa-2",
-    eyebrow: "PROGRAMA 02",
-    title: "Nome a definir",
-    description: "Descrição do programa será publicada aqui.",
-    schedule: "Dias e horários a definir",
-  },
-  {
-    id: "programa-3",
-    eyebrow: "PROGRAMA 03",
-    title: "Nome a definir",
-    description: "Descrição do programa será publicada aqui.",
-    schedule: "Dias e horários a definir",
-  },
+const FALLBACK_SCHEDULE = [
+  { dayOfWeek: 1, dayLabel: "Segunda", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 2, dayLabel: "Terça", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 3, dayLabel: "Quarta", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 4, dayLabel: "Quinta", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 5, dayLabel: "Sexta", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 6, dayLabel: "Sábado", locutorName: "", timeLabel: "", enabled: true },
+  { dayOfWeek: 7, dayLabel: "Domingo", locutorName: "", timeLabel: "", enabled: true },
 ];
 
 function getListenerLabel(count) {
@@ -117,6 +77,10 @@ export default function RadioPage() {
   const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
   const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [activeProgramIndex, setActiveProgramIndex] = useState(0);
+  const [radioPrograms, setRadioPrograms] = useState([]);
+  const [radioSchedule, setRadioSchedule] = useState(FALLBACK_SCHEDULE);
+  const [radioRanking, setRadioRanking] = useState([]);
+  const [radioContentError, setRadioContentError] = useState("");
   const [requestForm, setRequestForm] = useState({
     requesterName: "",
     songAndArtist: "",
@@ -127,7 +91,7 @@ export default function RadioPage() {
   const coverUrl = typeof metadata.cover === "string" ? metadata.cover.trim() : "";
   const hasCover = /^https?:\/\//i.test(coverUrl) && failedCover !== coverUrl;
   const isUnavailable = Boolean(metadataError || playerError);
-  const activeProgram = RADIO_PROGRAMS[activeProgramIndex];
+  const activeProgram = radioPrograms[activeProgramIndex] || null;
 
   const refreshMetadata = useCallback(async (signal) => {
     try {
@@ -173,12 +137,50 @@ export default function RadioPage() {
 
 
   useEffect(() => {
+    let active = true;
+
+    async function loadPublicRadioContent() {
+      try {
+        const content = await getRadioPublicContent();
+        if (!active) return;
+
+        setRadioPrograms(Array.isArray(content?.programs) ? content.programs : []);
+        setRadioSchedule(
+          Array.isArray(content?.schedule) && content.schedule.length
+            ? content.schedule
+            : FALLBACK_SCHEDULE,
+        );
+        setRadioRanking(Array.isArray(content?.ranking) ? content.ranking : []);
+        setRadioContentError("");
+      } catch {
+        if (!active) return;
+        setRadioContentError("A programação está sendo atualizada.");
+      }
+    }
+
+    loadPublicRadioContent();
+    const intervalId = window.setInterval(loadPublicRadioContent, 60000);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (radioPrograms.length < 2) return undefined;
+
     const timer = window.setInterval(() => {
-      setActiveProgramIndex((current) => (current + 1) % RADIO_PROGRAMS.length);
+      setActiveProgramIndex((current) => (current + 1) % radioPrograms.length);
     }, 6000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [radioPrograms.length]);
+
+  useEffect(() => {
+    if (activeProgramIndex < radioPrograms.length) return;
+    setActiveProgramIndex(0);
+  }, [activeProgramIndex, radioPrograms.length]);
 
   const closeRequestFlow = useCallback(() => {
     window.clearTimeout(requestCloseTimerRef.current);
@@ -433,16 +435,16 @@ export default function RadioPage() {
         </div>
 
         <div className="imortal-radio-schedule__grid">
-          {RADIO_SCHEDULE.map((slot) => (
-            <article key={slot.day} className="imortal-radio-schedule__day">
+          {radioSchedule.map((slot) => (
+            <article key={slot.dayOfWeek || slot.dayLabel} className="imortal-radio-schedule__day">
               <div className="imortal-radio-schedule__day-title">
                 <CalendarDays size={15} />
-                <strong>{slot.day}</strong>
+                <strong>{slot.dayLabel}</strong>
               </div>
-              <span>{slot.locutor}</span>
+              <span>{slot.locutorName || "Locutor a definir"}</span>
               <small>
                 <Clock3 size={13} />
-                {slot.time}
+                {slot.timeLabel || "Horário a definir"}
               </small>
             </article>
           ))}
@@ -450,53 +452,91 @@ export default function RadioPage() {
       </section>
 
       <section className="imortal-radio-content-grid" aria-label="Conteúdo da rádio">
-        {RADIO_SECTIONS.map((section) => {
-          const Icon = section.icon;
-          return (
-            <article key={section.id} id={section.id} className="imortal-radio-info-card">
-              <div className="imortal-radio-info-card__icon">
-                <Icon size={21} />
-              </div>
-              <span>{section.eyebrow}</span>
-              <h2>{section.title}</h2>
-              <p>{section.description}</p>
-              <div className="imortal-radio-empty">
-                <strong>Em preparação</strong>
-                <small>{section.empty}</small>
-              </div>
-            </article>
-          );
-        })}
+        <article id="ranking" className="imortal-radio-info-card imortal-radio-ranking-card">
+          <div className="imortal-radio-info-card__icon">
+            <ListMusic size={21} />
+          </div>
+          <span>MAIS PEDIDAS</span>
+          <h2>Ranking musical</h2>
+          <p>As músicas mais pedidas pela comunidade no IMORTAL0800.</p>
+
+          {radioRanking.length ? (
+            <ol className="imortal-radio-ranking-list">
+              {radioRanking.map((item, index) => (
+                <li key={`${item.label}-${index}`}>
+                  <strong>{index + 1}</strong>
+                  <span>{item.label}</span>
+                  <small>{item.count} {item.count === 1 ? "pedido" : "pedidos"}</small>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="imortal-radio-empty">
+              <strong>Ranking começando</strong>
+              <small>Os pedidos enviados pela página alimentarão este Top 5 automaticamente.</small>
+            </div>
+          )}
+        </article>
+
+        <article id="novidades" className="imortal-radio-info-card">
+          <div className="imortal-radio-info-card__icon">
+            <Newspaper size={21} />
+          </div>
+          <span>MÚSICA</span>
+          <h2>Novidades</h2>
+          <p>Lançamentos, destaques e novidades do universo musical.</p>
+          <div className="imortal-radio-empty">
+            <strong>Em preparação</strong>
+            <small>As próximas novidades musicais aparecerão aqui.</small>
+          </div>
+        </article>
 
         <article className="imortal-radio-programs-card" aria-labelledby="radio-programs-title">
           <div className="imortal-radio-programs-card__top">
             <div className="imortal-radio-info-card__icon">
               <Sparkles size={21} />
             </div>
-            <span>PROGRAMAÇÃO</span>
+            <span>PROGRAMAS DA RÁDIO</span>
           </div>
 
-          <div key={activeProgram.id} className="imortal-radio-programs-card__slide">
-            <small>{activeProgram.eyebrow}</small>
-            <h2 id="radio-programs-title">{activeProgram.title}</h2>
-            <p>{activeProgram.description}</p>
-            <strong>{activeProgram.schedule}</strong>
-          </div>
+          {activeProgram ? (
+            <>
+              <div key={activeProgram.id} className="imortal-radio-programs-card__slide">
+                <small>{activeProgram.locutorName || "IMORTAL0800"}</small>
+                <h2 id="radio-programs-title">{activeProgram.title}</h2>
+                <p>{activeProgram.description || "Programa da Rádio IMORTAL0800."}</p>
+                <strong>
+                  {[activeProgram.daysLabel, activeProgram.timeLabel].filter(Boolean).join(" • ") || "Dias e horários a definir"}
+                </strong>
+              </div>
 
-          <div className="imortal-radio-programs-card__indicators" aria-label="Selecionar programa">
-            {RADIO_PROGRAMS.map((program, index) => (
-              <button
-                key={program.id}
-                type="button"
-                className={index === activeProgramIndex ? "is-active" : ""}
-                aria-label={`Mostrar programa ${index + 1}`}
-                aria-current={index === activeProgramIndex ? "true" : undefined}
-                onClick={() => setActiveProgramIndex(index)}
-              />
-            ))}
-          </div>
+              {radioPrograms.length > 1 ? (
+                <div className="imortal-radio-programs-card__indicators" aria-label="Selecionar programa">
+                  {radioPrograms.map((program, index) => (
+                    <button
+                      key={program.id}
+                      type="button"
+                      className={index === activeProgramIndex ? "is-active" : ""}
+                      aria-label={`Mostrar programa ${index + 1}`}
+                      aria-current={index === activeProgramIndex ? "true" : undefined}
+                      onClick={() => setActiveProgramIndex(index)}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="imortal-radio-empty">
+              <strong>Programas em preparação</strong>
+              <small>Os programas cadastrados no Painel da Rádio aparecerão aqui automaticamente.</small>
+            </div>
+          )}
         </article>
       </section>
+
+      {radioContentError ? (
+        <p className="imortal-radio-content-notice" role="status">{radioContentError}</p>
+      ) : null}
 
       {requestModalOpen && (
         <div className="imortal-radio-modal" role="dialog" aria-modal="true" aria-labelledby="radio-request-title">
