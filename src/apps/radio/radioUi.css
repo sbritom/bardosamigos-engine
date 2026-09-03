@@ -2144,7 +2144,7 @@
 }
 
 .imortal-radio-ranking-card,
-.imortal-radio-news-card,
+.imortal-radio-now-card,
 .imortal-radio-programs-card {
   min-height: 242px;
 }
@@ -2163,7 +2163,7 @@
 @media (max-width: 680px) {
   .imortal-radio-programs-card,
   .imortal-radio-ranking-card,
-  .imortal-radio-news-card {
+  .imortal-radio-now-card {
     min-height: 0;
   }
 
@@ -2342,4 +2342,123 @@
 .imortal-radio-modal__panel {
   max-height: min(720px, calc(100dvh - 36px));
   overflow-y: auto;
+}
+
+
+/* Rádio - terceiro card: próximo na rádio */
+.imortal-radio-now-card {
+  min-height: 242px;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(20, 136, 255, .10), transparent 34%),
+    linear-gradient(180deg, rgba(9, 16, 27, .98), rgba(5, 9, 15, .99)) !important;
+}
+
+.imortal-radio-now-card.is-live {
+  border-color: rgba(46, 210, 125, .20) !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(46, 210, 125, .10), transparent 34%),
+    linear-gradient(180deg, rgba(8, 19, 24, .98), rgba(5, 10, 14, .99)) !important;
+}
+
+.imortal-radio-now-card.is-live > span {
+  color: #65dca0;
+}
+
+.imortal-radio-now-card.is-live .imortal-radio-info-card__icon {
+  border-color: rgba(46, 210, 125, .22);
+  color: #65dca0;
+  background: rgba(46, 210, 125, .07);
+}
+
+.imortal-radio-now-card > p {
+  min-height: 0;
+}
+
+.imortal-radio-now-card__meta {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.imortal-radio-now-card__meta > span {
+  min-height: 29px;
+  padding: 0 9px;
+  border: 1px solid rgba(69, 159, 255, .13);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #a9c8e7;
+  background: rgba(5, 12, 20, .48);
+  font-size: .61rem;
+  font-weight: 800;
+}
+
+.imortal-radio-now-card__meta > span.is-live {
+  border-color: rgba(46, 210, 125, .18);
+  color: #75e5aa;
+  background: rgba(46, 210, 125, .06);
+}
+
+.imortal-radio-now-card__meta > span.is-live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 5px rgba(46, 210, 125, .08);
+}
+
+.imortal-radio-now-card__footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(60, 151, 255, .10);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 7px;
+  align-items: center;
+  color: #62c9ff;
+}
+
+.imortal-radio-now-card__footer svg {
+  grid-row: span 2;
+}
+
+.imortal-radio-now-card__footer span {
+  color: #e7f3ff;
+  font-size: .67rem;
+  font-weight: 850;
+}
+
+.imortal-radio-now-card__footer small {
+  color: #657d99;
+  font-size: .58rem;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .imortal-radio-now-card {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .imortal-radio-programs-card {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .imortal-radio-now-card,
+  .imortal-radio-programs-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .imortal-radio-now-card {
+    min-height: 0;
+  }
 }
