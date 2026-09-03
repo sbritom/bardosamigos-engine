@@ -58,6 +58,31 @@ function getListenerLabel(count) {
   return `${value} ${value === 1 ? "ouvinte" : "ouvintes"} agora`;
 }
 
+
+function normalizeRadioSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
+function isMusicNews(item = {}) {
+  const text = normalizeRadioSearchText(
+    [item.title, item.description, item.summary].filter(Boolean).join(" "),
+  );
+
+  return /(musica|musical|cantor|cantora|banda|album|single|show|turne|festival|sertanejo|forro|pagode|funk|rap|rock|pop|dj|artista)/.test(text);
+}
+
+function normalizeMusicNews(item = {}) {
+  return {
+    id: item.id || item.url || item.title,
+    title: item.title || "Novidade musical",
+    source: item.source || item.metadata?.source || "Fonte sincronizada",
+    url: item.url || item.metadata?.sourceUrl || item.metadata?.originalUrl || "",
+  };
+}
+
 export default function RadioPage() {
   const { isAuthenticated, profile, displayName, openAuth } = useAuth();
   const audioRef = useRef(null);
@@ -80,6 +105,8 @@ export default function RadioPage() {
   const [radioPrograms, setRadioPrograms] = useState([]);
   const [radioSchedule, setRadioSchedule] = useState(FALLBACK_SCHEDULE);
   const [radioRanking, setRadioRanking] = useState([]);
+  const [radioNews, setRadioNews] = useState([]);
+  const [radioLocutorStatus, setRadioLocutorStatus] = useState({ isLive: false, locutorName: "" });
   const [radioContentError, setRadioContentError] = useState("");
   const [requestForm, setRequestForm] = useState({
     requesterName: "",
@@ -151,7 +178,27 @@ export default function RadioPage() {
             : FALLBACK_SCHEDULE,
         );
         setRadioRanking(Array.isArray(content?.ranking) ? content.ranking : []);
+        setRadioLocutorStatus({
+          isLive: Boolean(content?.locutorStatus?.isLive),
+          locutorName: content?.locutorStatus?.locutorName || "",
+        });
         setRadioContentError("");
+
+        try {
+          const newsResponse = await fetch("/api/news?category=Entretenimento&limit=20", {
+            headers: { Accept: "application/json" },
+          });
+          const newsPayload = await newsResponse.json().catch(() => ({}));
+          if (active && newsResponse.ok) {
+            const musicNews = (Array.isArray(newsPayload?.articles) ? newsPayload.articles : [])
+              .filter(isMusicNews)
+              .slice(0, 3)
+              .map(normalizeMusicNews);
+            setRadioNews(musicNews);
+          }
+        } catch {
+          if (active) setRadioNews([]);
+        }
       } catch {
         if (!active) return;
         setRadioContentError("A programação está sendo atualizada.");
@@ -432,6 +479,14 @@ export default function RadioPage() {
             <h2 id="radio-schedule-title">Locutores da rádio</h2>
             <p>Grade semanal do IMORTAL0800 com dia, locutor e horário.</p>
           </div>
+
+          {radioLocutorStatus.isLive ? (
+            <div className="imortal-radio-schedule__live">
+              <Radio size={14} />
+              <span>NO AR AGORA</span>
+              <strong>{radioLocutorStatus.locutorName || "Locutor"}</strong>
+            </div>
+          ) : null}
         </div>
 
         <div className="imortal-radio-schedule__grid">
@@ -478,20 +533,44 @@ export default function RadioPage() {
           )}
         </article>
 
-        <article id="novidades" className="imortal-radio-info-card">
+        <article id="novidades" className="imortal-radio-info-card imortal-radio-news-card">
           <div className="imortal-radio-info-card__icon">
             <Newspaper size={21} />
           </div>
           <span>MÚSICA</span>
           <h2>Novidades</h2>
-          <p>Lançamentos, destaques e novidades do universo musical.</p>
-          <div className="imortal-radio-empty">
-            <strong>Em preparação</strong>
-            <small>As próximas novidades musicais aparecerão aqui.</small>
-          </div>
+          <p>Lançamentos e destaques musicais encontrados nas notícias do portal.</p>
+
+          {radioNews.length ? (
+            <div className="imortal-radio-news-list">
+              {radioNews.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.url || "#"}
+                  target={item.url ? "_blank" : undefined}
+                  rel={item.url ? "noreferrer" : undefined}
+                  onClick={(event) => {
+                    if (!item.url) event.preventDefault();
+                  }}
+                >
+                  <strong>{item.title}</strong>
+                  <small>{item.source}</small>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="imortal-radio-empty">
+              <strong>Novidades em atualização</strong>
+              <small>Quando houver notícias musicais recentes, elas aparecerão aqui automaticamente.</small>
+            </div>
+          )}
         </article>
 
-        <article className="imortal-radio-programs-card" aria-labelledby="radio-programs-title">
+        <article
+          className={`imortal-radio-programs-card ${activeProgram?.imageUrl ? "has-image" : ""}`}
+          aria-labelledby="radio-programs-title"
+          style={activeProgram?.imageUrl ? { "--imortal-radio-program-image": `url("${activeProgram.imageUrl}")` } : undefined}
+        >
           <div className="imortal-radio-programs-card__top">
             <div className="imortal-radio-info-card__icon">
               <Sparkles size={21} />
