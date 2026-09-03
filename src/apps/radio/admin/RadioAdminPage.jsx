@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut } from "lucide-react";
+import { CalendarDays, ListMusic, LogOut, Mic2 } from "lucide-react";
 
 import {
   getRadioRequestsAdminAccess,
@@ -7,6 +7,7 @@ import {
   signOutRadioRequestsAdmin,
 } from "../requests/radioRequestsApi";
 import RadioRequestsPanel from "../requests/RadioRequestsPanel";
+import RadioContentManager from "./RadioContentManager";
 import "./radioAdmin.css";
 
 const INITIAL_ACCESS = {
@@ -22,6 +23,7 @@ export default function RadioAdminPage() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState("requests");
 
   useEffect(() => {
     let active = true;
@@ -150,8 +152,37 @@ export default function RadioAdminPage() {
         </button>
       </header>
 
+      <nav className="radio-admin-sections" aria-label="Áreas do painel da rádio">
+        <button
+          type="button"
+          className={activeSection === "requests" ? "is-active" : ""}
+          onClick={() => setActiveSection("requests")}
+        >
+          <ListMusic size={16} />
+          Pedidos
+        </button>
+        <button
+          type="button"
+          className={activeSection === "programs" ? "is-active" : ""}
+          onClick={() => setActiveSection("programs")}
+        >
+          <Mic2 size={16} />
+          Programas
+        </button>
+        <button
+          type="button"
+          className={activeSection === "schedule" ? "is-active" : ""}
+          onClick={() => setActiveSection("schedule")}
+        >
+          <CalendarDays size={16} />
+          Grade de locutores
+        </button>
+      </nav>
+
       <div className="radio-admin-grid">
-        <RadioRequestsPanel access={access} />
+        {activeSection === "requests" ? <RadioRequestsPanel access={access} /> : null}
+        {activeSection === "programs" ? <RadioContentManager mode="programs" /> : null}
+        {activeSection === "schedule" ? <RadioContentManager mode="schedule" /> : null}
       </div>
     </main>
   );
