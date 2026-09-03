@@ -2229,3 +2229,117 @@
     font-size: 0.56rem;
   }
 }
+
+
+/* Rádio - catálogo AutoDJ no pedido */
+.imortal-radio-request-mode {
+  margin-top: -1px;
+  color: #6f8aa7 !important;
+  font-size: 0.61rem !important;
+  font-weight: 700 !important;
+  line-height: 1.4;
+}
+
+.imortal-radio-request-mode.is-live {
+  color: #65dca0 !important;
+}
+
+.imortal-radio-request-selected {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid rgba(21, 201, 255, 0.2);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  color: #5fd9ff;
+  background: rgba(11, 120, 255, 0.07);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.imortal-radio-request-selected > span {
+  color: #5fd9ff !important;
+  font-size: 0.58rem;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.imortal-radio-request-selected strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #eef7ff;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-radio-catalog-results {
+  max-height: 210px;
+  overflow-y: auto;
+  display: grid;
+  gap: 5px;
+  padding-right: 2px;
+}
+
+.imortal-radio-catalog-results > button {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 9px;
+  border: 1px solid rgba(49, 143, 255, 0.11);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c7d8ea;
+  background: rgba(5, 13, 22, 0.62);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.imortal-radio-catalog-results > button:hover {
+  border-color: rgba(21, 201, 255, 0.26);
+  color: #fff;
+  background: rgba(11, 120, 255, 0.08);
+}
+
+.imortal-radio-catalog-results > button svg {
+  flex: 0 0 auto;
+  color: #5fc7ff;
+}
+
+.imortal-radio-catalog-results > button span {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit !important;
+  font-size: 0.67rem;
+  font-weight: 700 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-radio-catalog-status {
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px dashed rgba(49, 143, 255, 0.12);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #7188a4 !important;
+  background: rgba(5, 13, 22, 0.36);
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  line-height: 1.35;
+}
+
+.imortal-radio-modal__panel {
+  max-height: min(720px, calc(100dvh - 36px));
+  overflow-y: auto;
+}
