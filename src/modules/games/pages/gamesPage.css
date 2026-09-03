@@ -699,9 +699,9 @@
 
 /* Cabeçalho Games compacto */
 .games-page__hero {
-  height: 100px;
-  min-height: 100px;
-  padding: 12px 18px;
+  height: auto;
+  min-height: 126px;
+  padding: 20px;
   align-items: center;
 }
 
@@ -747,9 +747,9 @@
 
 @media (max-width: 720px) {
   .games-page__hero {
-    height: 100px;
-    min-height: 100px;
-    padding: 12px 14px;
+    height: auto;
+    min-height: 126px;
+    padding: 20px;
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
