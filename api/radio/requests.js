@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { applyApiCors, rejectOversizedBody } from '../_lib/security.js'
 
 const TABLE = 'radio_music_requests'
+const LOCUTOR_STATUS_TABLE = 'radio_locutor_status'
 const VALID_STATUSES = new Set(['pending', 'read'])
 const REQUEST_WINDOW_SECONDS = 60
 const AUTHORIZED_ROLES = new Set(['admin', 'locutor'])
@@ -135,6 +136,82 @@ async function readBody(request) {
   return {}
 }
 
+async function getLocutorDisplayName(supabase, user) {
+  if (!user?.id) return 'Locutor'
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('display_name, username')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (error) throw error
+
+  return cleanText(
+    data?.display_name
+      || data?.username
+      || user?.app_metadata?.username
+      || user?.user_metadata?.username
+      || 'Locutor',
+    80,
+  )
+}
+
+async function handleLocutorStatusGet(request, response, supabase) {
+  const admin = await requireAdmin(request, supabase)
+  if (!admin.ok) {
+    response.status(admin.status).json({ ok: false, error: admin.error })
+    return
+  }
+
+  const { data, error } = await supabase
+    .from(LOCUTOR_STATUS_TABLE)
+    .select('id,is_live,locutor_name,updated_at')
+    .eq('id', 'imortal0800')
+    .maybeSingle()
+
+  if (error) throw error
+
+  response.status(200).json({
+    ok: true,
+    data: {
+      isLive: Boolean(data?.is_live),
+      locutorName: cleanText(data?.locutor_name, 80),
+      updatedAt: data?.updated_at || null,
+    },
+  })
+}
+
+async function handleLocutorStatusPatch(request, response, supabase, admin, body) {
+  const isLive = Boolean(body.isLive)
+  const locutorName = isLive
+    ? await getLocutorDisplayName(supabase, admin.user)
+    : ''
+
+  const { data, error } = await supabase
+    .from(LOCUTOR_STATUS_TABLE)
+    .upsert({
+      id: 'imortal0800',
+      is_live: isLive,
+      locutor_name: locutorName,
+      updated_by: admin.user?.id || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' })
+    .select('id,is_live,locutor_name,updated_at')
+    .single()
+
+  if (error) throw error
+
+  response.status(200).json({
+    ok: true,
+    data: {
+      isLive: Boolean(data?.is_live),
+      locutorName: cleanText(data?.locutor_name, 80),
+      updatedAt: data?.updated_at || null,
+    },
+  })
+}
+
 async function handlePost(request, response, supabase) {
   const requester = await getOptionalUser(request, supabase)
   if (!requester.ok) {
@@ -241,6 +318,12 @@ async function handlePatch(request, response, supabase) {
   }
 
   const body = await readBody(request)
+
+  if (body.resource === 'locutor-status') {
+    await handleLocutorStatusPatch(request, response, supabase, admin, body)
+    return
+  }
+
   const id = cleanText(body.id, 80)
   const status = cleanText(body.status, 30)
 
@@ -335,6 +418,11 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'GET') {
+      if (cleanText(request.query?.section, 40) === 'locutor-status') {
+        await handleLocutorStatusGet(request, response, supabase)
+        return
+      }
+
       await handleGet(request, response, supabase)
       return
     }
