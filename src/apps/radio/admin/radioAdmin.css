@@ -1240,3 +1240,245 @@
     grid-column: 1 / -1;
   }
 }
+
+
+/* Rádio Admin - modernização e centralização final */
+.radio-admin-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 56px;
+  display: grid;
+  gap: 16px;
+}
+
+.radio-admin-header {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px 20px;
+  border: 1px solid rgba(53, 155, 255, .14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(19, 135, 255, .11), transparent 28%),
+    linear-gradient(145deg, rgba(8, 15, 25, .985), rgba(4, 8, 14, .995));
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, .24),
+    inset 0 1px 0 rgba(255, 255, 255, .02);
+}
+
+.radio-admin-header--with-actions {
+  align-items: center;
+}
+
+.radio-admin-header__brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.radio-admin-header__icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(72, 170, 255, .16);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #6fd0ff;
+  background: rgba(11, 120, 255, .08);
+}
+
+.radio-admin-header__brand > div {
+  min-width: 0;
+}
+
+.radio-admin-header span {
+  color: #62caff;
+  font-size: .6rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+
+.radio-admin-header h1,
+.radio-admin-header--with-actions h1 {
+  margin: 3px 0 0;
+  color: #f5f9ff;
+  font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+}
+
+.radio-admin-header p {
+  margin: 5px 0 0;
+  color: #7187a4;
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.radio-admin-header button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid rgba(61, 160, 255, .14);
+  border-radius: 11px;
+  color: #c8d9ec;
+  background: rgba(255,255,255,.025);
+  font-size: .68rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.radio-admin-header button:hover {
+  color: #fff;
+  border-color: rgba(61, 160, 255, .28);
+  background: rgba(11, 120, 255, .08);
+}
+
+.radio-admin-sections {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 5px;
+  border: 1px solid rgba(53, 155, 255, .12);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, auto));
+  gap: 4px;
+  background: rgba(3, 9, 16, .78);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.015);
+}
+
+.radio-admin-sections button {
+  min-height: 38px;
+  border-radius: 10px;
+  color: #758ca9;
+}
+
+.radio-admin-sections button.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(23, 137, 255, .2), rgba(5, 85, 186, .14));
+  box-shadow: inset 0 0 0 1px rgba(72, 170, 255, .15);
+}
+
+.radio-admin-grid {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  gap: 14px;
+}
+
+.radio-admin-panel,
+.radio-admin-card {
+  border-color: rgba(53, 155, 255, .1);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(8, 15, 25, .94), rgba(4, 8, 14, .97));
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.015);
+}
+
+.radio-admin-panel {
+  padding: 16px;
+}
+
+.radio-admin-panel-title {
+  margin-bottom: 12px;
+  color: #68cbff;
+}
+
+.radio-admin-panel-title h2 {
+  color: #eef6ff;
+  font-size: .92rem;
+}
+
+.radio-locutor-toolbar {
+  border-radius: 14px;
+}
+
+.radio-request-tabs {
+  justify-content: center;
+}
+
+.radio-request-card {
+  border-radius: 12px;
+  background: rgba(255,255,255,.018);
+}
+
+.radio-program-form,
+.radio-program-card,
+.radio-schedule-editor__row {
+  border-radius: 13px;
+  background: rgba(255,255,255,.016);
+}
+
+.radio-program-form input,
+.radio-program-form textarea,
+.radio-schedule-editor__row input {
+  border-radius: 10px;
+  background: rgba(2, 8, 15, .62);
+}
+
+.radio-admin-panel :where(button, input, textarea):focus-visible,
+.radio-admin-sections button:focus-visible,
+.radio-admin-header button:focus-visible {
+  outline: 2px solid #5fc7ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .radio-admin-page {
+    width: min(100% - 20px, 1180px);
+    padding-top: 12px;
+  }
+
+  .radio-admin-header {
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .radio-admin-header--with-actions {
+    align-items: flex-start;
+  }
+
+  .radio-admin-header__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .radio-admin-sections {
+    width: 100%;
+    box-sizing: border-box;
+    grid-template-columns: 1fr 1fr 1.2fr;
+  }
+
+  .radio-admin-sections button {
+    min-width: 0;
+    padding-inline: 7px;
+    font-size: .62rem;
+  }
+
+  .radio-admin-grid {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .radio-admin-header--with-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .radio-admin-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .radio-admin-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-admin-sections button {
+    width: 100%;
+  }
+}
