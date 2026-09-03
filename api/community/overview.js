@@ -4,6 +4,7 @@ import { applyApiCors, rejectOversizedBody } from '../_lib/security.js'
 
 const WALL_TABLE = 'community_wall_posts'
 const BIRTHDAY_TABLE = 'community_birthdays'
+const EVOX_MANUAL_TABLE = 'community_evox_manual'
 const WALL_COOLDOWN_SECONDS = 20
 const BIRTHDAY_COOLDOWN_SECONDS = 60
 
@@ -226,11 +227,57 @@ async function getCommunityAchievements(supabase) {
   return data || []
 }
 
+function normalizeManualTopActive(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .slice(0, 10)
+    .map((item, index) => ({
+      id: cleanText(item?.id || 'manual-active-' + (index + 1), 80),
+      name: cleanText(item?.name, 50) || 'Imortal',
+      activity: Math.max(0, Number(item?.activity) || 0),
+    }))
+}
+
+function normalizeManualRanking(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .slice(0, 20)
+    .map((item, index) => ({
+      id: cleanText(item?.id || 'manual-ranking-' + (index + 1), 80),
+      position: index + 1,
+      points: Math.max(0, Number(item?.points) || 0),
+      user: {
+        displayName: cleanText(item?.name, 50) || 'Imortal',
+        xatId: Number(item?.xatId) > 0 ? Number(item.xatId) : null,
+      },
+    }))
+}
+
+async function getManualEvox(supabase) {
+  const { data, error } = await supabase
+    .from(EVOX_MANUAL_TABLE)
+    .select('xat_group_name,online_now,top_active,ranking,updated_at')
+    .eq('xat_group_name', 'imortal0800')
+    .maybeSingle()
+
+  if (error) throw error
+
+  return {
+    source: 'manual',
+    xatGroup: data?.xat_group_name || 'imortal0800',
+    onlineNow: data?.online_now === null || data?.online_now === undefined
+      ? null
+      : Math.max(0, Number(data.online_now) || 0),
+    topActive: normalizeManualTopActive(data?.top_active),
+    ranking: normalizeManualRanking(data?.ranking),
+    updatedAt: data?.updated_at || null,
+  }
+}
+
 async function handleOverview(response, supabase) {
-  const [birthdayCollections, ranking, achievements] = await Promise.all([
+  const [birthdayCollections, ranking, achievements, evoxManual] = await Promise.all([
     getBirthdayCollections(supabase),
     getCommunityRanking(supabase),
     getCommunityAchievements(supabase),
+    getManualEvox(supabase),
   ])
 
   response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
@@ -241,6 +288,7 @@ async function handleOverview(response, supabase) {
       birthdaysUpcoming: birthdayCollections.upcoming,
       ranking,
       achievements,
+      evoxManual,
       xat: { connected: false, onlineCount: null },
     },
   })
@@ -591,7 +639,7 @@ async function handleModerationGet(request, response, supabase) {
   const admin = await requireAdmin(request, response, supabase)
   if (!admin) return
 
-  const [wallResult, birthdayResult] = await Promise.all([
+  const [wallResult, birthdayResult, evoxManual] = await Promise.all([
     supabase.from(WALL_TABLE)
       .select('id,author_name,xat_id,body,source,status,created_at,updated_at')
       .order('created_at', { ascending: false })
@@ -600,6 +648,7 @@ async function handleModerationGet(request, response, supabase) {
       .select('id,display_name,birth_day,birth_month,status,created_at,updated_at')
       .order('created_at', { ascending: false })
       .limit(100),
+    getManualEvox(supabase),
   ])
 
   if (wallResult.error) throw wallResult.error
@@ -611,6 +660,7 @@ async function handleModerationGet(request, response, supabase) {
     data: {
       wall: (wallResult.data || []).map((row) => mapWallPost(row, { canEdit: true, canModerate: true })),
       birthdays: (birthdayResult.data || []).map((row) => mapBirthday(row, { canEdit: true })),
+      evoxManual,
     },
   })
 }
@@ -624,8 +674,48 @@ async function handleModerationPatch(request, response, supabase) {
   const id = cleanText(body.id, 80)
   const action = cleanText(body.action, 30)
 
-  if (!id || !['wall', 'birthday'].includes(resource)) {
+  if (!id || !['wall', 'birthday', 'evox-manual'].includes(resource)) {
     response.status(400).json({ ok: false, error: 'Item de moderação inválido.' })
+    return
+  }
+
+  if (resource === 'evox-manual') {
+    if (action !== 'save') {
+      response.status(400).json({ ok: false, error: 'Ação de moderação inválida.' })
+      return
+    }
+
+    const onlineNow = body.onlineNow === '' || body.onlineNow === null || body.onlineNow === undefined
+      ? null
+      : Math.max(0, Number(body.onlineNow) || 0)
+
+    const topActive = (Array.isArray(body.topActive) ? body.topActive : [])
+      .slice(0, 10)
+      .map((item) => ({
+        name: cleanText(item?.name, 50) || 'Imortal',
+        activity: Math.max(0, Number(item?.activity) || 0),
+      }))
+
+    const ranking = (Array.isArray(body.ranking) ? body.ranking : [])
+      .slice(0, 20)
+      .map((item) => ({
+        name: cleanText(item?.name, 50) || 'Imortal',
+        xatId: Number(item?.xatId) > 0 ? Number(item.xatId) : null,
+        points: Math.max(0, Number(item?.points) || 0),
+      }))
+
+    const { error } = await supabase
+      .from(EVOX_MANUAL_TABLE)
+      .upsert({
+        xat_group_name: 'imortal0800',
+        online_now: onlineNow,
+        top_active: topActive,
+        ranking,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'xat_group_name' })
+
+    if (error) throw error
+    response.status(200).json({ ok: true, data: await getManualEvox(supabase) })
     return
   }
 
