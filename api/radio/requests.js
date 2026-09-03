@@ -188,7 +188,7 @@ function normalizeSchedule(row = {}) {
 }
 
 async function handlePublicContentGet(response, supabase) {
-  const [programResult, scheduleResult, statusResult] = await Promise.all([
+  const [programResult, scheduleResult, statusResult, requestResult] = await Promise.all([
     supabase
       .from(PROGRAMS_TABLE)
       .select('id,title,description,locutor_name,days_label,time_label,image_url,enabled,display_order,created_at,updated_at')
@@ -205,11 +205,31 @@ async function handlePublicContentGet(response, supabase) {
       .select('is_live,locutor_name,updated_at')
       .eq('id', 'imortal0800')
       .maybeSingle(),
+    supabase
+      .from(TABLE)
+      .select('song_and_artist,created_at')
+      .order('created_at', { ascending: false })
+      .limit(500),
   ])
 
   if (programResult.error) throw programResult.error
   if (scheduleResult.error) throw scheduleResult.error
   if (statusResult.error) throw statusResult.error
+  if (requestResult.error) throw requestResult.error
+
+  const rankingMap = new Map()
+  for (const row of requestResult.data || []) {
+    const label = cleanText(row.song_and_artist, 180)
+    if (!label) continue
+    const key = label.toLocaleLowerCase('pt-BR')
+    const current = rankingMap.get(key) || { label, count: 0, lastRequestedAt: row.created_at || null }
+    current.count += 1
+    rankingMap.set(key, current)
+  }
+
+  const ranking = Array.from(rankingMap.values())
+    .sort((a, b) => b.count - a.count || String(b.lastRequestedAt || '').localeCompare(String(a.lastRequestedAt || '')))
+    .slice(0, 5)
 
   response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
   response.status(200).json({
@@ -217,6 +237,7 @@ async function handlePublicContentGet(response, supabase) {
     data: {
       programs: (programResult.data || []).map(normalizeProgram),
       schedule: (scheduleResult.data || []).map(normalizeSchedule),
+      ranking,
       locutorStatus: {
         isLive: Boolean(statusResult.data?.is_live),
         locutorName: cleanText(statusResult.data?.locutor_name, 80),
