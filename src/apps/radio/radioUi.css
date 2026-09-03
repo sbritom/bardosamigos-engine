@@ -2462,3 +2462,190 @@
     min-height: 0;
   }
 }
+
+
+/* Rádio - refinamento visual final */
+.imortal-radio-page {
+  scroll-behavior: smooth;
+}
+
+.imortal-radio-hero,
+.imortal-radio-player-card,
+.imortal-radio-schedule,
+.imortal-radio-info-card,
+.imortal-radio-programs-card {
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, .20),
+    inset 0 1px 0 rgba(255, 255, 255, .018);
+}
+
+.imortal-radio-nav a,
+.imortal-radio-nav button,
+.imortal-radio-play,
+.imortal-radio-request,
+.imortal-radio-programs-card__arrows button,
+.imortal-radio-modal__actions button,
+.imortal-radio-request-identity button,
+.imortal-radio-catalog-results > button,
+.imortal-radio-request-selected {
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.imortal-radio-nav a:focus-visible,
+.imortal-radio-nav button:focus-visible,
+.imortal-radio-play:focus-visible,
+.imortal-radio-request:focus-visible,
+.imortal-radio-programs-card__arrows button:focus-visible,
+.imortal-radio-modal__actions button:focus-visible,
+.imortal-radio-request-identity button:focus-visible,
+.imortal-radio-catalog-results > button:focus-visible,
+.imortal-radio-request-selected:focus-visible,
+.imortal-radio-modal__header button:focus-visible {
+  outline: 2px solid rgba(95, 199, 255, .9);
+  outline-offset: 2px;
+}
+
+.imortal-radio-schedule__day {
+  position: relative;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.imortal-radio-schedule__day:hover {
+  transform: translateY(-1px);
+  border-color: rgba(72, 168, 255, .20);
+}
+
+.imortal-radio-schedule__day.is-today {
+  border-color: rgba(21, 201, 255, .28);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(21, 201, 255, .09), transparent 34%),
+    linear-gradient(180deg, rgba(10, 24, 38, .92), rgba(6, 13, 22, .96));
+  box-shadow: inset 0 0 0 1px rgba(21, 201, 255, .035);
+}
+
+.imortal-radio-schedule__day.is-next:not(.is-today) {
+  border-color: rgba(92, 151, 255, .18);
+}
+
+.imortal-radio-schedule__day-title {
+  min-width: 0;
+}
+
+.imortal-radio-schedule__day-title em {
+  margin-left: auto;
+  padding: 3px 5px;
+  border: 1px solid rgba(95, 199, 255, .16);
+  border-radius: 999px;
+  color: #78d3ff;
+  background: rgba(11, 120, 255, .07);
+  font-size: .47rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: 1;
+}
+
+.imortal-radio-schedule__day.is-today .imortal-radio-schedule__day-title em {
+  border-color: rgba(21, 201, 255, .22);
+  color: #6de3ff;
+}
+
+.imortal-radio-content-grid {
+  align-items: stretch;
+}
+
+.imortal-radio-ranking-card,
+.imortal-radio-now-card,
+.imortal-radio-programs-card {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.imortal-radio-ranking-card .imortal-radio-info-card__icon,
+.imortal-radio-now-card .imortal-radio-info-card__icon {
+  margin-bottom: 14px;
+}
+
+.imortal-radio-ranking-list li:first-child {
+  border-color: rgba(95, 199, 255, .16);
+  background: rgba(11, 120, 255, .05);
+}
+
+.imortal-radio-ranking-list li:first-child > strong {
+  color: #d9f3ff;
+  background: linear-gradient(180deg, rgba(21, 201, 255, .20), rgba(11, 120, 255, .12));
+}
+
+.imortal-radio-modal__panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(95, 199, 255, .26) rgba(5, 12, 20, .5);
+}
+
+.imortal-radio-modal__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(61, 151, 255, .08);
+  background: linear-gradient(180deg, rgba(8, 15, 25, .99), rgba(8, 15, 25, .96));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.imortal-radio-request-form input:focus,
+.imortal-radio-request-form textarea:focus {
+  border-color: rgba(21, 201, 255, .38) !important;
+  box-shadow: 0 0 0 3px rgba(21, 201, 255, .055);
+}
+
+.imortal-radio-catalog-results > button:hover {
+  transform: translateX(1px);
+}
+
+@media (max-width: 680px) {
+  .imortal-radio-page {
+    gap: 12px;
+  }
+
+  .imortal-radio-hero {
+    padding: 15px;
+  }
+
+  .imortal-radio-player-card {
+    padding: 15px;
+  }
+
+  .imortal-radio-schedule__day-title em {
+    font-size: .44rem;
+  }
+
+  .imortal-radio-modal {
+    padding: 10px;
+  }
+
+  .imortal-radio-modal__panel {
+    max-height: calc(100dvh - 20px);
+    border-radius: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imortal-radio-nav a,
+  .imortal-radio-nav button,
+  .imortal-radio-play,
+  .imortal-radio-request,
+  .imortal-radio-schedule__day,
+  .imortal-radio-programs-card__arrows button,
+  .imortal-radio-modal__actions button,
+  .imortal-radio-catalog-results > button {
+    transition: none;
+  }
+}

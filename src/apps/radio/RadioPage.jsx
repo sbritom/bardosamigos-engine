@@ -173,6 +173,10 @@ export default function RadioPage() {
   const hasCover = /^https?:\/\//i.test(coverUrl) && failedCover !== coverUrl;
   const isUnavailable = Boolean(metadataError || playerError);
   const activeProgram = radioPrograms[activeProgramIndex] || null;
+  const todayScheduleDay = useMemo(() => {
+    const day = new Date().getDay();
+    return day === 0 ? 7 : day;
+  }, [metadata.updatedAt]);
   const nextRadioSlot = useMemo(
     () => getUpcomingRadioSlot(radioSchedule, new Date()),
     [metadata.updatedAt, radioSchedule],
@@ -640,19 +644,32 @@ export default function RadioPage() {
         </div>
 
         <div className="imortal-radio-schedule__grid">
-          {radioSchedule.map((slot) => (
-            <article key={slot.dayOfWeek || slot.dayLabel} className="imortal-radio-schedule__day">
-              <div className="imortal-radio-schedule__day-title">
-                <CalendarDays size={15} />
-                <strong>{slot.dayLabel}</strong>
-              </div>
-              <span>{slot.locutorName || "Locutor a definir"}</span>
-              <small>
-                <Clock3 size={13} />
-                {slot.timeLabel || "Horário a definir"}
-              </small>
-            </article>
-          ))}
+          {radioSchedule.map((slot) => {
+            const isToday = Number(slot.dayOfWeek) === todayScheduleDay;
+            const isNext = Number(slot.dayOfWeek) === Number(nextRadioSlot?.dayOfWeek);
+
+            return (
+              <article
+                key={slot.dayOfWeek || slot.dayLabel}
+                className={[
+                  "imortal-radio-schedule__day",
+                  isToday ? "is-today" : "",
+                  !isToday && isNext ? "is-next" : "",
+                ].filter(Boolean).join(" ")}
+              >
+                <div className="imortal-radio-schedule__day-title">
+                  <CalendarDays size={15} />
+                  <strong>{slot.dayLabel}</strong>
+                  {isToday ? <em>HOJE</em> : !isToday && isNext ? <em>PRÓXIMO</em> : null}
+                </div>
+                <span>{slot.locutorName || "Locutor a definir"}</span>
+                <small>
+                  <Clock3 size={13} />
+                  {slot.timeLabel || "Horário a definir"}
+                </small>
+              </article>
+            );
+          })}
         </div>
       </section>
 
