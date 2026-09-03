@@ -18,7 +18,7 @@ import { getSupabaseClient } from '../../../core/database'
 import { isFinishedStatus, isLiveStatus } from '../../../core/time'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
 import { HomePortalBanner } from '../home/components/HomePortalBanner'
-import { HomeGamesCard } from '../home/components/HomeGamesCard'
+import { HomePortalOverviewCard } from '../home/components/HomePortalOverviewCard'
 import { HomeModuleBoundary } from '../home/components/HomeModuleBoundary'
 import { HOME_TV_CATEGORIES, HOME_TV_CHANNELS } from '../home/data/homeTvChannels'
 import { loadHomeDashboardContent } from '../home/services/homeContentService'
@@ -336,7 +336,7 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="tv" data-designer-label="TV"><HomeModuleBoundary moduleName="TV"><TvCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-12" data-designer-id="games" data-designer-label="Games"><HomeModuleBoundary moduleName="Games"><HomeGamesCard /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="portal-overview" data-designer-label="Portal"><HomeModuleBoundary moduleName="Portal"><HomePortalOverviewCard /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
     </main>
