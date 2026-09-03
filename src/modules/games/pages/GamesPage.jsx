@@ -403,6 +403,7 @@ export default function GamesPage() {
   }, [payload.news, payload.releases])
 
   const term = normalize(search)
+  const searchLabel = search.trim()
 
   const filteredNews = useMemo(
     () => payload.news.filter((item) => includesTerm([item.title, item.description, item.source], term)),
@@ -423,7 +424,9 @@ export default function GamesPage() {
     () => esportsMatches.filter((match) => includesTerm([
       match.videogame,
       match.league,
+      match.serie,
       match.tournament,
+      match.name,
       ...(match.opponents || []).map((team) => team.name),
     ], term)),
     [esportsMatches, term],
@@ -440,6 +443,7 @@ export default function GamesPage() {
       match.league,
       match.serie,
       match.tournament,
+      match.name,
       ...(match.opponents || []).map((team) => team.name),
     ], term)),
     [championshipMatches, term],
@@ -451,8 +455,66 @@ export default function GamesPage() {
   )
 
   const featured = payload.featured || radarItems[0] || null
+  const filteredMode = Boolean(searchLabel) || activeFilter !== 'all'
+  const globalResultCount = filteredNews.length + filteredReleases.length + filteredFreeGames.length + filteredEsports.length
+
+  function renderGlobalResults() {
+    if (!globalResultCount) {
+      return <EmptyPanel title="Nenhum resultado encontrado." description="Tente outro termo ou escolha um filtro diferente." />
+    }
+
+    return (
+      <div className="games-page__list">
+        {filteredEsports.length ? (
+          <div>
+            <div className="games-page__section-title">
+              <div><span><Swords size={15} /> Esports</span><h2>Partidas e competições</h2></div>
+            </div>
+            <div className="games-page__esports-grid">
+              {filteredEsports.map((match) => <EsportsMatchCard key={match.id} match={match} />)}
+            </div>
+          </div>
+        ) : null}
+
+        {filteredReleases.length ? (
+          <div>
+            <div className="games-page__section-title">
+              <div><span><Rocket size={15} /> Lançamentos</span><h2>Jogos encontrados</h2></div>
+            </div>
+            <div className="games-page__source-grid">
+              {filteredReleases.map((game) => <ReleaseCard key={game.id} game={game} />)}
+            </div>
+          </div>
+        ) : null}
+
+        {filteredFreeGames.length ? (
+          <div>
+            <div className="games-page__section-title">
+              <div><span><Gift size={15} /> Jogos grátis</span><h2>Ofertas encontradas</h2></div>
+            </div>
+            <div className="games-page__source-grid">
+              {filteredFreeGames.map((item) => <FreeGameCard key={item.id} item={item} />)}
+            </div>
+          </div>
+        ) : null}
+
+        {filteredNews.length ? (
+          <div>
+            <div className="games-page__section-title">
+              <div><span><Newspaper size={15} /> Notícias</span><h2>Radar gamer</h2></div>
+            </div>
+            <div className="games-page__grid">
+              {filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   function renderFilteredContent() {
+    if (activeFilter === 'all') return renderGlobalResults()
+
     if (activeFilter === 'releases') {
       return filteredReleases.length
         ? <div className="games-page__source-grid">{filteredReleases.map((game) => <ReleaseCard key={game.id} game={game} />)}</div>
@@ -488,9 +550,7 @@ export default function GamesPage() {
         : <EmptyPanel title="Nenhum campeonato encontrado para esta busca." description="Tente outro termo." />
     }
 
-    return filteredNews.length
-      ? <div className="games-page__grid">{filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}</div>
-      : <EmptyPanel title="Nenhum resultado encontrado." description="Tente outro termo de busca." />
+    return <EmptyPanel title="Nenhum resultado encontrado." description="Tente outro termo de busca." />
   }
 
   return (
@@ -501,7 +561,13 @@ export default function GamesPage() {
           <p>Esports, lançamentos, campeonatos, novidades e jogos grátis reunidos em uma central atualizada automaticamente.</p>
 
           <div className="games-page__hero-actions">
-            <ActionButton icon={<Gamepad2 size={17} />} onClick={() => setActiveFilter('all')}>
+            <ActionButton
+              icon={<Gamepad2 size={17} />}
+              onClick={() => {
+                setActiveFilter('all')
+                setSearch('')
+              }}
+            >
               Explorar Games
             </ActionButton>
             <ActionButton variant="outline" icon={<RefreshCw size={16} />} onClick={loadGames}>
@@ -524,6 +590,7 @@ export default function GamesPage() {
               key={id}
               type="button"
               className={activeFilter === id ? 'is-active' : ''}
+              aria-pressed={activeFilter === id}
               onClick={() => setActiveFilter(id)}
             >
               {label}
@@ -536,8 +603,8 @@ export default function GamesPage() {
           <input
             type="search"
             value={search}
-            placeholder="Buscar em Games..."
-            aria-label="Buscar em Games"
+            placeholder="Buscar em todo o Games..."
+            aria-label="Buscar em todo o Games"
             onChange={(event) => setSearch(event.target.value)}
           />
         </label>
@@ -551,6 +618,19 @@ export default function GamesPage() {
 
       {loading ? (
         <div className="games-page__loading">Carregando central de Games...</div>
+      ) : filteredMode ? (
+        <section className="games-page__section">
+          <div className="games-page__section-title">
+            <div>
+              <span><Search size={15} /> Resultados</span>
+              <h2>
+                {FILTERS.find(([id]) => id === activeFilter)?.[1] || 'Tudo'}
+                {searchLabel ? ` · “${searchLabel}”` : ''}
+              </h2>
+            </div>
+          </div>
+          {renderFilteredContent()}
+        </section>
       ) : (
         <>
           <section className="games-page__featured-grid">
@@ -598,18 +678,6 @@ export default function GamesPage() {
               </div>
             </aside>
           </section>
-
-          {search || activeFilter !== 'all' ? (
-            <section className="games-page__section">
-              <div className="games-page__section-title">
-                <div>
-                  <span><Search size={15} /> Resultados</span>
-                  <h2>{FILTERS.find(([id]) => id === activeFilter)?.[1] || 'Tudo'}</h2>
-                </div>
-              </div>
-              {renderFilteredContent()}
-            </section>
-          ) : null}
 
           <section className="games-page__section">
             <div className="games-page__section-title">
