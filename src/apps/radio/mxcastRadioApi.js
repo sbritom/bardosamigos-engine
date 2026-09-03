@@ -67,14 +67,22 @@ export async function fetchMxCastStatus({ signal } = {}) {
 
   return {
     online: Boolean(data.online),
+    statusLabel: data.statusLabel || "",
     songTitle: data.songTitle || "",
     track: parsed.track,
     artist: parsed.artist,
     listeners: Number(data.listeners) || 0,
+    listenerLimit: Number(data.listenerLimit) || 0,
     peakListeners: Number(data.peakListeners) || 0,
+    bitrate: Number(data.bitrate) || 0,
+    bitrateLabel: data.bitrateLabel || "",
+    genre: data.genre || "",
     serverTitle: data.serverTitle || "IMORTAL0800",
     streamUrl: data.streamUrl || OFFICIAL_STREAM_URL,
     cover: data.cover || "",
+    provider: data.provider || "",
+    protocol: data.protocol || "",
+    fallbackActive: Boolean(data.fallbackActive),
     updatedAt: data.updatedAt || new Date().toISOString(),
   };
 }
