@@ -93,7 +93,7 @@ export async function submitRadioMusicRequest({ songAndArtist, message, requeste
 export async function listRadioMusicRequests({ status } = {}) {
   const token = await getAdminAccessToken();
   if (!token) {
-    throw new Error("Entre com uma conta administradora para ver os pedidos.");
+    throw new Error("Entre com uma conta autorizada para ver os pedidos.");
   }
 
   const params = status ? `?status=${encodeURIComponent(status)}` : "";
@@ -106,6 +106,45 @@ export async function listRadioMusicRequests({ status } = {}) {
 
   const data = await parseResponse(response);
   return Array.isArray(data) ? data.map(normalizeRequest) : [];
+}
+
+export async function getRadioLocutorStatus() {
+  const token = await getAdminAccessToken();
+  if (!token) {
+    throw new Error("Entre com uma conta autorizada para ver o status da rádio.");
+  }
+
+  const response = await fetch(`${REQUESTS_ENDPOINT}?section=locutor-status`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  return parseResponse(response);
+}
+
+export async function updateRadioLocutorStatus(isLive) {
+  const token = await getAdminAccessToken();
+  if (!token) {
+    throw new Error("Entre com uma conta autorizada para alterar o status da rádio.");
+  }
+
+  const response = await fetch(REQUESTS_ENDPOINT, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      resource: "locutor-status",
+      isLive: Boolean(isLive),
+    }),
+  });
+
+  return parseResponse(response);
 }
 
 export async function updateRadioMusicRequest({ id, status, adminNote = "", handledBy = "" }) {
