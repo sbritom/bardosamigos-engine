@@ -38,25 +38,44 @@ async function getProviderIntegration() {
   return data
 }
 
-function describePayloadShape(value, depth = 0) {
-  if (depth > 3) return typeof value
-  if (Array.isArray(value)) {
-    return value.length ? [describePayloadShape(value[0], depth + 1)] : []
-  }
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).slice(0, 50).map(([key, child]) => [
-        key,
-        describePayloadShape(child, depth + 1),
-      ]),
-    )
-  }
-  return typeof value
+function parseNumber(value) {
+  const parsed = Number.parseInt(String(value ?? '').replace(/[^0-9-]/g, ''), 10)
+  return Number.isFinite(parsed) ? parsed : 0
 }
 
-async function inspectProviderPayload() {
+function normalizeProviderCover(value) {
+  if (typeof value === 'string') return value.trim()
+  if (!value || typeof value !== 'object') return ''
+
+  const candidates = [
+    value.url,
+    value.src,
+    value.image,
+    value.capa,
+    value.cover,
+    value.large,
+    value.medium,
+    value.small,
+  ]
+
+  return candidates.find((candidate) => typeof candidate === 'string' && candidate.trim())?.trim() || ''
+}
+
+function isProviderOnline(status) {
+  const normalized = String(status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+  return ['ligado', 'online', 'on', 'ativo', 'active'].includes(normalized)
+}
+
+async function getOfficialProviderStats() {
   const integration = await getProviderIntegration()
-  if (!integration) return null
+  if (!integration) {
+    throw new Error('VOX API integration is not configured.')
+  }
 
   const response = await fetchWithTimeout(integration.json_url)
   if (!response.ok) {
@@ -64,8 +83,39 @@ async function inspectProviderPayload() {
   }
 
   const payload = await response.json()
-  console.info('VOX API payload shape:', JSON.stringify(describePayloadShape(payload)))
-  return payload
+  const songTitle = String(payload?.musica_atual || '').trim() || 'Programação ao vivo'
+  const providerCover = normalizeProviderCover(payload?.capa_musica)
+  const cover = providerCover || await getTrackArtwork(songTitle)
+
+  return {
+    online: isProviderOnline(payload?.status),
+    statusLabel: String(payload?.status || '').trim(),
+    songTitle,
+    listeners: parseNumber(payload?.ouvintes_conectados),
+    listenerLimit: parseNumber(payload?.plano_ouvintes),
+    peakListeners: 0,
+    bitrate: parseNumber(payload?.plano_bitrate),
+    bitrateLabel: String(payload?.plano_bitrate || '').trim(),
+    sampleRate: 0,
+    contentType: '',
+    serverTitle: String(payload?.titulo || '').trim() || 'IMORTAL0800',
+    streamUrl: RADIO_STREAM_URL,
+    cover,
+    genre: String(payload?.genero || '').trim(),
+    serverIp: String(payload?.ip || '').trim(),
+    port: parseNumber(payload?.porta),
+    djPort: parseNumber(payload?.porta_dj),
+    ftpPlan: String(payload?.plano_ftp || '').trim(),
+    shoutcastUrl: String(payload?.shoutcast || '').trim(),
+    protocol: 'VOX API',
+    provider: integration.provider || 'vox-svrdedicado',
+    updatedAt: new Date().toISOString(),
+    source: providerCover
+      ? 'vox-api-json+provider-artwork'
+      : cover
+        ? 'vox-api-json+itunes-artwork'
+        : 'vox-api-json',
+  }
 }
 
 async function fetchWithTimeout(url) {
@@ -213,13 +263,16 @@ export default async function handler(request, response) {
   }
 
   try {
-    try {
-      await inspectProviderPayload()
-    } catch (providerError) {
-      console.warn('VOX API inspection unavailable:', providerError?.message || providerError)
-    }
+    let data
+    let providerError = null
 
-    const data = await getIcecastStats()
+    try {
+      data = await getOfficialProviderStats()
+    } catch (error) {
+      providerError = error
+      console.warn('VOX API unavailable, using Icecast fallback:', error?.message || error)
+      data = await getIcecastStats()
+    }
 
     response.setHeader(
       'Cache-Control',
@@ -228,7 +281,10 @@ export default async function handler(request, response) {
 
     response.status(200).json({
       ok: true,
-      data,
+      data: {
+        ...data,
+        fallbackActive: Boolean(providerError),
+      },
     })
   } catch (error) {
     console.error('Radio stats unavailable:', error)
