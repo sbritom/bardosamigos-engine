@@ -12,6 +12,7 @@ const TOPICS = Object.freeze([
   { category: 'Brasil', query: 'brasil', weight: 16 },
   { category: 'Esportes', query: 'futebol OR esportes', weight: 14 },
   { category: 'Entretenimento', query: 'entretenimento', weight: 10 },
+  { category: 'Música', query: 'musica OR cantor OR cantora OR album OR single OR show OR banda', weight: 11 },
   { category: 'Tecnologia', query: 'tecnologia', weight: 10 },
   { category: 'Games', query: 'games OR esports OR videogames OR "Free Fire" OR Fortnite OR VALORANT', weight: 13 },
 ])
