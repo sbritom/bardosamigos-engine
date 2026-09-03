@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  CalendarDays,
+  Clock3,
   Headphones,
   ListMusic,
   Loader2,
+  Mic2,
   Music2,
   Newspaper,
   Pause,
@@ -51,6 +54,17 @@ const RADIO_SECTIONS = [
     description: "Lançamentos, destaques e novidades do universo musical.",
     empty: "As próximas novidades musicais aparecerão aqui.",
   },
+];
+
+
+const RADIO_SCHEDULE = [
+  { day: "Segunda", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Terça", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Quarta", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Quinta", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Sexta", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Sábado", locutor: "Locutor a definir", time: "Horário a definir" },
+  { day: "Domingo", locutor: "Locutor a definir", time: "Horário a definir" },
 ];
 
 function getListenerLabel(count) {
@@ -260,18 +274,31 @@ export default function RadioPage() {
         </div>
 
         <nav className="imortal-radio-nav" aria-label="Seções da rádio">
-          <a href="#ao-vivo">Ao vivo</a>
-          <button ref={requestTriggerRef} type="button" onClick={openRequestFlow}>Pedidos</button>
-          <a href="#ranking">Ranking</a>
-          <a href="#novidades">Novidades</a>
+          <a href="#ao-vivo">
+            <Radio size={14} />
+            Ao vivo
+          </a>
+          <button ref={requestTriggerRef} type="button" onClick={openRequestFlow}>
+            <Music2 size={14} />
+            Pedidos
+          </button>
+          <a href="#ranking">
+            <ListMusic size={14} />
+            Ranking
+          </a>
+          <a href="#novidades">
+            <Newspaper size={14} />
+            Novidades
+          </a>
         </nav>
       </header>
 
       <section
         id="ao-vivo"
-        className="imortal-radio-player-card"
+        className={`imortal-radio-player-card ${hasCover ? "has-cover" : ""}`}
         aria-label="Player da Rádio IMORTAL0800"
         aria-busy={metadataLoading}
+        style={hasCover ? { "--imortal-radio-cover-image": `url("${coverUrl}")` } : undefined}
       >
         <div className="imortal-radio-cover">
           {hasCover ? (
@@ -353,6 +380,35 @@ export default function RadioPage() {
               {playerError || metadataError}
             </p>
           )}
+        </div>
+      </section>
+
+      <section className="imortal-radio-schedule" aria-labelledby="radio-schedule-title">
+        <div className="imortal-radio-schedule__header">
+          <div className="imortal-radio-schedule__icon">
+            <Mic2 size={20} />
+          </div>
+          <div>
+            <span>PROGRAMAÇÃO</span>
+            <h2 id="radio-schedule-title">Locutores da rádio</h2>
+            <p>Grade semanal do IMORTAL0800 com dia, locutor e horário.</p>
+          </div>
+        </div>
+
+        <div className="imortal-radio-schedule__grid">
+          {RADIO_SCHEDULE.map((slot) => (
+            <article key={slot.day} className="imortal-radio-schedule__day">
+              <div className="imortal-radio-schedule__day-title">
+                <CalendarDays size={15} />
+                <strong>{slot.day}</strong>
+              </div>
+              <span>{slot.locutor}</span>
+              <small>
+                <Clock3 size={13} />
+                {slot.time}
+              </small>
+            </article>
+          ))}
         </div>
       </section>
 
