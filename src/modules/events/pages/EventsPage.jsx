@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   CalendarDays,
   Clock3,
@@ -6,8 +6,6 @@ import {
   MapPin,
   MessageCircle,
   PartyPopper,
-  RefreshCw,
-  Sparkles,
 } from 'lucide-react'
 
 import { WorkspaceSkeleton } from '../../../shared/workspace'
@@ -19,6 +17,7 @@ import {
   getEventType,
   getParticipationRule,
   listPublishedEvents,
+  sortEventsForHome,
 } from '../services/eventsService'
 
 function temporalStatus(event = {}) {
@@ -59,34 +58,39 @@ function EventCard({ event, onOpen }) {
   const image = event.image || event.metadata?.imageUrl || event.metadata?.banner || ''
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-white/10 bg-[var(--surface)] shadow-sm">
+    <article className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--surface)]">
       {image ? (
-        <div className="aspect-[16/6] overflow-hidden border-b border-white/10 bg-black/20">
+        <div className="aspect-[16/7] overflow-hidden border-b border-white/10 bg-black/20">
           <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
         </div>
       ) : null}
 
       <div className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--primary)]">
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--primary)]">
             {type}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold text-[var(--text-secondary)]">
+          <span className="text-[10px] font-bold text-[var(--text-secondary)]">
             {status.label}
           </span>
         </div>
 
-        <h2 className="mt-3 text-lg font-black text-[var(--text)]">{event.title || 'Evento IMORTAL0800'}</h2>
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--text-secondary)]">{summary}</p>
+        <h2 className="mt-2 text-lg font-black text-[var(--text)]">
+          {event.title || 'Evento IMORTAL0800'}
+        </h2>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--text-secondary)]">
+          {summary}
+        </p>
 
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-            <Clock3 size={13} />
+        <div className="mt-4 grid gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+          <span className="inline-flex items-center gap-2">
+            <Clock3 size={14} className="text-[var(--primary)]" />
             {eventPeriod(event)}
           </span>
+
           {event.location ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <MapPin size={13} />
+            <span className="inline-flex items-center gap-2">
+              <MapPin size={14} className="text-[var(--primary)]" />
               {event.location}
             </span>
           ) : null}
@@ -95,7 +99,7 @@ function EventCard({ event, onOpen }) {
         <button
           type="button"
           onClick={() => onOpen(event)}
-          className="mt-5 w-full rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-110"
+          className="mt-5 inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-bold text-[var(--text)] transition hover:bg-white/[0.07]"
         >
           Ver detalhes
         </button>
@@ -110,48 +114,66 @@ function EventDetails({ event, onBack }) {
   const participation = getParticipationRule(event)
   const actionUrl = getEventActionUrl(event)
   const type = getEventType(event) || 'Evento'
+  const status = temporalStatus(event)
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <section className="rounded-2xl border border-white/10 bg-[var(--surface)] p-5 md:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">{type}</span>
-          <h2 className="mt-2 text-2xl font-black text-[var(--text)]">{event.title || 'Evento IMORTAL0800'}</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-black uppercase tracking-[0.14em] text-[var(--primary)]">
+              {type}
+            </span>
+            <span className="text-xs font-bold text-[var(--text-secondary)]">{status.label}</span>
+          </div>
+
+          <h2 className="mt-2 text-2xl font-black text-[var(--text)]">
+            {event.title || 'Evento IMORTAL0800'}
+          </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
             {getEventSummary(event) || event.description || 'Confira as informações do evento.'}
           </p>
         </div>
+
         <button
           type="button"
           onClick={onBack}
-          className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold text-[var(--text)] transition hover:bg-white/10"
+          className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-bold text-[var(--text)] transition hover:bg-white/[0.07]"
         >
           Voltar
         </button>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Quando</span>
-          <strong className="mt-2 block text-[var(--text)]">{eventPeriod(event)}</strong>
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
+            <CalendarDays size={14} className="text-[var(--primary)]" />
+            Quando
+          </span>
+          <strong className="mt-2 block text-sm text-[var(--text)]">{eventPeriod(event)}</strong>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Onde</span>
-          <strong className="mt-2 block text-[var(--text)]">{event.location || 'Local informado pela equipe'}</strong>
+        <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
+            <MapPin size={14} className="text-[var(--primary)]" />
+            Onde
+          </span>
+          <strong className="mt-2 block text-sm text-[var(--text)]">
+            {event.location || 'Local informado pela equipe'}
+          </strong>
         </div>
       </div>
 
       {participation ? (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Como participar</span>
+        <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <span className="text-xs font-bold text-[var(--text-secondary)]">Como participar</span>
           <p className="mt-2 text-sm leading-6 text-[var(--text)]">{participation}</p>
         </div>
       ) : null}
 
       {prizes.length ? (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Premiação</span>
+        <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <span className="text-xs font-bold text-[var(--text-secondary)]">Premiação</span>
           <ul className="mt-2 grid gap-2 text-sm text-[var(--text)]">
             {prizes.map((item) => <li key={item}>• {item}</li>)}
           </ul>
@@ -159,8 +181,8 @@ function EventDetails({ event, onBack }) {
       ) : null}
 
       {rules.length ? (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Regulamento</span>
+        <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+          <span className="text-xs font-bold text-[var(--text-secondary)]">Regras</span>
           <ul className="mt-2 grid gap-2 text-sm text-[var(--text)]">
             {rules.map((item) => <li key={item}>• {item}</li>)}
           </ul>
@@ -175,7 +197,7 @@ function EventDetails({ event, onBack }) {
           className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
         >
           <ExternalLink size={16} />
-          Abrir participação
+          Participar no Xat
         </a>
       ) : null}
     </section>
@@ -194,8 +216,9 @@ export default function EventsPage() {
 
     try {
       const result = await listPublishedEvents()
-      setEvents(Array.isArray(result.data) ? result.data : [])
-      if (result.error) setError('Não foi possível atualizar todos os eventos agora.')
+      const published = Array.isArray(result.data) ? result.data : []
+      setEvents(sortEventsForHome(published))
+      if (result.error) setError('Parte da agenda não pôde ser atualizada agora.')
     } catch {
       setEvents([])
       setError('Não foi possível carregar os eventos agora.')
@@ -208,86 +231,48 @@ export default function EventsPage() {
     load()
   }, [])
 
-  const counts = useMemo(() => {
-    return events.reduce((acc, event) => {
-      const status = temporalStatus(event).id
-      acc[status] += 1
-      return acc
-    }, { active: 0, upcoming: 0, ended: 0 })
-  }, [events])
-
   if (selected) {
     return (
-      <main className="mx-auto w-full max-w-[1180px] px-4 py-4">
+      <main className="mx-auto w-full max-w-[980px] px-4 py-5">
         <EventDetails event={selected} onBack={() => setSelected(null)} />
       </main>
     )
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1180px] px-4 py-4">
-      <header className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">
-              <PartyPopper size={15} />
-              IMORTAL0800
-            </span>
-            <h1 className="mt-2 text-3xl font-black text-[var(--text)] md:text-4xl">Eventos do IMORTAL0800</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-              Agenda oficial de atividades, encontros e eventos da comunidade.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-[var(--text)] transition hover:bg-white/10 disabled:opacity-50"
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Atualizar
-          </button>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <Sparkles size={17} className="text-[var(--primary)]" />
-            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.active}</strong>
-            <span className="text-xs text-[var(--text-secondary)]">Ativos</span>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <CalendarDays size={17} className="text-[var(--primary)]" />
-            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.upcoming}</strong>
-            <span className="text-xs text-[var(--text-secondary)]">Próximos</span>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <Clock3 size={17} className="text-[var(--primary)]" />
-            <strong className="mt-2 block text-xl text-[var(--text)]">{counts.ended}</strong>
-            <span className="text-xs text-[var(--text-secondary)]">Encerrados</span>
-          </div>
-        </div>
+    <main className="mx-auto w-full max-w-[1080px] px-4 py-5">
+      <header className="mb-5 border-b border-white/10 pb-5">
+        <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">
+          <PartyPopper size={15} />
+          IMORTAL0800
+        </span>
+        <h1 className="mt-2 text-2xl font-black text-[var(--text)] md:text-3xl">Eventos</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
+          Agenda oficial da comunidade.
+        </p>
       </header>
 
       {error ? (
-        <p className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+        <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           {error}
         </p>
       ) : null}
 
-      <section className="mt-5">
+      <section>
         {loading ? (
-          <WorkspaceSkeleton rows={4} />
+          <WorkspaceSkeleton rows={3} />
         ) : events.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {events.map((event) => <EventCard key={event.id} event={event} onOpen={setSelected} />)}
+          <div className="grid gap-4 md:grid-cols-2">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} onOpen={setSelected} />
+            ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-white/15 bg-[var(--surface)] p-8 text-center">
-            <MessageCircle size={26} className="mx-auto text-[var(--primary)]" />
-            <h2 className="mt-3 text-lg font-black text-[var(--text)]">Nenhum evento publicado agora</h2>
+          <div className="rounded-2xl border border-dashed border-white/15 bg-[var(--surface)] p-7 text-center">
+            <MessageCircle size={24} className="mx-auto text-[var(--primary)]" />
+            <h2 className="mt-3 text-base font-black text-[var(--text)]">Nenhum evento publicado</h2>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              Quando a equipe publicar um novo evento, ele aparecerá aqui automaticamente.
+              Novos eventos aparecerão aqui quando forem publicados pela equipe.
             </p>
           </div>
         )}
