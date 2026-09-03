@@ -21,22 +21,22 @@ export function TVPlayer({
     ? {
         icon: <Globe2 size={32} />,
         title: 'Verificando disponibilidade',
-        description: 'Estamos identificando sua regiao antes de iniciar a transmissao.',
+        description: 'Estamos identificando sua região antes de iniciar a transmissão.',
       }
     : blockedByRegion
       ? {
           icon: <Globe2 size={32} />,
-          title: 'Canal indisponivel nesta regiao',
+          title: 'Canal indisponível nesta região',
           description: viewerCountry
-            ? `Esta fonte libera a transmissao somente no Brasil. Seu acesso foi identificado como ${viewerCountry}. Escolha um canal Global para assistir.`
-            : 'Esta fonte libera a transmissao somente no Brasil. Escolha um canal Global para assistir.',
+            ? `Esta fonte libera a transmissão somente no Brasil. Seu acesso foi identificado como ${viewerCountry}. Escolha um canal Global para assistir.`
+            : 'Esta fonte libera a transmissão somente no Brasil. Escolha um canal Global para assistir.',
         }
       : {
           icon: embedUrl ? <AlertTriangle size={30} /> : <Tv size={32} />,
-          title: embedUrl ? 'Provedor indisponivel' : 'Nenhum canal selecionado',
+          title: embedUrl ? 'Provedor indisponível' : 'Nenhum canal selecionado',
           description: embedUrl
-            ? 'Este provedor ainda nao possui um adaptador de reproducao.'
-            : 'Escolha um canal publicado para iniciar a transmissao.',
+            ? 'A fonte deste canal não possui um adaptador de reprodução compatível.'
+            : 'Escolha um canal publicado para iniciar a transmissão.',
         }
 
   return (
