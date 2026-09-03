@@ -1,14 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { RadioTower } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import {
-  Panel,
-  ResponsiveContainer,
-  SectionHeader,
-  StatusBadge,
-  Toast,
-  useToast,
-} from '../../../design-system'
+import { Panel, ResponsiveContainer, SectionHeader, StatusBadge, Toast, useToast } from '../../../design-system'
 import { TVAdminGuard } from './TVAdminGuard'
 import { TVCategoryManager } from './TVCategoryManager'
 import { TVChannelManager } from './TVChannelManager'
@@ -20,12 +13,12 @@ import { TV_ADMIN_SECTIONS } from './config'
 import './tvManager.css'
 
 const titles = {
-  dashboard: ['Dashboard da TV', 'Visao geral operacional com dados reais do catalogo.'],
-  categories: ['Categorias', 'Organize o catalogo e controle a ordem de exibicao.'],
-  channels: ['Canais', 'Cadastre, revise e publique canais sem editar codigo.'],
-  featured: ['Destaques', 'Gerencie prioridade e periodo editorial do Hero da TV.'],
-  settings: ['Configuracoes', 'Consulte provedores e politicas de seguranca da plataforma.'],
-  import: ['Importacao', 'Estrutura reservada para a proxima Sprint.'],
+  dashboard: ['Dashboard da TV', 'Visão geral operacional com dados reais do catálogo.'],
+  categories: ['Categorias', 'Organize o catálogo e controle a ordem de exibição.'],
+  channels: ['Canais', 'Cadastre, revise e publique canais sem editar código.'],
+  featured: ['Destaques', 'Gerencie prioridade e período editorial do Hero da TV.'],
+  settings: ['Configurações', 'Consulte provedores e políticas de segurança da plataforma.'],
+  import: ['Importação', 'Estrutura reservada para uma etapa futura.'],
 }
 
 export function TVManager({ section = 'dashboard' }) {
@@ -33,22 +26,15 @@ export function TVManager({ section = 'dashboard' }) {
   const location = useLocation()
   const { toasts, pushToast, removeToast } = useToast()
   const [title, subtitle] = titles[section] || titles.dashboard
-
-  const notify = useCallback((status, toastTitle, message = '') => {
-    pushToast({ status, title: toastTitle, message })
-  }, [pushToast])
-
+  const notify = useCallback((status, toastTitle, message = '') => pushToast({ status, title: toastTitle, message }), [pushToast])
   const navigateTo = useCallback((target, state) => {
     const destination = TV_ADMIN_SECTIONS.find((item) => item.id === target)
     if (destination) navigate(destination.path, { state })
   }, [navigate])
-
   const createRequested = Boolean(location.state?.create)
 
   useEffect(() => {
-    if (location.state?.create) {
-      navigate(location.pathname, { replace: true, state: null })
-    }
+    if (location.state?.create) navigate(location.pathname, { replace: true, state: null })
   }, [location.pathname, location.state, navigate])
 
   const content = {
@@ -64,41 +50,20 @@ export function TVManager({ section = 'dashboard' }) {
     <TVAdminGuard>
       <ResponsiveContainer size="xl" className="tv-manager">
         <header className="tv-manager__header">
-          <div className="tv-manager__brand">
-            <RadioTower size={24} aria-hidden="true" />
-            <div>
-              <span>BAR DOS AMIGOS</span>
-              <strong>TV Manager</strong>
-            </div>
-          </div>
+          <div className="tv-manager__brand"><RadioTower size={24} aria-hidden="true" /><div><span>IMORTAL0800</span><strong>TV Manager</strong></div></div>
           <StatusBadge status="ADMIN">ACESSO ADMINISTRATIVO</StatusBadge>
         </header>
-
         <div className="tv-manager__layout">
           <Panel as="nav" className="tv-manager__nav" aria-label="TV Manager">
             {TV_ADMIN_SECTIONS.map(({ id, label, icon: Icon, path, upcoming }) => (
-              <NavLink
-                key={id}
-                to={path}
-                end={id === 'dashboard'}
-                className={({ isActive }) => `tv-manager__nav-link${isActive ? ' tv-manager__nav-link--active' : ''}`}
-              >
-                <Icon size={18} aria-hidden="true" />
-                <span>{label}</span>
-                {upcoming && <small>Em breve</small>}
+              <NavLink key={id} to={path} end={id === 'dashboard'} className={({ isActive }) => `tv-manager__nav-link${isActive ? ' tv-manager__nav-link--active' : ''}`}>
+                <Icon size={18} aria-hidden="true" /><span>{label}</span>{upcoming && <small>Em breve</small>}
               </NavLink>
             ))}
           </Panel>
-
-          <main className="tv-manager__content">
-            <SectionHeader eyebrow="TV PLATFORM" title={title} subtitle={subtitle} />
-            <Panel className="tv-manager__workspace">{content}</Panel>
-          </main>
+          <main className="tv-manager__content"><SectionHeader eyebrow="TV IMORTAL0800" title={title} subtitle={subtitle} /><Panel className="tv-manager__workspace">{content}</Panel></main>
         </div>
-
-        <div className="tv-manager__toasts" aria-live="polite">
-          {toasts.map((toast) => <Toast key={toast.id} toast={toast} onClose={removeToast} />)}
-        </div>
+        <div className="tv-manager__toasts" aria-live="polite">{toasts.map((toast) => <Toast key={toast.id} toast={toast} onClose={removeToast} />)}</div>
       </ResponsiveContainer>
     </TVAdminGuard>
   )

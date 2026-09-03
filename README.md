@@ -1,91 +1,49 @@
-# Bar dos Amigos — Projeto Oficial
+# IMORTAL0800
 
-Este repositório é a **única fonte oficial do portal Bar dos Amigos**.
+Portal de entretenimento 24h com TV, Futebol, Games, Rádio e Comunidade/Xat.
 
-- Site: https://www.radiobardosamigos.com.br
-- Domínio alternativo: https://radiobardosamigos.com.br
-- Repositório oficial: `sbritom/bardosamigos-engine`
-- Branch de produção: `main`
-- Projeto Vercel oficial: `radio-bar-dos-amigos`
-- Frontend: React + Vite
-- Backend de dados/autenticação: Supabase
-- APIs web/cron: Vercel Functions
-- Engine de rádio: Node.js em `server/`
+## Identidade
 
-> **Regra de arquitetura:** não criar outra aplicação Vite/React dentro deste repositório e não manter cópias `.backup` versionadas. O histórico do Git é o backup oficial.
+- Nome: **IMORTAL0800**
+- Slogan: **Entretenimento 24h**
+- Domínio oficial planejado: `https://imortal0800.com`
+- Xat oficial: `https://xat.com/Imortal0800`
 
-## Estrutura oficial
+## Áreas principais
 
-```text
-/
-├─ api/                 # Funções/API executadas na Vercel
-├─ config/              # Configurações compartilhadas
-├─ docs/                # Documentação técnica
-├─ public/              # Assets públicos
-├─ scripts/             # Build, SEO, sincronizações e utilitários
-├─ server/              # Engine/backend da rádio
-├─ src/                 # Aplicação web oficial
-│  ├─ apps/portal/      # Shell, Home, layout e roteamento
-│  ├─ apps/radio/       # Experiência de rádio atualmente ligada às rotas
-│  ├─ core/             # Auth, banco, providers, registry e serviços centrais
-│  ├─ design-system/    # Componentes e tokens visuais
-│  ├─ modules/          # TV, futebol, eventos, BarCoins, chat, etc.
-│  └─ shared/           # Componentes/utilitários compartilhados
-├─ supabase/            # Migrations e seed do banco
-├─ tests/portal/        # Testes automatizados do portal
-├─ index.html           # Entrada única do frontend
-├─ package.json         # Dependências/scripts únicos do projeto
-├─ vercel.json          # Rotas, headers, cron e deploy
-└─ vite.config.js       # Configuração única do Vite
-```
+- `/` — Início
+- `/tv` — TV
+- `/football` — Futebol
+- `/games` — Games
+- `/radio` — Rádio
+- `/community` — Comunidade
+- `/chat` — Xat oficial
+- `/events` — Eventos
+- `/admin` — Administração
 
-## Rotas e módulos principais
+## Rádio
 
-O registro de rotas oficial está em `src/core/registry/plugins.jsx`.
+A Rádio IMORTAL0800 usa o stream `https://s01.svrdedicado.org:7956/stream`. Metadados e ouvintes são consumidos por `/api/radio/stats`; pedidos musicais usam `/api/radio/requests`.
 
-Áreas públicas principais:
-- Home
-- TV
-- Rádio
-- Futebol
-- Notícias
-- BarStudio/Ferramentas
-- Brincadeiras
-- Comunidade
-- BarCoins
-- Eventos
-- Manual
-- Chat
-- Palpites, Meus Palpites e Ranking
-- Perfil, Para Você e Configurações
-
-Áreas administrativas protegidas:
-- `/admin`
-- TV Manager
-- Competition Admin
-- Eventos Admin
-- Rádio Admin
-
-## Qualidade
-
-Antes de publicar mudanças importantes:
+## Desenvolvimento
 
 ```bash
-npm ci
-npm run portal:test
-npm run build
-npm run portal:release-smoke
-npm run portal:budget
+npm install
+npm run dev
 ```
 
-O workflow `.github/workflows/portal-quality.yml` executa essas verificações em pushes/PRs para `main`.
+Validação antes de produção:
 
-## Convenções
+```bash
+npm run quality:portal
+```
 
-1. `main` é a branch de produção.
-2. Nenhum segundo frontend deve ser criado dentro do repositório.
-3. Backups de código não devem ser commitados; use o histórico do Git.
-4. Segredos ficam somente em variáveis de ambiente.
-5. O navegador pode receber apenas chaves públicas/anon do Supabase; nunca `service_role`.
-6. Rotas administrativas devem usar os guards oficiais e autorização server-side/RLS.
-7. Alterações de banco devem permanecer rastreáveis por migrations em `supabase/migrations/`.
+O comando executa testes do portal, build, smoke check e orçamento do bundle.
+
+## Arquitetura
+
+Frontend em React/Vite, Supabase para dados e autenticação, e Vercel para hospedagem e funções serverless. O projeto é mantido dentro do limite de 12 funções Node do plano atual da Vercel.
+
+## Projeto
+
+Todo conteúdo, identidade visual, textos, URLs públicas e recursos do portal devem usar exclusivamente a marca **IMORTAL0800**.
