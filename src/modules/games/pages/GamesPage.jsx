@@ -497,8 +497,7 @@ export default function GamesPage() {
     <main className="games-page">
       <header className="games-page__hero">
         <div className="games-page__hero-copy">
-          <span>IMORTAL0800</span>
-          <h1>Games</h1>
+          <h1>GAMES</h1>
           <p>Esports, lançamentos, campeonatos, novidades e jogos grátis reunidos em uma central atualizada automaticamente.</p>
 
           <div className="games-page__hero-actions">
