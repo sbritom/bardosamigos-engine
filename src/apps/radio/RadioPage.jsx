@@ -185,16 +185,23 @@ export default function RadioPage() {
         setRadioContentError("");
 
         try {
-          const newsResponse = await fetch("/api/news?category=Entretenimento&limit=20", {
+          const musicResponse = await fetch("/api/news?category=Música&limit=5", {
             headers: { Accept: "application/json" },
           });
-          const newsPayload = await newsResponse.json().catch(() => ({}));
-          if (active && newsResponse.ok) {
-            const musicNews = (Array.isArray(newsPayload?.articles) ? newsPayload.articles : [])
-              .filter(isMusicNews)
-              .slice(0, 3)
-              .map(normalizeMusicNews);
-            setRadioNews(musicNews);
+          const musicPayload = await musicResponse.json().catch(() => ({}));
+          let musicArticles = Array.isArray(musicPayload?.articles) ? musicPayload.articles : [];
+
+          if (!musicArticles.length) {
+            const fallbackResponse = await fetch("/api/news?category=Entretenimento&limit=20", {
+              headers: { Accept: "application/json" },
+            });
+            const fallbackPayload = await fallbackResponse.json().catch(() => ({}));
+            musicArticles = (Array.isArray(fallbackPayload?.articles) ? fallbackPayload.articles : [])
+              .filter(isMusicNews);
+          }
+
+          if (active) {
+            setRadioNews(musicArticles.slice(0, 3).map(normalizeMusicNews));
           }
         } catch {
           if (active) setRadioNews([]);
