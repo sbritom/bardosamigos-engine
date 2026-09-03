@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { LockKeyhole, LogIn, LogOut, ShieldAlert, ShieldCheck, User } from 'lucide-react'
+import { Eye, EyeOff, LockKeyhole, LogIn, LogOut, ShieldAlert, ShieldCheck, User } from 'lucide-react'
 
 import { getSupabaseClient } from '../database/client/supabaseClient.js'
 import './adminRouteGuard.css'
@@ -28,6 +28,16 @@ function AdminAccessShell({ children, centered = false }) {
         'admin-access-shell',
         centered ? 'admin-access-shell--centered' : '',
       ].filter(Boolean).join(' ')}
+      style={centered ? {
+        width: '100%',
+        maxWidth: 'none',
+        minHeight: 'calc(100dvh - 210px)',
+        margin: '0 auto',
+        padding: '32px 16px',
+        boxSizing: 'border-box',
+        display: 'grid',
+        placeItems: 'center',
+      } : undefined}
     >
       <section
         className={[
@@ -35,6 +45,11 @@ function AdminAccessShell({ children, centered = false }) {
           'admin-access-card',
           centered ? 'admin-access-card--centered' : '',
         ].filter(Boolean).join(' ')}
+        style={centered ? {
+          width: 'min(100%, 390px)',
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        } : undefined}
       >
         {children}
       </section>
@@ -52,6 +67,7 @@ export default function AdminRouteGuard({
   const [form, setForm] = useState({ username: '', password: '' })
   const [busy, setBusy] = useState(false)
   const [loginError, setLoginError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const refreshAccess = useCallback(async ({ showLoading = true } = {}) => {
     if (showLoading) setAccess((current) => ({ ...current, loading: true }))
@@ -212,13 +228,22 @@ export default function AdminRouteGuard({
                 <LockKeyhole size={16} />
                 <input
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Sua senha"
                 />
+                <button
+                  type="button"
+                  className="admin-access-password-toggle"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             ) : (
               <input
