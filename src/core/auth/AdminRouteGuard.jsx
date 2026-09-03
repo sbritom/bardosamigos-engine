@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { LogIn, LogOut, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { LockKeyhole, LogIn, LogOut, ShieldAlert, ShieldCheck, User } from 'lucide-react'
 
 import { getSupabaseClient } from '../database/client/supabaseClient.js'
+import './adminRouteGuard.css'
 import {
   ADMIN_AUTH_ERRORS,
   ADMIN_ROLES,
@@ -19,10 +20,22 @@ const INITIAL_STATE = {
   role: '',
 }
 
-function AdminAccessShell({ children }) {
+function AdminAccessShell({ children, centered = false }) {
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-10 md:py-16">
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
+    <main
+      className={[
+        'mx-auto w-full max-w-xl px-4 py-10 md:py-16',
+        'admin-access-shell',
+        centered ? 'admin-access-shell--centered' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <section
+        className={[
+          'rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8',
+          'admin-access-card',
+          centered ? 'admin-access-card--centered' : '',
+        ].filter(Boolean).join(' ')}
+      >
         {children}
       </section>
     </main>
@@ -33,6 +46,7 @@ export default function AdminRouteGuard({
   children,
   allowedRoles = [ADMIN_ROLES.ADMIN],
   title = 'Area administrativa',
+  centeredAuth = false,
 }) {
   const [access, setAccess] = useState(INITIAL_STATE)
   const [form, setForm] = useState({ username: '', password: '' })
@@ -130,7 +144,7 @@ export default function AdminRouteGuard({
 
   if (access.loading) {
     return (
-      <AdminAccessShell>
+      <AdminAccessShell centered={centeredAuth}>
         <div className="flex items-center gap-3 text-[var(--text-secondary)]">
           <ShieldCheck size={24} className="text-[var(--primary)]" />
           <div>
@@ -144,51 +158,83 @@ export default function AdminRouteGuard({
 
   if (!access.hasSession) {
     return (
-      <AdminAccessShell>
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)]/15 text-[var(--primary)]">
+      <AdminAccessShell centered={centeredAuth}>
+        <div className={centeredAuth ? 'admin-access-card__header' : 'flex items-start gap-3'}>
+          <span className={centeredAuth ? 'admin-access-card__icon' : 'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)]/15 text-[var(--primary)]'}>
             <ShieldCheck size={24} />
           </span>
           <div>
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Acesso restrito</span>
-            <h1 className="mt-1 text-2xl font-black text-[var(--text)]">{title}</h1>
-            <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-              Entre com uma conta autorizada. O acesso e validado antes de carregar o modulo administrativo.
+            <span className={centeredAuth ? 'admin-access-card__eyebrow' : 'text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]'}>Acesso restrito</span>
+            <h1 className={centeredAuth ? 'admin-access-card__title' : 'mt-1 text-2xl font-black text-[var(--text)]'}>{title}</h1>
+            <p className={centeredAuth ? 'admin-access-card__subtitle' : 'mt-2 text-sm leading-6 text-[var(--text-secondary)]'}>
+              Entre com uma conta autorizada. O acesso é validado antes de carregar o módulo administrativo.
             </p>
           </div>
         </div>
 
-        <form className="mt-6 grid gap-4" onSubmit={handleLogin}>
-          <label className="text-sm font-bold text-[var(--text)]">
-            Usuario
-            <input
-              name="username"
-              type="text"
-              autoComplete="username"
-              required
-              minLength={3}
-              maxLength={32}
-              value={form.username}
-              onChange={handleChange}
-              className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 font-normal text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
-            />
+        <form className={centeredAuth ? 'admin-access-form' : 'mt-6 grid gap-4'} onSubmit={handleLogin}>
+          <label className={centeredAuth ? 'admin-access-field' : 'text-sm font-bold text-[var(--text)]'}>
+            <span>Usuário</span>
+            {centeredAuth ? (
+              <div>
+                <User size={16} />
+                <input
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  required
+                  minLength={3}
+                  maxLength={32}
+                  value={form.username}
+                  onChange={handleChange}
+                  placeholder="Seu usuário"
+                />
+              </div>
+            ) : (
+              <input
+                name="username"
+                type="text"
+                autoComplete="username"
+                required
+                minLength={3}
+                maxLength={32}
+                value={form.username}
+                onChange={handleChange}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 font-normal text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+              />
+            )}
           </label>
 
-          <label className="text-sm font-bold text-[var(--text)]">
-            Senha
-            <input
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 font-normal text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
-            />
+          <label className={centeredAuth ? 'admin-access-field' : 'text-sm font-bold text-[var(--text)]'}>
+            <span>Senha</span>
+            {centeredAuth ? (
+              <div>
+                <LockKeyhole size={16} />
+                <input
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Sua senha"
+                />
+              </div>
+            ) : (
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={form.password}
+                onChange={handleChange}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 font-normal text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+              />
+            )}
           </label>
 
           {(loginError || access.reason) && (
-            <p className="rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-100">
+            <p className={centeredAuth ? 'admin-access-feedback' : 'rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-100'}>
               {loginError || access.reason}
             </p>
           )}
@@ -196,7 +242,7 @@ export default function AdminRouteGuard({
           <button
             type="submit"
             disabled={busy}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60"
+            className={centeredAuth ? 'admin-access-primary' : 'flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60'}
           >
             <LogIn size={18} />
             {busy ? 'Validando...' : 'Entrar'}
@@ -208,7 +254,7 @@ export default function AdminRouteGuard({
 
   if (!access.allowed) {
     return (
-      <AdminAccessShell>
+      <AdminAccessShell centered={centeredAuth}>
         <ShieldAlert size={30} className="text-amber-300" />
         <h1 className="mt-3 text-2xl font-black text-[var(--text)]">Acesso nao autorizado</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
