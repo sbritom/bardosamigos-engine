@@ -1303,3 +1303,362 @@
     margin-left: -96px;
   }
 }
+
+
+/* Rádio — acabamento visual completo, navegação e grade */
+.imortal-radio-hero,
+.imortal-radio-player-card,
+.imortal-radio-schedule,
+.imortal-radio-info-card {
+  border-color: rgba(58, 155, 255, 0.14) !important;
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.018) !important;
+}
+
+.imortal-radio-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(20, 135, 255, 0.14), transparent 32%),
+    radial-gradient(circle at 88% 16%, rgba(86, 92, 255, 0.08), transparent 28%),
+    linear-gradient(145deg, rgba(8, 15, 26, 0.99), rgba(4, 8, 14, 0.995)) !important;
+}
+
+.imortal-radio-nav {
+  min-width: 380px;
+  padding: 5px;
+  border: 1px solid rgba(58, 155, 255, 0.12);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  background: rgba(3, 9, 17, 0.56);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.imortal-radio-nav a,
+.imortal-radio-nav button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #7890ad;
+  background: transparent;
+  font-size: 0.67rem;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  transition: 150ms ease;
+}
+
+.imortal-radio-nav a:first-child {
+  color: #eaf6ff;
+  background:
+    linear-gradient(180deg, rgba(25, 141, 255, 0.22), rgba(8, 83, 176, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(72, 172, 255, 0.16);
+}
+
+.imortal-radio-nav a:hover,
+.imortal-radio-nav button:hover {
+  color: #fff;
+  background: rgba(33, 130, 230, 0.12);
+}
+
+.imortal-radio-nav a:focus-visible,
+.imortal-radio-nav button:focus-visible {
+  outline: 2px solid #5fc7ff;
+  outline-offset: 2px;
+}
+
+.imortal-radio-player-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 184px;
+  padding: 15px;
+}
+
+.imortal-radio-player-card::before {
+  content: "";
+  position: absolute;
+  inset: -42%;
+  z-index: -2;
+  opacity: 0;
+  background-image: var(--imortal-radio-cover-image);
+  background-position: center;
+  background-size: cover;
+  filter: blur(65px) saturate(1.18);
+  transform: scale(1.04);
+  transition: opacity 220ms ease;
+}
+
+.imortal-radio-player-card.has-cover::before {
+  opacity: 0.16;
+}
+
+.imortal-radio-player-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(8, 10, 14, 0.94), rgba(10, 13, 18, 0.88)),
+    radial-gradient(circle at 86% 50%, rgba(28, 135, 255, 0.08), transparent 36%);
+  pointer-events: none;
+}
+
+.imortal-radio-cover {
+  position: relative;
+  align-self: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.imortal-radio-cover img {
+  transition: transform 280ms ease;
+}
+
+.imortal-radio-player-card:hover .imortal-radio-cover img {
+  transform: scale(1.018);
+}
+
+.imortal-radio-player-card__content {
+  position: relative;
+  z-index: 1;
+}
+
+.imortal-radio-live-badge {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.imortal-radio-track h2 {
+  max-width: 760px;
+}
+
+.imortal-radio-controls {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(3, 5, 8, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.imortal-radio-control-center small {
+  letter-spacing: 0.01em;
+}
+
+.imortal-radio-request {
+  white-space: nowrap;
+}
+
+.imortal-radio-schedule {
+  padding: 17px;
+  border: 1px solid rgba(58, 155, 255, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(16, 124, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(8, 15, 25, 0.97), rgba(4, 8, 14, 0.99));
+}
+
+.imortal-radio-schedule__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.imortal-radio-schedule__icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(64, 160, 255, 0.18);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #65caff;
+  background: rgba(11, 120, 255, 0.08);
+}
+
+.imortal-radio-schedule__header > div:last-child {
+  min-width: 0;
+}
+
+.imortal-radio-schedule__header span {
+  color: #5fc7ff;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.imortal-radio-schedule__header h2 {
+  margin: 2px 0 0;
+  color: #f4f8ff;
+  font-size: 1rem;
+}
+
+.imortal-radio-schedule__header p {
+  margin: 3px 0 0;
+  color: #7288a6;
+  font-size: 0.69rem;
+}
+
+.imortal-radio-schedule__grid {
+  margin-top: 13px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.imortal-radio-schedule__day {
+  min-width: 0;
+  min-height: 104px;
+  padding: 10px;
+  border: 1px solid rgba(63, 146, 255, 0.1);
+  border-radius: 13px;
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  background:
+    linear-gradient(180deg, rgba(10, 19, 32, 0.82), rgba(6, 11, 18, 0.92));
+}
+
+.imortal-radio-schedule__day-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7ecfff;
+}
+
+.imortal-radio-schedule__day-title strong {
+  overflow: hidden;
+  color: #eef6ff;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imortal-radio-schedule__day > span {
+  color: #7f95b2;
+  font-size: 0.63rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.imortal-radio-schedule__day small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #5f7594;
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.imortal-radio-content-grid {
+  margin-top: 0;
+}
+
+.imortal-radio-info-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.imortal-radio-info-card:hover {
+  border-color: rgba(68, 164, 255, 0.24) !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1040px) {
+  .imortal-radio-schedule__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .imortal-radio-nav {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(90px, 1fr));
+    overflow-x: auto;
+  }
+
+  .imortal-radio-player-card {
+    min-height: 164px;
+  }
+
+  .imortal-radio-schedule__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .imortal-radio-hero {
+    gap: 12px;
+  }
+
+  .imortal-radio-nav {
+    grid-template-columns: repeat(4, minmax(86px, 1fr));
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .imortal-radio-nav a,
+  .imortal-radio-nav button {
+    min-height: 36px;
+    padding-inline: 9px;
+  }
+
+  .imortal-radio-player-card {
+    min-height: 0;
+  }
+
+  .imortal-radio-player-card::before {
+    inset: -60%;
+  }
+
+  .imortal-radio-schedule {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .imortal-radio-schedule__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .imortal-radio-schedule__day {
+    min-height: 94px;
+  }
+}
+
+@media (max-width: 420px) {
+  .imortal-radio-nav {
+    grid-template-columns: repeat(4, 84px);
+    justify-content: start;
+    scrollbar-width: none;
+  }
+
+  .imortal-radio-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .imortal-radio-nav a,
+  .imortal-radio-nav button {
+    gap: 5px;
+    font-size: 0.62rem;
+  }
+
+  .imortal-radio-schedule__header {
+    align-items: flex-start;
+  }
+
+  .imortal-radio-schedule__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
