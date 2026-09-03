@@ -1,73 +1,52 @@
 import { useEffect, useRef, useState } from 'react'
-import { AtSign, Camera, LogIn, LogOut, Save, Settings, Sparkles, Star, Trophy, UserPlus, UserRound } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { AtSign, Camera, KeyRound, LogIn, LogOut, Save, UserPlus, UserRound } from 'lucide-react'
 
 import { useAuth } from '../../auth/AuthContext'
-import { PersonalizationShell } from '../components/PersonalizationComponents'
-
-function AccountBenefit({ icon, title, description }) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="mb-2 flex items-center gap-2 font-bold text-[var(--text)]">
-        {icon}
-        {title}
-      </div>
-      <p className="text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
-    </article>
-  )
-}
+import '../styles/personalization.css'
 
 function GuestProfile() {
   const { openAuth } = useAuth()
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
-        <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Acesso livre</span>
-        <h2 className="mt-2 text-3xl font-black text-[var(--text)]">Voce esta navegando como visitante</h2>
-        <p className="mt-4 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          Nao e preciso criar conta para ouvir a radio, pedir musica, assistir TV, acompanhar futebol, ler noticias, usar o chat ou navegar pelo IMORTAL0800.
-        </p>
-        <p className="mt-3 leading-7 text-[var(--text-secondary)]">
-          A conta so e solicitada quando voce quiser usar algo que precise guardar sua identidade ou seus dados, como favoritos, perfil personalizado e palpites.
-        </p>
+    <main className="bds-personalization-page">
+      <section className="mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-[var(--primary)]/10 text-[var(--primary)]">
+          <UserRound size={38} />
+        </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-5 text-center">
+          <h1 className="text-2xl font-black text-[var(--text)]">Perfil</h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+            Entre na sua conta para editar nome, usuário, bio e foto.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-3">
           <button
             type="button"
             onClick={() => openAuth('', 'login')}
-            className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110"
+            className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 font-black text-white transition hover:brightness-110"
           >
-            <LogIn size={18} />
+            <LogIn size={17} />
             Entrar
           </button>
+
           <button
             type="button"
             onClick={() => openAuth('', 'signup')}
-            className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10"
+            className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 font-bold text-[var(--text)] transition hover:bg-white/[0.07]"
           >
-            <UserPlus size={18} />
+            <UserPlus size={16} />
             Criar conta
           </button>
         </div>
       </section>
-
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
-        <h3 className="text-lg font-black text-[var(--text)]">O que a conta libera?</h3>
-        <div className="mt-4 grid gap-3">
-          <AccountBenefit icon={<UserRound size={18} />} title="Perfil personalizado" description="Tenha nome de usuario, foto e bio associados a sua conta." />
-          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Salve canais da TV e times para encontrar depois." />
-          <AccountBenefit icon={<Trophy size={18} />} title="Participacoes identificadas" description="Sua identidade podera ser usada em palpites e outras atividades que precisem guardar seu progresso." />
-        </div>
-      </section>
-    </div>
+    </main>
   )
 }
 
 function AuthenticatedProfile() {
-  const navigate = useNavigate()
   const {
-    user,
     displayName,
     profile,
     profileLoading,
@@ -75,7 +54,9 @@ function AuthenticatedProfile() {
     updateProfile,
     uploadAvatar,
     signOut,
+    openAuth,
   } = useAuth()
+
   const avatarInputRef = useRef(null)
   const [form, setForm] = useState({ displayName: '', username: '', bio: '' })
   const [busy, setBusy] = useState(false)
@@ -104,10 +85,10 @@ function AuthenticatedProfile() {
     try {
       await updateProfile(form)
       setTone('success')
-      setFeedback('Perfil atualizado com sucesso.')
+      setFeedback('Perfil atualizado.')
     } catch (error) {
       setTone('error')
-      setFeedback(error.message || 'Nao foi possivel atualizar seu perfil.')
+      setFeedback(error.message || 'Não foi possível atualizar o perfil.')
     } finally {
       setBusy(false)
     }
@@ -124,10 +105,13 @@ function AuthenticatedProfile() {
     try {
       await uploadAvatar(file)
       setTone('success')
-      setFeedback('Foto de perfil atualizada.')
+      setFeedback('Foto atualizada.')
     } catch (error) {
       setTone('error')
-      setFeedback(error.message || 'Nao foi possivel atualizar a foto.')
+      const message = String(error?.message || '')
+      setFeedback(/bucket/i.test(message)
+        ? 'A troca de foto está temporariamente indisponível.'
+        : message || 'Não foi possível atualizar a foto.')
     } finally {
       setAvatarBusy(false)
     }
@@ -141,36 +125,43 @@ function AuthenticatedProfile() {
       await signOut()
     } catch (error) {
       setTone('error')
-      setFeedback(error.message || 'Nao foi possivel sair da conta.')
+      setFeedback(error.message || 'Não foi possível sair da conta.')
       setBusy(false)
     }
   }
 
   const avatarUrl = profile?.avatarUrl || ''
-  const usernameLabel = profile?.username ? `@${profile.username}` : 'Escolha seu @usuario'
+  const currentName = form.displayName || displayName || 'Usuário'
+  const currentUsername = form.username || profile?.username || ''
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="relative h-24 w-24 shrink-0">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[var(--primary)]/15 text-[var(--primary)]">
+    <main className="bds-personalization-page">
+      <section className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-[var(--surface)] p-5 shadow-xl sm:p-7">
+        <header className="flex flex-col items-center text-center">
+          <div className="relative h-24 w-24">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[var(--primary)]/10 text-[var(--primary)]">
               {avatarUrl ? (
-                <img src={avatarUrl} alt={`Foto de ${displayName || 'usuario'}`} className="h-full w-full object-cover" />
+                <img
+                  src={avatarUrl}
+                  alt={`Foto de ${currentName}`}
+                  className="h-full w-full object-cover"
+                />
               ) : (
-                <UserRound size={44} />
+                <UserRound size={43} />
               )}
             </div>
+
             <button
               type="button"
               disabled={avatarBusy || profileLoading}
               onClick={() => avatarInputRef.current?.click()}
               className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[var(--primary)] text-white shadow-lg transition hover:brightness-110 disabled:opacity-60"
-              aria-label="Alterar foto de perfil"
-              title="Alterar foto de perfil"
+              aria-label="Alterar foto"
+              title="Alterar foto"
             >
-              <Camera size={18} />
+              <Camera size={17} />
             </button>
+
             <input
               ref={avatarInputRef}
               className="hidden"
@@ -180,168 +171,124 @@ function AuthenticatedProfile() {
             />
           </div>
 
-          <div className="min-w-0">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Conta conectada</span>
-            <h2 className="truncate text-2xl font-black text-[var(--text)]">{displayName || 'Usuário IMORTAL0800'}</h2>
-            <p className="flex items-center gap-1 truncate text-sm font-semibold text-[var(--primary)]">
-              <AtSign size={14} />
-              {usernameLabel.replace(/^@/, '')}
-            </p>
-            <p className="mt-1 truncate text-sm text-[var(--text-secondary)]">{user?.email}</p>
-            {avatarBusy && <small className="mt-2 block text-[var(--text-secondary)]">Enviando foto...</small>}
-          </div>
-        </div>
-
-        {profileError && (
-          <p className="mt-5 rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
-            {profileError} Os dados basicos da sua conta continuam disponiveis.
+          <h1 className="mt-5 max-w-full truncate text-2xl font-black text-[var(--text)]">
+            {currentName}
+          </h1>
+          <p className="mt-1 flex items-center gap-1 text-sm font-bold text-[var(--primary)]">
+            <AtSign size={14} />
+            {currentUsername || 'usuario'}
           </p>
-        )}
+          {avatarBusy ? (
+            <small className="mt-2 text-[var(--text-secondary)]">Enviando foto...</small>
+          ) : null}
+        </header>
 
-        <form className="mt-7" onSubmit={handleSave}>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm font-bold text-[var(--text)]">
-              Nome exibido
-              <input
-                name="displayName"
-                type="text"
-                minLength={2}
-                maxLength={60}
-                required
-                value={form.displayName}
-                onChange={handleChange}
-                className="mt-2 w-full rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+        <form className="mt-7 grid gap-4" onSubmit={handleSave}>
+          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
+            Nome exibido
+            <input
+              name="displayName"
+              type="text"
+              minLength={2}
+              maxLength={60}
+              required
+              value={form.displayName}
+              onChange={handleChange}
+              className="min-h-[48px] w-full rounded-2xl border border-white/10 bg-black/10 px-4 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
+            Nome de usuário
+            <div className="relative">
+              <AtSign
+                size={16}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
               />
-            </label>
+              <input
+                name="username"
+                type="text"
+                minLength={3}
+                maxLength={24}
+                value={form.username}
+                onChange={handleChange}
+                placeholder="seuusuario"
+                className="min-h-[48px] w-full rounded-2xl border border-white/10 bg-black/10 py-3 pl-10 pr-4 lowercase text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+              />
+            </div>
+          </label>
 
-            <label className="block text-sm font-bold text-[var(--text)]">
-              Nome de usuario
-              <div className="relative mt-2">
-                <AtSign size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  name="username"
-                  type="text"
-                  minLength={3}
-                  maxLength={24}
-                  value={form.username}
-                  onChange={handleChange}
-                  placeholder="seuusuario"
-                  className="w-full rounded-xl border border-white/15 bg-black/10 py-3 pl-10 pr-4 lowercase text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
-                />
-              </div>
-              <small className="mt-1 block font-normal text-[var(--text-secondary)]">Letras, numeros, ponto e underline.</small>
-            </label>
-          </div>
-
-          <label className="mt-4 block text-sm font-bold text-[var(--text)]">
+          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
             Bio
             <textarea
               name="bio"
               rows={3}
-              maxLength={280}
+              maxLength={160}
               value={form.bio}
               onChange={handleChange}
-              placeholder="Conte um pouco sobre voce..."
-              className="mt-2 w-full resize-y rounded-xl border border-white/15 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-[var(--text-secondary)]/60 focus:border-[var(--primary)]"
-            />
-            <small className="mt-1 block text-right font-normal text-[var(--text-secondary)]">{form.bio.length}/280</small>
-          </label>
-
-          <label className="mt-4 block text-sm font-bold text-[var(--text)]">
-            E-mail da conta
-            <input
-              type="email"
-              readOnly
-              value={user?.email || ''}
-              className="mt-2 w-full cursor-not-allowed rounded-xl border border-white/10 bg-black/10 px-4 py-3 text-[var(--text-secondary)] opacity-80"
+              placeholder="Conte um pouco sobre você..."
+              className="w-full resize-none rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-[var(--text-secondary)]/60 focus:border-[var(--primary)]"
             />
           </label>
 
-          {feedback && (
-            <p className={`mt-4 rounded-xl px-4 py-3 text-sm ${tone === 'success' ? 'bg-emerald-500/15 text-emerald-100' : 'bg-red-500/15 text-red-100'}`}>
-              {feedback}
+          {(feedback || profileError) ? (
+            <p className={`rounded-2xl px-4 py-3 text-sm ${
+              tone === 'success' && !profileError
+                ? 'bg-emerald-500/10 text-emerald-100'
+                : 'bg-red-500/10 text-red-100'
+            }`}>
+              {feedback || 'Alguns dados do perfil não puderam ser carregados agora.'}
             </p>
-          )}
+          ) : null}
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-1 grid gap-3 sm:grid-cols-2">
             <button
               type="submit"
               disabled={busy || avatarBusy || profileLoading}
-              className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60"
+              className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 font-black text-white transition hover:brightness-110 disabled:opacity-60"
             >
-              <Save size={18} />
+              <Save size={17} />
               {busy ? 'Salvando...' : 'Salvar perfil'}
             </button>
+
             <button
               type="button"
+              onClick={() => openAuth('', 'recover')}
               disabled={busy || avatarBusy}
-              onClick={handleSignOut}
-              className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10 disabled:opacity-60"
+              className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 font-bold text-[var(--text)] transition hover:bg-white/[0.07] disabled:opacity-60"
             >
-              <LogOut size={18} />
-              Sair
+              <KeyRound size={17} />
+              Redefinir senha
             </button>
           </div>
+
+          <button
+            type="button"
+            disabled={busy || avatarBusy}
+            onClick={handleSignOut}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-transparent px-5 text-sm font-bold text-[var(--text-secondary)] transition hover:bg-white/[0.04] hover:text-[var(--text)] disabled:opacity-60"
+          >
+            <LogOut size={16} />
+            Sair da conta
+          </button>
         </form>
       </section>
-
-      <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
-        <h3 className="text-lg font-black text-[var(--text)]">Seu perfil no portal</h3>
-        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          Nome, usuario, bio, foto, favoritos e preferencias ficam associados a sua conta.
-        </p>
-
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Identidade</span>
-          <strong className="mt-2 block text-lg text-[var(--text)]">{displayName || 'Usuário IMORTAL0800'}</strong>
-          <span className="text-sm text-[var(--primary)]">{profile?.username ? `@${profile.username}` : 'Sem @usuario definido'}</span>
-          {profile?.bio && <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{profile.bio}</p>}
-        </div>
-
-        <div className="mt-5 grid gap-3">
-          <AccountBenefit icon={<UserRound size={18} />} title="Identidade no portal" description="Seu nome, @usuario e avatar ficam disponiveis para recursos que precisem identificar voce." />
-          <AccountBenefit icon={<Star size={18} />} title="Favoritos" description="Canais da TV e times salvos acompanham sua conta." />
-          <AccountBenefit icon={<Trophy size={18} />} title="Palpites e participacoes" description="Nome, usuario e avatar poderao representar voce nesses recursos." />
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => navigate('/for-you')}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-3 font-bold text-white transition hover:brightness-110"
-          >
-            <Sparkles size={18} />
-            Meus favoritos
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/settings')}
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 font-bold text-[var(--text)] transition hover:bg-white/10"
-          >
-            <Settings size={18} />
-            Preferencias
-          </button>
-        </div>
-      </section>
-    </div>
+    </main>
   )
 }
 
 export default function ProfilePage() {
   const { loading, isAuthenticated } = useAuth()
 
-  return (
-    <PersonalizationShell
-      eyebrow="Perfil e autenticacao"
-      title="Sua area no IMORTAL0800"
-      description="Navegue livremente como visitante e use uma conta apenas quando quiser guardar uma experiencia pessoal."
-      icon={<UserRound size={40} />}
-    >
-      {loading ? (
-        <div className="mx-auto w-full max-w-5xl rounded-3xl border border-white/10 bg-[var(--surface)] p-8 text-center text-[var(--text-secondary)]">
-          Verificando sua sessao...
+  if (loading) {
+    return (
+      <main className="bds-personalization-page">
+        <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-[var(--surface)] p-8 text-center text-[var(--text-secondary)]">
+          Carregando perfil...
         </div>
-      ) : isAuthenticated ? <AuthenticatedProfile /> : <GuestProfile />}
-    </PersonalizationShell>
-  )
+      </main>
+    )
+  }
+
+  return isAuthenticated ? <AuthenticatedProfile /> : <GuestProfile />
 }
