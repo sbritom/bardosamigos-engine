@@ -5,6 +5,8 @@ const RADIO_STREAM_URL =
   'https://s01.svrdedicado.org:7956/stream'
 
 const REQUEST_TIMEOUT_MS = 8000
+const ARTWORK_CACHE_TTL_MS = 6 * 60 * 60 * 1000
+const artworkCache = new Map()
 
 async function fetchWithTimeout(url) {
   const controller = new AbortController()
@@ -38,6 +40,53 @@ function pickRadioSource(payload) {
   }) || sources[0] || null
 }
 
+
+function normalizeSongQuery(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/^\s*[-–—|]+|[-–—|]+\s*$/g, '')
+    .trim()
+}
+
+function upscaleArtworkUrl(url) {
+  return String(url || '')
+    .replace(/\/100x100bb\.(jpg|png)$/i, '/600x600bb.$1')
+    .replace(/\/100x100bb$/i, '/600x600bb')
+}
+
+async function getTrackArtwork(songTitle) {
+  const query = normalizeSongQuery(songTitle)
+  if (!query || /^(programação ao vivo|imortal0800)$/i.test(query)) return ''
+
+  const cached = artworkCache.get(query.toLowerCase())
+  if (cached && Date.now() - cached.createdAt < ARTWORK_CACHE_TTL_MS) {
+    return cached.url
+  }
+
+  try {
+    const url = new URL('https://itunes.apple.com/search')
+    url.searchParams.set('term', query)
+    url.searchParams.set('entity', 'song')
+    url.searchParams.set('limit', '1')
+    url.searchParams.set('country', 'BR')
+
+    const response = await fetchWithTimeout(url.toString())
+    if (!response.ok) return ''
+
+    const payload = await response.json()
+    const artwork = upscaleArtworkUrl(payload?.results?.[0]?.artworkUrl100 || '')
+
+    artworkCache.set(query.toLowerCase(), {
+      url: artwork,
+      createdAt: Date.now(),
+    })
+
+    return artwork
+  } catch {
+    return ''
+  }
+}
+
 async function getIcecastStats() {
   const response = await fetchWithTimeout(ICECAST_STATS_URL)
 
@@ -66,9 +115,12 @@ async function getIcecastStats() {
     }
   }
 
+  const songTitle = source.title || 'Programação ao vivo'
+  const cover = await getTrackArtwork(songTitle)
+
   return {
     online: true,
-    songTitle: source.title || 'Programação ao vivo',
+    songTitle,
     listeners: Number(source.listeners) || 0,
     peakListeners: Number(source.listener_peak) || 0,
     bitrate: Number(source.bitrate) || 0,
@@ -76,10 +128,10 @@ async function getIcecastStats() {
     contentType: source.server_type || '',
     serverTitle: source.server_name || 'IMORTAL0800',
     streamUrl: RADIO_STREAM_URL,
-    cover: '',
+    cover,
     protocol: 'Icecast',
     updatedAt: new Date().toISOString(),
-    source: 'icecast-json',
+    source: cover ? 'icecast-json+itunes-artwork' : 'icecast-json',
   }
 }
 
