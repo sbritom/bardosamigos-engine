@@ -3,7 +3,7 @@ import { Check, Clock3, Music2, UserRound } from "lucide-react";
 
 const STATUS_LABELS = {
   pending: "NOVO",
-  read: "LIDO",
+  read: "ATENDIDO",
 };
 
 function formatRequestDate(value) {
@@ -48,7 +48,7 @@ function RadioRequestCard({ request, busy, onMarkRead }) {
         <div className="radio-request-card__actions">
           <button type="button" disabled={busy} onClick={() => onMarkRead(request)}>
             <Check size={15} />
-            MARCAR COMO LIDO
+            MARCAR COMO ATENDIDO
           </button>
         </div>
       )}
