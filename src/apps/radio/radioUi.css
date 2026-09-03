@@ -2201,3 +2201,31 @@
     padding: 5px 12px 10px;
   }
 }
+
+
+/* Rádio - detalhes oficiais do streaming */
+.imortal-radio-stream-detail {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 1px solid rgba(74, 174, 255, 0.11);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  color: #88a8c8;
+  background: rgba(5, 12, 20, 0.34);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  .imortal-radio-live-line {
+    flex-wrap: wrap;
+  }
+
+  .imortal-radio-stream-detail {
+    min-height: 24px;
+    font-size: 0.56rem;
+  }
+}
