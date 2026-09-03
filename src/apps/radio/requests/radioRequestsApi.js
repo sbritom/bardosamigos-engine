@@ -90,6 +90,115 @@ export async function submitRadioMusicRequest({ songAndArtist, message, requeste
   return parseResponse(response);
 }
 
+export async function getRadioPublicContent() {
+  const response = await fetch(`${REQUESTS_ENDPOINT}?section=public-content`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+
+  return parseResponse(response);
+}
+
+export async function listRadioProgramsAdmin() {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para gerenciar programas.");
+
+  const response = await fetch(`${REQUESTS_ENDPOINT}?section=programs`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createRadioProgram(program) {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para criar programas.");
+
+  const response = await fetch(REQUESTS_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ resource: "program", ...program }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function updateRadioProgram(program) {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para atualizar programas.");
+
+  const response = await fetch(REQUESTS_ENDPOINT, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ resource: "program", ...program }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function deleteRadioProgram(id) {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para remover programas.");
+
+  const response = await fetch(REQUESTS_ENDPOINT, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ resource: "program", id }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function listRadioScheduleAdmin() {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para gerenciar a grade.");
+
+  const response = await fetch(`${REQUESTS_ENDPOINT}?section=schedule`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function updateRadioScheduleSlot(slot) {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("Entre com uma conta autorizada para atualizar a grade.");
+
+  const response = await fetch(REQUESTS_ENDPOINT, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ resource: "schedule", ...slot }),
+  });
+
+  return parseResponse(response);
+}
+
 export async function listRadioMusicRequests({ status } = {}) {
   const token = await getAdminAccessToken();
   if (!token) {
