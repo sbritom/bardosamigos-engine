@@ -1,8 +1,14 @@
-import { CalendarDays, Radio, Shield, Tv, Users } from 'lucide-react'
+import { CalendarDays, Radio, Shield, Tv, UserCog, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ActionButton, FeatureCard, HeroCard, SectionHeader, StatusBadge } from '../../../design-system'
 
 const modules = [
+  {
+    title: 'Usuários e cargos',
+    description: 'Promova usuários a locutor ou remova o cargo com segurança.',
+    icon: UserCog,
+    path: '/admin/users',
+  },
   {
     title: 'Competition Admin',
     description: 'Campeonatos, temporadas, rodadas, times, jogos e resultados.',
