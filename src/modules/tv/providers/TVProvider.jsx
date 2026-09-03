@@ -50,7 +50,9 @@ export function TVProvider({ children, userId = null }) {
       await Promise.all(requests)
     const fallback = getLocalTVPlatformCatalog()
     const fallbackChannels = filterFallbackChannels(fallback.channels, filters)
-    const shouldFallbackChannels = channelResult.error || !channelResult.data?.length
+    const hasChannelFilters = Boolean(filters.categoryId || String(filters.search || '').trim())
+    const shouldFallbackChannels = Boolean(channelResult.error)
+      || (!hasChannelFilters && !channelResult.data?.length)
     const shouldFallbackCategories = categoryResult.error || !categoryResult.data?.length
     const finalCategories = shouldFallbackCategories
       ? {

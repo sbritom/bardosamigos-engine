@@ -82,7 +82,7 @@ function TVPlatformContent() {
     TVFavoriteService.list(user.id).then((result) => {
       if (!active) return
       if (result?.error) {
-        setFavoriteFeedback('Nao foi possivel carregar seus canais favoritos agora.')
+        setFavoriteFeedback('Não foi possível carregar seus canais favoritos agora.')
         return
       }
 
@@ -92,7 +92,7 @@ function TVPlatformContent() {
       setFavoriteIds(new Set(ids))
       setFavoriteFeedback('')
     }).catch(() => {
-      if (active) setFavoriteFeedback('Nao foi possivel carregar seus canais favoritos agora.')
+      if (active) setFavoriteFeedback('Não foi possível carregar seus canais favoritos agora.')
     })
 
     return () => {
@@ -109,11 +109,18 @@ function TVPlatformContent() {
     let base = favoritesOnly
       ? channels.data.filter((channel) => favoriteIds.has(channel.id))
       : channels.data
+
     if (globalOnly) {
       base = base.filter((channel) => channel.availabilityScope === 'GLOBAL')
     }
+
     return sortTVChannelsForCountry(base, viewerCountry)
   }, [channels.data, favoriteIds, favoritesOnly, globalOnly, viewerCountry])
+
+  const selectedCategory = useMemo(
+    () => categories.data.find((category) => category.id === channels.filters.categoryId) || null,
+    [categories.data, channels.filters.categoryId],
+  )
 
   const channelCount = channels.count || channels.data.length
   const fallbackChannel = useMemo(() => {
@@ -132,35 +139,47 @@ function TVPlatformContent() {
   const catalogLoading = channels.loading || categories.loading || featured.loading
   const outsideBrazil = Boolean(geoResolved && viewerCountry && viewerCountry !== 'BR')
   const viewerCountryName = useMemo(() => countryDisplayName(viewerCountry), [viewerCountry])
+  const sectionTitle = globalOnly
+    ? 'Canais globais'
+    : favoritesOnly
+      ? 'Meus favoritos'
+      : selectedCategory?.name || 'Todos os canais'
 
   const emptyCopy = useMemo(() => {
     if (globalOnly) {
       return {
         icon: <Globe2 size={32} aria-hidden="true" />,
         title: 'Nenhum canal global encontrado',
-        description: 'Remova a busca ou volte para Todos para ver o catalogo completo.',
+        description: 'Remova a busca ou volte para Todos para ver o catálogo completo.',
       }
     }
     if (favoritesOnly) {
       return {
         icon: <Star size={32} aria-hidden="true" />,
         title: 'Nenhum canal favorito',
-        description: 'Toque na estrela de um canal para encontra-lo aqui depois.',
+        description: 'Toque na estrela de um canal para encontrá-lo aqui depois.',
       }
     }
-    if (channels.filters.search) {
+    if (channels.filters.search.trim()) {
       return {
         icon: <SearchX size={32} aria-hidden="true" />,
         title: 'Nenhum canal encontrado',
         description: 'Tente outro termo ou remova os filtros da pesquisa.',
       }
     }
+    if (selectedCategory) {
+      return {
+        icon: <RadioTower size={32} aria-hidden="true" />,
+        title: `Nenhum canal em ${selectedCategory.name}`,
+        description: 'Esta categoria ainda não possui canais disponíveis.',
+      }
+    }
     return {
       icon: <RadioTower size={32} aria-hidden="true" />,
-      title: 'Catalogo em preparacao',
+      title: 'Catálogo em preparação',
       description: 'Nenhum canal foi publicado ainda.',
     }
-  }, [channels.filters.search, favoritesOnly, globalOnly])
+  }, [channels.filters.search, favoritesOnly, globalOnly, selectedCategory])
 
   const selectChannel = useCallback((channel) => {
     setActiveChannel(channel)
@@ -199,7 +218,7 @@ function TVPlatformContent() {
       })
       setFavoriteFeedback(isFavorite ? 'Canal removido dos favoritos.' : 'Canal salvo nos favoritos.')
     } catch (error) {
-      setFavoriteFeedback(error?.message || 'Nao foi possivel atualizar seus favoritos.')
+      setFavoriteFeedback(error?.message || 'Não foi possível atualizar seus favoritos.')
     }
   }, [favoriteIds, isAuthenticated, openAuth, user?.id])
 
@@ -208,9 +227,11 @@ function TVPlatformContent() {
       openAuth('Entre para ver sua lista de canais favoritos.', 'login')
       return
     }
+
     setGlobalOnly(false)
+    channels.setCategory('')
     setFavoritesOnly((current) => !current)
-  }, [isAuthenticated, openAuth])
+  }, [channels, isAuthenticated, openAuth])
 
   const toggleGlobalOnly = useCallback(() => {
     setFavoritesOnly(false)
@@ -224,7 +245,7 @@ function TVPlatformContent() {
     try {
       await player.requestFullscreen()
     } catch (error) {
-      console.warn('[TVPage] Nao foi possivel abrir tela cheia.', error)
+      console.warn('[TVPage] Não foi possível abrir tela cheia.', error)
     }
   }, [geoResolved, selectedAvailable])
 
@@ -235,18 +256,18 @@ function TVPlatformContent() {
           <span><Tv size={20} aria-hidden="true" /></span>
           <h1>TV <span>IMORTAL0800</span></h1>
         </div>
-        <Badge>{outsideBrazil ? `${availableChannels.length} DISPONIVEIS` : `${channelCount} CANAIS`}</Badge>
+        <Badge>{outsideBrazil ? `${availableChannels.length} DISPONÍVEIS` : `${channelCount} CANAIS`}</Badge>
       </header>
 
       {!catalogLoading && catalogError ? (
         <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100" role="status" aria-live="polite">
-          Nao foi possivel atualizar todo o catalogo agora. Os canais ja disponiveis continuam acessiveis.
+          Não foi possível atualizar todo o catálogo agora. Os canais já disponíveis continuam acessíveis.
         </p>
       ) : null}
 
       {outsideBrazil ? (
         <p className="mb-4 rounded-xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm font-semibold text-sky-100" role="status">
-          Acesso identificado em {viewerCountryName || viewerCountry}. As fontes brasileiras atuais reproduzem apenas no Brasil; canais marcados como Global continuam disponiveis normalmente.
+          Acesso identificado em {viewerCountryName || viewerCountry}. As fontes brasileiras atuais reproduzem apenas no Brasil; canais marcados como Global continuam disponíveis normalmente.
         </p>
       ) : null}
 
@@ -285,6 +306,7 @@ function TVPlatformContent() {
           <button
             type="button"
             className={!channels.filters.categoryId && !favoritesOnly && !globalOnly ? 'is-active' : ''}
+            aria-pressed={!channels.filters.categoryId && !favoritesOnly && !globalOnly}
             onClick={() => {
               setFavoritesOnly(false)
               setGlobalOnly(false)
@@ -296,6 +318,7 @@ function TVPlatformContent() {
           <button
             type="button"
             className={globalOnly ? 'is-active' : ''}
+            aria-pressed={globalOnly}
             onClick={toggleGlobalOnly}
           >
             <Globe2 size={14} aria-hidden="true" />
@@ -304,25 +327,30 @@ function TVPlatformContent() {
           <button
             type="button"
             className={favoritesOnly ? 'is-active' : ''}
+            aria-pressed={favoritesOnly}
             onClick={toggleFavoritesOnly}
           >
             <Star size={14} fill={favoritesOnly ? 'currentColor' : 'none'} aria-hidden="true" />
             Favoritos
           </button>
-          {categories.data.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              className={!favoritesOnly && !globalOnly && channels.filters.categoryId === category.id ? 'is-active' : ''}
-              onClick={() => {
-                setFavoritesOnly(false)
-                setGlobalOnly(false)
-                channels.setCategory(channels.filters.categoryId === category.id ? '' : category.id)
-              }}
-            >
-              {category.name}
-            </button>
-          ))}
+          {categories.data.map((category) => {
+            const active = !favoritesOnly && !globalOnly && channels.filters.categoryId === category.id
+            return (
+              <button
+                key={category.id}
+                type="button"
+                className={active ? 'is-active' : ''}
+                aria-pressed={active}
+                onClick={() => {
+                  setFavoritesOnly(false)
+                  setGlobalOnly(false)
+                  channels.setCategory(active ? '' : category.id)
+                }}
+              >
+                {category.name}
+              </button>
+            )
+          })}
         </div>
         {favoriteFeedback && (
           <small className="block text-sm font-semibold text-[var(--text-secondary)]" role="status" aria-live="polite">
@@ -332,7 +360,7 @@ function TVPlatformContent() {
       </section>
 
       <TVSection
-        title={globalOnly ? 'Canais globais' : favoritesOnly ? 'Meus favoritos' : 'Canais'}
+        title={sectionTitle}
         action={<Badge>{visibleChannels.length} EXIBIDOS</Badge>}
       >
         {channels.loading || categories.loading ? (
