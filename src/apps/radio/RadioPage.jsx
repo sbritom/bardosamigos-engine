@@ -7,6 +7,7 @@ import {
   Loader2,
   Mic2,
   Music2,
+  Sparkles,
   Newspaper,
   Pause,
   Play,
@@ -67,6 +68,31 @@ const RADIO_SCHEDULE = [
   { day: "Domingo", locutor: "Locutor a definir", time: "Horário a definir" },
 ];
 
+
+const RADIO_PROGRAMS = [
+  {
+    id: "programa-1",
+    eyebrow: "PROGRAMA 01",
+    title: "Nome a definir",
+    description: "Descrição do programa será publicada aqui.",
+    schedule: "Dias e horários a definir",
+  },
+  {
+    id: "programa-2",
+    eyebrow: "PROGRAMA 02",
+    title: "Nome a definir",
+    description: "Descrição do programa será publicada aqui.",
+    schedule: "Dias e horários a definir",
+  },
+  {
+    id: "programa-3",
+    eyebrow: "PROGRAMA 03",
+    title: "Nome a definir",
+    description: "Descrição do programa será publicada aqui.",
+    schedule: "Dias e horários a definir",
+  },
+];
+
 function getListenerLabel(count) {
   const value = Number(count) || 0;
   return `${value} ${value === 1 ? "ouvinte" : "ouvintes"} agora`;
@@ -90,6 +116,7 @@ export default function RadioPage() {
   const [requestFeedback, setRequestFeedback] = useState("");
   const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
   const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [activeProgramIndex, setActiveProgramIndex] = useState(0);
   const [requestForm, setRequestForm] = useState({
     requesterName: "",
     songAndArtist: "",
@@ -100,6 +127,7 @@ export default function RadioPage() {
   const coverUrl = typeof metadata.cover === "string" ? metadata.cover.trim() : "";
   const hasCover = /^https?:\/\//i.test(coverUrl) && failedCover !== coverUrl;
   const isUnavailable = Boolean(metadataError || playerError);
+  const activeProgram = RADIO_PROGRAMS[activeProgramIndex];
 
   const refreshMetadata = useCallback(async (signal) => {
     try {
@@ -141,6 +169,15 @@ export default function RadioPage() {
 
   useEffect(() => () => {
     window.clearTimeout(requestCloseTimerRef.current);
+  }, []);
+
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveProgramIndex((current) => (current + 1) % RADIO_PROGRAMS.length);
+    }, 6000);
+
+    return () => window.clearInterval(timer);
   }, []);
 
   const closeRequestFlow = useCallback(() => {
@@ -430,6 +467,35 @@ export default function RadioPage() {
             </article>
           );
         })}
+
+        <article className="imortal-radio-programs-card" aria-labelledby="radio-programs-title">
+          <div className="imortal-radio-programs-card__top">
+            <div className="imortal-radio-info-card__icon">
+              <Sparkles size={21} />
+            </div>
+            <span>PROGRAMAÇÃO</span>
+          </div>
+
+          <div key={activeProgram.id} className="imortal-radio-programs-card__slide">
+            <small>{activeProgram.eyebrow}</small>
+            <h2 id="radio-programs-title">{activeProgram.title}</h2>
+            <p>{activeProgram.description}</p>
+            <strong>{activeProgram.schedule}</strong>
+          </div>
+
+          <div className="imortal-radio-programs-card__indicators" aria-label="Selecionar programa">
+            {RADIO_PROGRAMS.map((program, index) => (
+              <button
+                key={program.id}
+                type="button"
+                className={index === activeProgramIndex ? "is-active" : ""}
+                aria-label={`Mostrar programa ${index + 1}`}
+                aria-current={index === activeProgramIndex ? "true" : undefined}
+                onClick={() => setActiveProgramIndex(index)}
+              />
+            ))}
+          </div>
+        </article>
       </section>
 
       {requestModalOpen && (
