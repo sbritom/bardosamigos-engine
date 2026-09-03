@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Headphones,
   ListMusic,
@@ -102,6 +104,7 @@ export default function RadioPage() {
   const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
   const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [activeProgramIndex, setActiveProgramIndex] = useState(0);
+  const [programCarouselPaused, setProgramCarouselPaused] = useState(false);
   const [radioPrograms, setRadioPrograms] = useState([]);
   const [radioSchedule, setRadioSchedule] = useState(FALLBACK_SCHEDULE);
   const [radioRanking, setRadioRanking] = useState([]);
@@ -222,14 +225,14 @@ export default function RadioPage() {
   }, []);
 
   useEffect(() => {
-    if (radioPrograms.length < 2) return undefined;
+    if (radioPrograms.length < 2 || programCarouselPaused) return undefined;
 
     const timer = window.setInterval(() => {
       setActiveProgramIndex((current) => (current + 1) % radioPrograms.length);
     }, 6000);
 
     return () => window.clearInterval(timer);
-  }, [radioPrograms.length]);
+  }, [programCarouselPaused, radioPrograms.length]);
 
   useEffect(() => {
     if (activeProgramIndex < radioPrograms.length) return;
@@ -285,6 +288,19 @@ export default function RadioPage() {
   const handleVolume = useCallback((event) => {
     setVolume(Number(event.target.value));
   }, []);
+
+
+  const showPreviousProgram = useCallback(() => {
+    if (!radioPrograms.length) return;
+    setActiveProgramIndex((current) => (
+      current - 1 < 0 ? radioPrograms.length - 1 : current - 1
+    ));
+  }, [radioPrograms.length]);
+
+  const showNextProgram = useCallback(() => {
+    if (!radioPrograms.length) return;
+    setActiveProgramIndex((current) => (current + 1) % radioPrograms.length);
+  }, [radioPrograms.length]);
 
   const handleRequestChange = useCallback((event) => {
     const { name, value } = event.target;
@@ -577,12 +593,31 @@ export default function RadioPage() {
           className={`imortal-radio-programs-card ${activeProgram?.imageUrl ? "has-image" : ""}`}
           aria-labelledby="radio-programs-title"
           style={activeProgram?.imageUrl ? { "--imortal-radio-program-image": `url("${activeProgram.imageUrl}")` } : undefined}
+          onMouseEnter={() => setProgramCarouselPaused(true)}
+          onMouseLeave={() => setProgramCarouselPaused(false)}
+          onFocusCapture={() => setProgramCarouselPaused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setProgramCarouselPaused(false);
+            }
+          }}
         >
           <div className="imortal-radio-programs-card__top">
             <div className="imortal-radio-info-card__icon">
               <Sparkles size={21} />
             </div>
             <span>PROGRAMAS DA RÁDIO</span>
+
+            {radioPrograms.length > 1 ? (
+              <div className="imortal-radio-programs-card__arrows">
+                <button type="button" aria-label="Programa anterior" onClick={showPreviousProgram}>
+                  <ChevronLeft size={16} />
+                </button>
+                <button type="button" aria-label="Próximo programa" onClick={showNextProgram}>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            ) : null}
           </div>
 
           {activeProgram ? (
@@ -591,23 +626,37 @@ export default function RadioPage() {
                 <small>{activeProgram.locutorName || "IMORTAL0800"}</small>
                 <h2 id="radio-programs-title">{activeProgram.title}</h2>
                 <p>{activeProgram.description || "Programa da Rádio IMORTAL0800."}</p>
-                <strong>
-                  {[activeProgram.daysLabel, activeProgram.timeLabel].filter(Boolean).join(" • ") || "Dias e horários a definir"}
-                </strong>
+                <div className="imortal-radio-programs-card__meta">
+                  {activeProgram.daysLabel ? (
+                    <span>
+                      <CalendarDays size={13} />
+                      {activeProgram.daysLabel}
+                    </span>
+                  ) : null}
+                  {activeProgram.timeLabel ? (
+                    <span>
+                      <Clock3 size={13} />
+                      {activeProgram.timeLabel}
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
               {radioPrograms.length > 1 ? (
-                <div className="imortal-radio-programs-card__indicators" aria-label="Selecionar programa">
-                  {radioPrograms.map((program, index) => (
-                    <button
-                      key={program.id}
-                      type="button"
-                      className={index === activeProgramIndex ? "is-active" : ""}
-                      aria-label={`Mostrar programa ${index + 1}`}
-                      aria-current={index === activeProgramIndex ? "true" : undefined}
-                      onClick={() => setActiveProgramIndex(index)}
-                    />
-                  ))}
+                <div className="imortal-radio-programs-card__footer">
+                  <div className="imortal-radio-programs-card__indicators" aria-label="Selecionar programa">
+                    {radioPrograms.map((program, index) => (
+                      <button
+                        key={program.id}
+                        type="button"
+                        className={index === activeProgramIndex ? "is-active" : ""}
+                        aria-label={`Mostrar programa ${index + 1}`}
+                        aria-current={index === activeProgramIndex ? "true" : undefined}
+                        onClick={() => setActiveProgramIndex(index)}
+                      />
+                    ))}
+                  </div>
+                  <small>{activeProgramIndex + 1} / {radioPrograms.length}</small>
                 </div>
               ) : null}
             </>
