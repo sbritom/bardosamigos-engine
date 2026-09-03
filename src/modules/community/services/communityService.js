@@ -72,6 +72,7 @@ async function loadOverview() {
 function createEmptyEvoxData(overrides = {}) {
   return {
     configured: false,
+    source: 'none',
     xatGroup: 'imortal0800',
     ranking: [],
     top10: [],
@@ -279,11 +280,41 @@ export async function loadCommunityPageData() {
   const overview = overviewResult.status === 'fulfilled' ? overviewResult.value : {}
   const events = eventsResult.status === 'fulfilled' ? (eventsResult.value?.data || []) : []
   const wall = wallResult.status === 'fulfilled' ? wallResult.value : []
-  const evox = evoxResult.status === 'fulfilled'
-    ? evoxResult.value
+
+  const liveEvox = evoxResult.status === 'fulfilled'
+    ? createEmptyEvoxData({ ...evoxResult.value, source: 'evox' })
     : createEmptyEvoxData({
+        source: 'none',
         error: evoxResult.reason?.message || 'Integração EVOX indisponível no momento.',
       })
+
+  const manualSource = overview.evoxManual || {}
+  const manualEvox = createEmptyEvoxData({
+    source: 'manual',
+    xatGroup: manualSource.xatGroup || 'imortal0800',
+    onlineNow: manualSource.onlineNow ?? null,
+    topActive: Array.isArray(manualSource.topActive) ? manualSource.topActive : [],
+    ranking: Array.isArray(manualSource.ranking) ? manualSource.ranking : [],
+    top10: Array.isArray(manualSource.ranking) ? manualSource.ranking.slice(0, 10) : [],
+    updatedAt: manualSource.updatedAt || null,
+  })
+
+  const hasManualData = manualEvox.onlineNow !== null
+    || manualEvox.topActive.length > 0
+    || manualEvox.ranking.length > 0
+
+  const evox = createEmptyEvoxData({
+    configured: liveEvox.configured,
+    source: liveEvox.configured ? (hasManualData ? 'evox+manual' : 'evox') : (hasManualData ? 'manual' : 'none'),
+    xatGroup: liveEvox.xatGroup || manualEvox.xatGroup,
+    ranking: liveEvox.ranking.length ? liveEvox.ranking : manualEvox.ranking,
+    top10: liveEvox.top10.length ? liveEvox.top10 : manualEvox.top10,
+    onlineNow: liveEvox.onlineNow ?? manualEvox.onlineNow,
+    topActive: liveEvox.topActive.length ? liveEvox.topActive : manualEvox.topActive,
+    analyticsAvailable: liveEvox.analyticsAvailable,
+    updatedAt: liveEvox.updatedAt || manualEvox.updatedAt,
+    error: hasManualData ? '' : liveEvox.error,
+  })
 
   const errors = []
   if (overviewResult.status === 'rejected') errors.push(overviewResult.reason)
