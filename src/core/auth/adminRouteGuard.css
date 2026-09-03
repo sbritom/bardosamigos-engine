@@ -1,0 +1,190 @@
+.admin-access-shell--centered {
+  width: 100%;
+  max-width: none !important;
+  min-height: min(72dvh, 720px);
+  margin: 0 auto;
+  padding: clamp(28px, 7vh, 72px) 16px !important;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+}
+
+.admin-access-card--centered {
+  width: min(100%, 390px);
+  margin: 0 auto;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(42, 143, 255, 0.16) !important;
+  border-radius: 22px !important;
+  color: #f5f9ff;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(11, 120, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(8, 15, 25, 0.985), rgba(4, 8, 14, 0.995)) !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42) !important;
+}
+
+.admin-access-card__header {
+  padding: 20px 20px 17px;
+  border-bottom: 1px solid rgba(42, 143, 255, 0.10);
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.admin-access-card__icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(42, 143, 255, 0.14);
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: #63c9ff;
+  background: rgba(11, 120, 255, 0.08);
+}
+
+.admin-access-card__header > div {
+  min-width: 0;
+}
+
+.admin-access-card__eyebrow {
+  color: #5fc7ff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-access-card__title {
+  margin: 5px 0 0;
+  color: #f5f9ff;
+  font-size: 1.42rem;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+.admin-access-card__subtitle {
+  margin: 7px 0 0;
+  color: #768ba9;
+  font-size: 0.71rem;
+  line-height: 1.5;
+}
+
+.admin-access-form {
+  padding: 18px 20px 20px;
+  display: grid;
+  gap: 13px;
+}
+
+.admin-access-field {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-access-field > span {
+  color: #a9bdd7;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.admin-access-field > div {
+  min-height: 46px;
+  padding: 0 11px;
+  border: 1px solid rgba(42, 143, 255, 0.13);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #5f7594;
+  background: rgba(4, 11, 20, 0.72);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.admin-access-field > div:focus-within {
+  border-color: rgba(21, 201, 255, 0.42);
+  box-shadow: 0 0 0 3px rgba(21, 201, 255, 0.05);
+  background: rgba(5, 14, 25, 0.9);
+}
+
+.admin-access-field input {
+  min-width: 0;
+  height: 44px;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: #f5f9ff;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.admin-access-field input::placeholder {
+  color: #526884;
+  font-weight: 600;
+}
+
+.admin-access-feedback {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 83, 103, 0.18);
+  border-radius: 11px;
+  color: #ffabb5;
+  background: rgba(255, 83, 103, 0.06);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.admin-access-primary {
+  min-height: 44px;
+  border: 1px solid rgba(61, 168, 255, 0.28);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  background: linear-gradient(135deg, #0b78ff, #0759cb);
+  box-shadow: 0 10px 24px rgba(11, 120, 255, 0.16);
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.admin-access-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.admin-access-primary:disabled {
+  cursor: wait;
+  opacity: .58;
+}
+
+.admin-access-card--centered :where(button, input):focus-visible {
+  outline: 2px solid #15c9ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .admin-access-shell--centered {
+    min-height: 64dvh;
+    padding: 18px 10px !important;
+  }
+
+  .admin-access-card--centered {
+    width: min(100%, 380px);
+    border-radius: 18px !important;
+  }
+
+  .admin-access-card__header {
+    padding: 17px 17px 15px;
+  }
+
+  .admin-access-form {
+    padding: 16px 17px 17px;
+    gap: 12px;
+  }
+}
