@@ -1,10 +1,11 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
-import { applyApiCors } from './_lib/security.js'
+import { applyApiCors, rejectOversizedBody } from './_lib/security.js'
 
 const PROFILE_FIELDS = 'id, display_name, username, avatar_url, bio, role, status, preferences, created_at, updated_at'
 const USERNAME_RE = /^[a-z0-9_]{3,20}$/
 const MIN_PASSWORD_LENGTH = 6
+const MANAGEABLE_ROLES = new Set(['user', 'locutor'])
 
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL
@@ -103,6 +104,114 @@ async function requireUser(request, supabase) {
   }
 
   return { ok: true, user: data.user }
+}
+
+async function requirePortalAdmin(request, supabase) {
+  const authenticated = await requireUser(request, supabase)
+  if (!authenticated.ok) return authenticated
+
+  const user = authenticated.user
+  const isAdmin = user?.app_metadata?.role === 'admin' || user?.app_metadata?.is_admin === true
+
+  if (!isAdmin) {
+    return { ok: false, status: 403, error: 'Apenas administradores podem gerenciar cargos.' }
+  }
+
+  return { ok: true, user }
+}
+
+async function listPortalUsers(supabase) {
+  const [{ data: authData, error: authError }, { data: profiles, error: profileError }] = await Promise.all([
+    supabase.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    supabase
+      .from('profiles')
+      .select('id,username,display_name,avatar_url,role,status,created_at')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
+  ])
+
+  if (authError) throw authError
+  if (profileError) throw profileError
+
+  const authById = new Map((authData?.users || []).map((user) => [user.id, user]))
+
+  return (profiles || []).map((profile) => {
+    const authUser = authById.get(profile.id)
+    const appRole = String(authUser?.app_metadata?.role || '').trim().toLowerCase()
+    const isAdmin = appRole === 'admin' || authUser?.app_metadata?.is_admin === true
+    const role = isAdmin ? 'admin' : appRole === 'locutor' ? 'locutor' : 'user'
+
+    return {
+      id: profile.id,
+      username: profile.username || '',
+      displayName: profile.display_name || profile.username || 'Usuário',
+      avatarUrl: profile.avatar_url || '',
+      role,
+      status: profile.status || 'active',
+      createdAt: profile.created_at || null,
+      lastSignInAt: authUser?.last_sign_in_at || null,
+      manageable: !isAdmin,
+    }
+  })
+}
+
+async function updatePortalUserRole(request, supabase, adminUser) {
+  const userId = String(request.body?.userId || '').trim().slice(0, 80)
+  const nextRole = String(request.body?.role || '').trim().toLowerCase().slice(0, 30)
+
+  if (!userId || !MANAGEABLE_ROLES.has(nextRole)) {
+    return { ok: false, status: 400, error: 'Usuário ou cargo inválido.' }
+  }
+
+  if (userId === adminUser.id) {
+    return { ok: false, status: 403, error: 'A conta administradora atual não pode ter o cargo alterado por esta tela.' }
+  }
+
+  const { data: targetData, error: targetError } = await supabase.auth.admin.getUserById(userId)
+  const target = targetData?.user
+
+  if (targetError || !target) {
+    return { ok: false, status: 404, error: 'Usuário não encontrado.' }
+  }
+
+  const targetIsAdmin = target.app_metadata?.role === 'admin' || target.app_metadata?.is_admin === true
+  if (targetIsAdmin) {
+    return { ok: false, status: 403, error: 'Contas administradoras não podem ser alteradas por esta tela.' }
+  }
+
+  const previousMetadata = target.app_metadata || {}
+  const nextAppMetadata = {
+    ...previousMetadata,
+    role: nextRole,
+  }
+  delete nextAppMetadata.is_admin
+
+  const { error: authUpdateError } = await supabase.auth.admin.updateUserById(userId, {
+    app_metadata: nextAppMetadata,
+  })
+  if (authUpdateError) throw authUpdateError
+
+  const { error: profileUpdateError } = await supabase
+    .from('profiles')
+    .update({
+      role: nextRole,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+
+  if (profileUpdateError) {
+    await supabase.auth.admin.updateUserById(userId, { app_metadata: previousMetadata }).catch(() => {})
+    throw profileUpdateError
+  }
+
+  return {
+    ok: true,
+    data: {
+      id: userId,
+      role: nextRole,
+      requiresRelogin: true,
+    },
+  }
 }
 
 async function ensureProfile(supabase, user) {
@@ -288,7 +397,7 @@ async function recoverUsernameAccount(supabase, usernameValue, recoveryCodeValue
 
 export default async function handler(request, response) {
   if (!applyApiCors(request, response, {
-    methods: 'GET, POST, OPTIONS',
+    methods: 'GET, POST, PATCH, OPTIONS',
     headers: 'Authorization, Content-Type',
   })) {
     response.status(403).json({ ok: false, error: 'Origin not allowed.' })
@@ -299,6 +408,10 @@ export default async function handler(request, response) {
 
   if (request.method === 'OPTIONS') {
     response.status(204).end()
+    return
+  }
+
+  if (request.method === 'PATCH' && rejectOversizedBody(request, response, 8 * 1024)) {
     return
   }
 
@@ -326,6 +439,31 @@ export default async function handler(request, response) {
       }
 
       response.status(result.status || (result.ok ? 200 : 400)).json(result)
+      return
+    }
+
+    const section = String(request.query?.section || '').trim()
+
+    if (section === 'admin-users') {
+      const admin = await requirePortalAdmin(request, supabase)
+      if (!admin.ok) {
+        response.status(admin.status).json({ ok: false, error: admin.error })
+        return
+      }
+
+      if (request.method === 'GET') {
+        const users = await listPortalUsers(supabase)
+        response.status(200).json({ ok: true, data: users })
+        return
+      }
+
+      if (request.method === 'PATCH') {
+        const result = await updatePortalUserRole(request, supabase, admin.user)
+        response.status(result.status || (result.ok ? 200 : 400)).json(result)
+        return
+      }
+
+      response.status(405).json({ ok: false, error: 'Method not allowed' })
       return
     }
 
