@@ -34,6 +34,7 @@ function TVPlatformContent() {
   const { user, isAuthenticated, openAuth } = useAuth()
   const [activeChannel, setActiveChannel] = useState(null)
   const [favoriteIds, setFavoriteIds] = useState(() => new Set())
+  const [favoritePendingIds, setFavoritePendingIds] = useState(() => new Set())
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [globalOnly, setGlobalOnly] = useState(false)
   const [favoriteFeedback, setFavoriteFeedback] = useState('')
@@ -72,6 +73,8 @@ function TVPlatformContent() {
   useEffect(() => {
     let active = true
 
+    setFavoritePendingIds(new Set())
+
     if (!user?.id) {
       setFavoriteIds(new Set())
       setFavoritesOnly(false)
@@ -100,9 +103,17 @@ function TVPlatformContent() {
     }
   }, [user?.id])
 
+  useEffect(() => {
+    if (!favoriteFeedback) return undefined
+    const timer = window.setTimeout(() => setFavoriteFeedback(''), 4200)
+    return () => window.clearTimeout(timer)
+  }, [favoriteFeedback])
+
+  const allChannels = channels.allData || channels.data
+
   const availableChannels = useMemo(
-    () => channels.data.filter((channel) => isTVChannelAvailableInCountry(channel, viewerCountry)),
-    [channels.data, viewerCountry],
+    () => allChannels.filter((channel) => isTVChannelAvailableInCountry(channel, viewerCountry)),
+    [allChannels, viewerCountry],
   )
 
   const visibleChannels = useMemo(() => {
@@ -122,13 +133,13 @@ function TVPlatformContent() {
     [categories.data, channels.filters.categoryId],
   )
 
-  const channelCount = channels.count || channels.data.length
+  const channelCount = channels.count || allChannels.length
   const fallbackChannel = useMemo(() => {
     const availableFeatured = featured.data.find((item) => (
       item?.channel && isTVChannelAvailableInCountry(item.channel, viewerCountry)
     ))?.channel
-    return availableFeatured || availableChannels[0] || channels.data[0] || null
-  }, [availableChannels, channels.data, featured.data, viewerCountry])
+    return availableFeatured || availableChannels[0] || allChannels[0] || null
+  }, [allChannels, availableChannels, featured.data, viewerCountry])
 
   const selectedChannel = activeChannel || fallbackChannel
   const selectedAvailable = selectedChannel
@@ -139,11 +150,13 @@ function TVPlatformContent() {
   const catalogLoading = channels.loading || categories.loading || featured.loading
   const outsideBrazil = Boolean(geoResolved && viewerCountry && viewerCountry !== 'BR')
   const viewerCountryName = useMemo(() => countryDisplayName(viewerCountry), [viewerCountry])
-  const sectionTitle = globalOnly
+  const searchTerm = channels.filters.search.trim()
+  const sectionTitleBase = globalOnly
     ? 'Canais globais'
     : favoritesOnly
       ? 'Meus favoritos'
       : selectedCategory?.name || 'Todos os canais'
+  const sectionTitle = searchTerm ? `${sectionTitleBase} · “${searchTerm}”` : sectionTitleBase
 
   const emptyCopy = useMemo(() => {
     if (globalOnly) {
@@ -156,11 +169,13 @@ function TVPlatformContent() {
     if (favoritesOnly) {
       return {
         icon: <Star size={32} aria-hidden="true" />,
-        title: 'Nenhum canal favorito',
-        description: 'Toque na estrela de um canal para encontrá-lo aqui depois.',
+        title: searchTerm ? 'Nenhum favorito encontrado' : 'Nenhum canal favorito',
+        description: searchTerm
+          ? 'Nenhum dos seus favoritos corresponde a esta pesquisa.'
+          : 'Toque na estrela de um canal para encontrá-lo aqui depois.',
       }
     }
-    if (channels.filters.search.trim()) {
+    if (searchTerm) {
       return {
         icon: <SearchX size={32} aria-hidden="true" />,
         title: 'Nenhum canal encontrado',
@@ -179,7 +194,7 @@ function TVPlatformContent() {
       title: 'Catálogo em preparação',
       description: 'Nenhum canal foi publicado ainda.',
     }
-  }, [channels.filters.search, favoritesOnly, globalOnly, selectedCategory])
+  }, [favoritesOnly, globalOnly, searchTerm, selectedCategory])
 
   const selectChannel = useCallback((channel) => {
     setActiveChannel(channel)
@@ -200,27 +215,45 @@ function TVPlatformContent() {
       return
     }
 
-    const isFavorite = favoriteIds.has(channel.id)
+    if (favoritePendingIds.has(channel.id)) return
+
+    const wasFavorite = favoriteIds.has(channel.id)
     setFavoriteFeedback('')
+    setFavoritePendingIds((current) => {
+      const next = new Set(current)
+      next.add(channel.id)
+      return next
+    })
+    setFavoriteIds((current) => {
+      const next = new Set(current)
+      if (wasFavorite) next.delete(channel.id)
+      else next.add(channel.id)
+      return next
+    })
 
     try {
-      const result = isFavorite
+      const result = wasFavorite
         ? await TVFavoriteService.remove(user.id, channel.id)
         : await TVFavoriteService.add(user.id, channel.id)
 
       if (result?.error) throw result.error
-
+      setFavoriteFeedback(wasFavorite ? 'Canal removido dos favoritos.' : 'Canal salvo nos favoritos.')
+    } catch (error) {
       setFavoriteIds((current) => {
         const next = new Set(current)
-        if (isFavorite) next.delete(channel.id)
-        else next.add(channel.id)
+        if (wasFavorite) next.add(channel.id)
+        else next.delete(channel.id)
         return next
       })
-      setFavoriteFeedback(isFavorite ? 'Canal removido dos favoritos.' : 'Canal salvo nos favoritos.')
-    } catch (error) {
       setFavoriteFeedback(error?.message || 'Não foi possível atualizar seus favoritos.')
+    } finally {
+      setFavoritePendingIds((current) => {
+        const next = new Set(current)
+        next.delete(channel.id)
+        return next
+      })
     }
-  }, [favoriteIds, isAuthenticated, openAuth, user?.id])
+  }, [favoriteIds, favoritePendingIds, isAuthenticated, openAuth, user?.id])
 
   const toggleFavoritesOnly = useCallback(() => {
     if (!isAuthenticated) {
@@ -331,7 +364,7 @@ function TVPlatformContent() {
             onClick={toggleFavoritesOnly}
           >
             <Star size={14} fill={favoritesOnly ? 'currentColor' : 'none'} aria-hidden="true" />
-            Favoritos
+            Favoritos{isAuthenticated && favoriteIds.size ? ` (${favoriteIds.size})` : ''}
           </button>
           {categories.data.map((category) => {
             const active = !favoritesOnly && !globalOnly && channels.filters.categoryId === category.id
@@ -373,6 +406,7 @@ function TVPlatformContent() {
                 channel={channel}
                 active={selectedChannel?.id === channel.id}
                 favorite={favoriteIds.has(channel.id)}
+                favoriteBusy={favoritePendingIds.has(channel.id)}
                 unavailable={Boolean(viewerCountry && !isTVChannelAvailableInCountry(channel, viewerCountry))}
                 onSelect={selectChannel}
                 onToggleFavorite={toggleFavorite}

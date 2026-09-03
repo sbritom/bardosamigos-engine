@@ -12,17 +12,34 @@ import { getLocalTVPlatformCatalog } from '../data/tvFallbackCatalog'
 
 const EMPTY_COLLECTION = { data: [], count: 0, error: null }
 
-function filterFallbackChannels(channels, filters) {
-  const search = String(filters.search || '').trim().toLowerCase()
+function normalizeSearchText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function filterCatalogChannels(channels, filters) {
+  const search = normalizeSearchText(filters.search)
+
   return channels.filter((channel) => {
     const matchesCategory = !filters.categoryId
       || channel.categoryId === filters.categoryId
       || channel.category?.id === filters.categoryId
-    const matchesSearch = !search
-      || channel.name.toLowerCase().includes(search)
-      || channel.category?.name?.toLowerCase().includes(search)
-      || channel.slug?.toLowerCase().includes(search)
-    return matchesCategory && matchesSearch
+
+    if (!matchesCategory) return false
+    if (!search) return true
+
+    const searchable = normalizeSearchText([
+      channel.name,
+      channel.slug,
+      channel.description,
+      channel.category?.name,
+      channel.language,
+    ].filter(Boolean).join(' '))
+
+    return searchable.includes(search)
   })
 }
 
@@ -39,33 +56,37 @@ export function TVProvider({ children, userId = null }) {
   const refresh = useCallback(async () => {
     setLoading(true)
     setError(null)
+
     const requests = [
       TVCategoryService.list(),
-      TVChannelService.list(filters),
+      TVChannelService.list(),
       TVFeaturedService.list(),
       userId ? TVFavoriteService.list(userId) : Promise.resolve(EMPTY_COLLECTION),
       userId ? TVRecentService.list(userId) : Promise.resolve(EMPTY_COLLECTION),
     ]
+
     const [categoryResult, channelResult, featuredResult, favoriteResult, recentResult] =
       await Promise.all(requests)
+
     const fallback = getLocalTVPlatformCatalog()
-    const fallbackChannels = filterFallbackChannels(fallback.channels, filters)
-    const hasChannelFilters = Boolean(filters.categoryId || String(filters.search || '').trim())
-    const shouldFallbackChannels = Boolean(channelResult.error)
-      || (!hasChannelFilters && !channelResult.data?.length)
-    const shouldFallbackCategories = categoryResult.error || !categoryResult.data?.length
+    const shouldFallbackChannels = Boolean(channelResult.error) || !channelResult.data?.length
+    const shouldFallbackCategories = shouldFallbackChannels
+      || Boolean(categoryResult.error)
+      || !categoryResult.data?.length
+
     const finalCategories = shouldFallbackCategories
       ? {
         data: fallback.categories,
         count: fallback.categories.length,
-        error: categoryResult.error || null,
+        error: categoryResult.error || channelResult.error || null,
         source: 'local-fallback',
       }
       : categoryResult
+
     const finalChannels = shouldFallbackChannels
       ? {
-        data: fallbackChannels,
-        count: fallbackChannels.length,
+        data: fallback.channels,
+        count: fallback.channels.length,
         error: channelResult.error || null,
         source: 'local-fallback',
       }
@@ -84,15 +105,27 @@ export function TVProvider({ children, userId = null }) {
       || recentResult.error,
     ))
     setLoading(false)
-  }, [filters, userId])
+  }, [userId])
 
   useEffect(() => {
     refresh()
   }, [refresh])
 
+  const filteredChannelData = useMemo(
+    () => filterCatalogChannels(channels.data || [], filters),
+    [channels.data, filters],
+  )
+
+  const filteredChannels = useMemo(() => ({
+    ...channels,
+    data: filteredChannelData,
+    filteredCount: filteredChannelData.length,
+    allData: channels.data || [],
+  }), [channels, filteredChannelData])
+
   const value = useMemo(() => ({
     categories,
-    channels,
+    channels: filteredChannels,
     featured,
     favorites,
     recent,
@@ -101,7 +134,7 @@ export function TVProvider({ children, userId = null }) {
     error,
     setFilters,
     refresh,
-  }), [categories, channels, featured, favorites, recent, filters, loading, error, refresh])
+  }), [categories, filteredChannels, featured, favorites, recent, filters, loading, error, refresh])
 
   return <TVContext.Provider value={value}>{children}</TVContext.Provider>
 }

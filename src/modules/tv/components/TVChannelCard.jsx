@@ -1,10 +1,11 @@
-import { Globe2, Play, Star } from 'lucide-react'
+import { Globe2, LoaderCircle, Play, Star } from 'lucide-react'
 import { Card } from '../../../design-system'
 
 export function TVChannelCard({
   channel,
   active = false,
   favorite = false,
+  favoriteBusy = false,
   unavailable = false,
   onSelect,
   onToggleFavorite,
@@ -43,12 +44,18 @@ export function TVChannelCard({
           <button
             type="button"
             onClick={() => onToggleFavorite(channel)}
+            disabled={favoriteBusy}
             aria-label={favorite ? `Remover ${channel.name} dos favoritos` : `Favoritar ${channel.name}`}
             aria-pressed={favorite}
+            aria-busy={favoriteBusy}
             title={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-            className={`ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${favorite ? 'border-[var(--primary)] bg-[var(--primary)] text-white' : 'border-white/10 bg-white/5 text-[var(--text-secondary)] hover:bg-white/10 hover:text-[var(--text)]'}`}
+            className={`ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition disabled:cursor-wait disabled:opacity-70 ${favorite ? 'border-[var(--primary)] bg-[var(--primary)] text-white' : 'border-white/10 bg-white/5 text-[var(--text-secondary)] hover:bg-white/10 hover:text-[var(--text)]'}`}
           >
-            <Star size={17} fill={favorite ? 'currentColor' : 'none'} />
+            {favoriteBusy ? (
+              <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Star size={17} fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />
+            )}
           </button>
         )}
       </div>
