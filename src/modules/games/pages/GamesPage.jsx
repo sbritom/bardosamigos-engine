@@ -302,6 +302,53 @@ function EmptyPanel({ title, description }) {
   )
 }
 
+function buildFeaturedContent({ liveMatch, freeGame, release, news }) {
+  if (liveMatch) {
+    const opponents = Array.isArray(liveMatch.opponents) ? liveMatch.opponents : []
+    const versus = opponents.map((team) => team?.name).filter(Boolean).join(' x ')
+    const competition = [liveMatch.league, liveMatch.serie || liveMatch.tournament].filter(Boolean).join(' · ')
+
+    return {
+      id: `live-${liveMatch.id}`,
+      title: versus || liveMatch.name || 'Partida de Esports ao vivo',
+      description: competition || 'Competição acontecendo agora na central de Esports.',
+      source: liveMatch.videogame ? `${liveMatch.videogame} · AO VIVO` : 'ESPORTS · AO VIVO',
+      publishedAt: '',
+      image: '',
+      url: '',
+      kind: 'esports-live',
+    }
+  }
+
+  if (freeGame) {
+    return {
+      id: `free-${freeGame.id}`,
+      title: freeGame.title || 'Jogo grátis',
+      description: freeGame.description || 'Oferta gratuita disponível por tempo limitado.',
+      source: 'JOGO GRÁTIS',
+      publishedAt: '',
+      image: freeGame.image || freeGame.thumbnail || '',
+      url: freeGame.openGiveawayUrl || freeGame.gamerPowerUrl || '',
+      kind: 'free',
+    }
+  }
+
+  if (release) {
+    return {
+      id: `release-${release.id}`,
+      title: release.name || 'Próximo lançamento',
+      description: `Lançamento previsto para ${(release.platforms || []).slice(0, 3).join(', ') || 'plataformas a confirmar'}.`,
+      source: 'PRÓXIMO LANÇAMENTO',
+      publishedAt: release.released || '',
+      image: release.image || '',
+      url: release.url || '',
+      kind: 'releases',
+    }
+  }
+
+  return news || null
+}
+
 export default function GamesPage() {
   const [payload, setPayload] = useState({
     news: [],
@@ -372,15 +419,23 @@ export default function GamesPage() {
     [payload.esports],
   )
 
+  const homeEsportsMatches = useMemo(
+    () => [...payload.esports.running, ...payload.esports.upcoming].slice(0, 6),
+    [payload.esports],
+  )
+
   const championshipMatches = useMemo(() => {
     const seen = new Set()
-    return esportsMatches.filter((match) => {
-      const key = [match.videogame, match.league, match.serie, match.tournament].join('|')
+    return homeEsportsMatches.filter((match) => {
+      const key = [match.videogame, match.league, match.serie, match.tournament]
+        .map(normalize)
+        .filter(Boolean)
+        .join('|')
       if (!key || seen.has(key)) return false
       seen.add(key)
       return true
     }).slice(0, 6)
-  }, [esportsMatches])
+  }, [homeEsportsMatches])
 
   const freeNews = useMemo(
     () => payload.news.filter((item) => item.kind === 'free').slice(0, 8),
@@ -454,7 +509,34 @@ export default function GamesPage() {
     [payload.esportsNews, term],
   )
 
-  const featured = payload.featured || radarItems[0] || null
+  const featured = useMemo(
+    () => buildFeaturedContent({
+      liveMatch: payload.esports.running[0],
+      freeGame: payload.freeGames[0],
+      release: payload.releases[0],
+      news: payload.featured || radarItems[0] || null,
+    }),
+    [payload.esports.running, payload.freeGames, payload.releases, payload.featured, radarItems],
+  )
+
+  const esportsQuickLabel = payload.esports.running.length
+    ? `${payload.esports.running.length} ao vivo agora`
+    : payload.esports.upcoming.length
+      ? `${payload.esports.upcoming.length} partidas agendadas`
+      : 'Nenhuma partida atual'
+
+  const releasesQuickLabel = payload.releases.length
+    ? `${payload.releases.length} próximos jogos`
+    : 'Agenda sem lançamentos'
+
+  const championshipsQuickLabel = championshipMatches.length || championshipNews.length
+    ? `${championshipMatches.length || championshipNews.length} em destaque`
+    : 'Nenhum destaque agora'
+
+  const freeGamesQuickLabel = payload.freeGames.length
+    ? `${payload.freeGames.length} ofertas ativas`
+    : 'Nenhuma oferta ativa'
+
   const filteredMode = Boolean(searchLabel) || activeFilter !== 'all'
   const globalResultCount = filteredNews.length + filteredReleases.length + filteredFreeGames.length + filteredEsports.length
 
@@ -643,7 +725,12 @@ export default function GamesPage() {
               </div>
 
               {featured ? (
-                <button className="games-page__featured-card" type="button" onClick={() => openExternal(featured.url)}>
+                <button
+                  className="games-page__featured-card"
+                  type="button"
+                  onClick={() => openExternal(featured.url)}
+                  disabled={!featured.url}
+                >
                   <GameCover item={featured} className="games-page__featured-cover" />
                   <span className="games-page__featured-copy">
                     <span className="games-page__meta">
@@ -662,19 +749,19 @@ export default function GamesPage() {
             <aside className="games-page__quick">
               <div className="games-page__quick-item">
                 <Swords size={20} />
-                <div><strong>Esports</strong><span>{payload.esports.running.length} ao vivo agora</span></div>
+                <div><strong>Esports</strong><span>{esportsQuickLabel}</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Rocket size={20} />
-                <div><strong>Lançamentos</strong><span>{payload.releases.length} próximos jogos</span></div>
+                <div><strong>Lançamentos</strong><span>{releasesQuickLabel}</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Trophy size={20} />
-                <div><strong>Campeonatos</strong><span>{championshipMatches.length || championshipNews.length} em destaque</span></div>
+                <div><strong>Campeonatos</strong><span>{championshipsQuickLabel}</span></div>
               </div>
               <div className="games-page__quick-item">
                 <Gift size={20} />
-                <div><strong>Jogos grátis</strong><span>{payload.freeGames.length} ofertas ativas</span></div>
+                <div><strong>Jogos grátis</strong><span>{freeGamesQuickLabel}</span></div>
               </div>
             </aside>
           </section>
@@ -687,41 +774,16 @@ export default function GamesPage() {
               </div>
               <button type="button" onClick={() => setActiveFilter('esports')}>Ver Esports</button>
             </div>
-            {esportsMatches.length ? (
+            {homeEsportsMatches.length ? (
               <div className="games-page__esports-grid">
-                {esportsMatches.slice(0, 3).map((match) => <EsportsMatchCard key={match.id} match={match} />)}
+                {homeEsportsMatches.slice(0, 3).map((match) => <EsportsMatchCard key={match.id} match={match} />)}
               </div>
             ) : payload.esportsNews.length ? (
               <div className="games-page__grid">
                 {payload.esportsNews.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
               </div>
             ) : (
-              <EmptyPanel title="Sem novidades de Esports agora." description="As partidas aparecem quando a PandaScore estiver disponível; notícias continuam como fallback." />
-            )}
-          </section>
-
-          <section className="games-page__section">
-            <div className="games-page__section-title">
-              <div>
-                <span><Rocket size={15} /> Calendário</span>
-                <h2>Próximos lançamentos</h2>
-              </div>
-              <a className="games-page__attribution" href="https://rawg.io/" target="_blank" rel="noreferrer">
-                RAWG <ExternalLink size={12} />
-              </a>
-            </div>
-            {payload.releases.length ? (
-              <div className="games-page__source-grid">
-                {payload.releases.slice(0, 6).map((game) => <ReleaseCard key={game.id} game={game} />)}
-              </div>
-            ) : payload.releasesNews.length ? (
-              <div className="games-page__grid">
-                {payload.releasesNews.slice(0, 6).map((item) => <NewsCard key={item.id} item={item} />)}
-              </div>
-            ) : (
-              <div className="games-page__grid">
-                {radarItems.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
-              </div>
+              <EmptyPanel title="Sem partidas ou novidades de Esports agora." description="A home prioriza partidas ao vivo e próximas; resultados antigos ficam fora do destaque principal." />
             )}
           </section>
 
@@ -744,9 +806,30 @@ export default function GamesPage() {
                 {freeNews.slice(0, 6).map((item) => <NewsCard key={item.id} item={item} />)}
               </div>
             ) : (
-              <div className="games-page__grid">
-                {radarItems.slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+              <EmptyPanel title="Nenhum jogo grátis confirmado agora." description="Quando houver uma oferta ativa, ela aparece aqui automaticamente." />
+            )}
+          </section>
+
+          <section className="games-page__section">
+            <div className="games-page__section-title">
+              <div>
+                <span><Rocket size={15} /> Calendário</span>
+                <h2>Próximos lançamentos</h2>
               </div>
+              <a className="games-page__attribution" href="https://rawg.io/" target="_blank" rel="noreferrer">
+                RAWG <ExternalLink size={12} />
+              </a>
+            </div>
+            {payload.releases.length ? (
+              <div className="games-page__source-grid">
+                {payload.releases.slice(0, 6).map((game) => <ReleaseCard key={game.id} game={game} />)}
+              </div>
+            ) : payload.releasesNews.length ? (
+              <div className="games-page__grid">
+                {payload.releasesNews.slice(0, 6).map((item) => <NewsCard key={item.id} item={item} />)}
+              </div>
+            ) : (
+              <EmptyPanel title="Nenhum lançamento confirmado na agenda atual." description="A lista será preenchida automaticamente assim que a RAWG disponibilizar novos jogos." />
             )}
           </section>
 
@@ -762,10 +845,12 @@ export default function GamesPage() {
                 <div className="games-page__championship-list">
                   {championshipMatches.slice(0, 5).map((match) => <ChampionshipRow key={match.id} match={match} />)}
                 </div>
-              ) : (
+              ) : championshipNews.length ? (
                 <div className="games-page__list">
                   {championshipNews.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
                 </div>
+              ) : (
+                <EmptyPanel title="Nenhum campeonato em destaque agora." description="Competições ao vivo e próximas entram aqui automaticamente." />
               )}
             </div>
 
@@ -776,9 +861,13 @@ export default function GamesPage() {
                   <h2>Últimas notícias</h2>
                 </div>
               </div>
-              <div className="games-page__list">
-                {radarItems.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
-              </div>
+              {radarItems.length ? (
+                <div className="games-page__list">
+                  {radarItems.slice(0, 5).map((item) => <NewsCard key={item.id} item={item} compact />)}
+                </div>
+              ) : (
+                <EmptyPanel title="Nenhuma notícia disponível agora." description="O radar volta a ser preenchido na próxima sincronização de conteúdo." />
+              )}
             </div>
           </section>
 
