@@ -10,6 +10,8 @@ import "./radioAdmin.css";
 
 const RADIO_ADMIN_ROLES = [ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR];
 
+// Login da Rádio usa o shell administrativo centralizado.
+
 function RadioAdminContent() {
   const [activeSection, setActiveSection] = useState("requests");
   const [logoutBusy, setLogoutBusy] = useState(false);
