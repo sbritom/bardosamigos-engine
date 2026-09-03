@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarDays, ListMusic, LogOut, Mic2 } from "lucide-react";
+import { CalendarDays, ListMusic, LogOut, Mic2, RadioTower } from "lucide-react";
 
 import AdminRouteGuard from "../../../core/auth/AdminRouteGuard";
 import { ADMIN_ROLES } from "../../../core/auth/adminAuthService";
@@ -26,10 +26,16 @@ function RadioAdminContent() {
   return (
     <main className="radio-admin-page">
       <header className="radio-admin-header radio-admin-header--with-actions">
-        <div>
-          <span>IMORTAL0800</span>
-          <h1>PAINEL DA RÁDIO</h1>
-          <p>Pedidos, programas e grade de locutores em um só lugar.</p>
+        <div className="radio-admin-header__brand">
+          <span className="radio-admin-header__icon" aria-hidden="true">
+            <RadioTower size={22} />
+          </span>
+
+          <div>
+            <span>IMORTAL0800</span>
+            <h1>PAINEL DA RÁDIO</h1>
+            <p>Pedidos, programas e grade de locutores em um só lugar.</p>
+          </div>
         </div>
 
         <button type="button" onClick={handleLogout} disabled={logoutBusy}>
