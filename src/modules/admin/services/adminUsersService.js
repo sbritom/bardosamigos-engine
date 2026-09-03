@@ -1,6 +1,6 @@
 import { getAdminAccessToken } from '../../../core/auth/adminAuthService.js'
 
-const ENDPOINT = '/api/admin/users'
+const ENDPOINT = '/api/profile?section=admin-users'
 
 async function parseResponse(response) {
   const payload = await response.json().catch(() => ({}))
