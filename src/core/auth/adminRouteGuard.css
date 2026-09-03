@@ -1,12 +1,12 @@
 .admin-access-shell--centered {
   width: 100%;
   max-width: none !important;
-  min-height: min(72dvh, 720px);
-  margin: 0 auto;
-  padding: clamp(28px, 7vh, 72px) 16px !important;
+  min-height: calc(100dvh - 210px);
+  margin: 0 auto !important;
+  padding: clamp(28px, 6vh, 56px) 16px !important;
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
+  display: grid !important;
+  place-items: center !important;
 }
 
 .admin-access-card--centered {
@@ -189,5 +189,44 @@
   .admin-access-form {
     padding: 16px 17px 17px;
     gap: 12px;
+  }
+}
+
+
+.admin-access-password-toggle {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #7186a4;
+  background: transparent;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.admin-access-password-toggle:hover {
+  color: #5fc7ff;
+  background: rgba(11, 120, 255, 0.08);
+}
+
+.admin-access-card--centered {
+  position: relative;
+}
+
+.admin-access-card--centered::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(95, 199, 255, .26), transparent);
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .admin-access-shell--centered {
+    padding-inline: 24px !important;
   }
 }
