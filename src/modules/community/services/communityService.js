@@ -69,6 +69,45 @@ async function loadOverview() {
   return parseResponse(response, 'Não foi possível carregar a comunidade agora.')
 }
 
+function createEmptyEvoxData(overrides = {}) {
+  return {
+    configured: false,
+    xatGroup: 'imortal0800',
+    ranking: [],
+    top10: [],
+    onlineNow: null,
+    topActive: [],
+    analyticsAvailable: false,
+    updatedAt: null,
+    error: '',
+    ...overrides,
+  }
+}
+
+async function loadEvoxCommunity() {
+  const client = getSupabaseClient()
+  if (!client) {
+    throw new Error('A conexão segura com o EVOX ainda não está disponível.')
+  }
+
+  const { data, error } = await client.functions.invoke('evox-community', {
+    body: { action: 'ranking' },
+  })
+
+  if (error) {
+    throw new Error('A integração EVOX ainda está aguardando a chave privada da API.')
+  }
+
+  if (!data?.ok) {
+    throw new Error(data?.error || 'Não foi possível consultar o EVOX agora.')
+  }
+
+  return createEmptyEvoxData({
+    ...(data?.data || {}),
+    configured: true,
+  })
+}
+
 async function loadWall() {
   const token = await getOptionalAccessToken()
   const headers = { Accept: 'application/json' }
@@ -230,15 +269,21 @@ export async function deleteCommunityModerationItem({ resource, id }) {
 }
 
 export async function loadCommunityPageData() {
-  const [overviewResult, eventsResult, wallResult] = await Promise.allSettled([
+  const [overviewResult, eventsResult, wallResult, evoxResult] = await Promise.allSettled([
     loadOverview(),
     listPublishedEvents({ limit: 6 }),
     loadWall(),
+    loadEvoxCommunity(),
   ])
 
   const overview = overviewResult.status === 'fulfilled' ? overviewResult.value : {}
   const events = eventsResult.status === 'fulfilled' ? (eventsResult.value?.data || []) : []
   const wall = wallResult.status === 'fulfilled' ? wallResult.value : []
+  const evox = evoxResult.status === 'fulfilled'
+    ? evoxResult.value
+    : createEmptyEvoxData({
+        error: evoxResult.reason?.message || 'Integração EVOX indisponível no momento.',
+      })
 
   const errors = []
   if (overviewResult.status === 'rejected') errors.push(overviewResult.reason)
@@ -256,6 +301,7 @@ export async function loadCommunityPageData() {
     ranking: overview.ranking || null,
     achievements: Array.isArray(overview.achievements) ? overview.achievements : [],
     xat: overview.xat || { connected: false, onlineCount: null },
+    evox,
     wall,
     errors,
   }
