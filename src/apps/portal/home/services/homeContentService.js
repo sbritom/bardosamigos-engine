@@ -132,14 +132,32 @@ function getFootballDateKey(value) {
 function normalizeNewsArticle(article = {}) {
   const safeArticle = article && typeof article === 'object' ? article : {}
   const metadata = safeArticle.metadata && typeof safeArticle.metadata === 'object' ? safeArticle.metadata : {}
+  const publishedAt = safeArticle.publishedAt || safeArticle.published_at || safeArticle.createdAt || safeArticle.created_at || ''
+  const summary = safeArticle.summary || safeArticle.description || safeArticle.excerpt || safeArticle.contentSnippet || ''
+  const content = safeArticle.content || safeArticle.body || safeArticle.text || summary
+  const sourceValue = safeArticle.source || metadata.source || 'Fonte sincronizada'
+  const source = typeof sourceValue === 'string' ? sourceValue : sourceValue?.name || 'Fonte sincronizada'
+  const url = safeArticle.url
+    || safeArticle.link
+    || safeArticle.originalUrl
+    || safeArticle.externalUrl
+    || metadata.originalUrl
+    || metadata.sourceUrl
+    || ''
 
   return {
     id: safeArticle.id || safeArticle.slug || safeArticle.title || 'fallback-news',
-    title: safeArticle.title || 'Noticia sem titulo',
-    category: safeArticle.category || metadata.category || metadata.categoryName || 'Comunidade',
-    date: formatDate(safeArticle.publishedAt || safeArticle.published_at || safeArticle.createdAt || safeArticle.created_at),
-    image: safeArticle.image || safeArticle.coverUrl || safeArticle.cover_url || metadata.image || metadata.thumbnail || '',
-    source: safeArticle.source || metadata.source || 'internal',
+    title: safeArticle.title || 'Notícia sem título',
+    category: safeArticle.category || metadata.category || metadata.categoryName || 'Brasil',
+    date: formatDate(publishedAt),
+    publishedAt,
+    image: normalizeImageSource(safeArticle.image || safeArticle.coverUrl || safeArticle.cover_url || metadata.image || metadata.thumbnail),
+    source,
+    summary,
+    description: summary,
+    content,
+    url,
+    originalUrl: metadata.originalUrl || url,
   }
 }
 
