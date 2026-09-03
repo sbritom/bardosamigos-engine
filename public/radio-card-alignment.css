@@ -1,0 +1,41 @@
+/* IMORTAL0800 Rádio — alinhamento final dos cabeçalhos dos três cards inferiores */
+.imortal-radio-programs-card__top {
+  min-height: 94px !important;
+  box-sizing: border-box !important;
+  padding: 20px 20px 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-rows: 40px auto !important;
+  align-items: start !important;
+  column-gap: 10px !important;
+  row-gap: 14px !important;
+}
+
+.imortal-radio-programs-card__top .imortal-radio-info-card__icon {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+}
+
+.imortal-radio-programs-card__top > span {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  align-self: center !important;
+  line-height: 1 !important;
+}
+
+.imortal-radio-programs-card__arrows {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  margin-left: 0 !important;
+  align-self: center !important;
+}
+
+@media (max-width: 680px) {
+  .imortal-radio-programs-card__top {
+    min-height: 88px !important;
+    padding: 14px 14px 0 !important;
+    grid-template-rows: 40px auto !important;
+    row-gap: 12px !important;
+  }
+}
