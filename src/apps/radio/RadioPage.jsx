@@ -25,6 +25,7 @@ import {
 } from "./mxcastRadioApi";
 import {
   getRadioPublicContent,
+  searchRadioProviderCatalog,
   submitRadioMusicRequest,
 } from "./requests/radioRequestsApi";
 import { useAuth } from "../../modules/auth/AuthContext";
@@ -109,6 +110,9 @@ export default function RadioPage() {
   const [requestFeedback, setRequestFeedback] = useState("");
   const [requestFeedbackTone, setRequestFeedbackTone] = useState("info");
   const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [providerCatalog, setProviderCatalog] = useState([]);
+  const [providerCatalogLoading, setProviderCatalogLoading] = useState(false);
+  const [selectedProviderTrack, setSelectedProviderTrack] = useState(null);
   const [activeProgramIndex, setActiveProgramIndex] = useState(0);
   const [programCarouselPaused, setProgramCarouselPaused] = useState(false);
   const [radioPrograms, setRadioPrograms] = useState([]);
@@ -314,12 +318,61 @@ export default function RadioPage() {
       ...current,
       [name]: value,
     }));
+
+    if (name === "songAndArtist") {
+      setSelectedProviderTrack(null);
+    }
   }, []);
 
   const openRequestFlow = useCallback(() => {
     setRequestFeedback("");
     setRequestFeedbackTone("info");
+    setProviderCatalog([]);
+    setSelectedProviderTrack(null);
     setRequestModalOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (!requestModalOpen || radioLocutorStatus.isLive) {
+      setProviderCatalog([]);
+      setProviderCatalogLoading(false);
+      return undefined;
+    }
+
+    const query = requestForm.songAndArtist.trim();
+    if (query.length < 2 || selectedProviderTrack) {
+      setProviderCatalog([]);
+      setProviderCatalogLoading(false);
+      return undefined;
+    }
+
+    const timer = window.setTimeout(async () => {
+      try {
+        setProviderCatalogLoading(true);
+        const results = await searchRadioProviderCatalog(query);
+        setProviderCatalog(results);
+      } catch {
+        setProviderCatalog([]);
+      } finally {
+        setProviderCatalogLoading(false);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    requestForm.songAndArtist,
+    requestModalOpen,
+    radioLocutorStatus.isLive,
+    selectedProviderTrack,
+  ]);
+
+  const selectProviderTrack = useCallback((item) => {
+    setSelectedProviderTrack(item);
+    setProviderCatalog([]);
+    setRequestForm((current) => ({
+      ...current,
+      songAndArtist: item.label,
+    }));
   }, []);
 
   const handleRequestSubmit = useCallback(async (event) => {
@@ -329,12 +382,33 @@ export default function RadioPage() {
 
     try {
       setRequestSubmitting(true);
-      await submitRadioMusicRequest({
+      const result = await submitRadioMusicRequest({
         ...requestForm,
         requesterName: isAuthenticated ? "" : requestForm.requesterName,
+        providerTrackFile: selectedProviderTrack?.file || "",
       });
-      setRequestFeedback("Seu pedido foi enviado ao locutor.");
+
+      if (result?.deliveryMode === "automatic") {
+        setRequestFeedback(
+          result.estimatedExecution
+            ? `Pedido enviado ao AutoDJ. Execução estimada: ${result.estimatedExecution}.`
+            : "Pedido enviado ao AutoDJ.",
+        );
+      } else if (result?.locutorLive) {
+        setRequestFeedback(
+          result.locutorName
+            ? `Pedido enviado para ${result.locutorName}, que está ao vivo.`
+            : "Seu pedido foi enviado ao locutor.",
+        );
+      } else if (result?.automaticError) {
+        setRequestFeedback("O AutoDJ não pôde receber agora; seu pedido ficou salvo na fila da rádio.");
+      } else {
+        setRequestFeedback("Seu pedido ficou salvo na fila da rádio.");
+      }
+
       setRequestFeedbackTone("success");
+      setSelectedProviderTrack(null);
+      setProviderCatalog([]);
       setRequestForm({ requesterName: "", songAndArtist: "", message: "" });
       window.clearTimeout(requestCloseTimerRef.current);
       requestCloseTimerRef.current = window.setTimeout(() => {
@@ -354,7 +428,7 @@ export default function RadioPage() {
     } finally {
       setRequestSubmitting(false);
     }
-  }, [closeRequestFlow, isAuthenticated, requestForm]);
+  }, [closeRequestFlow, isAuthenticated, requestForm, selectedProviderTrack]);
 
   return (
     <main className="imortal-radio-page">
@@ -747,13 +821,62 @@ export default function RadioPage() {
                   ref={requestInputRef}
                   name="songAndArtist"
                   type="text"
-                  placeholder="Nome da música e do artista"
+                  placeholder={radioLocutorStatus.isLive ? "Nome da música e do artista" : "Digite para buscar no AutoDJ"}
                   minLength={3}
                   maxLength={180}
                   required
                   value={requestForm.songAndArtist}
                   onChange={handleRequestChange}
                 />
+
+                {!radioLocutorStatus.isLive ? (
+                  <small className="imortal-radio-request-mode">
+                    AutoDJ disponível: escolha uma música do catálogo para envio automático.
+                  </small>
+                ) : (
+                  <small className="imortal-radio-request-mode is-live">
+                    Locutor ao vivo: o pedido será enviado para a fila manual.
+                  </small>
+                )}
+
+                {selectedProviderTrack ? (
+                  <button
+                    type="button"
+                    className="imortal-radio-request-selected"
+                    onClick={() => setSelectedProviderTrack(null)}
+                    title="Remover seleção do AutoDJ"
+                  >
+                    <Music2 size={14} />
+                    <span>Selecionada no AutoDJ</span>
+                    <strong>{selectedProviderTrack.label}</strong>
+                  </button>
+                ) : null}
+
+                {!radioLocutorStatus.isLive && !selectedProviderTrack ? (
+                  <div className="imortal-radio-catalog-results" aria-live="polite">
+                    {providerCatalogLoading ? (
+                      <span className="imortal-radio-catalog-status">
+                        <Loader2 size={14} className="imortal-radio-spin" />
+                        Buscando no catálogo...
+                      </span>
+                    ) : providerCatalog.length ? (
+                      providerCatalog.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => selectProviderTrack(item)}
+                        >
+                          <Music2 size={14} />
+                          <span>{item.label}</span>
+                        </button>
+                      ))
+                    ) : requestForm.songAndArtist.trim().length >= 2 ? (
+                      <span className="imortal-radio-catalog-status">
+                        Nenhuma música encontrada no AutoDJ. Você ainda pode enviar para a fila da rádio.
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </label>
 
               <label>
