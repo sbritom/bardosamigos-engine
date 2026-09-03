@@ -8,7 +8,6 @@ import {
   Pause,
   Play,
   Radio,
-  Sparkles,
   Volume2,
   X,
 } from "lucide-react";
@@ -316,16 +315,21 @@ export default function RadioPage() {
               aria-label={playing ? "Pausar rádio" : "Tocar rádio"}
             >
               {connecting ? (
-                <Loader2 size={25} className="imortal-radio-spin" aria-hidden="true" />
+                <Loader2 size={22} className="imortal-radio-spin" aria-hidden="true" />
               ) : playing ? (
-                <Pause size={27} aria-hidden="true" />
+                <Pause size={23} fill="currentColor" aria-hidden="true" />
               ) : (
-                <Play size={27} fill="currentColor" aria-hidden="true" />
+                <Play size={23} fill="currentColor" aria-hidden="true" />
               )}
             </button>
 
+            <div className="imortal-radio-control-center">
+              <span>{playing ? "Tocando ao vivo" : "Rádio IMORTAL0800"}</span>
+              <small>{playing ? "Clique para pausar" : "Clique em play para ouvir"}</small>
+            </div>
+
             <label className="imortal-radio-volume" title={`Volume ${volume}%`}>
-              <Volume2 size={19} aria-hidden="true" />
+              <Volume2 size={17} aria-hidden="true" />
               <input
                 type="range"
                 min="0"
@@ -335,10 +339,11 @@ export default function RadioPage() {
                 aria-label="Volume da rádio"
                 style={{ "--imortal-radio-volume": `${volume}%` }}
               />
+              <span>{volume}%</span>
             </label>
 
             <button className="imortal-radio-request" type="button" onClick={openRequestFlow}>
-              <Music2 size={18} aria-hidden="true" />
+              <Music2 size={16} aria-hidden="true" />
               Pedir música
             </button>
           </div>
@@ -349,21 +354,6 @@ export default function RadioPage() {
             </p>
           )}
         </div>
-      </section>
-
-      <section className="imortal-radio-request-strip" aria-label="Pedidos musicais">
-        <div className="imortal-radio-request-strip__icon">
-          <Sparkles size={22} />
-        </div>
-        <div>
-          <span>QUER OUVIR SUA MÚSICA?</span>
-          <strong>Faça seu pedido para a rádio.</strong>
-          <p>Envie música e artista; o pedido segue direto para o painel do locutor.</p>
-        </div>
-        <button type="button" onClick={openRequestFlow}>
-          <Music2 size={17} />
-          Fazer pedido
-        </button>
       </section>
 
       <section className="imortal-radio-content-grid" aria-label="Conteúdo da rádio">
