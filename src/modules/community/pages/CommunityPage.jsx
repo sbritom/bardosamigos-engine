@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   Trophy,
+  Users,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -156,6 +157,137 @@ function EmptyState({ children }) {
   return <div className="imortal-community-empty">{children}</div>
 }
 
+function formatEvoxNumber(value) {
+  return Number(value || 0).toLocaleString('pt-BR')
+}
+
+function getEvoxUserName(item = {}) {
+  return item?.user?.displayName
+    || item?.user?.regname
+    || item?.user?.name
+    || item?.displayName
+    || item?.regname
+    || item?.name
+    || 'Imortal'
+}
+
+function EvoxCommunitySection({ evox = {}, loading, onRefresh }) {
+  const ranking = Array.isArray(evox.top10) ? evox.top10 : []
+  const topActive = Array.isArray(evox.topActive) ? evox.topActive : []
+  const hasOnline = evox.onlineNow !== null
+    && evox.onlineNow !== undefined
+    && Number.isFinite(Number(evox.onlineNow))
+
+  return (
+    <section className="imortal-community-section">
+      <CommunitySectionHeader
+        eyebrow="EVOX BOT"
+        title="Atividade e Ranking"
+        description="Dados automáticos da comunidade no Xat, sem misturar com a presença de visitantes do portal."
+        action={(
+          <button
+            className="imortal-community-inline-action"
+            type="button"
+            onClick={onRefresh}
+            disabled={loading}
+          >
+            <RefreshCw size={14} />
+            {loading ? 'Atualizando...' : 'Atualizar'}
+          </button>
+        )}
+      />
+
+      <div className="grid gap-3 lg:grid-cols-12">
+        <article className="rounded-2xl border border-[rgba(42,143,255,0.12)] bg-[rgba(7,17,30,0.58)] p-4 lg:col-span-3">
+          <div className="flex items-center gap-2 text-[#5fc7ff]">
+            <Activity size={18} />
+            <strong className="text-xs uppercase tracking-[0.08em]">Usuários online agora</strong>
+          </div>
+          <div className="mt-4 text-3xl font-black text-white">
+            {hasOnline ? formatEvoxNumber(evox.onlineNow) : '—'}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#7186a4]">
+            {hasOnline
+              ? 'Online no Xat segundo o EVOX.'
+              : 'Aguardando a leitura do Analytics do EVOX.'}
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-[rgba(42,143,255,0.12)] bg-[rgba(7,17,30,0.58)] p-4 lg:col-span-4">
+          <div className="flex items-center gap-2 text-[#5fc7ff]">
+            <Users size={18} />
+            <strong className="text-xs uppercase tracking-[0.08em]">Top 10 mais ativos</strong>
+          </div>
+
+          {topActive.length ? (
+            <ol className="mt-3 grid gap-1.5">
+              {topActive.slice(0, 10).map((item, index) => (
+                <li
+                  key={item.id || item.user?.id || `active-${index}`}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.025] px-3 py-2"
+                >
+                  <span className="min-w-0 truncate text-xs font-bold text-[#dce7f7]">
+                    {index + 1}. {getEvoxUserName(item)}
+                  </span>
+                  {item.activity !== undefined && item.activity !== null ? (
+                    <small className="shrink-0 text-[0.65rem] font-bold text-[#7890ae]">
+                      {formatEvoxNumber(item.activity)}
+                    </small>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="mt-3 rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs leading-5 text-[#7186a4]">
+              Aguardando a leitura do Top 10 do Analytics do EVOX.
+            </div>
+          )}
+        </article>
+
+        <article className="rounded-2xl border border-[rgba(42,143,255,0.12)] bg-[rgba(7,17,30,0.58)] p-4 lg:col-span-5">
+          <div className="flex items-center gap-2 text-[#5fc7ff]">
+            <Trophy size={18} />
+            <strong className="text-xs uppercase tracking-[0.08em]">Ranking de Pontos</strong>
+          </div>
+
+          {ranking.length ? (
+            <ol className="mt-3 grid gap-1.5">
+              {ranking.map((item, index) => {
+                const position = Number(item.position || index + 1)
+                const xatId = item?.user?.xatId
+
+                return (
+                  <li
+                    key={item.id || item.user?.id || `ranking-${index}`}
+                    className="grid grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-white/5 bg-white/[0.025] px-3 py-2"
+                  >
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#0b78ff]/10 text-xs font-black text-[#5fc7ff]">
+                      {position <= 3 ? <Medal size={15} /> : position}
+                    </span>
+                    <span className="min-w-0">
+                      <strong className="block truncate text-xs text-[#dce7f7]">{getEvoxUserName(item)}</strong>
+                      {xatId ? <small className="block text-[0.6rem] text-[#647a99]">ID {xatId}</small> : null}
+                    </span>
+                    <strong className="text-xs font-black text-[#8cc8ff]">
+                      {formatEvoxNumber(item.points)} pts
+                    </strong>
+                  </li>
+                )
+              })}
+            </ol>
+          ) : (
+            <div className="mt-3 rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs leading-5 text-[#7186a4]">
+              {evox.error
+                ? 'Conexão segura preparada. O ranking aparecerá assim que a integração EVOX estiver autorizada.'
+                : 'Nenhuma pontuação retornada pelo EVOX no momento.'}
+            </div>
+          )}
+        </article>
+      </div>
+    </section>
+  )
+}
+
 function getNextBingoLabel() {
   const now = new Date()
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -284,6 +416,15 @@ export default function CommunityPage() {
     achievements: [],
     wall: [],
     xat: { connected: false, onlineCount: null },
+    evox: {
+      configured: false,
+      ranking: [],
+      top10: [],
+      onlineNow: null,
+      topActive: [],
+      analyticsAvailable: false,
+      error: '',
+    },
     errors: [],
   })
   const [loading, setLoading] = useState(true)
@@ -481,17 +622,23 @@ export default function CommunityPage() {
           </span>
         </div>
 
-        <div className="imortal-community-active-widget" aria-label="Imortais ativos">
+        <div className="imortal-community-active-widget" aria-label="Imortais no portal">
           <div className="imortal-community-active-widget__icon">
             <Activity size={22} />
           </div>
-          <span>Imortais ativos</span>
+          <span>No portal agora</span>
           <strong>{onlineLabel}</strong>
           <small>
-            {presenceConnected ? 'Conectados ao portal agora' : 'Sincronizando presença'}
+            {presenceConnected ? 'Visitantes conectados ao portal' : 'Sincronizando presença'}
           </small>
         </div>
       </header>
+
+      <EvoxCommunitySection
+        evox={data.evox}
+        loading={loading}
+        onRefresh={load}
+      />
 
       <section className="imortal-community-section imortal-community-section--games">
         <CommunitySectionHeader
