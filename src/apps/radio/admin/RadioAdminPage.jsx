@@ -78,8 +78,9 @@ export default function RadioAdminPage() {
       <main className="radio-admin-page">
         <section className="radio-admin-login-card" aria-labelledby="radio-admin-login-title">
           <header className="radio-admin-login-header">
-            <span>Radio do Bar</span>
+            <span>IMORTAL0800</span>
             <h1 id="radio-admin-login-title">PAINEL DO LOCUTOR</h1>
+            <p>Pedidos musicais e controle da transmissão.</p>
           </header>
 
           <form className="radio-admin-login-form" onSubmit={handleLoginSubmit}>
@@ -139,7 +140,10 @@ export default function RadioAdminPage() {
   return (
     <main className="radio-admin-page">
       <header className="radio-admin-header radio-admin-header--with-actions">
-        <h1>PAINEL DO LOCUTOR</h1>
+        <div>
+          <span>IMORTAL0800</span>
+          <h1>PAINEL DO LOCUTOR</h1>
+        </div>
         <button type="button" onClick={handleLogout}>
           <LogOut size={16} />
           Sair
