@@ -4,19 +4,19 @@ import { slugifyTVValue } from '../utils/slugifyTVValue.js'
 const CATEGORY_LABELS = {
   todos: 'Todos',
   esportes: 'Esportes',
-  'filmes-e-series': 'Filmes e Series',
+  'filmes-e-series': 'Filmes e Séries',
   'tv-aberta': 'TV Aberta',
   variedades: 'Variedades',
-  noticias: 'Noticias',
+  noticias: 'Notícias',
   infantil: 'Infantil',
   especiais: 'Especiais',
 }
 
 const TEXT_REPLACEMENTS = [
-  ['SÃ©ries', 'Series'],
-  ['NotÃ­cias', 'Noticias'],
-  ['PatrÃ£o', 'Patrao'],
-  ['SÃ©rie', 'Serie'],
+  ['SÃ©ries', 'Séries'],
+  ['NotÃ­cias', 'Notícias'],
+  ['PatrÃ£o', 'Patrão'],
+  ['SÃ©rie', 'Série'],
 ]
 
 function cleanText(value) {
@@ -41,7 +41,7 @@ function createCategoryMap(channels) {
         id: `local-${slug}`,
         name,
         slug,
-        description: `Canais de ${name} da TV Bar dos Amigos.`,
+        description: `Canais de ${name} da TV IMORTAL0800.`,
         icon: '',
         color: '#38bdf8',
         displayOrder: map.size,
