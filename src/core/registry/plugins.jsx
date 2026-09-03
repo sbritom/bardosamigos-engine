@@ -38,6 +38,7 @@ const GamesPage = React.lazy(() => import("../../modules/games/pages/GamesPage")
 const EventsPage = React.lazy(() => import("../../modules/events/pages/EventsPage"));
 const EventsAdminPage = React.lazy(() => import("../../modules/events/admin/pages/EventsAdminPage"));
 const AdminPage = React.lazy(() => import("../../modules/admin/pages/AdminPage"));
+const AdminUsersPage = React.lazy(() => import("../../modules/admin/pages/AdminUsersPage"));
 const TVManager = React.lazy(() =>
   import("../../modules/tv/admin/TVManager").then((module) => ({ default: module.TVManager })),
 );
@@ -246,6 +247,15 @@ export const plugins = [
     icon: Shield,
     menu: false,
     element: <AdminPluginPage component={AdminPage} title="Admin" />,
+  },
+
+  {
+    id: "admin-users",
+    title: "Usuários e Cargos",
+    path: "/admin/users",
+    icon: Users,
+    menu: false,
+    element: <AdminPluginPage component={AdminUsersPage} title="Usuários e Cargos" />,
   },
 
   {
