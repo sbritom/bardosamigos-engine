@@ -9,6 +9,8 @@ const SCHEDULE_TABLE = 'radio_schedule'
 const VALID_STATUSES = new Set(['pending', 'read'])
 const REQUEST_WINDOW_SECONDS = 60
 const AUTHORIZED_ROLES = new Set(['admin', 'locutor'])
+const PROVIDER_INTEGRATION_ID = 'imortal0800-primary'
+const PROVIDER_TIMEOUT_MS = 8000
 
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL
@@ -31,6 +33,153 @@ function cleanText(value, maxLength) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLength)
+}
+
+function normalizeSearchText(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('pt-BR')
+}
+
+async function fetchProvider(url, options = {}) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS)
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'IMORTAL0800/1.0',
+        ...(options.headers || {}),
+      },
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function getRadioProviderIntegration(supabase) {
+  const { data, error } = await supabase
+    .from('radio_provider_integrations')
+    .select('provider,automatic_request_url,automatic_catalog_url,manual_request_url,enabled')
+    .eq('id', PROVIDER_INTEGRATION_ID)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data?.enabled) return null
+  return data
+}
+
+function extractProviderTrackFilename(buttonHtml) {
+  const html = String(buttonHtml || '')
+  const match = html.match(/pedir\((?:&quot;|["'])?([^"'()<>]+?\.mp3)(?:&quot;|["'])?\)/i)
+    || html.match(/pedir\(\\?["']([^"']+?\.mp3)\\?["']\)/i)
+  return cleanText(match?.[1], 240)
+}
+
+function normalizeProviderCatalogItem(row, index) {
+  if (!Array.isArray(row)) return null
+  const label = cleanText(row[0], 220)
+  const file = extractProviderTrackFilename(row[1])
+  if (!label || !file) return null
+
+  return {
+    id: `${index}-${crypto.createHash('sha1').update(file).digest('hex').slice(0, 12)}`,
+    label,
+    file,
+  }
+}
+
+async function fetchProviderCatalog(supabase) {
+  const integration = await getRadioProviderIntegration(supabase)
+  if (!integration?.automatic_catalog_url) {
+    throw Object.assign(new Error('Catálogo do AutoDJ não está configurado.'), { status: 503 })
+  }
+
+  const providerResponse = await fetchProvider(integration.automatic_catalog_url, {
+    headers: {
+      Accept: 'application/json, text/plain, */*',
+    },
+  })
+
+  if (!providerResponse.ok) {
+    throw Object.assign(new Error('Catálogo do AutoDJ indisponível.'), { status: 502 })
+  }
+
+  const payload = await providerResponse.json()
+  return (Array.isArray(payload?.data) ? payload.data : [])
+    .map(normalizeProviderCatalogItem)
+    .filter(Boolean)
+}
+
+async function handleProviderCatalogGet(request, response, supabase) {
+  const query = normalizeSearchText(cleanText(request.query?.q, 80))
+  if (query.length < 2) {
+    response.status(200).json({ ok: true, data: [] })
+    return
+  }
+
+  const catalog = await fetchProviderCatalog(supabase)
+  const terms = query.split(' ').filter(Boolean)
+
+  const data = catalog
+    .filter((item) => {
+      const haystack = normalizeSearchText(item.label)
+      return terms.every((term) => haystack.includes(term))
+    })
+    .slice(0, 12)
+
+  response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+  response.status(200).json({ ok: true, data })
+}
+
+async function sendAutomaticProviderRequest(supabase, { trackFile, requesterName }) {
+  const integration = await getRadioProviderIntegration(supabase)
+  if (!integration?.automatic_request_url) {
+    throw new Error('Pedido automático não está configurado.')
+  }
+
+  const catalog = await fetchProviderCatalog(supabase)
+  const selected = catalog.find((item) => item.file === trackFile)
+  if (!selected) {
+    throw Object.assign(new Error('A música escolhida não está mais disponível no AutoDJ.'), { status: 409 })
+  }
+
+  const providerResponse = await fetchProvider(integration.automatic_request_url, {
+    method: 'POST',
+    headers: {
+      Accept: 'text/plain, text/html, */*',
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    },
+    body: new URLSearchParams({
+      musica: selected.file,
+      nome: cleanText(requesterName, 40),
+      email: '',
+    }).toString(),
+  })
+
+  if (!providerResponse.ok) {
+    throw new Error(`AutoDJ respondeu HTTP ${providerResponse.status}`)
+  }
+
+  const result = cleanText(await providerResponse.text(), 120)
+  if (!result || result.toLocaleLowerCase('pt-BR') === 'erro') {
+    throw Object.assign(
+      new Error('O AutoDJ recusou o pedido neste momento. Aguarde alguns minutos e tente novamente.'),
+      { status: 429 },
+    )
+  }
+
+  return {
+    queued: true,
+    provider: integration.provider || 'vox-svrdedicado',
+    estimatedExecution: result,
+    track: selected,
+  }
 }
 
 function getIp(request) {
@@ -490,18 +639,55 @@ async function handlePost(request, response, supabase) {
     return
   }
 
+  const { data: locutorStatus, error: locutorStatusError } = await supabase
+    .from(LOCUTOR_STATUS_TABLE)
+    .select('is_live,locutor_name')
+    .eq('id', 'imortal0800')
+    .maybeSingle()
+
+  if (locutorStatusError) throw locutorStatusError
+
+  const locutorLive = Boolean(locutorStatus?.is_live)
+  const providerTrackFile = cleanText(body.providerTrackFile, 240)
+  let automaticDelivery = null
+  let automaticError = ''
+
+  if (!locutorLive && providerTrackFile) {
+    try {
+      automaticDelivery = await sendAutomaticProviderRequest(supabase, {
+        trackFile: providerTrackFile,
+        requesterName: identity.requesterName,
+      })
+    } catch (error) {
+      automaticError = cleanText(error?.message, 240)
+    }
+  }
+
+  const sourceBase = requester.user ? 'authenticated_radio_page' : 'public_radio_page'
+  const source = automaticDelivery?.queued
+    ? `${sourceBase}_autodj`
+    : locutorLive
+      ? `${sourceBase}_live_manual`
+      : sourceBase
+
   const { data, error } = await supabase
     .from(TABLE)
     .insert({
-      song_and_artist: songAndArtist,
+      song_and_artist: automaticDelivery?.track?.label || songAndArtist,
       message: message || null,
-      status: 'pending',
-      source: requester.user ? 'authenticated_radio_page' : 'public_radio_page',
+      status: automaticDelivery?.queued ? 'read' : 'pending',
+      source,
       request_fingerprint: fingerprint,
       requester_user_agent: getUserAgent(request) || null,
       requester_profile_id: identity.requesterProfileId,
       requester_name: identity.requesterName,
       requester_kind: identity.requesterKind,
+      admin_note: automaticDelivery?.queued
+        ? `AutoDJ: execução estimada ${automaticDelivery.estimatedExecution}`
+        : automaticError
+          ? `AutoDJ indisponível: ${automaticError}`
+          : null,
+      handled_by: automaticDelivery?.queued ? 'vox-autodj' : null,
     })
     .select('id, status')
     .single()
@@ -512,7 +698,15 @@ async function handlePost(request, response, supabase) {
 
   response.status(201).json({
     ok: true,
-    data,
+    data: {
+      ...data,
+      deliveryMode: automaticDelivery?.queued ? 'automatic' : 'manual',
+      locutorLive,
+      locutorName: cleanText(locutorStatus?.locutor_name, 80),
+      providerQueued: Boolean(automaticDelivery?.queued),
+      estimatedExecution: automaticDelivery?.estimatedExecution || '',
+      automaticError,
+    },
   })
 }
 
@@ -675,6 +869,12 @@ export default async function handler(request, response) {
         await handlePublicContentGet(response, supabase)
         return
       }
+
+      if (section === 'provider-catalog') {
+        await handleProviderCatalogGet(request, response, supabase)
+        return
+      }
+
 
       if (section === 'locutor-status') {
         await handleLocutorStatusGet(request, response, supabase)
