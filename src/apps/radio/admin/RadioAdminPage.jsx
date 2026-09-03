@@ -87,6 +87,7 @@ export default function RadioAdminPage() {
     <AdminRouteGuard
       allowedRoles={RADIO_ADMIN_ROLES}
       title="Painel da Rádio"
+      centeredAuth
     >
       <RadioAdminContent />
     </AdminRouteGuard>
