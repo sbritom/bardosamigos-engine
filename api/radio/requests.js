@@ -4,6 +4,8 @@ import { applyApiCors, rejectOversizedBody } from '../_lib/security.js'
 
 const TABLE = 'radio_music_requests'
 const LOCUTOR_STATUS_TABLE = 'radio_locutor_status'
+const PROGRAMS_TABLE = 'radio_programs'
+const SCHEDULE_TABLE = 'radio_schedule'
 const VALID_STATUSES = new Set(['pending', 'read'])
 const REQUEST_WINDOW_SECONDS = 60
 const AUTHORIZED_ROLES = new Set(['admin', 'locutor'])
@@ -157,6 +159,213 @@ async function getLocutorDisplayName(supabase, user) {
   )
 }
 
+
+function normalizeProgram(row = {}) {
+  return {
+    id: row.id,
+    title: cleanText(row.title, 80),
+    description: cleanText(row.description, 300),
+    locutorName: cleanText(row.locutor_name, 80),
+    daysLabel: cleanText(row.days_label, 100),
+    timeLabel: cleanText(row.time_label, 80),
+    imageUrl: cleanText(row.image_url, 500),
+    enabled: row.enabled !== false,
+    displayOrder: Number(row.display_order) || 0,
+    createdAt: row.created_at || null,
+    updatedAt: row.updated_at || null,
+  }
+}
+
+function normalizeSchedule(row = {}) {
+  return {
+    dayOfWeek: Number(row.day_of_week) || 0,
+    dayLabel: cleanText(row.day_label, 30),
+    locutorName: cleanText(row.locutor_name, 80),
+    timeLabel: cleanText(row.time_label, 80),
+    enabled: row.enabled !== false,
+    updatedAt: row.updated_at || null,
+  }
+}
+
+async function handlePublicContentGet(response, supabase) {
+  const [programResult, scheduleResult, statusResult] = await Promise.all([
+    supabase
+      .from(PROGRAMS_TABLE)
+      .select('id,title,description,locutor_name,days_label,time_label,image_url,enabled,display_order,created_at,updated_at')
+      .eq('enabled', true)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: true }),
+    supabase
+      .from(SCHEDULE_TABLE)
+      .select('day_of_week,day_label,locutor_name,time_label,enabled,updated_at')
+      .eq('enabled', true)
+      .order('day_of_week', { ascending: true }),
+    supabase
+      .from(LOCUTOR_STATUS_TABLE)
+      .select('is_live,locutor_name,updated_at')
+      .eq('id', 'imortal0800')
+      .maybeSingle(),
+  ])
+
+  if (programResult.error) throw programResult.error
+  if (scheduleResult.error) throw scheduleResult.error
+  if (statusResult.error) throw statusResult.error
+
+  response.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+  response.status(200).json({
+    ok: true,
+    data: {
+      programs: (programResult.data || []).map(normalizeProgram),
+      schedule: (scheduleResult.data || []).map(normalizeSchedule),
+      locutorStatus: {
+        isLive: Boolean(statusResult.data?.is_live),
+        locutorName: cleanText(statusResult.data?.locutor_name, 80),
+        updatedAt: statusResult.data?.updated_at || null,
+      },
+    },
+  })
+}
+
+async function handleProgramsGet(request, response, supabase) {
+  const admin = await requireAdmin(request, supabase)
+  if (!admin.ok) {
+    response.status(admin.status).json({ ok: false, error: admin.error })
+    return
+  }
+
+  const { data, error } = await supabase
+    .from(PROGRAMS_TABLE)
+    .select('id,title,description,locutor_name,days_label,time_label,image_url,enabled,display_order,created_at,updated_at')
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: (data || []).map(normalizeProgram) })
+}
+
+async function handleScheduleGet(request, response, supabase) {
+  const admin = await requireAdmin(request, supabase)
+  if (!admin.ok) {
+    response.status(admin.status).json({ ok: false, error: admin.error })
+    return
+  }
+
+  const { data, error } = await supabase
+    .from(SCHEDULE_TABLE)
+    .select('day_of_week,day_label,locutor_name,time_label,enabled,updated_at')
+    .order('day_of_week', { ascending: true })
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: (data || []).map(normalizeSchedule) })
+}
+
+async function handleProgramPost(request, response, supabase, body) {
+  const admin = await requireAdmin(request, supabase)
+  if (!admin.ok) {
+    response.status(admin.status).json({ ok: false, error: admin.error })
+    return
+  }
+
+  const title = cleanText(body.title, 80)
+  if (title.length < 2) {
+    response.status(400).json({ ok: false, error: 'Informe o nome do programa.' })
+    return
+  }
+
+  const payload = {
+    title,
+    description: cleanText(body.description, 300) || null,
+    locutor_name: cleanText(body.locutorName, 80) || null,
+    days_label: cleanText(body.daysLabel, 100) || null,
+    time_label: cleanText(body.timeLabel, 80) || null,
+    image_url: cleanText(body.imageUrl, 500) || null,
+    enabled: body.enabled !== false,
+    display_order: Math.max(0, Number.parseInt(body.displayOrder, 10) || 0),
+    updated_by: admin.user?.id || null,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await supabase
+    .from(PROGRAMS_TABLE)
+    .insert(payload)
+    .select('id,title,description,locutor_name,days_label,time_label,image_url,enabled,display_order,created_at,updated_at')
+    .single()
+
+  if (error) throw error
+  response.status(201).json({ ok: true, data: normalizeProgram(data) })
+}
+
+async function handleProgramPatch(request, response, supabase, admin, body) {
+  const id = cleanText(body.id, 80)
+  const title = cleanText(body.title, 80)
+  if (!id || title.length < 2) {
+    response.status(400).json({ ok: false, error: 'Programa inválido.' })
+    return
+  }
+
+  const payload = {
+    title,
+    description: cleanText(body.description, 300) || null,
+    locutor_name: cleanText(body.locutorName, 80) || null,
+    days_label: cleanText(body.daysLabel, 100) || null,
+    time_label: cleanText(body.timeLabel, 80) || null,
+    image_url: cleanText(body.imageUrl, 500) || null,
+    enabled: body.enabled !== false,
+    display_order: Math.max(0, Number.parseInt(body.displayOrder, 10) || 0),
+    updated_by: admin.user?.id || null,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await supabase
+    .from(PROGRAMS_TABLE)
+    .update(payload)
+    .eq('id', id)
+    .select('id,title,description,locutor_name,days_label,time_label,image_url,enabled,display_order,created_at,updated_at')
+    .single()
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: normalizeProgram(data) })
+}
+
+async function handleSchedulePatch(response, supabase, admin, body) {
+  const dayOfWeek = Number.parseInt(body.dayOfWeek, 10)
+  if (!Number.isInteger(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7) {
+    response.status(400).json({ ok: false, error: 'Dia da semana inválido.' })
+    return
+  }
+
+  const { data, error } = await supabase
+    .from(SCHEDULE_TABLE)
+    .update({
+      locutor_name: cleanText(body.locutorName, 80),
+      time_label: cleanText(body.timeLabel, 80),
+      enabled: body.enabled !== false,
+      updated_by: admin.user?.id || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('day_of_week', dayOfWeek)
+    .select('day_of_week,day_label,locutor_name,time_label,enabled,updated_at')
+    .single()
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: normalizeSchedule(data) })
+}
+
+async function handleProgramDelete(response, supabase, id) {
+  if (!id) {
+    response.status(400).json({ ok: false, error: 'Programa não informado.' })
+    return
+  }
+
+  const { error } = await supabase
+    .from(PROGRAMS_TABLE)
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+  response.status(200).json({ ok: true, data: { id, deleted: true } })
+}
+
 async function handleLocutorStatusGet(request, response, supabase) {
   const admin = await requireAdmin(request, supabase)
   if (!admin.ok) {
@@ -213,13 +422,19 @@ async function handleLocutorStatusPatch(request, response, supabase, admin, body
 }
 
 async function handlePost(request, response, supabase) {
+  const body = await readBody(request)
+
+  if (body.resource === 'program') {
+    await handleProgramPost(request, response, supabase, body)
+    return
+  }
+
   const requester = await getOptionalUser(request, supabase)
   if (!requester.ok) {
     response.status(requester.status).json({ ok: false, error: requester.error })
     return
   }
 
-  const body = await readBody(request)
   const songAndArtist = cleanText(body.songAndArtist, 180)
   const message = cleanText(body.message, 500)
   const identity = await getRequesterIdentity(supabase, requester.user, body.requesterName)
@@ -324,6 +539,16 @@ async function handlePatch(request, response, supabase) {
     return
   }
 
+  if (body.resource === 'program') {
+    await handleProgramPatch(request, response, supabase, admin, body)
+    return
+  }
+
+  if (body.resource === 'schedule') {
+    await handleSchedulePatch(response, supabase, admin, body)
+    return
+  }
+
   const id = cleanText(body.id, 80)
   const status = cleanText(body.status, 30)
 
@@ -367,6 +592,11 @@ async function handleDelete(request, response, supabase) {
 
   const body = await readBody(request)
   const id = cleanText(request.query?.id || body.id, 80)
+
+  if (body.resource === 'program' || cleanText(request.query?.section, 40) === 'programs') {
+    await handleProgramDelete(response, supabase, id)
+    return
+  }
 
   if (!id) {
     response.status(400).json({ ok: false, error: 'Pedido nao informado.' })
@@ -418,8 +648,25 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'GET') {
-      if (cleanText(request.query?.section, 40) === 'locutor-status') {
+      const section = cleanText(request.query?.section, 40)
+
+      if (section === 'public-content') {
+        await handlePublicContentGet(response, supabase)
+        return
+      }
+
+      if (section === 'locutor-status') {
         await handleLocutorStatusGet(request, response, supabase)
+        return
+      }
+
+      if (section === 'programs') {
+        await handleProgramsGet(request, response, supabase)
+        return
+      }
+
+      if (section === 'schedule') {
+        await handleScheduleGet(request, response, supabase)
         return
       }
 
