@@ -14,6 +14,7 @@ import {
 } from '../../../design-system'
 import '../../../design-system/styles/index.css'
 import '../home/components/homeFootballStrip.css'
+import './homeFinal.css'
 import { getSupabaseClient } from '../../../core/database'
 import { isFinishedStatus, isLiveStatus } from '../../../core/time'
 import { getFootballAutoSyncInterval, hasLiveFootballMatch, syncFootballBeforeRead } from '../../../modules/competition/services/footballAutoSyncService'
@@ -33,6 +34,7 @@ const OfficialChat = lazy(() =>
 const initialDashboard = {
   competitionMatches: [],
   liveMatchCenter: null,
+  events: [],
 }
 
 function TvCard() {
@@ -81,13 +83,17 @@ function TvCard() {
 
   return (
     <FeatureCard
-      className="bds-home-card-full"
+      className="bds-home-card-full imortal-home-media-card imortal-home-tv-card"
       title="TV AO VIVO"
       icon={<Play size={20} />}
-      action={<ActionButton className="bds-home-tv-header-button" variant="secondary" onClick={() => setIsChannelModalOpen(true)}>Escolha outro canal</ActionButton>}
+      action={<ActionButton className="bds-home-tv-header-button" variant="secondary" onClick={() => setIsChannelModalOpen(true)}>Canais</ActionButton>}
     >
       <div className="bds-home-panel-body bds-home-tv-panel" data-designer-id="tv.content" data-designer-label="TV / Conteudo">
         <div className="bds-home-tv-stage" data-designer-id="tv.player" data-designer-label="TV / Player">
+          <div className="imortal-home-tv-current">
+            <span>{currentChannel?.category || 'Ao vivo'}</span>
+            <strong>{currentChannel?.name || 'TV IMORTAL0800'}</strong>
+          </div>
           <iframe
             key={currentChannel.id}
             className="bds-home-tv-iframe"
@@ -291,6 +297,7 @@ export default function HomePage() {
           setDashboard({
             competitionMatches: Array.isArray(content?.competitionMatches) ? content.competitionMatches : [],
             liveMatchCenter: content?.liveMatchCenter || null,
+            events: Array.isArray(content?.events) ? content.events : [],
           })
         }
       } catch (error) {
@@ -336,7 +343,7 @@ export default function HomePage() {
           <div className="bds-grid-span-6" data-designer-id="tv" data-designer-label="TV"><HomeModuleBoundary moduleName="TV"><TvCard /></HomeModuleBoundary></div>
           <div className="bds-grid-span-6" data-designer-id="chat" data-designer-label="Chat"><HomeModuleBoundary moduleName="Chat"><Suspense fallback={<Loading label="Carregando chat oficial" />}><OfficialChat /></Suspense></HomeModuleBoundary></div>
           <div className="bds-grid-span-12" data-designer-id="football" data-designer-label="Futebol"><HomeModuleBoundary moduleName="Futebol"><FootballCard matches={dashboard.competitionMatches} /></HomeModuleBoundary></div>
-          <div className="bds-grid-span-12" data-designer-id="portal-overview" data-designer-label="Portal"><HomeModuleBoundary moduleName="Portal"><HomePortalOverviewCard /></HomeModuleBoundary></div>
+          <div className="bds-grid-span-12" data-designer-id="portal-overview" data-designer-label="Portal"><HomeModuleBoundary moduleName="Portal"><HomePortalOverviewCard events={dashboard.events} /></HomeModuleBoundary></div>
         </DashboardGrid>
       </ResponsiveContainer>
     </main>
