@@ -1,18 +1,18 @@
-# Xat
+# Xat IMORTAL0800
 
-## Codigo radiohtml5
+## Sala oficial
+
+- Público: `https://xat.com/Imortal0800`
+- Embed: `https://xat.com/embed/chat.php#id=212581131&gn=Imortal0800`
+
+## Rádio no Xat
+
+O stream oficial da Rádio IMORTAL0800 usa a porta `7956`.
 
 ```text
-[radiohtml5:localhost:8000:radio]
+https://s01.svrdedicado.org:7956/stream
 ```
-
-## Endpoints
-
-- `GET /engine/xat/config`
-- `GET /engine/xat/status`
-- `GET /engine/xat/widget`
-- `GET /engine/xat/stream`
 
 ## Preview
 
-Abra `/radio/xat`.
+O preview interno do widget da rádio está disponível em `/radio/xat`.
