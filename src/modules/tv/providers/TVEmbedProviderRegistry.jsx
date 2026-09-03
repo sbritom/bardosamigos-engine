@@ -1,3 +1,4 @@
+import { ManagedTVIframe } from '../components/ManagedTVIframe'
 import { OfficialHlsPlayer } from '../components/OfficialHlsPlayer'
 import {
   normalizeOfficialTVHlsUrl,
@@ -18,7 +19,7 @@ export function registerTVEmbedProvider(name, renderer) {
 }
 
 export function resolveTVEmbedProvider(name = 'iframe') {
-  return providers.get(name) || providers.get('iframe')
+  return providers.get(name) || null
 }
 
 export function listTVEmbedProviders() {
@@ -27,23 +28,24 @@ export function listTVEmbedProviders() {
 
 function iframeFor(url, title) {
   return (
-    <iframe
+    <ManagedTVIframe
       src={url}
       title={title}
       allow={TV_EMBED_IFRAME_POLICY.allow}
-      allowFullScreen
-      loading="lazy"
       referrerPolicy={TV_EMBED_IFRAME_POLICY.referrerPolicy}
       sandbox={TV_EMBED_IFRAME_POLICY.sandbox}
     />
   )
 }
 
-registerTVEmbedProvider('iframe', ({ embedUrl, title }) => {
+function renderNormalizedIframe({ embedUrl, title }) {
   const normalized = normalizeTVEmbedUrl(embedUrl)
   if (!normalized.valid) return null
   return iframeFor(normalized.url, title)
-})
+}
+
+registerTVEmbedProvider('iframe', renderNormalizedIframe)
+registerTVEmbedProvider('embed-canais-tv', renderNormalizedIframe)
 
 registerTVEmbedProvider('youtube-official', ({ embedUrl, title }) => {
   let parsed
