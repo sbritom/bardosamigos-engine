@@ -100,6 +100,16 @@ async function fetchPandaMatches(path, token, perPage, sort = '') {
   return (Array.isArray(payload) ? payload : []).map(normalizeEsportsMatch)
 }
 
+function dedupeMatches(items = [], seen = new Set()) {
+  return items.filter((match) => {
+    const key = match?.id ? String(match.id) : ''
+    if (!key) return true
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 export async function listRawgReleases() {
   const apiKey = String(process.env.RAWG_API_KEY || '').trim()
   if (!apiKey) {
@@ -158,11 +168,7 @@ export async function listGamerPowerFreeGames() {
     attribution: { label: 'Ofertas por GamerPower', url: 'https://www.gamerpower.com/' },
     items: (Array.isArray(payload) ? payload : [])
       .filter((item) => String(item.status || 'Active').toLowerCase() === 'active')
-      .sort((a, b) => {
-        const aGame = String(a.type || '').toLowerCase() === 'game' ? 0 : 1
-        const bGame = String(b.type || '').toLowerCase() === 'game' ? 0 : 1
-        return aGame - bGame
-      })
+      .filter((item) => String(item.type || '').trim().toLowerCase() === 'game')
       .slice(0, 18)
       .map(normalizeGiveaway),
   }
@@ -176,17 +182,34 @@ export async function listPandaScoreMatches() {
     throw error
   }
 
-  const [running, upcoming, past] = await Promise.all([
+  const settled = await Promise.allSettled([
     fetchPandaMatches('/matches/running', token, 8),
     fetchPandaMatches('/matches/upcoming', token, 12, 'begin_at'),
     fetchPandaMatches('/matches/past', token, 12, '-begin_at'),
   ])
 
+  const sectionNames = ['running', 'upcoming', 'past']
+  const failures = settled
+    .map((entry, index) => entry.status === 'rejected' ? sectionNames[index] : null)
+    .filter(Boolean)
+
+  if (failures.length === settled.length) {
+    const firstFailure = settled.find((entry) => entry.status === 'rejected')
+    throw firstFailure?.reason || new Error('PandaScore indisponível no momento.')
+  }
+
+  const rawRunning = settled[0].status === 'fulfilled' ? settled[0].value : []
+  const rawUpcoming = settled[1].status === 'fulfilled' ? settled[1].value : []
+  const rawPast = settled[2].status === 'fulfilled' ? settled[2].value : []
+  const seen = new Set()
+
   return {
     source: 'pandascore',
-    running,
-    upcoming,
-    past,
+    running: dedupeMatches(rawRunning, seen),
+    upcoming: dedupeMatches(rawUpcoming, seen),
+    past: dedupeMatches(rawPast, seen),
+    partial: failures.length > 0,
+    warnings: failures,
   }
 }
 
