@@ -8,24 +8,21 @@ function GuestProfile() {
   const { openAuth } = useAuth()
 
   return (
-    <main className="bds-personalization-page">
-      <section className="mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-[var(--primary)]/10 text-[var(--primary)]">
-          <UserRound size={38} />
+    <main className="imortal-profile-page imortal-profile-page--guest">
+      <section className="imortal-profile-access-card">
+        <div className="imortal-profile-access-card__icon">
+          <UserRound size={32} />
         </div>
 
-        <div className="mt-5 text-center">
-          <h1 className="text-2xl font-black text-[var(--text)]">Perfil</h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-            Entre na sua conta para editar nome, usuário, bio e foto.
-          </p>
-        </div>
+        <span className="imortal-profile-eyebrow">CONTA IMORTAL0800</span>
+        <h1>Acesse seu perfil</h1>
+        <p>Entre na sua conta ou crie um usuário para começar.</p>
 
-        <div className="mt-6 grid gap-3">
+        <div className="imortal-profile-access-card__actions">
           <button
             type="button"
+            className="is-primary"
             onClick={() => openAuth('', 'login')}
-            className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 font-black text-white transition hover:brightness-110"
           >
             <LogIn size={17} />
             Entrar
@@ -34,7 +31,6 @@ function GuestProfile() {
           <button
             type="button"
             onClick={() => openAuth('', 'signup')}
-            className="flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 font-bold text-[var(--text)] transition hover:bg-white/[0.07]"
           >
             <UserPlus size={16} />
             Criar conta
@@ -135,19 +131,15 @@ function AuthenticatedProfile() {
   const currentUsername = form.username || profile?.username || ''
 
   return (
-    <main className="bds-personalization-page">
-      <section className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-[var(--surface)] p-5 shadow-xl sm:p-7">
-        <header className="flex flex-col items-center text-center">
-          <div className="relative h-24 w-24">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[var(--primary)]/10 text-[var(--primary)]">
+    <main className="imortal-profile-page">
+      <section className="imortal-profile-card">
+        <header className="imortal-profile-card__header">
+          <div className="imortal-profile-avatar-wrap">
+            <div className="imortal-profile-avatar">
               {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={`Foto de ${currentName}`}
-                  className="h-full w-full object-cover"
-                />
+                <img src={avatarUrl} alt={`Foto de ${currentName}`} />
               ) : (
-                <UserRound size={43} />
+                <UserRound size={39} />
               )}
             </div>
 
@@ -155,11 +147,11 @@ function AuthenticatedProfile() {
               type="button"
               disabled={avatarBusy || profileLoading}
               onClick={() => avatarInputRef.current?.click()}
-              className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[var(--primary)] text-white shadow-lg transition hover:brightness-110 disabled:opacity-60"
+              className="imortal-profile-avatar-button"
               aria-label="Alterar foto"
               title="Alterar foto"
             >
-              <Camera size={17} />
+              <Camera size={16} />
             </button>
 
             <input
@@ -171,21 +163,17 @@ function AuthenticatedProfile() {
             />
           </div>
 
-          <h1 className="mt-5 max-w-full truncate text-2xl font-black text-[var(--text)]">
-            {currentName}
-          </h1>
-          <p className="mt-1 flex items-center gap-1 text-sm font-bold text-[var(--primary)]">
-            <AtSign size={14} />
-            {currentUsername || 'usuario'}
-          </p>
-          {avatarBusy ? (
-            <small className="mt-2 text-[var(--text-secondary)]">Enviando foto...</small>
-          ) : null}
+          <div>
+            <span className="imortal-profile-eyebrow">MEU PERFIL</span>
+            <h1>{currentName}</h1>
+            <p><AtSign size={13} />{currentUsername || 'usuario'}</p>
+            {avatarBusy ? <small>Enviando foto...</small> : null}
+          </div>
         </header>
 
-        <form className="mt-7 grid gap-4" onSubmit={handleSave}>
-          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
-            Nome exibido
+        <form className="imortal-profile-form" onSubmit={handleSave}>
+          <label>
+            <span>Nome exibido</span>
             <input
               name="displayName"
               type="text"
@@ -194,17 +182,13 @@ function AuthenticatedProfile() {
               required
               value={form.displayName}
               onChange={handleChange}
-              className="min-h-[48px] w-full rounded-2xl border border-white/10 bg-black/10 px-4 text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
             />
           </label>
 
-          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
-            Nome de usuário
-            <div className="relative">
-              <AtSign
-                size={16}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
-              />
+          <label>
+            <span>Nome de usuário</span>
+            <div className="imortal-profile-input-with-icon">
+              <AtSign size={15} />
               <input
                 name="username"
                 type="text"
@@ -213,13 +197,12 @@ function AuthenticatedProfile() {
                 value={form.username}
                 onChange={handleChange}
                 placeholder="seuusuario"
-                className="min-h-[48px] w-full rounded-2xl border border-white/10 bg-black/10 py-3 pl-10 pr-4 lowercase text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
               />
             </div>
           </label>
 
-          <label className="grid gap-2 text-sm font-bold text-[var(--text)]">
-            Bio
+          <label>
+            <span>Bio</span>
             <textarea
               name="bio"
               rows={3}
@@ -227,37 +210,23 @@ function AuthenticatedProfile() {
               value={form.bio}
               onChange={handleChange}
               placeholder="Conte um pouco sobre você..."
-              className="w-full resize-none rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-[var(--text)] outline-none transition placeholder:text-[var(--text-secondary)]/60 focus:border-[var(--primary)]"
             />
           </label>
 
           {(feedback || profileError) ? (
-            <p className={`rounded-2xl px-4 py-3 text-sm ${
-              tone === 'success' && !profileError
-                ? 'bg-emerald-500/10 text-emerald-100'
-                : 'bg-red-500/10 text-red-100'
-            }`}>
+            <p className={`imortal-profile-feedback ${tone === 'success' && !profileError ? 'is-success' : 'is-error'}`}>
               {feedback || 'Alguns dados do perfil não puderam ser carregados agora.'}
             </p>
           ) : null}
 
-          <div className="mt-1 grid gap-3 sm:grid-cols-2">
-            <button
-              type="submit"
-              disabled={busy || avatarBusy || profileLoading}
-              className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 font-black text-white transition hover:brightness-110 disabled:opacity-60"
-            >
-              <Save size={17} />
+          <div className="imortal-profile-form__actions">
+            <button type="submit" className="is-primary" disabled={busy || avatarBusy || profileLoading}>
+              <Save size={16} />
               {busy ? 'Salvando...' : 'Salvar perfil'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => openAuth('', 'recover')}
-              disabled={busy || avatarBusy}
-              className="flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 font-bold text-[var(--text)] transition hover:bg-white/[0.07] disabled:opacity-60"
-            >
-              <KeyRound size={17} />
+            <button type="button" onClick={() => openAuth('', 'recover')} disabled={busy || avatarBusy}>
+              <KeyRound size={16} />
               Redefinir senha
             </button>
           </div>
@@ -266,9 +235,9 @@ function AuthenticatedProfile() {
             type="button"
             disabled={busy || avatarBusy}
             onClick={handleSignOut}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-transparent px-5 text-sm font-bold text-[var(--text-secondary)] transition hover:bg-white/[0.04] hover:text-[var(--text)] disabled:opacity-60"
+            className="imortal-profile-signout"
           >
-            <LogOut size={16} />
+            <LogOut size={15} />
             Sair da conta
           </button>
         </form>
@@ -282,10 +251,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="bds-personalization-page">
-        <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-[var(--surface)] p-8 text-center text-[var(--text-secondary)]">
-          Carregando perfil...
-        </div>
+      <main className="imortal-profile-page imortal-profile-page--guest">
+        <div className="imortal-profile-loading">Carregando perfil...</div>
       </main>
     )
   }
