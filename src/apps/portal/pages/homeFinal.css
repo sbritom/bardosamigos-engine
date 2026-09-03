@@ -73,9 +73,9 @@
 .bds-home-shell .imortal-home-tv-card .bds-home-tv-stage,
 .bds-home-shell .imortal-home-chat-card .bds-chat-frame {
   width: 100%;
-  height: auto !important;
-  min-height: 0 !important;
-  aspect-ratio: 4 / 3;
+  height: 560px !important;
+  min-height: 560px !important;
+  aspect-ratio: auto;
   box-sizing: border-box;
   border-radius: 15px;
 }
@@ -279,7 +279,9 @@
 
   .bds-home-shell .imortal-home-tv-card .bds-home-tv-stage,
   .bds-home-shell .imortal-home-chat-card .bds-chat-frame {
-    aspect-ratio: 4 / 3;
+    height: 560px !important;
+    min-height: 560px !important;
+    aspect-ratio: auto;
     border-radius: 13px;
   }
 
