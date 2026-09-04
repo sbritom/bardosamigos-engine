@@ -1,0 +1,31 @@
+/* Banner visual da Central de Futebol — mantém a estrutura e as dimensões do header existente. */
+.imortal-football-intro {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #03060b;
+  background-image: url('/banners/imortal0800-football-header.webp');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center 38%;
+}
+
+/* O texto continua no DOM para acessibilidade/SEO; a arte já contém o título visual. */
+.imortal-football-intro > div {
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.imortal-football-intro .imortal-football-pool {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
+}
+
+@media (max-width: 720px) {
+  .imortal-football-intro {
+    background-size: contain;
+    background-position: center center;
+  }
+}
