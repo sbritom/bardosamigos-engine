@@ -1,31 +1,56 @@
-/* Banner visual da Central de Futebol — mantém a estrutura e as dimensões do header existente. */
-.imortal-football-intro {
-  position: relative;
-  overflow: hidden;
+/* Banner visual da Central de Futebol — exibe a arte completa no cabeçalho da página. */
+.bds-football-page > .imortal-football-intro {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 1920 / 278 !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
   isolation: isolate;
-  background-color: #03060b;
-  background-image: url('/banners/imortal0800-football-header.webp');
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center 38%;
+  border: 1px solid rgba(42, 143, 255, .22) !important;
+  border-radius: 18px !important;
+  background-color: #03060b !important;
+  background-image: url('/banners/imortal0800-football-header.webp') !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .28) !important;
 }
 
-/* O texto continua no DOM para acessibilidade/SEO; a arte já contém o título visual. */
-.imortal-football-intro > div {
-  opacity: 0;
-  pointer-events: none;
-  user-select: none;
+/* A arte já contém IMORTAL0800 + CENTRAL DE FUTEBOL; mantém o texto sem duplicá-lo visualmente. */
+.bds-football-page > .imortal-football-intro > div {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
 
-.imortal-football-intro .imortal-football-pool {
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
+/* Mantém o acesso ao bolão sem alterar a proporção nem empurrar a imagem. */
+.bds-football-page > .imortal-football-intro .imortal-football-pool {
+  position: absolute !important;
+  right: 16px !important;
+  bottom: 14px !important;
+  z-index: 2 !important;
+  margin: 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .48) !important;
 }
 
 @media (max-width: 720px) {
-  .imortal-football-intro {
-    background-size: contain;
-    background-position: center center;
+  .bds-football-page > .imortal-football-intro {
+    margin-bottom: 12px !important;
+    border-radius: 13px !important;
+    background-size: 100% 100% !important;
+  }
+
+  .bds-football-page > .imortal-football-intro .imortal-football-pool {
+    right: 8px !important;
+    bottom: 7px !important;
+    min-height: 30px !important;
+    padding: 0 9px !important;
+    font-size: .65rem !important;
   }
 }
