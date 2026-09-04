@@ -94,7 +94,7 @@ export function AuthProvider({ children }) {
       return nextProfile
     } catch (error) {
       setProfile(null)
-      setProfileError(error.message || 'Nao foi possivel carregar seu perfil.')
+      setProfileError(error.message || 'Não foi possível carregar seu perfil.')
       return null
     } finally {
       setProfileLoading(false)
@@ -213,7 +213,7 @@ export function AuthProvider({ children }) {
       const { error } = await supabase.auth.updateUser({
         data: { display_name: nextProfile.displayName },
       })
-      if (error) console.warn('Nao foi possivel sincronizar o nome no Auth:', error.message)
+      if (error) console.warn('Não foi possível sincronizar o nome no Auth:', error.message)
     }
 
     return nextProfile
@@ -221,7 +221,7 @@ export function AuthProvider({ children }) {
 
   const updatePreferences = useCallback(async (patch = {}) => {
     const user = session?.user
-    if (!user) throw new Error('Entre na sua conta para salvar preferencias.')
+    if (!user) throw new Error('Entre na sua conta para salvar preferências.')
 
     const nextPreferences = mergePreferences(profile?.preferences || {}, patch)
     const nextProfile = await saveUserPreferences(user, nextPreferences)

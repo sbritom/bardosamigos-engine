@@ -60,7 +60,7 @@ function AdminAccessShell({ children, centered = false }) {
 export default function AdminRouteGuard({
   children,
   allowedRoles = [ADMIN_ROLES.ADMIN],
-  title = 'Area administrativa',
+  title = 'Área administrativa',
   centeredAuth = false,
 }) {
   const [access, setAccess] = useState(INITIAL_STATE)
@@ -165,7 +165,7 @@ export default function AdminRouteGuard({
           <ShieldCheck size={24} className="text-[var(--primary)]" />
           <div>
             <strong className="block text-[var(--text)]">Verificando acesso</strong>
-            <span className="text-sm">Validando sua sessao administrativa...</span>
+            <span className="text-sm">Validando sua sessão administrativa...</span>
           </div>
         </div>
       </AdminAccessShell>
@@ -281,7 +281,7 @@ export default function AdminRouteGuard({
     return (
       <AdminAccessShell centered={centeredAuth}>
         <ShieldAlert size={30} className="text-amber-300" />
-        <h1 className="mt-3 text-2xl font-black text-[var(--text)]">Acesso nao autorizado</h1>
+        <h1 className="mt-3 text-2xl font-black text-[var(--text)]">Acesso não autorizado</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
           {access.reason || ADMIN_AUTH_ERRORS.NOT_ALLOWED}
         </p>

@@ -7,7 +7,7 @@ const ALLOWED_AVATAR_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
 
 function getClient() {
   const client = getSupabaseClient()
-  if (!client) throw new Error('O Supabase nao esta configurado neste ambiente.')
+  if (!client) throw new Error('O Supabase não está configurado neste ambiente.')
   return client
 }
 
@@ -53,7 +53,7 @@ function mapProfile(row, user) {
 
 function handleProfileError(error) {
   if (error?.code === '23505') {
-    throw new Error('Esse nome de usuario ja esta em uso. Escolha outro.')
+    throw new Error('Esse nome de usuário já está em uso. Escolha outro.')
   }
   throw error
 }
@@ -63,7 +63,7 @@ async function getAccessToken(client) {
   if (error) throw error
 
   const token = data?.session?.access_token || ''
-  if (!token) throw new Error('Sua sessao expirou. Entre novamente para continuar.')
+  if (!token) throw new Error('Sua sessão expirou. Entre novamente para continuar.')
   return token
 }
 
@@ -78,7 +78,7 @@ async function bootstrapProfile(client, user) {
   const payload = await response.json().catch(() => ({}))
 
   if (!response.ok || payload?.ok === false) {
-    throw new Error(payload?.error || 'Nao foi possivel preparar seu perfil agora.')
+    throw new Error(payload?.error || 'Não foi possível preparar seu perfil agora.')
   }
 
   return mapProfile(payload?.data, user)
@@ -95,12 +95,12 @@ export function validateUsername(value) {
   const username = normalizeUsername(value)
   if (!username) return ''
 
-  if (username.length < 3 || username.length > 24) {
-    throw new Error('O nome de usuario deve ter entre 3 e 24 caracteres.')
+  if (username.length < 3 || username.length > 20) {
+    throw new Error('O nome de usuário deve ter entre 3 e 20 caracteres.')
   }
 
-  if (!/^[a-z0-9._]+$/.test(username)) {
-    throw new Error('Use apenas letras, numeros, ponto e underline no nome de usuario.')
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    throw new Error('Use apenas letras, números e underline no nome de usuário.')
   }
 
   return username
@@ -141,7 +141,7 @@ async function updateWithBootstrap(user, payload) {
 
   await bootstrapProfile(client, user)
   const retried = await updateExistingProfile(client, user, payload)
-  if (!retried) throw new Error('Nao foi possivel salvar seu perfil agora.')
+  if (!retried) throw new Error('Não foi possível salvar seu perfil agora.')
   return retried
 }
 
@@ -170,7 +170,7 @@ export async function saveUserProfile(user, values = {}) {
 }
 
 export async function saveUserPreferences(user, preferences = {}) {
-  if (!user?.id) throw new Error('Entre na sua conta para salvar preferencias.')
+  if (!user?.id) throw new Error('Entre na sua conta para salvar preferências.')
 
   const safePreferences = preferences && typeof preferences === 'object' && !Array.isArray(preferences)
     ? preferences
@@ -189,7 +189,7 @@ export async function uploadUserAvatar(user, file) {
   if (!user?.id) throw new Error('Entre na sua conta para alterar a foto.')
   if (!file) throw new Error('Selecione uma imagem para o perfil.')
   if (!ALLOWED_AVATAR_TYPES.has(file.type)) throw new Error('Use uma imagem PNG, JPG ou WebP.')
-  if (file.size > MAX_AVATAR_SIZE) throw new Error('A imagem deve ter no maximo 5 MB.')
+  if (file.size > MAX_AVATAR_SIZE) throw new Error('A imagem deve ter no máximo 5 MB.')
 
   const client = getClient()
   const extension = getAvatarExtension(file)
@@ -207,7 +207,7 @@ export async function uploadUserAvatar(user, file) {
 
   const { data } = client.storage.from(AVATAR_BUCKET).getPublicUrl(filePath)
   const avatarUrl = data?.publicUrl || ''
-  if (!avatarUrl) throw new Error('Nao foi possivel gerar a URL publica do avatar.')
+  if (!avatarUrl) throw new Error('Não foi possível gerar a URL pública do avatar.')
 
   return {
     avatarUrl,

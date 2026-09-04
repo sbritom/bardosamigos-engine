@@ -105,11 +105,11 @@ export const plugins = [
 
   {
     id: "radio-xat",
-    title: "Radio xat",
+    title: "Rádio Xat",
     path: "/radio/xat",
     icon: Radio,
     menu: false,
-    element: <LazyPluginPage component={XatPreviewPage} title="Radio xat" />,
+    element: <LazyPluginPage component={XatPreviewPage} title="Rádio Xat" />,
   },
 
   {
@@ -148,7 +148,6 @@ export const plugins = [
     element: <LazyPluginPage component={FootballTeamPage} title="Time" />,
   },
 
-
   {
     id: "news",
     title: "Notícias",
@@ -157,7 +156,6 @@ export const plugins = [
     menu: false,
     element: <LazyPluginPage component={NewsPage} title="Notícias" />,
   },
-
 
   {
     id: "barstudio-designer",
@@ -176,7 +174,6 @@ export const plugins = [
     menu: true,
     element: <LazyPluginPage component={GamesPage} title="Games" />,
   },
-
 
   {
     id: "community",
@@ -198,22 +195,21 @@ export const plugins = [
 
   {
     id: "for-you",
-    title: "Para Voce",
+    title: "Para Você",
     path: "/for-you",
     icon: Sparkles,
     menu: false,
-    element: <LazyPluginPage component={ForYouPage} title="Para Voce" />,
+    element: <LazyPluginPage component={ForYouPage} title="Para Você" />,
   },
 
   {
     id: "settings",
-    title: "Configuracoes",
+    title: "Configurações",
     path: "/settings",
     icon: Settings,
     menu: false,
-    element: <LazyPluginPage component={SettingsPage} title="Configuracoes" />,
+    element: <LazyPluginPage component={SettingsPage} title="Configurações" />,
   },
-
 
   {
     id: "events",
@@ -232,7 +228,6 @@ export const plugins = [
     menu: false,
     element: <AdminPluginPage component={EventsAdminPage} title="Eventos Admin" />,
   },
-
 
   {
     id: "admin",
@@ -299,7 +294,7 @@ export const plugins = [
 
   {
     id: "admin-tv-settings",
-    title: "TV Manager Configuracoes",
+    title: "TV Manager Configurações",
     path: "/admin/tv/settings",
     icon: Tv,
     menu: false,
@@ -308,7 +303,7 @@ export const plugins = [
 
   {
     id: "admin-tv-import",
-    title: "TV Manager Importacao",
+    title: "TV Manager Importação",
     path: "/admin/tv/import",
     icon: Tv,
     menu: false,

@@ -11,10 +11,10 @@ export default function NotFoundPage() {
 
         <p className="mt-5 text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Erro 404</p>
         <h1 id="not-found-title" className="mt-2 text-3xl font-black text-[var(--text)]">
-          Pagina nao encontrada
+          Página não encontrada
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-secondary)]">
-          Este endereco nao existe ou foi movido. Voce pode voltar para a pagina inicial e continuar navegando normalmente.
+          Este endereço não existe ou foi movido. Você pode voltar para a página inicial e continuar navegando normalmente.
         </p>
 
         <Link
@@ -22,7 +22,7 @@ export default function NotFoundPage() {
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110"
         >
           <Home size={18} aria-hidden="true" />
-          Ir para a pagina inicial
+          Ir para a página inicial
         </Link>
       </div>
     </section>

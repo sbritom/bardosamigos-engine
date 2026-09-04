@@ -8,10 +8,10 @@ import { PersonalizationShell } from '../components/PersonalizationComponents'
 import { loadPersonalFavorites } from '../services/favoritesService'
 
 const QUICK_LINKS = [
-  { id: 'football', title: 'Futebol', description: 'Jogos, times e competicoes.', path: '/football', icon: Trophy },
+  { id: 'football', title: 'Futebol', description: 'Jogos, times e competições.', path: '/football', icon: Trophy },
   { id: 'tv', title: 'TV', description: 'Assista aos canais e salve seus favoritos.', path: '/tv', icon: Tv },
-  { id: 'radio', title: 'Radio', description: 'Ouça a programacao e peça sua musica.', path: '/radio', icon: Radio },
-  { id: 'news', title: 'Noticias', description: 'Veja as noticias em destaque.', path: '/news', icon: Newspaper },
+  { id: 'radio', title: 'Rádio', description: 'Ouça a programação e peça sua música.', path: '/radio', icon: Radio },
+  { id: 'news', title: 'Notícias', description: 'Veja as notícias em destaque.', path: '/news', icon: Newspaper },
   { id: 'events', title: 'Eventos', description: 'Acompanhe a agenda do IMORTAL0800.', path: '/events', icon: CalendarDays },
 ]
 
@@ -22,7 +22,7 @@ function GuestForYou({ onLogin, onExplore }) {
         <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Acesso livre</span>
         <h2 className="mt-2 text-3xl font-black text-[var(--text)]">O portal continua aberto para todos</h2>
         <p className="mt-4 max-w-2xl leading-7 text-[var(--text-secondary)]">
-          Voce pode usar Radio, TV, Futebol, Noticias e Eventos sem cadastro. A conta serve apenas para guardar favoritos e preferencias pessoais.
+          Você pode usar Rádio, TV, Futebol, Notícias e Eventos sem cadastro. A conta serve apenas para guardar favoritos e preferências pessoais.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
@@ -47,7 +47,7 @@ function GuestForYou({ onLogin, onExplore }) {
         <Star className="text-[var(--primary)]" size={26} />
         <h3 className="mt-3 text-xl font-black text-[var(--text)]">O que fica salvo?</h3>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          Canais da TV, times do Futebol e suas preferencias passam a acompanhar sua conta em qualquer dispositivo.
+          Canais da TV, times do Futebol e suas preferências passam a acompanhar sua conta em qualquer dispositivo.
         </p>
       </div>
     </section>
@@ -84,7 +84,7 @@ function QuickLinks({ interests, onlyInterests, onOpen }) {
   return (
     <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6">
       <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Seus interesses</span>
-      <h2 className="mt-1 text-xl font-black text-[var(--text)]">Atalhos para voce</h2>
+      <h2 className="mt-1 text-xl font-black text-[var(--text)]">Atalhos para você</h2>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {visibleLinks.map(({ id, title, description, path, icon: Icon }) => (
           <button
@@ -154,7 +154,7 @@ export default function ForYouPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Favoritos</span>
-          <h2 className="mt-1 text-xl font-black text-[var(--text)]">O que voce salvou</h2>
+          <h2 className="mt-1 text-xl font-black text-[var(--text)]">O que você salvou</h2>
         </div>
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-[var(--text-secondary)]">
           {tvFavorites.length + footballFavorites.length} item(ns)
@@ -168,8 +168,8 @@ export default function ForYouPage() {
           {footballFavorites.map((favorite) => (
             <FavoriteCard
               key={`football-${favorite.id}`}
-              title={favorite.metadata?.name || (favorite.type === 'team' ? 'Time favorito' : 'Competicao favorita')}
-              subtitle={favorite.type === 'team' ? (favorite.metadata?.country || 'Futebol') : 'Competicao'}
+              title={favorite.metadata?.name || (favorite.type === 'team' ? 'Time favorito' : 'Competição favorita')}
+              subtitle={favorite.type === 'team' ? (favorite.metadata?.country || 'Futebol') : 'Competição'}
               image={favorite.metadata?.crest || ''}
               icon={Trophy}
               onOpen={() => navigate(favorite.type === 'team' ? `/football/times/${favorite.favoriteId}` : '/football')}
@@ -188,8 +188,8 @@ export default function ForYouPage() {
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/5 p-5">
-          <p className="font-bold text-[var(--text)]">Voce ainda nao salvou favoritos.</p>
-          <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">Use a estrela na TV ou favorite um time na area de Futebol.</p>
+          <p className="font-bold text-[var(--text)]">Você ainda não salvou favoritos.</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">Use a estrela na TV ou favorite um time na área de Futebol.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" onClick={() => navigate('/tv')} className="rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-bold text-white">Explorar TV</button>
             <button type="button" onClick={() => navigate('/football')} className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold text-[var(--text)]">Explorar Futebol</button>
@@ -198,7 +198,7 @@ export default function ForYouPage() {
       )}
 
       {favorites.errors.length > 0 && (
-        <p className="mt-4 text-sm text-amber-100">Alguns favoritos nao puderam ser carregados agora.</p>
+        <p className="mt-4 text-sm text-amber-100">Alguns favoritos não puderam ser carregados agora.</p>
       )}
     </section>
   )
@@ -207,8 +207,8 @@ export default function ForYouPage() {
 
   return (
     <PersonalizationShell
-      eyebrow="Para voce"
-      title="Sua area personalizada"
+      eyebrow="Para você"
+      title="Sua área personalizada"
       description="Favoritos e atalhos organizados a partir das escolhas salvas na sua conta."
       icon={<Sparkles size={40} />}
       actions={
@@ -217,14 +217,14 @@ export default function ForYouPage() {
             Perfil
           </ActionButton>
           <ActionButton variant="outline" icon={<Settings size={16} />} onClick={() => navigate('/settings')}>
-            Preferencias
+            Preferências
           </ActionButton>
         </>
       }
     >
       {!isAuthenticated ? (
         <GuestForYou
-          onLogin={() => openAuth('Entre para ver favoritos e preferencias salvos na sua conta.', 'login')}
+          onLogin={() => openAuth('Entre para ver seus favoritos e suas preferências salvas na sua conta.', 'login')}
           onExplore={() => navigate('/')}
         />
       ) : (

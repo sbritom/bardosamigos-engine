@@ -166,7 +166,7 @@ function AuthenticatedProfile() {
           <div>
             <span className="imortal-profile-eyebrow">MEU PERFIL</span>
             <h1>{currentName}</h1>
-            <p><AtSign size={13} />{currentUsername || 'usuario'}</p>
+            <p><AtSign size={13} />{currentUsername || 'usuário'}</p>
             {avatarBusy ? <small>Enviando foto...</small> : null}
           </div>
         </header>
@@ -193,7 +193,7 @@ function AuthenticatedProfile() {
                 name="username"
                 type="text"
                 minLength={3}
-                maxLength={24}
+                maxLength={20}
                 value={form.username}
                 onChange={handleChange}
                 placeholder="seuusuario"

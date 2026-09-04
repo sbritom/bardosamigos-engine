@@ -42,7 +42,7 @@ export default function Header() {
   )
 
   const profileLabel = isAuthenticated
-    ? `Perfil de ${displayName || user?.email || 'usuario'}`
+    ? `Perfil de ${displayName || user?.email || 'usuário'}`
     : 'Entrar ou acessar perfil'
 
   useEffect(() => {

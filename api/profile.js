@@ -5,6 +5,7 @@ import { applyApiCors, rejectOversizedBody } from './_lib/security.js'
 const PROFILE_FIELDS = 'id, display_name, username, avatar_url, bio, role, status, preferences, created_at, updated_at'
 const USERNAME_RE = /^[a-z0-9_]{3,20}$/
 const MIN_PASSWORD_LENGTH = 6
+const MIN_NEW_PASSWORD_LENGTH = 12
 const MANAGEABLE_ROLES = new Set(['user', 'locutor'])
 
 function getSupabaseAdmin() {
@@ -49,10 +50,13 @@ function validateUsername(value) {
   return username
 }
 
-function validatePassword(value) {
+function validatePassword(value, { newPassword = false } = {}) {
   const password = String(value || '')
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    throw new Error('A senha precisa ter pelo menos 6 caracteres.')
+  const minimum = newPassword ? MIN_NEW_PASSWORD_LENGTH : MIN_PASSWORD_LENGTH
+  if (password.length < minimum) {
+    throw new Error(newPassword
+      ? 'A nova senha precisa ter pelo menos 12 caracteres.'
+      : 'A senha precisa ter pelo menos 6 caracteres.')
   }
   if (password.length > 72) {
     throw new Error('A senha é muito longa.')
@@ -307,7 +311,7 @@ async function loginWithUsername(supabase, usernameValue, passwordValue) {
 
 async function createUsernameAccount(supabase, usernameValue, passwordValue) {
   const username = validateUsername(usernameValue)
-  const password = validatePassword(passwordValue)
+  const password = validatePassword(passwordValue, { newPassword: true })
   const existing = await findProfileByUsername(supabase, username)
 
   if (existing) {
@@ -367,7 +371,7 @@ async function createUsernameAccount(supabase, usernameValue, passwordValue) {
 
 async function recoverUsernameAccount(supabase, usernameValue, recoveryCodeValue, passwordValue) {
   const username = validateUsername(usernameValue)
-  const password = validatePassword(passwordValue)
+  const password = validatePassword(passwordValue, { newPassword: true })
   const recoveryCode = normalizeRecoveryCode(recoveryCodeValue)
 
   if (recoveryCode.length < 8) {

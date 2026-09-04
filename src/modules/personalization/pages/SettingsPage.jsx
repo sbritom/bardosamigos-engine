@@ -7,10 +7,10 @@ import { useAuth } from '../../auth/AuthContext'
 import { PersonalizationShell } from '../components/PersonalizationComponents'
 
 const INTERESTS = [
-  { id: 'football', label: 'Futebol', description: 'Jogos, times e competicoes.', icon: Trophy },
+  { id: 'football', label: 'Futebol', description: 'Jogos, times e competições.', icon: Trophy },
   { id: 'tv', label: 'TV', description: 'Canais e destaques da TV do portal.', icon: Tv },
-  { id: 'radio', label: 'Radio', description: 'Programacao e conteudos da radio.', icon: Radio },
-  { id: 'news', label: 'Noticias', description: 'Noticias e assuntos em destaque.', icon: Newspaper },
+  { id: 'radio', label: 'Rádio', description: 'Programação e conteúdos da rádio.', icon: Radio },
+  { id: 'news', label: 'Notícias', description: 'Notícias e assuntos em destaque.', icon: Newspaper },
   { id: 'events', label: 'Eventos', description: 'Eventos e programação do IMORTAL0800.', icon: CalendarDays },
 ]
 
@@ -19,10 +19,10 @@ const DEFAULT_INTERESTS = INTERESTS.map((item) => item.id)
 function GuestSettings({ onLogin }) {
   return (
     <section className="mx-auto w-full max-w-4xl rounded-3xl border border-white/10 bg-[var(--surface)] p-7 shadow-xl">
-      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Preferencias pessoais</span>
-      <h2 className="mt-2 text-2xl font-black text-[var(--text)]">Entre para salvar suas preferencias</h2>
+      <span className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Preferências pessoais</span>
+      <h2 className="mt-2 text-2xl font-black text-[var(--text)]">Entre para salvar suas preferências</h2>
       <p className="mt-3 max-w-2xl leading-7 text-[var(--text-secondary)]">
-        O portal continua livre sem cadastro. A conta e necessaria somente para guardar suas escolhas e usa-las em experiencias personalizadas.
+        O portal continua livre sem cadastro. A conta é necessária somente para guardar suas escolhas e usá-las em experiências personalizadas.
       </p>
       <button
         type="button"
@@ -72,7 +72,7 @@ export default function SettingsPage() {
     event.preventDefault()
     if (!hasAtLeastOneInterest) {
       setTone('error')
-      setFeedback('Escolha pelo menos um interesse para personalizar a area Para voce.')
+      setFeedback('Escolha pelo menos um interesse para personalizar a área Para Você.')
       return
     }
 
@@ -88,10 +88,10 @@ export default function SettingsPage() {
         },
       })
       setTone('success')
-      setFeedback('Preferencias salvas. A area Para voce ja usa essas escolhas.')
+      setFeedback('Preferências salvas. A área Para Você já usa essas escolhas.')
     } catch (error) {
       setTone('error')
-      setFeedback(error.message || 'Nao foi possivel salvar suas preferencias.')
+      setFeedback(error.message || 'Não foi possível salvar suas preferências.')
     } finally {
       setBusy(false)
     }
@@ -99,9 +99,9 @@ export default function SettingsPage() {
 
   return (
     <PersonalizationShell
-      eyebrow="Configuracoes"
-      title="Preferencias da conta"
-      description="Escolha os assuntos que quer priorizar e como a area Para voce deve organizar seus conteudos."
+      eyebrow="Configurações"
+      title="Preferências da conta"
+      description="Escolha os assuntos que quer priorizar e como a área Para Você deve organizar seus conteúdos."
       icon={<Settings size={40} />}
       actions={
         <ActionButton variant="secondary" icon={<UserRound size={16} />} onClick={() => navigate('/profile')}>
@@ -110,16 +110,16 @@ export default function SettingsPage() {
       }
     >
       {!isAuthenticated ? (
-        <GuestSettings onLogin={() => openAuth('Entre para salvar suas preferencias no IMORTAL0800.', 'login')} />
+        <GuestSettings onLogin={() => openAuth('Entre para salvar suas preferências no IMORTAL0800.', 'login')} />
       ) : (
         <form className="mx-auto grid w-full max-w-5xl gap-5" onSubmit={handleSave}>
           <section className="rounded-3xl border border-white/10 bg-[var(--surface)] p-6 shadow-xl md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">Seus interesses</span>
-                <h2 className="mt-1 text-2xl font-black text-[var(--text)]">O que voce quer ver mais?</h2>
+                <h2 className="mt-1 text-2xl font-black text-[var(--text)]">O que você quer ver mais?</h2>
                 <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                  Essas escolhas organizam os atalhos e destaques da sua area personalizada.
+                  Essas escolhas organizam os atalhos e destaques da sua área personalizada.
                 </p>
               </div>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-[var(--text-secondary)]">
@@ -161,7 +161,7 @@ export default function SettingsPage() {
               />
               <span>
                 <span className="flex items-center gap-2 font-black text-[var(--text)]"><Star size={18} /> Priorizar meus favoritos</span>
-                <small className="mt-2 block leading-6 text-[var(--text-secondary)]">Mostra canais e times salvos antes dos atalhos gerais na area Para voce.</small>
+                <small className="mt-2 block leading-6 text-[var(--text-secondary)]">Mostra canais e times salvos antes dos atalhos gerais na área Para Você.</small>
               </span>
             </label>
 
@@ -173,8 +173,8 @@ export default function SettingsPage() {
                 className="mt-1 h-5 w-5 accent-[var(--primary)]"
               />
               <span>
-                <span className="flex items-center gap-2 font-black text-[var(--text)]"><Bell size={18} /> Mostrar so meus interesses</span>
-                <small className="mt-2 block leading-6 text-[var(--text-secondary)]">Oculta atalhos de areas que voce nao marcou como interesse.</small>
+                <span className="flex items-center gap-2 font-black text-[var(--text)]"><Bell size={18} /> Mostrar só meus interesses</span>
+                <small className="mt-2 block leading-6 text-[var(--text-secondary)]">Oculta atalhos de áreas que você não marcou como interesse.</small>
               </span>
             </label>
           </section>
@@ -192,14 +192,14 @@ export default function SettingsPage() {
               className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white transition hover:brightness-110 disabled:opacity-60"
             >
               <Save size={18} />
-              {busy ? 'Salvando...' : 'Salvar preferencias'}
+              {busy ? 'Salvando...' : 'Salvar preferências'}
             </button>
             <button
               type="button"
               onClick={() => navigate('/for-you')}
               className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-bold text-[var(--text)] transition hover:bg-white/10"
             >
-              Ver minha area Para voce
+              Ver minha área Para Você
             </button>
           </div>
         </form>

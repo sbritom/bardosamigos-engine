@@ -7,10 +7,10 @@ export const ADMIN_ROLES = Object.freeze({ ADMIN: 'admin', LOCUTOR: 'locutor' })
 export const ADMIN_AUTH_ERRORS = Object.freeze({
   INVALID_USERNAME: 'Informe um nome de usuário válido.',
   INVALID_LOGIN: 'Usuário ou senha inválidos.',
-  SUPABASE_NOT_CONFIGURED: 'Supabase nao configurado.',
+  SUPABASE_NOT_CONFIGURED: 'Supabase não configurado.',
   NO_SESSION: 'Entre para acessar o painel administrativo.',
-  NOT_ALLOWED: 'Acesso nao autorizado para este usuario.',
-  INVALID_SESSION: 'Sua sessao administrativa expirou. Entre novamente.',
+  NOT_ALLOWED: 'Acesso não autorizado para este usuário.',
+  INVALID_SESSION: 'Sua sessão administrativa expirou. Entre novamente.',
 })
 
 export function normalizeUsername(username) {

@@ -269,7 +269,8 @@ export default function AuthDialog() {
                 onChange={handleChange}
                 placeholder={mode === 'recover' ? 'Nova senha' : 'Sua senha'}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
-                minLength={6}
+                minLength={isLogin ? 6 : 12}
+                maxLength={72}
                 trailing={passwordToggle}
               />
 
@@ -294,7 +295,8 @@ export default function AuthDialog() {
                   onChange={handleChange}
                   placeholder="Repita a senha"
                   autoComplete="new-password"
-                  minLength={6}
+                  minLength={12}
+                  maxLength={72}
                   trailing={confirmPasswordToggle}
                 />
               ) : null}
