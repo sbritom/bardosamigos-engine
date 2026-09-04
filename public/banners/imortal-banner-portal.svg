@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="195" viewBox="0 0 1920 195" role="img" aria-label="IMORTAL0800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#010308"/><stop offset="35%" stop-color="#03101a"/><stop offset="50%" stop-color="#06253a"/><stop offset="65%" stop-color="#03101a"/><stop offset="100%" stop-color="#010308"/></linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="48%"><stop offset="0%" stop-color="#12c9ff" stop-opacity=".26"/><stop offset="35%" stop-color="#0787d6" stop-opacity=".13"/><stop offset="100%" stop-color="#00111e" stop-opacity="0"/></radialGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f2fbff"/><stop offset="50%" stop-color="#8edfff"/><stop offset="100%" stop-color="#18b8ff"/></linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0b78ff" stop-opacity="0"/><stop offset="50%" stop-color="#15c9ff" stop-opacity=".9"/><stop offset="100%" stop-color="#0b78ff" stop-opacity="0"/></linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="1920" height="195" fill="url(#bg)"/><ellipse cx="960" cy="98" rx="760" ry="155" fill="url(#halo)"/>
+  <g opacity=".34" fill="none" stroke="#0d83c9"><circle cx="960" cy="98" r="72"/><circle cx="960" cy="98" r="87" opacity=".45"/><circle cx="960" cy="98" r="102" opacity=".18"/></g>
+  <path d="M180 98 H760 M1160 98 H1740" stroke="url(#line)" stroke-width="1.5" opacity=".48"/><path d="M960 16 V179" stroke="#18bfff" stroke-opacity=".10"/>
+  <g opacity=".14" fill="#18bfff"><circle cx="240" cy="39" r="1.5"/><circle cx="330" cy="151" r="1.2"/><circle cx="425" cy="68" r="1.1"/><circle cx="1510" cy="42" r="1.4"/><circle cx="1620" cy="136" r="1.1"/><circle cx="1710" cy="72" r="1.6"/></g>
+  <ellipse cx="960" cy="99" rx="110" ry="20" fill="#12c9ff" opacity=".10" filter="url(#soft)"/><circle cx="960" cy="98" r="3.8" fill="#b8efff" filter="url(#glow)"/>
+  <g fill="none" stroke="#19baff" stroke-opacity=".34"><path d="M780 26 C820 44 842 49 876 55"/><path d="M1140 26 C1100 44 1078 49 1044 55"/><path d="M780 168 C820 150 842 145 876 139"/><path d="M1140 168 C1100 150 1078 145 1044 139"/></g>
+  <text x="960" y="54" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="6" fill="#75d9ff" opacity=".55">PORTAL DA COMUNIDADE</text>
+  <text x="960" y="121" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="73" font-weight="700" letter-spacing="8" fill="url(#title)" stroke="#c5f2ff" stroke-opacity=".28" stroke-width="1" paint-order="stroke fill" filter="url(#glow)">IMORTAL0800</text>
+  <path d="M690 143 H1230" stroke="url(#line)" stroke-width="2" opacity=".68"/>
+</svg>

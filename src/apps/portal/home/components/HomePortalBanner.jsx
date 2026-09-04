@@ -4,28 +4,34 @@ import './homePortalBanner.css'
 const SLIDES = [
   {
     id: 'portal',
-    image: '/banners/imortal-simple-portal.svg',
+    image: '/banners/imortal-banner-portal.svg',
     alt: 'IMORTAL0800',
     href: '/',
   },
   {
     id: 'chat',
-    image: '/banners/imortal-simple-xat.svg',
+    image: '/banners/imortal-banner-xat.svg',
     alt: 'Xat Oficial IMORTAL0800',
     href: 'https://xat.com/Imortal0800',
     external: true,
   },
   {
     id: 'football',
-    image: '/banners/imortal-simple-football.svg',
+    image: '/banners/imortal-banner-football.svg',
     alt: 'Futebol IMORTAL0800',
     href: '/football',
   },
   {
     id: 'games',
-    image: '/banners/imortal-simple-games.svg',
+    image: '/banners/imortal-banner-games.svg',
     alt: 'Games IMORTAL0800',
     href: '/games',
+  },
+  {
+    id: 'community',
+    image: '/banners/imortal-banner-community.svg',
+    alt: 'Comunidade IMORTAL0800',
+    href: '/community',
   },
 ]
 
