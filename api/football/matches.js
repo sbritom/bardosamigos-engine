@@ -561,13 +561,44 @@ function compareMatches(left, right, today) {
   return getMatchTime(left) - getMatchTime(right)
 }
 
+function isFinishedMatch(match = {}) {
+  const status = getMatchStatus(match)
+  return FINISHED_STATUSES.has(status) || ['FINALIZADO', 'ENCERRADO'].includes(status)
+}
+
 function selectRelevantMatches(matches = [], today, limit = DISPLAY_LIMIT) {
   const uniqueMatches = Array.from(new Map(matches.map((match) => [match.id, match])).values())
   const sortedMatches = uniqueMatches.sort((left, right) => compareMatches(left, right, today))
-  const todayMatches = sortedMatches.filter((match) => getMatchPriority(match, today) < 3)
+  const liveMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 0)
+  const todayUpcoming = sortedMatches.filter((match) => getMatchPriority(match, today) === 1)
+  const recentFinished = sortedMatches
+    .filter(isFinishedMatch)
+    .sort((left, right) => getMatchTime(right) - getMatchTime(left))
   const nextMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 3)
 
-  return (todayMatches.length ? todayMatches : nextMatches).slice(0, limit)
+  const selected = []
+  const seen = new Set()
+  const append = (items, maxItems = Infinity) => {
+    for (const match of items) {
+      if (selected.length >= limit || maxItems <= 0) break
+      if (!match?.id || seen.has(match.id)) continue
+      selected.push(match)
+      seen.add(match.id)
+      maxItems -= 1
+    }
+  }
+
+  append(liveMatches)
+
+  const availableAfterLive = Math.max(0, limit - selected.length)
+  const reservedResults = Math.min(4, recentFinished.length, availableAfterLive)
+  const todaySlots = Math.max(0, availableAfterLive - reservedResults)
+
+  append(todayUpcoming, todaySlots)
+  append(recentFinished, reservedResults)
+  append(nextMatches)
+
+  return selected.slice(0, limit)
 }
 
 function isWorldCupActive({ competition, matches = [], now = new Date() }) {
