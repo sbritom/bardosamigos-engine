@@ -71,6 +71,26 @@ function isProviderOnline(status) {
   return ['ligado', 'online', 'on', 'ativo', 'active'].includes(normalized)
 }
 
+function getProviderDebug(payload) {
+  const data = payload && typeof payload === 'object' ? payload : {}
+  const fields = Object.keys(data).sort()
+  const candidates = {}
+
+  for (const [key, value] of Object.entries(data)) {
+    if (!/(locutor|dj|apresent|presenter|host)/i.test(key) || /porta/i.test(key)) continue
+
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      candidates[key] = String(value).slice(0, 200)
+    }
+  }
+
+  return {
+    fields,
+    candidates,
+    nextSong: String(data?.proxima_musica || '').trim().slice(0, 300),
+  }
+}
+
 async function getOfficialProviderStats() {
   const integration = await getProviderIntegration()
   if (!integration) {
@@ -109,6 +129,7 @@ async function getOfficialProviderStats() {
     shoutcastUrl: String(payload?.shoutcast || '').trim(),
     protocol: 'VOX API',
     provider: integration.provider || 'vox-svrdedicado',
+    providerDebug: getProviderDebug(payload),
     updatedAt: new Date().toISOString(),
     source: providerCover
       ? 'vox-api-json+provider-artwork'
@@ -149,7 +170,6 @@ function pickRadioSource(payload) {
     return listenUrl.includes(':7956/stream') || listenUrl.endsWith('/stream')
   }) || sources[0] || null
 }
-
 
 function normalizeSongQuery(value) {
   return String(value || '')
