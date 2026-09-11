@@ -38,6 +38,57 @@ async function getProviderIntegration() {
   return data
 }
 
+async function syncDetectedLiveStatus(isLive) {
+  const supabase = getSupabaseAdmin()
+  if (!supabase) return
+
+  try {
+    const { data: current, error: readError } = await supabase
+      .from('radio_locutor_status')
+      .select('id,is_live,locutor_name')
+      .eq('id', 'imortal0800')
+      .maybeSingle()
+
+    if (readError) throw readError
+
+    const currentIsLive = Boolean(current?.is_live)
+    const currentName = String(current?.locutor_name || '').trim()
+
+    if (current && currentIsLive === isLive && (isLive || !currentName)) {
+      return
+    }
+
+    const updatedAt = new Date().toISOString()
+
+    if (current) {
+      const payload = isLive
+        ? { is_live: true, updated_at: updatedAt }
+        : { is_live: false, locutor_name: '', updated_at: updatedAt }
+
+      const { error: updateError } = await supabase
+        .from('radio_locutor_status')
+        .update(payload)
+        .eq('id', 'imortal0800')
+
+      if (updateError) throw updateError
+      return
+    }
+
+    const { error: insertError } = await supabase
+      .from('radio_locutor_status')
+      .insert({
+        id: 'imortal0800',
+        is_live: isLive,
+        locutor_name: '',
+        updated_at: updatedAt,
+      })
+
+    if (insertError) throw insertError
+  } catch (error) {
+    console.warn('Could not sync detected live status:', error?.message || error)
+  }
+}
+
 function parseNumber(value) {
   const parsed = Number.parseInt(String(value ?? '').replace(/[^0-9-]/g, ''), 10)
   return Number.isFinite(parsed) ? parsed : 0
@@ -71,26 +122,6 @@ function isProviderOnline(status) {
   return ['ligado', 'online', 'on', 'ativo', 'active'].includes(normalized)
 }
 
-function getProviderDebug(payload) {
-  const data = payload && typeof payload === 'object' ? payload : {}
-  const fields = Object.keys(data).sort()
-  const candidates = {}
-
-  for (const [key, value] of Object.entries(data)) {
-    if (!/(locutor|dj|apresent|presenter|host)/i.test(key) || /porta/i.test(key)) continue
-
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-      candidates[key] = String(value).slice(0, 200)
-    }
-  }
-
-  return {
-    fields,
-    candidates,
-    nextSong: String(data?.proxima_musica || '').trim().slice(0, 300),
-  }
-}
-
 async function getOfficialProviderStats() {
   const integration = await getProviderIntegration()
   if (!integration) {
@@ -103,14 +134,22 @@ async function getOfficialProviderStats() {
   }
 
   const payload = await response.json()
+  const providerOnline = isProviderOnline(payload?.status)
+  const nextSong = String(payload?.proxima_musica || '').trim()
+  const liveDetected = providerOnline && !nextSong
   const songTitle = String(payload?.musica_atual || '').trim() || 'Programação ao vivo'
   const providerCover = normalizeProviderCover(payload?.capa_musica)
   const cover = providerCover || await getTrackArtwork(songTitle)
 
+  await syncDetectedLiveStatus(liveDetected)
+
   return {
-    online: isProviderOnline(payload?.status),
+    online: providerOnline,
     statusLabel: String(payload?.status || '').trim(),
     songTitle,
+    nextSong,
+    liveDetected,
+    broadcastMode: liveDetected ? 'live' : providerOnline ? 'autodj' : 'offline',
     listeners: parseNumber(payload?.ouvintes_conectados),
     listenerLimit: parseNumber(payload?.plano_ouvintes),
     peakListeners: 0,
@@ -129,7 +168,6 @@ async function getOfficialProviderStats() {
     shoutcastUrl: String(payload?.shoutcast || '').trim(),
     protocol: 'VOX API',
     provider: integration.provider || 'vox-svrdedicado',
-    providerDebug: getProviderDebug(payload),
     updatedAt: new Date().toISOString(),
     source: providerCover
       ? 'vox-api-json+provider-artwork'
@@ -231,6 +269,9 @@ async function getIcecastStats() {
     return {
       online: false,
       songTitle: 'Programação ao vivo',
+      nextSong: '',
+      liveDetected: false,
+      broadcastMode: 'unknown',
       listeners: 0,
       peakListeners: 0,
       bitrate: 0,
@@ -251,6 +292,9 @@ async function getIcecastStats() {
   return {
     online: true,
     songTitle,
+    nextSong: '',
+    liveDetected: false,
+    broadcastMode: 'unknown',
     listeners: Number(source.listeners) || 0,
     peakListeners: Number(source.listener_peak) || 0,
     bitrate: Number(source.bitrate) || 0,
