@@ -1,0 +1,12 @@
+.imortal-radio-ranking-list li > small {
+  display: none;
+}
+
+.imortal-radio-ranking-list li {
+  grid-template-columns: 26px minmax(0, 1fr);
+}
+
+.imortal-radio-ranking-list li > span {
+  font-size: 0.66rem;
+  letter-spacing: -0.01em;
+}
