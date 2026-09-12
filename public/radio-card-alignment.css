@@ -18,6 +18,43 @@
   white-space: nowrap !important;
 }
 
+/* Programas da Rádio — arte ambiente quando ainda não há programa cadastrado. */
+.imortal-radio-programs-card:has(.imortal-radio-empty) {
+  overflow: hidden !important;
+  background-image:
+    linear-gradient(90deg, rgba(4, 8, 14, 0.98) 0%, rgba(4, 8, 14, 0.9) 42%, rgba(4, 8, 14, 0.42) 72%, rgba(4, 8, 14, 0.18) 100%),
+    url("/assets/radio-programs-empty.svg") !important;
+  background-position: center, center right !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+.imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-programs-card__top,
+.imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty {
+  position: relative;
+  z-index: 2;
+}
+
+.imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty {
+  width: min(58%, 310px);
+  margin: 0 !important;
+  padding: 18px 16px 20px !important;
+  align-self: end;
+  border-top: 0 !important;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(5, 11, 19, 0.3), rgba(5, 11, 19, 0.58));
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty strong {
+  color: #77d0ff !important;
+}
+
+.imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty small {
+  color: rgba(226, 237, 250, 0.68) !important;
+}
+
 /* AutoDJ — movimento discreto para indicar que a rádio está ativa. */
 .imortal-radio-now-card:not(.is-live) {
   position: relative !important;
@@ -161,6 +198,17 @@
     top: -48px !important;
     left: 48px !important;
     margin-right: 48px !important;
+  }
+
+  .imortal-radio-programs-card:has(.imortal-radio-empty) {
+    background-position: center, 72% center !important;
+  }
+
+  .imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty {
+    width: auto;
+    margin: 0 12px 12px !important;
+    padding: 14px !important;
+    background: rgba(5, 11, 19, 0.7);
   }
 
   .imortal-radio-now-card:not(.is-live) .imortal-radio-now-card__footer {
