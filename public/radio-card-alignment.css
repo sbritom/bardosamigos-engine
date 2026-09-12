@@ -55,6 +55,32 @@
   display: none !important;
 }
 
+/* Próximo na Rádio — estado sem próxima atração definida. */
+.imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) {
+  background-image:
+    linear-gradient(90deg, rgba(4, 8, 14, 0.97) 0%, rgba(4, 8, 14, 0.9) 42%, rgba(4, 8, 14, 0.46) 72%, rgba(4, 8, 14, 0.18) 100%),
+    url("/assets/radio-next-empty.svg") !important;
+  background-position: center, center right !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+.imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) > p {
+  display: none !important;
+}
+
+.imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) > h2,
+.imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) .imortal-radio-now-card__footer {
+  position: relative;
+  z-index: 3;
+}
+
+.imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) > h2 {
+  width: min(58%, 300px);
+  color: #eaf7ff !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+
 /* AutoDJ — movimento discreto para indicar que a rádio está ativa. */
 .imortal-radio-now-card:not(.is-live) {
   position: relative !important;
@@ -209,6 +235,14 @@
     margin: 0 12px 12px !important;
     padding: 14px !important;
     background: rgba(5, 11, 19, 0.7);
+  }
+
+  .imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) {
+    background-position: center, 68% center !important;
+  }
+
+  .imortal-radio-now-card:not(.is-live):not(:has(.imortal-radio-now-card__meta)) > h2 {
+    width: min(72%, 260px);
   }
 
   .imortal-radio-now-card:not(.is-live) .imortal-radio-now-card__footer {
