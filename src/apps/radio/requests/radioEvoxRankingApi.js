@@ -36,7 +36,6 @@ function normalizeRankingEntry(entry = {}, index = 0) {
   const likes = toNonNegativeInteger(entry.likes ?? entry.requests ?? entry.count);
   const dislikes = toNonNegativeInteger(entry.dislikes);
   const approval = toPercent(entry.approval ?? (likes + dislikes ? Math.round((likes / (likes + dislikes)) * 100) : 0));
-  const songLabel = [title, artist].filter(Boolean).join(" — ");
 
   return {
     position: index + 1,
@@ -45,7 +44,7 @@ function normalizeRankingEntry(entry = {}, index = 0) {
     likes,
     dislikes,
     approval,
-    label: `👍 ${likes} · 👎 ${dislikes} · ${approval}% | ${songLabel}`,
+    label: title,
     count: likes,
   };
 }
