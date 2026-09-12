@@ -6,6 +6,7 @@ import {
   signOutAdmin,
 } from "../../../core/auth/adminAuthService";
 import { getSupabaseClient } from "../../../core/database";
+import { getRadioEvoxRankingPublic } from "./radioEvoxRankingApi";
 
 const REQUESTS_ENDPOINT = "/api/radio/requests";
 const RADIO_ADMIN_ROLES = [ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR];
@@ -101,7 +102,32 @@ export async function getRadioPublicContent() {
     cache: "no-store",
   });
 
-  return parseResponse(response);
+  const content = await parseResponse(response);
+  const evoxRanking = await getRadioEvoxRankingPublic();
+
+  if (!evoxRanking?.hasManualData) {
+    return content;
+  }
+
+  return {
+    ...content,
+    ranking: evoxRanking.ranking.map((item) => ({
+      label: item.label,
+      count: item.count,
+      title: item.title,
+      artist: item.artist,
+      position: item.position,
+    })),
+    rankingMeta: {
+      source: "evox-manual",
+      periodLabel: evoxRanking.periodLabel,
+      totalRequests: evoxRanking.totalRequests,
+      uniqueSongs: evoxRanking.uniqueSongs,
+      highlightSong: evoxRanking.highlightSong,
+      highlightArtist: evoxRanking.highlightArtist,
+      updatedAt: evoxRanking.updatedAt,
+    },
+  };
 }
 
 export async function searchRadioProviderCatalog(query) {

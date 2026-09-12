@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { CalendarDays, ListMusic, LogOut, Mic2, RadioTower } from "lucide-react";
+import { CalendarDays, ListMusic, LogOut, Mic2, RadioTower, Trophy } from "lucide-react";
 
 import AdminRouteGuard from "../../../core/auth/AdminRouteGuard";
 import { ADMIN_ROLES } from "../../../core/auth/adminAuthService";
 import { signOutRadioRequestsAdmin } from "../requests/radioRequestsApi";
 import RadioRequestsPanel from "../requests/RadioRequestsPanel";
 import RadioContentManager from "./RadioContentManager";
+import RadioEvoxRankingManager from "./RadioEvoxRankingManager";
 import "./radioAdmin.css";
 
 const RADIO_ADMIN_ROLES = [ADMIN_ROLES.ADMIN, ADMIN_ROLES.LOCUTOR];
@@ -36,7 +37,7 @@ function RadioAdminContent() {
           <div>
             <span>IMORTAL0800</span>
             <h1>PAINEL DA RÁDIO</h1>
-            <p>Pedidos, programas e grade de locutores em um só lugar.</p>
+            <p>Pedidos, Ranking EVOX, programas e grade de locutores em um só lugar.</p>
           </div>
         </div>
 
@@ -54,6 +55,15 @@ function RadioAdminContent() {
         >
           <ListMusic size={16} />
           Pedidos
+        </button>
+
+        <button
+          type="button"
+          className={activeSection === "ranking" ? "is-active" : ""}
+          onClick={() => setActiveSection("ranking")}
+        >
+          <Trophy size={16} />
+          Ranking EVOX
         </button>
 
         <button
@@ -77,6 +87,7 @@ function RadioAdminContent() {
 
       <div className="radio-admin-grid">
         {activeSection === "requests" ? <RadioRequestsPanel /> : null}
+        {activeSection === "ranking" ? <RadioEvoxRankingManager /> : null}
         {activeSection === "programs" ? <RadioContentManager mode="programs" /> : null}
         {activeSection === "schedule" ? <RadioContentManager mode="schedule" /> : null}
       </div>
