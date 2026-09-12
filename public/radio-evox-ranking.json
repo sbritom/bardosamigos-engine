@@ -1,0 +1,46 @@
+{
+  "hasManualData": true,
+  "periodLabel": "Ranking atual",
+  "songsEvaluated": 132,
+  "likesCount": 141,
+  "approvalPercent": 87,
+  "totalReactions": 162,
+  "updatedAt": "2026-09-12T11:26:10.918642Z",
+  "ranking": [
+    {
+      "position": 1,
+      "title": "ACHOU QUE EU IA SER TROUXA (Ao Vivo)",
+      "artist": "Luan Pereira, Gustavo Mioto e Murilo Huff",
+      "label": "ACHOU QUE EU IA SER TROUXA (Ao Vivo)",
+      "count": 3
+    },
+    {
+      "position": 2,
+      "title": "DVD Pra Ser Feliz - Ao Vivo [COMPLETO] - Gold Records",
+      "artist": "Gustavo Lins",
+      "label": "DVD Pra Ser Feliz - Ao Vivo [COMPLETO] - Gold Records",
+      "count": 3
+    },
+    {
+      "position": 3,
+      "title": "50 Tons (Ao Vivo) - VITINHO (youtube)",
+      "artist": "VITINHO",
+      "label": "50 Tons (Ao Vivo) - VITINHO (youtube)",
+      "count": 2
+    },
+    {
+      "position": 4,
+      "title": "A Thousand Years",
+      "artist": "Christina Perri",
+      "label": "A Thousand Years",
+      "count": 2
+    },
+    {
+      "position": 5,
+      "title": "Belo e Ornella [Letra]",
+      "artist": "Agenda",
+      "label": "Belo e Ornella [Letra]",
+      "count": 2
+    }
+  ]
+}
