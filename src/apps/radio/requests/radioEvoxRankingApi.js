@@ -4,6 +4,7 @@ import "../radioEvoxRanking.css";
 
 const EVOX_RANKING_TABLE = "radio_evox_ranking";
 const EVOX_RANKING_ID = "imortal0800";
+const EVOX_RANKING_SNAPSHOT_URL = "/radio-evox-ranking.json";
 
 function cleanText(value, maxLength = 120) {
   return String(value || "")
@@ -124,12 +125,30 @@ async function readRankingRow() {
   return data ? normalizeRankingRow(data) : null;
 }
 
-export async function getRadioEvoxRankingPublic() {
+async function readRankingSnapshot() {
   try {
-    return await readRankingRow();
+    const response = await fetch(EVOX_RANKING_SNAPSHOT_URL, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return normalizeRankingRow(data);
   } catch {
     return null;
   }
+}
+
+export async function getRadioEvoxRankingPublic() {
+  try {
+    const liveRanking = await readRankingRow();
+    if (liveRanking?.hasManualData) return liveRanking;
+  } catch {
+    // O snapshot abaixo mantém o Top 5 visível se a leitura pública do Supabase oscilar.
+  }
+
+  return readRankingSnapshot();
 }
 
 export async function getRadioEvoxRankingAdmin() {
