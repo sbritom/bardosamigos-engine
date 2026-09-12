@@ -22,24 +22,35 @@
   background: rgba(2, 17, 64, 0.34);
 }
 
-.radio-evox-manager__section-title {
+.radio-evox-manager__section-title,
+.radio-evox-manager__highlight-title {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--bds-color-primary-hover);
 }
 
-.radio-evox-manager__grid {
+.radio-evox-manager__grid,
+.radio-evox-manager__highlights {
   display: grid;
   gap: 14px;
 }
 
-.radio-evox-manager__grid--three {
+.radio-evox-manager__grid--metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.radio-evox-manager__highlights {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.radio-evox-manager__grid--two {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.radio-evox-manager__highlight-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--bds-color-border);
+  border-radius: 8px;
+  background: rgba(0, 7, 28, 0.5);
 }
 
 .radio-evox-manager label {
@@ -73,13 +84,24 @@
 
 .radio-evox-manager__rank-row {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1.2fr) minmax(0, 1fr) 110px;
+  grid-template-columns: 42px minmax(0, 1.2fr) minmax(0, 1fr) minmax(210px, 0.75fr);
   align-items: end;
   gap: 12px;
   padding: 12px;
   border: 1px solid var(--bds-color-border);
   border-radius: 8px;
   background: rgba(0, 7, 28, 0.48);
+}
+
+.radio-evox-manager__rank-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.radio-evox-manager__rank-stats input {
+  padding-inline: 8px;
+  text-align: center;
 }
 
 .radio-evox-manager__position {
@@ -93,10 +115,6 @@
   color: var(--bds-color-primary-hover);
   font-weight: 950;
   background: rgba(2, 17, 64, 0.72);
-}
-
-.radio-evox-manager__requests input {
-  text-align: center;
 }
 
 .radio-evox-manager__error,
@@ -151,10 +169,20 @@
   opacity: 0.65;
 }
 
+@media (max-width: 1180px) {
+  .radio-evox-manager__grid--metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .radio-evox-manager__highlights {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 880px) {
-  .radio-evox-manager__grid--three,
-  .radio-evox-manager__grid--two,
-  .radio-evox-manager__rank-row {
+  .radio-evox-manager__grid--metrics,
+  .radio-evox-manager__rank-row,
+  .radio-evox-manager__rank-stats {
     grid-template-columns: 1fr;
   }
 

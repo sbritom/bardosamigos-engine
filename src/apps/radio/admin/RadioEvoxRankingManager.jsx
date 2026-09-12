@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ListMusic, Save, Sparkles } from "lucide-react";
+import { Heart, ListMusic, Save, Sparkles, Star, ThumbsDown } from "lucide-react";
 
 import {
   getRadioEvoxRankingAdmin,
@@ -7,13 +7,17 @@ import {
 } from "../requests/radioEvoxRankingApi";
 import "./radioEvoxRankingAdmin.css";
 
-const EMPTY_RANKING_ITEM = { title: "", artist: "", requests: 0 };
+const EMPTY_RANKING_ITEM = { title: "", artist: "", likes: 0, dislikes: 0, approval: 0 };
+const EMPTY_HIGHLIGHT = { title: "", artist: "", count: 0 };
 const EMPTY_FORM = {
-  periodLabel: "Últimos 7 dias",
-  totalRequests: 0,
-  uniqueSongs: 0,
-  highlightSong: "",
-  highlightArtist: "",
+  periodLabel: "Ranking atual",
+  songsEvaluated: 0,
+  likesCount: 0,
+  approvalPercent: 0,
+  totalReactions: 0,
+  mostLiked: { ...EMPTY_HIGHLIGHT },
+  mostFavorited: { ...EMPTY_HIGHLIGHT },
+  mostRejected: { ...EMPTY_HIGHLIGHT },
   ranking: Array.from({ length: 5 }, () => ({ ...EMPTY_RANKING_ITEM })),
 };
 
@@ -23,18 +27,64 @@ function toForm(data = {}) {
     return {
       title: item.title || "",
       artist: item.artist || "",
-      requests: Number(item.requests ?? item.count) || 0,
+      likes: Number(item.likes ?? item.count) || 0,
+      dislikes: Number(item.dislikes) || 0,
+      approval: Number(item.approval) || 0,
     };
   });
 
   return {
-    periodLabel: data.periodLabel || "Últimos 7 dias",
-    totalRequests: Number(data.totalRequests) || 0,
-    uniqueSongs: Number(data.uniqueSongs) || 0,
-    highlightSong: data.highlightSong || "",
-    highlightArtist: data.highlightArtist || "",
+    periodLabel: data.periodLabel || "Ranking atual",
+    songsEvaluated: Number(data.songsEvaluated) || 0,
+    likesCount: Number(data.likesCount) || 0,
+    approvalPercent: Number(data.approvalPercent) || 0,
+    totalReactions: Number(data.totalReactions) || 0,
+    mostLiked: { ...EMPTY_HIGHLIGHT, ...(data.mostLiked || {}) },
+    mostFavorited: { ...EMPTY_HIGHLIGHT, ...(data.mostFavorited || {}) },
+    mostRejected: { ...EMPTY_HIGHLIGHT, ...(data.mostRejected || {}) },
     ranking,
   };
+}
+
+function HighlightFields({ title, icon, value, onChange }) {
+  return (
+    <div className="radio-evox-manager__highlight-card">
+      <div className="radio-evox-manager__highlight-title">
+        {icon}
+        <strong>{title}</strong>
+      </div>
+
+      <label>
+        Música
+        <input
+          value={value.title}
+          onChange={(event) => onChange("title", event.target.value)}
+          maxLength={120}
+          placeholder="Nome da música"
+        />
+      </label>
+
+      <label>
+        Artista
+        <input
+          value={value.artist}
+          onChange={(event) => onChange("artist", event.target.value)}
+          maxLength={120}
+          placeholder="Nome do artista"
+        />
+      </label>
+
+      <label>
+        Quantidade
+        <input
+          type="number"
+          min="0"
+          value={value.count}
+          onChange={(event) => onChange("count", event.target.value)}
+        />
+      </label>
+    </div>
+  );
 }
 
 export default function RadioEvoxRankingManager() {
@@ -71,9 +121,17 @@ export default function RadioEvoxRankingManager() {
 
   function updateField(event) {
     const { name, value, type } = event.target;
+    const nextValue = type === "number" ? Math.max(0, Number(value) || 0) : value;
+    setForm((current) => ({ ...current, [name]: nextValue }));
+  }
+
+  function updateHighlight(name, field, value) {
     setForm((current) => ({
       ...current,
-      [name]: type === "number" ? Math.max(0, Number(value) || 0) : value,
+      [name]: {
+        ...current[name],
+        [field]: field === "count" ? Math.max(0, Number(value) || 0) : value,
+      },
     }));
   }
 
@@ -84,7 +142,9 @@ export default function RadioEvoxRankingManager() {
         itemIndex === index
           ? {
               ...item,
-              [field]: field === "requests" ? Math.max(0, Number(value) || 0) : value,
+              [field]: ["likes", "dislikes", "approval"].includes(field)
+                ? Math.max(0, Number(value) || 0)
+                : value,
             }
           : item
       )),
@@ -101,7 +161,7 @@ export default function RadioEvoxRankingManager() {
       const data = await saveRadioEvoxRankingAdmin(form);
       setForm(toForm(data));
       setUpdatedAt(data.updatedAt || "");
-      setFeedback("Ranking EVOX salvo. O card Mais Pedidas já usará este Top 5.");
+      setFeedback("Ranking EVOX salvo. O card Mais Pedidas foi atualizado.");
     } catch (requestError) {
       setError(requestError.message || "Não foi possível salvar o Ranking EVOX.");
     } finally {
@@ -117,7 +177,7 @@ export default function RadioEvoxRankingManager() {
       </div>
 
       <p className="radio-evox-manager__intro">
-        Atualize manualmente os números da EVOX e o Top 5 que alimenta o card Mais Pedidas da página Rádio.
+        Cadastre exatamente os números do Ranking Musical da EVOX: avaliações, curtidas, aprovação, reações, destaques e Top 5.
       </p>
 
       {loading ? (
@@ -130,38 +190,36 @@ export default function RadioEvoxRankingManager() {
               <strong>Números gerais</strong>
             </div>
 
-            <div className="radio-evox-manager__grid radio-evox-manager__grid--three">
+            <div className="radio-evox-manager__grid radio-evox-manager__grid--metrics">
               <label>
-                Período
+                Identificação
                 <input
                   name="periodLabel"
                   value={form.periodLabel}
                   onChange={updateField}
                   maxLength={60}
-                  placeholder="Ex.: Últimos 7 dias"
+                  placeholder="Ex.: Ranking atual"
                 />
               </label>
 
               <label>
-                Total de pedidos
-                <input
-                  name="totalRequests"
-                  type="number"
-                  min="0"
-                  value={form.totalRequests}
-                  onChange={updateField}
-                />
+                Músicas avaliadas
+                <input name="songsEvaluated" type="number" min="0" value={form.songsEvaluated} onChange={updateField} />
               </label>
 
               <label>
-                Músicas diferentes
-                <input
-                  name="uniqueSongs"
-                  type="number"
-                  min="0"
-                  value={form.uniqueSongs}
-                  onChange={updateField}
-                />
+                Curtidas
+                <input name="likesCount" type="number" min="0" value={form.likesCount} onChange={updateField} />
+              </label>
+
+              <label>
+                Aprovação (%)
+                <input name="approvalPercent" type="number" min="0" max="100" value={form.approvalPercent} onChange={updateField} />
+              </label>
+
+              <label>
+                Total de reações
+                <input name="totalReactions" type="number" min="0" value={form.totalReactions} onChange={updateField} />
               </label>
             </div>
           </div>
@@ -169,31 +227,28 @@ export default function RadioEvoxRankingManager() {
           <div className="radio-evox-manager__section">
             <div className="radio-evox-manager__section-title">
               <Sparkles size={16} />
-              <strong>Destaques</strong>
+              <strong>Destaques dos ouvintes</strong>
             </div>
 
-            <div className="radio-evox-manager__grid radio-evox-manager__grid--two">
-              <label>
-                Música destaque
-                <input
-                  name="highlightSong"
-                  value={form.highlightSong}
-                  onChange={updateField}
-                  maxLength={120}
-                  placeholder="Nome da música"
-                />
-              </label>
-
-              <label>
-                Artista destaque
-                <input
-                  name="highlightArtist"
-                  value={form.highlightArtist}
-                  onChange={updateField}
-                  maxLength={120}
-                  placeholder="Nome do artista"
-                />
-              </label>
+            <div className="radio-evox-manager__highlights">
+              <HighlightFields
+                title="Mais curtida"
+                icon={<Heart size={15} />}
+                value={form.mostLiked}
+                onChange={(field, value) => updateHighlight("mostLiked", field, value)}
+              />
+              <HighlightFields
+                title="Mais favoritada"
+                icon={<Star size={15} />}
+                value={form.mostFavorited}
+                onChange={(field, value) => updateHighlight("mostFavorited", field, value)}
+              />
+              <HighlightFields
+                title="Mais rejeitada"
+                icon={<ThumbsDown size={15} />}
+                value={form.mostRejected}
+                onChange={(field, value) => updateHighlight("mostRejected", field, value)}
+              />
             </div>
           </div>
 
@@ -228,15 +283,20 @@ export default function RadioEvoxRankingManager() {
                     />
                   </label>
 
-                  <label className="radio-evox-manager__requests">
-                    Pedidos
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.requests}
-                      onChange={(event) => updateRankingItem(index, "requests", event.target.value)}
-                    />
-                  </label>
+                  <div className="radio-evox-manager__rank-stats">
+                    <label>
+                      👍
+                      <input type="number" min="0" value={item.likes} onChange={(event) => updateRankingItem(index, "likes", event.target.value)} />
+                    </label>
+                    <label>
+                      👎
+                      <input type="number" min="0" value={item.dislikes} onChange={(event) => updateRankingItem(index, "dislikes", event.target.value)} />
+                    </label>
+                    <label>
+                      Aprovação
+                      <input type="number" min="0" max="100" value={item.approval} onChange={(event) => updateRankingItem(index, "approval", event.target.value)} />
+                    </label>
+                  </div>
                 </div>
               ))}
             </div>
