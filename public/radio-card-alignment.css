@@ -52,7 +52,7 @@
 }
 
 .imortal-radio-programs-card:has(.imortal-radio-empty) .imortal-radio-empty small {
-  color: rgba(226, 237, 250, 0.68) !important;
+  display: none !important;
 }
 
 /* AutoDJ — movimento discreto para indicar que a rádio está ativa. */
