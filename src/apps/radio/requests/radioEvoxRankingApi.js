@@ -1,5 +1,6 @@
 import { getAdminAccessToken } from "../../../core/auth/adminAuthService";
 import { getSupabaseClient } from "../../../core/database";
+import "../radioEvoxRanking.css";
 
 const EVOX_RANKING_TABLE = "radio_evox_ranking";
 const EVOX_RANKING_ID = "imortal0800";
@@ -35,6 +36,7 @@ function normalizeRankingEntry(entry = {}, index = 0) {
   const likes = toNonNegativeInteger(entry.likes ?? entry.requests ?? entry.count);
   const dislikes = toNonNegativeInteger(entry.dislikes);
   const approval = toPercent(entry.approval ?? (likes + dislikes ? Math.round((likes / (likes + dislikes)) * 100) : 0));
+  const songLabel = [title, artist].filter(Boolean).join(" — ");
 
   return {
     position: index + 1,
@@ -43,7 +45,7 @@ function normalizeRankingEntry(entry = {}, index = 0) {
     likes,
     dislikes,
     approval,
-    label: [title, artist].filter(Boolean).join(" — "),
+    label: `👍 ${likes} · 👎 ${dislikes} · ${approval}% | ${songLabel}`,
     count: likes,
   };
 }
