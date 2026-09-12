@@ -16,18 +16,35 @@ function toNonNegativeInteger(value) {
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 }
 
+function toPercent(value) {
+  return Math.min(100, toNonNegativeInteger(value));
+}
+
+function normalizeHighlight(value = {}) {
+  const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return {
+    title: cleanText(source.title, 120),
+    artist: cleanText(source.artist, 120),
+    count: toNonNegativeInteger(source.count),
+  };
+}
+
 function normalizeRankingEntry(entry = {}, index = 0) {
   const title = cleanText(entry.title, 120);
   const artist = cleanText(entry.artist, 120);
-  const requests = toNonNegativeInteger(entry.requests ?? entry.count);
+  const likes = toNonNegativeInteger(entry.likes ?? entry.requests ?? entry.count);
+  const dislikes = toNonNegativeInteger(entry.dislikes);
+  const approval = toPercent(entry.approval ?? (likes + dislikes ? Math.round((likes / (likes + dislikes)) * 100) : 0));
 
   return {
     position: index + 1,
     title,
     artist,
-    requests,
+    likes,
+    dislikes,
+    approval,
     label: [title, artist].filter(Boolean).join(" — "),
-    count: requests,
+    count: likes,
   };
 }
 
@@ -37,13 +54,24 @@ function normalizeRankingRow(row = {}) {
     .map(normalizeRankingEntry)
     .filter((entry) => entry.title);
 
+  const legacyMostLiked = {
+    title: cleanText(row.highlight_song || row.highlightSong, 120),
+    artist: cleanText(row.highlight_artist || row.highlightArtist, 120),
+    count: 0,
+  };
+
   const data = {
     id: row.id || EVOX_RANKING_ID,
-    periodLabel: cleanText(row.period_label || row.periodLabel || "Últimos 7 dias", 60),
-    totalRequests: toNonNegativeInteger(row.total_requests ?? row.totalRequests),
-    uniqueSongs: toNonNegativeInteger(row.unique_songs ?? row.uniqueSongs),
-    highlightSong: cleanText(row.highlight_song || row.highlightSong, 120),
-    highlightArtist: cleanText(row.highlight_artist || row.highlightArtist, 120),
+    periodLabel: cleanText(row.period_label || row.periodLabel || "Ranking atual", 60),
+    songsEvaluated: toNonNegativeInteger(row.songs_evaluated ?? row.songsEvaluated ?? row.unique_songs ?? row.uniqueSongs),
+    likesCount: toNonNegativeInteger(row.likes_count ?? row.likesCount),
+    approvalPercent: toPercent(row.approval_percent ?? row.approvalPercent),
+    totalReactions: toNonNegativeInteger(row.total_reactions ?? row.totalReactions ?? row.total_requests ?? row.totalRequests),
+    mostLiked: Object.keys(row.most_liked || row.mostLiked || {}).length
+      ? normalizeHighlight(row.most_liked || row.mostLiked)
+      : legacyMostLiked,
+    mostFavorited: normalizeHighlight(row.most_favorited || row.mostFavorited),
+    mostRejected: normalizeHighlight(row.most_rejected || row.mostRejected),
     ranking,
     updatedAt: row.updated_at || row.updatedAt || null,
   };
@@ -52,13 +80,34 @@ function normalizeRankingRow(row = {}) {
     ...data,
     hasManualData: Boolean(
       data.ranking.length
-      || data.totalRequests
-      || data.uniqueSongs
-      || data.highlightSong
-      || data.highlightArtist,
+      || data.songsEvaluated
+      || data.likesCount
+      || data.approvalPercent
+      || data.totalReactions
+      || data.mostLiked.title
+      || data.mostFavorited.title
+      || data.mostRejected.title,
     ),
   };
 }
+
+const EVOX_SELECT = [
+  "id",
+  "period_label",
+  "total_requests",
+  "unique_songs",
+  "highlight_song",
+  "highlight_artist",
+  "songs_evaluated",
+  "likes_count",
+  "approval_percent",
+  "total_reactions",
+  "most_liked",
+  "most_favorited",
+  "most_rejected",
+  "ranking",
+  "updated_at",
+].join(",");
 
 async function readRankingRow() {
   const supabase = getSupabaseClient();
@@ -66,7 +115,7 @@ async function readRankingRow() {
 
   const { data, error } = await supabase
     .from(EVOX_RANKING_TABLE)
-    .select("id,period_label,total_requests,unique_songs,highlight_song,highlight_artist,ranking,updated_at")
+    .select(EVOX_SELECT)
     .eq("id", EVOX_RANKING_ID)
     .maybeSingle();
 
@@ -107,17 +156,36 @@ export async function saveRadioEvoxRankingAdmin(input = {}) {
     .slice(0, 5)
     .map((entry, index) => normalizeRankingEntry(entry, index))
     .filter((entry) => entry.title)
-    .map(({ title, artist, requests }) => ({ title, artist, requests }));
+    .map(({ title, artist, likes, dislikes, approval }) => ({
+      title,
+      artist,
+      likes,
+      dislikes,
+      approval,
+    }));
 
   const { data: userResult } = await supabase.auth.getUser();
   const updatedBy = userResult?.user?.id || null;
+  const mostLiked = normalizeHighlight(input.mostLiked);
+  const mostFavorited = normalizeHighlight(input.mostFavorited);
+  const mostRejected = normalizeHighlight(input.mostRejected);
+  const songsEvaluated = toNonNegativeInteger(input.songsEvaluated);
+  const totalReactions = toNonNegativeInteger(input.totalReactions);
+
   const payload = {
-    period_label: cleanText(input.periodLabel || "Últimos 7 dias", 60),
-    total_requests: toNonNegativeInteger(input.totalRequests),
-    unique_songs: toNonNegativeInteger(input.uniqueSongs),
-    highlight_song: cleanText(input.highlightSong, 120),
-    highlight_artist: cleanText(input.highlightArtist, 120),
+    period_label: cleanText(input.periodLabel || "Ranking atual", 60),
+    songs_evaluated: songsEvaluated,
+    likes_count: toNonNegativeInteger(input.likesCount),
+    approval_percent: toPercent(input.approvalPercent),
+    total_reactions: totalReactions,
+    most_liked: mostLiked,
+    most_favorited: mostFavorited,
+    most_rejected: mostRejected,
     ranking,
+    total_requests: totalReactions,
+    unique_songs: songsEvaluated,
+    highlight_song: mostLiked.title,
+    highlight_artist: mostLiked.artist,
     updated_at: new Date().toISOString(),
     updated_by: updatedBy,
   };
@@ -126,7 +194,7 @@ export async function saveRadioEvoxRankingAdmin(input = {}) {
     .from(EVOX_RANKING_TABLE)
     .update(payload)
     .eq("id", EVOX_RANKING_ID)
-    .select("id,period_label,total_requests,unique_songs,highlight_song,highlight_artist,ranking,updated_at")
+    .select(EVOX_SELECT)
     .single();
 
   if (error) throw error;
