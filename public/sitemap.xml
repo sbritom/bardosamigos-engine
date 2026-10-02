@@ -1,43 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.radiobardosamigos.com.br/</loc>
+    <loc>https://imortal0800.vercel.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.radiobardosamigos.com.br/football</loc>
+    <loc>https://imortal0800.vercel.app/football</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.radiobardosamigos.com.br/radio</loc>
+    <loc>https://imortal0800.vercel.app/radio</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.radiobardosamigos.com.br/tv</loc>
+    <loc>https://imortal0800.vercel.app/tv</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://imortal0800.vercel.app/games</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.radiobardosamigos.com.br/events</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.radiobardosamigos.com.br/news</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.radiobardosamigos.com.br/tools</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.radiobardosamigos.com.br/community</loc>
+    <loc>https://imortal0800.vercel.app/chat</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://imortal0800.vercel.app/events</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://imortal0800.vercel.app/news</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://imortal0800.vercel.app/community</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>

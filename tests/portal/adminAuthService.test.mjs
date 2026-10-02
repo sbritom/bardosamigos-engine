@@ -13,8 +13,8 @@ test('normaliza nomes administrativos sem acentos e espacos externos', () => {
   assert.equal(normalizeUsername('  João.Admin  '), 'joao.admin')
 })
 
-test('converte usuario administrativo em email interno', () => {
-  assert.equal(usernameToAuthEmail('Locutor_01'), 'locutor_01@auth.bardosamigos.local')
+test('converte usuario administrativo em email interno do IMORTAL0800', () => {
+  assert.equal(usernameToAuthEmail('Locutor_01'), 'locutor_01@auth.imortal0800.local')
 })
 
 test('rejeita usuario com email, espacos ou tamanho invalido', () => {

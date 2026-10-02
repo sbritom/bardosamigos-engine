@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
 import PortalSeo from "./seo/PortalSeo";
-import AuthDialog from "../../modules/auth/AuthDialog";
-import { AuthProvider } from "../../modules/auth/AuthContext";
+import { AuthProvider, useAuth } from "../../modules/auth/AuthContext";
 import { CommunityPresenceProvider } from "../../modules/community/presence/CommunityPresenceContext";
+
+const AuthDialog = lazy(() => import("../../modules/auth/AuthDialog"));
 
 const portalBackground = {
   backgroundImage: 'url("/backgrounds/portal-bg.webp")',
@@ -53,6 +54,17 @@ function useDeferredPortalBackgrounds(pathname) {
   }, [pathname])
 }
 
+function DeferredAuthDialog() {
+  const { authDialog } = useAuth()
+  if (!authDialog.open) return null
+
+  return (
+    <Suspense fallback={null}>
+      <AuthDialog />
+    </Suspense>
+  )
+}
+
 export default function AppShell() {
   const { pathname } = useLocation()
   useDeferredPortalBackgrounds(pathname)
@@ -61,22 +73,22 @@ export default function AppShell() {
     <AuthProvider>
       <CommunityPresenceProvider pathname={pathname}>
         <div className="bds-portal-shell min-h-screen text-[var(--text)]" style={portalBackground}>
-        <PortalSeo />
+          <PortalSeo />
 
-        <a className="bds-skip-link" href="#portal-main-content">
-          Pular para o conteudo
-        </a>
+          <a className="bds-skip-link" href="#portal-main-content">
+            Pular para o conteudo
+          </a>
 
-        <Header />
+          <Header />
 
-        <div className="w-full py-5">
-          <div id="portal-main-content" tabIndex={-1}>
-            <Outlet />
+          <div className="w-full py-5">
+            <div id="portal-main-content" tabIndex={-1}>
+              <Outlet />
+            </div>
           </div>
-        </div>
 
-        <Footer />
-          <AuthDialog />
+          <Footer />
+          <DeferredAuthDialog />
         </div>
       </CommunityPresenceProvider>
     </AuthProvider>

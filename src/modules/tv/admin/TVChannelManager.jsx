@@ -107,7 +107,7 @@ export function TVChannelManager({ createRequested, notify }) {
   useEffect(() => {
     const timeout = window.setTimeout(load, filters.search ? 250 : 0)
     return () => window.clearTimeout(timeout)
-  }, [load])
+  }, [filters.search, load])
 
   const openForm = useCallback((channel = null) => {
     setEditing(channel)

@@ -54,6 +54,7 @@ function summarizePresence(channel) {
 export function CommunityPresenceProvider({ pathname, children }) {
   const pathnameRef = useRef(pathname)
   const channelRef = useRef(null)
+  const trackedAreaRef = useRef(null)
   const [state, setState] = useState({
     connected: false,
     onlineCount: null,
@@ -66,10 +67,16 @@ export function CommunityPresenceProvider({ pathname, children }) {
     const channel = channelRef.current
     if (!channel || !state.connected) return
 
+    const nextArea = getPresenceArea(pathname)
+    if (trackedAreaRef.current === nextArea) return
+
+    trackedAreaRef.current = nextArea
     channel.track({
-      area: getPresenceArea(pathname),
+      area: nextArea,
       online_at: new Date().toISOString(),
-    }).catch(() => {})
+    }).catch(() => {
+      trackedAreaRef.current = null
+    })
   }, [pathname, state.connected])
 
   useEffect(() => {
@@ -109,18 +116,22 @@ export function CommunityPresenceProvider({ pathname, children }) {
         if (status === 'SUBSCRIBED') {
           setState((current) => ({ ...current, connected: true }))
 
+          const area = getPresenceArea(pathnameRef.current)
           try {
             await channel.track({
-              area: getPresenceArea(pathnameRef.current),
+              area,
               online_at: new Date().toISOString(),
             })
+            trackedAreaRef.current = area
           } catch {
+            trackedAreaRef.current = null
             setState((current) => ({ ...current, connected: false }))
           }
           return
         }
 
         if (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(status)) {
+          trackedAreaRef.current = null
           setState({
             connected: false,
             onlineCount: null,
@@ -131,6 +142,7 @@ export function CommunityPresenceProvider({ pathname, children }) {
 
     return () => {
       channelRef.current = null
+      trackedAreaRef.current = null
       channel.untrack().catch(() => {})
       client.removeChannel(channel)
     }

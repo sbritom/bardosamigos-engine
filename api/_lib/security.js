@@ -1,11 +1,42 @@
 import crypto from 'node:crypto'
 
-const OFFICIAL_ORIGINS = new Set([
-  'https://radiobardosamigos.com.br',
-  'https://www.radiobardosamigos.com.br',
-])
+const DEFAULT_OFFICIAL_ORIGINS = [
+  'https://imortal0800.vercel.app',
+  'https://imortal0800.com',
+  'https://www.imortal0800.com',
+]
 
 const LOCAL_ORIGIN_RE = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?$/
+
+function normalizeOrigin(value) {
+  const candidate = String(value || '').trim()
+  if (!candidate) return ''
+
+  try {
+    const url = new URL(candidate.includes('://') ? candidate : `https://${candidate}`)
+    if (!['http:', 'https:'].includes(url.protocol)) return ''
+    return url.origin
+  } catch {
+    return ''
+  }
+}
+
+function getConfiguredOfficialOrigins() {
+  const configured = [
+    process.env.PUBLIC_SITE_URL,
+    process.env.SITE_URL,
+    process.env.VITE_SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  ]
+
+  return new Set(
+    [...DEFAULT_OFFICIAL_ORIGINS, ...configured]
+      .map(normalizeOrigin)
+      .filter(Boolean),
+  )
+}
+
+const OFFICIAL_ORIGINS = getConfiguredOfficialOrigins()
 
 function getRequestOrigin(request) {
   const host = String(
@@ -18,11 +49,11 @@ function getRequestOrigin(request) {
 
   const forwardedProto = String(request.headers?.['x-forwarded-proto'] || '').trim()
   const proto = forwardedProto === 'http' ? 'http' : 'https'
-  return `${proto}://${host}`
+  return normalizeOrigin(`${proto}://${host}`)
 }
 
 export function isTrustedOrigin(request) {
-  const origin = String(request.headers?.origin || '').trim()
+  const origin = normalizeOrigin(request.headers?.origin)
   if (!origin) return true
   if (OFFICIAL_ORIGINS.has(origin)) return true
   if (LOCAL_ORIGIN_RE.test(origin)) return true
@@ -37,7 +68,7 @@ export function applyApiCors(
     headers = 'Content-Type, Authorization',
   } = {},
 ) {
-  const origin = String(request.headers?.origin || '').trim()
+  const origin = normalizeOrigin(request.headers?.origin)
   const trusted = isTrustedOrigin(request)
 
   response.setHeader('Access-Control-Allow-Methods', methods)

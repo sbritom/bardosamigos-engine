@@ -139,7 +139,11 @@
     },
     {
       "source": "/games",
-      "destination": "/index.html"
+      "destination": "/games/index.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat/index.html"
     },
     {
       "source": "/brincadeiras",
@@ -167,4 +171,3 @@
     }
   ]
 }
-

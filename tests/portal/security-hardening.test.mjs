@@ -50,6 +50,14 @@ test('known insecure radio defaults are not versioned', () => {
   assert.doesNotMatch(files, /<admin-password>admin<\/admin-password>/)
 })
 
+test('API origin allowlist is aligned with IMORTAL0800 and configurable by environment', () => {
+  const source = read('api/_lib/security.js')
+  assert.match(source, /https:\/\/imortal0800\.vercel\.app/)
+  assert.match(source, /https:\/\/imortal0800\.com/)
+  assert.match(source, /VERCEL_PROJECT_PRODUCTION_URL/)
+  assert.match(source, /PUBLIC_SITE_URL/)
+  assert.doesNotMatch(source, /radiobardosamigos/i)
+})
 
 test('events admin keeps its server-side Supabase client', () => {
   const source = read('api/events/admin.js')
@@ -58,12 +66,17 @@ test('events admin keeps its server-side Supabase client', () => {
   assert.match(source, /requireAdminUser/)
 })
 
-
 test('sensitive admin APIs disable response caching', () => {
   const events = read('api/events/admin.js')
   const requests = read('api/radio/requests.js')
   assert.match(events, /private, no-store, max-age=0/)
   assert.match(requests, /private, no-store, max-age=0/)
+})
+
+test('painel da Radio exige guarda de rota para admin ou locutor', () => {
+  const registry = read('src/core/registry/plugins.jsx')
+  assert.match(registry, /RADIO_ADMIN_ROLES\s*=\s*Object\.freeze\(\[ADMIN_ROLES\.ADMIN, ADMIN_ROLES\.LOCUTOR\]\)/)
+  assert.match(registry, /id:\s*"radio-admin"[\s\S]*?AdminPluginPage[\s\S]*?allowedRoles=\{RADIO_ADMIN_ROLES\}/)
 })
 
 test('football API only accepts the configured public competition allowlist', () => {

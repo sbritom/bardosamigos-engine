@@ -38,13 +38,13 @@
     "portal:test": "node --test tests/portal/*.test.mjs",
     "portal:release-smoke": "node scripts/check-release-build.mjs",
     "portal:budget": "node scripts/check-portal-budget.mjs",
-    "quality:portal": "npm run portal:test && npm run build && npm run portal:release-smoke && npm run portal:budget",
+    "quality:portal": "npm run lint && npm run portal:test && npm run build && npm run portal:release-smoke && npm run portal:budget",
     "seed:tv": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs",
     "seed:tv:dry": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs --dry-run",
     "sync:football": "npm run sync:football-data",
     "sync:football-data": "node --experimental-specifier-resolution=node scripts/sync-football-data.mjs",
     "sync:gnews": "node --experimental-specifier-resolution=node scripts/sync-gnews.mjs",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1", "@tailwindcss/vite": "^4.3.1", "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1", "eslint": "^10.3.0", "eslint-plugin-react-hooks": "^7.1.1",
+    "@vitejs/plugin-react": "^6.0.1", "ajv": "8.20.0", "eslint": "^10.3.0", "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2", "globals": "^17.6.0", "tailwindcss": "^4.3.1", "vite": "^8.0.12"
   }
 }

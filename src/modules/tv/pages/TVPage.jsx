@@ -253,7 +253,7 @@ function TVPlatformContent() {
         return next
       })
     }
-  }, [favoriteIds, favoritePendingIds, isAuthenticated, openAuth, user?.id])
+  }, [favoriteIds, favoritePendingIds, isAuthenticated, openAuth, user])
 
   const toggleFavoritesOnly = useCallback(() => {
     if (!isAuthenticated) {

@@ -13,8 +13,8 @@ import {
   publicSeoPages,
 } from '../../src/apps/portal/seo/seoConfig.js'
 
-const EXPECTED_SITE_URL = 'https://www.radiobardosamigos.com.br'
-const EXPECTED_SOCIAL_IMAGE = '/social/bar-dos-amigos-social.jpg'
+const EXPECTED_SITE_URL = 'https://imortal0800.vercel.app'
+const EXPECTED_SOCIAL_IMAGE = '/banners/imortal0800-portal.webp'
 
 async function source(path) {
   return readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
@@ -24,7 +24,7 @@ function sitemapLocations(xml) {
   return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
 }
 
-test('dominio canonico usa o endereco publico de producao', () => {
+test('dominio canonico usa o endereco publico atual do IMORTAL0800', () => {
   assert.equal(SITE_URL, EXPECTED_SITE_URL)
 
   for (const page of publicSeoPages) {
@@ -35,7 +35,7 @@ test('dominio canonico usa o endereco publico de producao', () => {
   }
 })
 
-test('sitemap contem somente as paginas SEO publicas e usa o dominio oficial', async () => {
+test('sitemap contem exatamente as paginas SEO publicas e usa o dominio atual', async () => {
   const sitemap = await source('public/sitemap.xml')
   const locations = sitemapLocations(sitemap)
   const expected = publicSeoPages.map((page) => (
@@ -43,12 +43,13 @@ test('sitemap contem somente as paginas SEO publicas e usa o dominio oficial', a
   ))
 
   assert.deepEqual(locations.sort(), expected.sort())
-  assert.doesNotMatch(sitemap, /https:\/\/bardosamigos\.com\.br/)
-  assert.doesNotMatch(sitemap, /\/barcoins|\/brincadeiras|\/games/)
+  assert.doesNotMatch(sitemap, /radiobardosamigos/i)
+  assert.doesNotMatch(sitemap, /\/barcoins|\/brincadeiras|\/tools/)
 })
 
-test('robots aponta para o sitemap oficial e bloqueia areas internas ou congeladas', async () => {
+test('robots aponta para o sitemap atual e bloqueia somente areas privadas ou internas', async () => {
   const robots = await source('public/robots.txt')
+  const lines = robots.split('\n')
 
   assert.ok(robots.includes(`Sitemap: ${EXPECTED_SITE_URL}/sitemap.xml`))
 
@@ -63,32 +64,35 @@ test('robots aponta para o sitemap oficial e bloqueia areas internas ou congelad
     '/palpites',
     '/barcoins',
     '/brincadeiras',
-    '/games',
+    '/radio/xat',
   ]) {
-    assert.ok(robots.split('\n').includes(`Disallow: ${path}`), `${path} deve estar bloqueada no robots.txt`)
+    assert.ok(lines.includes(`Disallow: ${path}`), `${path} deve estar bloqueada no robots.txt`)
+  }
+
+  for (const page of publicSeoPages.filter((item) => item.path !== '/')) {
+    assert.ok(!lines.includes(`Disallow: ${page.path}`), `${page.path} nao pode ser bloqueada no robots.txt`)
   }
 })
 
 test('rotas nao publicadas para SEO continuam noindex no cliente', () => {
-  for (const path of ['/admin', '/profile', '/settings', '/barcoins', '/brincadeiras', '/games', '/palpites']) {
+  for (const path of ['/admin', '/profile', '/settings', '/barcoins', '/brincadeiras', '/palpites']) {
     const seo = getSeoForPath(path)
     assert.equal(seo.robots, 'noindex,nofollow')
   }
 })
 
-test('capa social oficial usa formato horizontal para card grande', async () => {
+test('capa social oficial usa a identidade atual do IMORTAL0800', async () => {
   assert.equal(DEFAULT_SOCIAL_IMAGE, EXPECTED_SOCIAL_IMAGE)
-  assert.equal(DEFAULT_SOCIAL_IMAGE_WIDTH, '600')
-  assert.equal(DEFAULT_SOCIAL_IMAGE_HEIGHT, '315')
-  assert.equal(DEFAULT_SOCIAL_IMAGE_TYPE, 'image/jpeg')
-  assert.match(DEFAULT_SOCIAL_IMAGE_ALT, /Bar dos Amigos/)
+  assert.equal(DEFAULT_SOCIAL_IMAGE_WIDTH, '1180')
+  assert.equal(DEFAULT_SOCIAL_IMAGE_HEIGHT, '140')
+  assert.equal(DEFAULT_SOCIAL_IMAGE_TYPE, 'image/webp')
+  assert.match(DEFAULT_SOCIAL_IMAGE_ALT, /IMORTAL0800/)
 
-  const imageInfo = await stat(new URL('../../public/social/bar-dos-amigos-social.jpg', import.meta.url))
+  const imageInfo = await stat(new URL('../../public/banners/imortal0800-portal.webp', import.meta.url))
   assert.ok(imageInfo.size > 5_000, 'capa social nao deve ser um placeholder vazio')
-  assert.ok(imageInfo.size < 100_000, 'capa social deve permanecer leve para compartilhamento')
 })
 
-test('html inicial publica card social grande com a nova capa', async () => {
+test('html inicial publica metadados da identidade atual', async () => {
   const html = await source('index.html')
   const imageUrl = `${EXPECTED_SITE_URL}${EXPECTED_SOCIAL_IMAGE}`
 
@@ -96,11 +100,12 @@ test('html inicial publica card social grande com a nova capa', async () => {
   assert.ok(html.includes(`<meta property="og:url" content="${EXPECTED_SITE_URL}"`))
   assert.ok(html.includes(`<meta property="og:image" content="${imageUrl}"`))
   assert.ok(html.includes(`<meta property="og:image:secure_url" content="${imageUrl}"`))
-  assert.ok(html.includes(`<meta property="og:image:type" content="image/jpeg"`))
+  assert.ok(html.includes(`<meta property="og:image:type" content="image/webp"`))
   assert.ok(html.includes(`<meta name="twitter:image" content="${imageUrl}"`))
   assert.match(html, /<meta name="twitter:card" content="summary_large_image"/)
-  assert.match(html, /<meta property="og:image:width" content="600"/)
-  assert.match(html, /<meta property="og:image:height" content="315"/)
+  assert.match(html, /<meta property="og:image:width" content="1180"/)
+  assert.match(html, /<meta property="og:image:height" content="140"/)
+  assert.doesNotMatch(html, /radiobardosamigos/i)
 })
 
 test('Vercel envia somente as rotas SEO publicas para entrypoints indexaveis', async () => {
@@ -120,8 +125,8 @@ test('Vercel envia somente as rotas SEO publicas para entrypoints indexaveis', a
   assert.equal(rewrites.get('/(.*)'), '/noindex/index.html')
 })
 
-test('paginas indexadas nao promovem modulos congelados no texto SEO', () => {
+test('paginas indexadas nao promovem modulos legados no texto SEO', () => {
   for (const page of publicSeoPages) {
-    assert.doesNotMatch(`${page.title} ${page.description}`, /BarCoins|Brincadeiras/i)
+    assert.doesNotMatch(`${page.title} ${page.description}`, /Bar dos Amigos|BarCoins|Brincadeiras/i)
   }
 })
