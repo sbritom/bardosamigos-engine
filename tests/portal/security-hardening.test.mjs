@@ -73,6 +73,12 @@ test('sensitive admin APIs disable response caching', () => {
   assert.match(requests, /private, no-store, max-age=0/)
 })
 
+test('painel da Radio exige guarda de rota para admin ou locutor', () => {
+  const registry = read('src/core/registry/plugins.jsx')
+  assert.match(registry, /RADIO_ADMIN_ROLES\s*=\s*Object\.freeze\(\[ADMIN_ROLES\.ADMIN, ADMIN_ROLES\.LOCUTOR\]\)/)
+  assert.match(registry, /id:\s*"radio-admin"[\s\S]*?AdminPluginPage[\s\S]*?allowedRoles=\{RADIO_ADMIN_ROLES\}/)
+})
+
 test('football API only accepts the configured public competition allowlist', () => {
   const source = read('api/football/matches.js')
   assert.match(source, /ALLOWED_COMPETITIONS/)
