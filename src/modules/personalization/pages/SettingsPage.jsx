@@ -39,23 +39,26 @@ function GuestSettings({ onLogin }) {
 export default function SettingsPage() {
   const navigate = useNavigate()
   const { isAuthenticated, profileLoading, preferences, openAuth, updatePreferences } = useAuth()
-  const savedPersonalization = preferences?.personalization || {}
-  const savedInterests = Array.isArray(savedPersonalization.interests) && savedPersonalization.interests.length
-    ? savedPersonalization.interests
-    : DEFAULT_INTERESTS
+  const savedPersonalization = preferences?.personalization
+  const savedInterests = useMemo(() => {
+    const values = savedPersonalization?.interests
+    return Array.isArray(values) && values.length ? values : DEFAULT_INTERESTS
+  }, [savedPersonalization?.interests])
+  const savedFavoritesFirst = savedPersonalization?.favoritesFirst !== false
+  const savedOnlyInterests = Boolean(savedPersonalization?.onlyInterests)
 
   const [interests, setInterests] = useState(savedInterests)
-  const [favoritesFirst, setFavoritesFirst] = useState(savedPersonalization.favoritesFirst !== false)
-  const [onlyInterests, setOnlyInterests] = useState(Boolean(savedPersonalization.onlyInterests))
+  const [favoritesFirst, setFavoritesFirst] = useState(savedFavoritesFirst)
+  const [onlyInterests, setOnlyInterests] = useState(savedOnlyInterests)
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [tone, setTone] = useState('success')
 
   useEffect(() => {
     setInterests(savedInterests)
-    setFavoritesFirst(savedPersonalization.favoritesFirst !== false)
-    setOnlyInterests(Boolean(savedPersonalization.onlyInterests))
-  }, [preferences])
+    setFavoritesFirst(savedFavoritesFirst)
+    setOnlyInterests(savedOnlyInterests)
+  }, [savedFavoritesFirst, savedInterests, savedOnlyInterests])
 
   const selectedCount = interests.length
   const hasAtLeastOneInterest = selectedCount > 0
