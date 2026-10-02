@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, CheckCircle2, Clock3, Target, Trophy } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../auth/AuthContext'
@@ -191,7 +191,7 @@ export default function CompetitionPredictionsPage({ initialTab = 'games' }) {
     setLoading(false)
   }
 
-  async function loadMyPredictions() {
+  const loadMyPredictions = useCallback(async () => {
     if (!isAuthenticated) {
       setMyPredictions([])
       setSecondaryError('')
@@ -203,15 +203,15 @@ export default function CompetitionPredictionsPage({ initialTab = 'games' }) {
     setMyPredictions(result.data || [])
     setSecondaryError(result.error?.message || '')
     setSecondaryLoading(false)
-  }
+  }, [isAuthenticated])
 
-  async function loadRanking() {
+  const loadRanking = useCallback(async () => {
     setSecondaryLoading(true)
     const result = await listLatestCompetitionRanking('general')
     setRanking(result.data)
     setSecondaryError(result.error?.message || '')
     setSecondaryLoading(false)
-  }
+  }, [])
 
   useEffect(() => {
     loadGames()
@@ -222,7 +222,7 @@ export default function CompetitionPredictionsPage({ initialTab = 'games' }) {
   useEffect(() => {
     if (activeTab === 'mine') loadMyPredictions()
     if (activeTab === 'ranking') loadRanking()
-  }, [activeTab, isAuthenticated])
+  }, [activeTab, loadMyPredictions, loadRanking])
 
   function changeTab(nextTab) {
     setMessage('')

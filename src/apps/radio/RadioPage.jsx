@@ -173,13 +173,17 @@ export default function RadioPage() {
   const hasCover = /^https?:\/\//i.test(coverUrl) && failedCover !== coverUrl;
   const isUnavailable = Boolean(metadataError || playerError);
   const activeProgram = radioPrograms[activeProgramIndex] || null;
-  const todayScheduleDay = useMemo(() => {
-    const day = new Date().getDay();
-    return day === 0 ? 7 : day;
+  const scheduleReferenceTime = useMemo(() => {
+    const candidate = metadata.updatedAt ? new Date(metadata.updatedAt) : new Date();
+    return Number.isNaN(candidate.getTime()) ? new Date() : candidate;
   }, [metadata.updatedAt]);
+  const todayScheduleDay = useMemo(() => {
+    const day = scheduleReferenceTime.getDay();
+    return day === 0 ? 7 : day;
+  }, [scheduleReferenceTime]);
   const nextRadioSlot = useMemo(
-    () => getUpcomingRadioSlot(radioSchedule, new Date()),
-    [metadata.updatedAt, radioSchedule],
+    () => getUpcomingRadioSlot(radioSchedule, scheduleReferenceTime),
+    [radioSchedule, scheduleReferenceTime],
   );
   const nextRadioProgram = useMemo(
     () => getProgramForSlot(radioPrograms, nextRadioSlot),
