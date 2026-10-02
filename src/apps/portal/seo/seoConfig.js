@@ -1,4 +1,26 @@
-export const SITE_URL = 'https://imortal0800.com'
+const DEFAULT_SITE_URL = 'https://imortal0800.vercel.app'
+
+function normalizeSiteUrl(value) {
+  const candidate = String(value || '').trim()
+  if (!candidate) return DEFAULT_SITE_URL
+
+  try {
+    const url = new URL(candidate.includes('://') ? candidate : `https://${candidate}`)
+    if (!['http:', 'https:'].includes(url.protocol)) return DEFAULT_SITE_URL
+    return url.origin
+  } catch {
+    return DEFAULT_SITE_URL
+  }
+}
+
+const viteSiteUrl = import.meta.env?.VITE_SITE_URL || ''
+const nodeEnv = globalThis?.process?.env || {}
+const configuredSiteUrl = viteSiteUrl
+  || nodeEnv.PUBLIC_SITE_URL
+  || nodeEnv.SITE_URL
+  || nodeEnv.VERCEL_PROJECT_PRODUCTION_URL
+
+export const SITE_URL = normalizeSiteUrl(configuredSiteUrl)
 export const SITE_NAME = 'IMORTAL0800'
 export const DEFAULT_SOCIAL_IMAGE = '/banners/imortal0800-portal.webp'
 export const DEFAULT_SOCIAL_IMAGE_WIDTH = '1180'
