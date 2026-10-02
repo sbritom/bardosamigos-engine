@@ -17,11 +17,11 @@ import {
   Settings,
 } from "lucide-react";
 
-import HomePage from "../../apps/portal/pages/HomePage";
 import AdminRouteGuard from "../auth/AdminRouteGuard";
 import { ADMIN_ROLES } from "../auth/adminAuthService";
 import PluginPage from "../../shared/layout/PluginPage";
 
+const HomePage = React.lazy(() => import("../../apps/portal/pages/HomePage"));
 const FullScreenChat = React.lazy(() => import("../../modules/chat/pages/FullScreenChat"));
 const TVPage = React.lazy(() => import("../../modules/tv/pages/TVPage"));
 const RadioPage = React.lazy(() => import("../../apps/radio/RadioPage"));
@@ -82,7 +82,7 @@ export const plugins = [
     path: "/",
     icon: Home,
     menu: true,
-    element: <HomePage />,
+    element: <LazyPluginPage component={HomePage} title="Home" />,
   },
 
   {
@@ -221,9 +221,18 @@ export const plugins = [
   },
 
   {
+    id: "community-admin",
+    title: "Comunidade Admin",
+    path: "/admin/community",
+    icon: Shield,
+    menu: false,
+    element: <AdminPluginPage component={CommunityAdminPage} title="Comunidade Admin" />,
+  },
+
+  {
     id: "events-admin",
     title: "Eventos Admin",
-    path: "/events/admin",
+    path: "/admin/events",
     icon: Shield,
     menu: false,
     element: <AdminPluginPage component={EventsAdminPage} title="Eventos Admin" />,
@@ -231,163 +240,87 @@ export const plugins = [
 
   {
     id: "admin",
-    title: "Admin",
+    title: "Administração",
     path: "/admin",
     icon: Shield,
     menu: false,
-    element: <AdminPluginPage component={AdminPage} title="Admin" />,
+    element: <AdminPluginPage component={AdminPage} title="Administração" />,
   },
 
   {
     id: "admin-users",
-    title: "Usuários e Cargos",
+    title: "Usuários",
     path: "/admin/users",
-    icon: Users,
+    icon: Shield,
     menu: false,
-    element: <AdminPluginPage component={AdminUsersPage} title="Usuários e Cargos" />,
-  },
-
-  {
-    id: "admin-community",
-    title: "Comunidade Admin",
-    path: "/admin/community",
-    icon: Users,
-    menu: false,
-    element: <AdminPluginPage component={CommunityAdminPage} title="Comunidade Admin" />,
+    element: <AdminPluginPage component={AdminUsersPage} title="Usuários" />,
   },
 
   {
     id: "admin-tv",
-    title: "TV Manager",
+    title: "TV Admin",
     path: "/admin/tv",
     icon: Tv,
     menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager" section="dashboard" />,
+    element: <AdminPluginPage component={TVManager} title="TV Admin" />,
   },
 
   {
-    id: "admin-tv-categories",
-    title: "TV Manager Categorias",
-    path: "/admin/tv/categories",
-    icon: Tv,
-    menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager Categorias" section="categories" />,
-  },
-
-  {
-    id: "admin-tv-channels",
-    title: "TV Manager Canais",
-    path: "/admin/tv/channels",
-    icon: Tv,
-    menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager Canais" section="channels" />,
-  },
-
-  {
-    id: "admin-tv-featured",
-    title: "TV Manager Destaques",
-    path: "/admin/tv/featured",
-    icon: Tv,
-    menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager Destaques" section="featured" />,
-  },
-
-  {
-    id: "admin-tv-settings",
-    title: "TV Manager Configurações",
-    path: "/admin/tv/settings",
-    icon: Tv,
-    menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager Configurações" section="settings" />,
-  },
-
-  {
-    id: "admin-tv-import",
-    title: "TV Manager Importação",
-    path: "/admin/tv/import",
-    icon: Tv,
-    menu: false,
-    element: <AdminPluginPage component={TVManager} title="TV Manager Importação" section="import" />,
-  },
-
-  {
-    id: "official-chat",
-    title: "Chat",
-    path: "/chat",
-    icon: MessageCircle,
-    menu: false,
-    element: (
-      <React.Suspense fallback={<PluginPage title="Chat" description="Carregando chat oficial..." />}>
-        <FullScreenChat />
-      </React.Suspense>
-    ),
-  },
-
-  {
-    id: "admin-competition",
-    title: "Admin Competition",
-    path: "/admin/competition/campeonatos",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={ChampionshipsPage} title="Admin Competition" />,
-  },
-
-  {
-    id: "admin-competition-seasons",
-    title: "Admin Competition Temporadas",
-    path: "/admin/competition/temporadas",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={SeasonsPage} title="Admin Competition Temporadas" />,
-  },
-
-  {
-    id: "admin-competition-rounds",
-    title: "Admin Competition Rodadas",
-    path: "/admin/competition/rodadas",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={RoundsPage} title="Admin Competition Rodadas" />,
-  },
-
-  {
-    id: "admin-competition-teams",
-    title: "Admin Competition Times",
-    path: "/admin/competition/times",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={TeamsPage} title="Admin Competition Times" />,
-  },
-
-  {
-    id: "admin-competition-matches",
-    title: "Admin Competition Jogos",
-    path: "/admin/competition/jogos",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={MatchesPage} title="Admin Competition Jogos" />,
-  },
-
-  {
-    id: "admin-competition-results",
-    title: "Admin Competition Resultados",
-    path: "/admin/competition/resultados",
-    icon: Shield,
-    menu: false,
-    element: <AdminPluginPage component={MatchResultsPage} title="Admin Competition Resultados" />,
-  },
-
-  {
-    id: "my-prediction-results",
-    title: "Meus Palpites",
-    path: "/meus-palpites/resultados",
+    id: "admin-championships",
+    title: "Campeonatos",
+    path: "/admin/competitions",
     icon: Trophy,
     menu: false,
-    element: <LazyPluginPage component={CompetitionPredictionsPage} title="Meus Palpites" initialTab="mine" />,
+    element: <AdminPluginPage component={ChampionshipsPage} title="Campeonatos" />,
   },
 
   {
-    id: "competition-predictions",
+    id: "admin-seasons",
+    title: "Temporadas",
+    path: "/admin/competitions/seasons",
+    icon: Trophy,
+    menu: false,
+    element: <AdminPluginPage component={SeasonsPage} title="Temporadas" />,
+  },
+
+  {
+    id: "admin-rounds",
+    title: "Rodadas",
+    path: "/admin/competitions/rounds",
+    icon: Trophy,
+    menu: false,
+    element: <AdminPluginPage component={RoundsPage} title="Rodadas" />,
+  },
+
+  {
+    id: "admin-teams",
+    title: "Times",
+    path: "/admin/competitions/teams",
+    icon: Trophy,
+    menu: false,
+    element: <AdminPluginPage component={TeamsPage} title="Times" />,
+  },
+
+  {
+    id: "admin-matches",
+    title: "Partidas",
+    path: "/admin/competitions/matches",
+    icon: Trophy,
+    menu: false,
+    element: <AdminPluginPage component={MatchesPage} title="Partidas" />,
+  },
+
+  {
+    id: "admin-results",
+    title: "Resultados",
+    path: "/admin/competitions/results",
+    icon: Trophy,
+    menu: false,
+    element: <AdminPluginPage component={MatchResultsPage} title="Resultados" />,
+  },
+
+  {
+    id: "predictions",
     title: "Palpites",
     path: "/palpites",
     icon: Trophy,
@@ -405,15 +338,20 @@ export const plugins = [
   },
 
   {
-    id: "competition-ranking",
+    id: "ranking",
     title: "Ranking",
-    path: "/competition/ranking",
+    path: "/ranking",
     icon: Trophy,
     menu: false,
     element: <LazyPluginPage component={CompetitionPredictionsPage} title="Ranking" initialTab="ranking" />,
   },
-];
 
-export function getMenuPlugins() {
-  return plugins.filter((plugin) => plugin.menu);
-}
+  {
+    id: "chat",
+    title: "Chat",
+    path: "/chat",
+    icon: MessageCircle,
+    menu: false,
+    element: <LazyPluginPage component={FullScreenChat} title="Chat" />,
+  },
+];
