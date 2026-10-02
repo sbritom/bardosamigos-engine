@@ -56,7 +56,7 @@ test('API origin allowlist is aligned with IMORTAL0800 and configurable by envir
   assert.match(source, /https:\/\/imortal0800\.com/)
   assert.match(source, /VERCEL_PROJECT_PRODUCTION_URL/)
   assert.match(source, /PUBLIC_SITE_URL/)
-  assert.doesNotMatch(source, /imortal0800/i)
+  assert.doesNotMatch(source, /radiobardosamigos|bardosamigos/i)
 })
 
 test('events admin keeps its server-side Supabase client', () => {
