@@ -1,6 +1,6 @@
 <icecast>
   <location>IMORTAL0800</location>
-  <admin>admin@bardosamigos.local</admin>
+  <admin>admin@imortal0800.local</admin>
   <hostname>localhost</hostname>
 
   <limits>
