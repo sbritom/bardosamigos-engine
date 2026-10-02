@@ -19,7 +19,7 @@ import {
   isLocalAdminEnabled,
   isLocalDesignerEnvironment,
   toggleLocalAdmin,
-} from '../../../modules/barstudio/designer/services/layoutDesignerService'
+} from '../../../modules/imortal-tools/designer/services/layoutDesignerService'
 import RadioBar from './RadioBar'
 import '../../../design-system/styles/index.css'
 
@@ -52,8 +52,8 @@ export default function Header() {
       setLocalAdminEnabledState(isLocalAdminEnabled())
     }
 
-    window.addEventListener('barstudio:local-admin-updated', handleLocalAdminUpdate)
-    return () => window.removeEventListener('barstudio:local-admin-updated', handleLocalAdminUpdate)
+    window.addEventListener('imortal-tools:local-admin-updated', handleLocalAdminUpdate)
+    return () => window.removeEventListener('imortal-tools:local-admin-updated', handleLocalAdminUpdate)
   }, [showLocalAdmin])
 
   return (
@@ -94,7 +94,6 @@ export default function Header() {
             >
               {IMORTAL_HOME_MENU.map((item) => {
                 const Icon = item.icon
-
                 return (
                   <NavLink
                     key={item.id}
@@ -132,12 +131,7 @@ export default function Header() {
                 onClick={() => navigate('/profile')}
               >
                 {isAuthenticated && profile?.avatarUrl ? (
-                  <img
-                    src={profile.avatarUrl}
-                    alt=""
-                    className="h-6 w-6 rounded-full object-cover"
-                    aria-hidden="true"
-                  />
+                  <img src={profile.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" aria-hidden="true" />
                 ) : (
                   <UserCircle size={20} />
                 )}
@@ -152,7 +146,6 @@ export default function Header() {
           >
             {IMORTAL_HOME_MENU.map((item) => {
               const Icon = item.icon
-
               return (
                 <NavLink
                   key={item.id}
