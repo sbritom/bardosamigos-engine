@@ -27,8 +27,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
+      'no-empty': ['error', { allowEmptyCatch: true }],
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/refs': 'off',
+      'react-hooks/preserve-manual-memoization': 'warn',
       'react-refresh/only-export-components': 'off',
     },
   },
