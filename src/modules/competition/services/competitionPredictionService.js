@@ -135,20 +135,19 @@ export async function removeCompetitionPrediction(prediction, match) {
 }
 
 export async function listLatestCompetitionRanking(scope = 'general') {
-  try {
-    const url = new URL('/api/competition/ranking', window.location.origin)
-    url.searchParams.set('scope', scope)
+  const safeScope = ['general', 'competition', 'season'].includes(scope) ? scope : 'general'
 
-    const response = await fetch(url, {
+  try {
+    const response = await fetch(`/api/football/matches?resource=ranking&scope=${encodeURIComponent(safeScope)}`, {
       headers: { Accept: 'application/json' },
     })
     const payload = await response.json().catch(() => ({}))
 
-    if (!response.ok || payload?.ok === false) {
-      throw new Error(payload?.error || 'Não foi possível carregar o ranking.')
+    if (!response.ok) {
+      return { data: null, error: new Error(payload?.error || 'Não foi possível carregar o ranking.') }
     }
 
-    return { data: payload?.data ? toCamelCase(payload.data) : null, error: null }
+    return { data: payload?.ranking ? toCamelCase(payload.ranking) : null, error: null }
   } catch (error) {
     return { data: null, error }
   }
