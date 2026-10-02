@@ -147,7 +147,7 @@ export async function listLatestCompetitionRanking(scope = 'general') {
       return { data: null, error: new Error(payload?.error || 'Não foi possível carregar o ranking.') }
     }
 
-    return { data: payload?.ranking ? toCamelCase(payload.ranking) : null, error: null }
+    return { data: payload?.data ? toCamelCase(payload.data) : null, error: null }
   } catch (error) {
     return { data: null, error }
   }
