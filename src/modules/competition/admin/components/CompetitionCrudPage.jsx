@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Card, EmptyState, Input, Loading, Modal, Pagination, Select } from '../../../../design-system'
 import { CompetitionDataTable } from './CompetitionDataTable'
 import { CompetitionEntityForm } from './CompetitionEntityForm'
@@ -39,7 +39,7 @@ export function CompetitionCrudPage({ entity }) {
     return firstFilter && filter ? { [firstFilter.key]: filter } : {}
   }, [entity.filters, filter])
 
-  async function loadRecords() {
+  const loadRecords = useCallback(async () => {
     setLoading(true)
     setError('')
     const result = await listCompetitionAdminRecords({
@@ -58,11 +58,11 @@ export function CompetitionCrudPage({ entity }) {
     setRows(result.data)
     setCount(result.count)
     setLoading(false)
-  }
+  }, [entity.searchFields, entity.table, filters, page, search])
 
   useEffect(() => {
     loadRecords()
-  }, [entity.table, page, search, filter])
+  }, [loadRecords])
 
   function openCreate() {
     setEditing({ id: null })
