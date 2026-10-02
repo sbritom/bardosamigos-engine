@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { applyApiCors, getBearerToken, timingSafeEqualText } from '../_lib/security.js'
 
 const FOOTBALL_DATA_BASE_URL = 'https://api.football-data.org/v4'
 const DEFAULT_COMPETITIONS = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL']
@@ -10,9 +11,15 @@ const DISPLAY_LIMIT = 12
 const WORLD_CUP_YEAR = 2026
 const MAX_COMPETITIONS = 12
 const REQUEST_TIMEOUT_MS = 8000
+const COMPETITION_CATALOG_TTL_MS = 6 * 60 * 60 * 1000
 const COMPETITION_CODE_RE = /^[A-Z0-9]{2,6}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const MATCH_ID_RE = /^\d{1,12}$/
+
+let competitionCatalogCache = {
+  data: null,
+  expiresAt: 0,
+}
 
 function getSupabaseAdmin() {
   const url = String(process.env.SUPABASE_URL || '').trim()
@@ -27,10 +34,27 @@ function getSupabaseAdmin() {
   })
 }
 
+function isAuthorizedSettlementRequest(request) {
+  const secret = String(process.env.CRON_SECRET || '').trim()
+  if (!secret) return false
+  return timingSafeEqualText(getBearerToken(request), secret)
+}
+
+function createSkippedSettlement(reason = 'cron-only') {
+  return {
+    enabled: false,
+    reason,
+    attempted: 0,
+    settled: 0,
+    scoredPredictions: 0,
+    errors: [],
+  }
+}
+
 async function settleFinishedMatches(matches = []) {
   const supabase = getSupabaseAdmin()
   if (!supabase) {
-    return { enabled: false, attempted: 0, settled: 0, scoredPredictions: 0, errors: [] }
+    return createSkippedSettlement('supabase-admin-unavailable')
   }
 
   const finished = matches
@@ -47,24 +71,28 @@ async function settleFinishedMatches(matches = []) {
   const errors = []
 
   for (const match of finished) {
-    const { data, error } = await supabase.rpc('imortal_settle_football_match', {
-      p_external_ref: String(match.providerMatchId),
-      p_home_score: match.homeScore,
-      p_away_score: match.awayScore,
-      p_provider_metadata: {
-        footballDataStatus: match.metadata?.providerStatus || 'FINISHED',
-        competitionCode: match.competitionCode || '',
-        autoSettlementCheckedAt: new Date().toISOString(),
-      },
-    })
+    try {
+      const { data, error } = await supabase.rpc('imortal_settle_football_match', {
+        p_external_ref: String(match.providerMatchId),
+        p_home_score: match.homeScore,
+        p_away_score: match.awayScore,
+        p_provider_metadata: {
+          footballDataStatus: match.metadata?.providerStatus || 'FINISHED',
+          competitionCode: match.competitionCode || '',
+          autoSettlementCheckedAt: new Date().toISOString(),
+        },
+      })
 
-    if (error) {
-      errors.push(`${match.providerMatchId}: ${error.message || 'settlement failed'}`)
-      continue
+      if (error) {
+        errors.push(`${match.providerMatchId}: ${error.message || 'settlement failed'}`)
+        continue
+      }
+
+      if (data?.found && !data?.alreadySettled) settled += 1
+      scoredPredictions += Number(data?.scoredPredictions || 0)
+    } catch (error) {
+      errors.push(`${match.providerMatchId}: ${error?.message || 'settlement failed'}`)
     }
-
-    if (data?.found && !data?.alreadySettled) settled += 1
-    scoredPredictions += Number(data?.scoredPredictions || 0)
   }
 
   return {
@@ -258,35 +286,49 @@ async function fetchCompetitionMatches({ competitionCode, apiKey, dateFrom, date
   if (dateTo) url.searchParams.set('dateTo', dateTo)
   if (!dateFrom && !dateTo) url.searchParams.set('season', String(WORLD_CUP_YEAR))
 
-  const response = await fetch(url, {
+  const providerResponse = await fetch(url, {
     headers: {
       'X-Auth-Token': apiKey,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
 
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(payload.message || `Football-Data request failed with status ${response.status}`)
+  const payload = await providerResponse.json().catch(() => ({}))
+  if (!providerResponse.ok) {
+    throw new Error(payload.message || `Football-Data request failed with status ${providerResponse.status}`)
   }
 
   return (payload.matches || []).map(mapMatch)
 }
 
 async function fetchCompetitions({ apiKey }) {
-  const response = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions`, {
+  const providerResponse = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions`, {
     headers: {
       'X-Auth-Token': apiKey,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-  const payload = await response.json().catch(() => ({}))
+  const payload = await providerResponse.json().catch(() => ({}))
 
-  if (!response.ok) {
-    throw new Error(payload.message || `Football-Data competitions request failed with status ${response.status}`)
+  if (!providerResponse.ok) {
+    throw new Error(payload.message || `Football-Data competitions request failed with status ${providerResponse.status}`)
   }
 
   return payload.competitions || []
+}
+
+async function fetchCompetitionsCached({ apiKey }) {
+  const now = Date.now()
+  if (Array.isArray(competitionCatalogCache.data) && competitionCatalogCache.expiresAt > now) {
+    return competitionCatalogCache.data
+  }
+
+  const data = await fetchCompetitions({ apiKey })
+  competitionCatalogCache = {
+    data,
+    expiresAt: now + COMPETITION_CATALOG_TTL_MS,
+  }
+  return data
 }
 
 function mapStandingRow(row = {}) {
@@ -308,16 +350,16 @@ function mapStandingRow(row = {}) {
 }
 
 async function fetchCompetitionStandings({ competitionCode, apiKey }) {
-  const response = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/standings`, {
+  const providerResponse = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/standings`, {
     headers: {
       'X-Auth-Token': apiKey,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-  const payload = await response.json().catch(() => ({}))
+  const payload = await providerResponse.json().catch(() => ({}))
 
-  if (!response.ok) {
-    throw new Error(payload.message || `Football-Data standings request failed with status ${response.status}`)
+  if (!providerResponse.ok) {
+    throw new Error(payload.message || `Football-Data standings request failed with status ${providerResponse.status}`)
   }
 
   const competition = {
@@ -336,6 +378,7 @@ async function fetchCompetitionStandings({ competitionCode, apiKey }) {
 
   return { competition, season: payload.season || null, standings }
 }
+
 function mapScorer(item = {}) {
   const player = item.player || {}
   const team = normalizeTeam(item.team, 'Time', '')
@@ -360,14 +403,14 @@ function mapScorer(item = {}) {
 async function fetchCompetitionScorers({ competitionCode, apiKey }) {
   const url = new URL(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/scorers`)
   url.searchParams.set('limit', '20')
-  const response = await fetch(url, {
+  const providerResponse = await fetch(url, {
     headers: { 'X-Auth-Token': apiKey },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-  const payload = await response.json().catch(() => ({}))
+  const payload = await providerResponse.json().catch(() => ({}))
 
-  if (!response.ok) {
-    throw new Error(payload.message || `Football-Data scorers request failed with status ${response.status}`)
+  if (!providerResponse.ok) {
+    throw new Error(payload.message || `Football-Data scorers request failed with status ${providerResponse.status}`)
   }
 
   return {
@@ -381,6 +424,7 @@ async function fetchCompetitionScorers({ competitionCode, apiKey }) {
     scorers: (payload.scorers || []).map(mapScorer),
   }
 }
+
 function eventMinute(item = {}) {
   return Number(item.minute ?? item.time ?? item.elapsed ?? 0) || 0
 }
@@ -494,21 +538,22 @@ function mapDetailedMatch(match = {}) {
 }
 
 async function fetchMatchDetails({ matchId, apiKey }) {
-  const response = await fetch(`${FOOTBALL_DATA_BASE_URL}/matches/${matchId}`, {
+  const providerResponse = await fetch(`${FOOTBALL_DATA_BASE_URL}/matches/${matchId}`, {
     headers: {
       'X-Auth-Token': apiKey,
       'X-Unfold-Goals': 'true',
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-  const payload = await response.json().catch(() => ({}))
+  const payload = await providerResponse.json().catch(() => ({}))
 
-  if (!response.ok) {
-    throw new Error(payload.message || `Football-Data match request failed with status ${response.status}`)
+  if (!providerResponse.ok) {
+    throw new Error(payload.message || `Football-Data match request failed with status ${providerResponse.status}`)
   }
 
   return mapDetailedMatch(payload)
 }
+
 function findWorldCupCompetition(competitions = []) {
   return competitions.find((competition) => {
     const season = competition.currentSeason || {}
@@ -634,8 +679,15 @@ function selectWorldCupMatches(matches = [], today, limit = DISPLAY_LIMIT) {
 }
 
 export default async function handler(request, response) {
-  response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  const trustedOrigin = applyApiCors(request, response, {
+    methods: 'GET, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  })
+
+  if (!trustedOrigin) {
+    response.status(403).json({ error: 'Origin not allowed.' })
+    return
+  }
 
   if (request.method === 'OPTIONS') {
     response.status(204).end()
@@ -649,6 +701,7 @@ export default async function handler(request, response) {
 
   const apiKey = getApiKey()
   if (!apiKey) {
+    response.setHeader('Cache-Control', 'no-store')
     response.status(503).json({ error: 'FOOTBALL_DATA_API_KEY is not configured.' })
     return
   }
@@ -672,6 +725,7 @@ export default async function handler(request, response) {
         match,
       })
     } catch (error) {
+      response.setHeader('Cache-Control', 'no-store')
       response.status(502).json({
         source: 'football-data.org',
         resource: 'match',
@@ -681,6 +735,7 @@ export default async function handler(request, response) {
     }
     return
   }
+
   if (resource === 'scorers') {
     if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
       response.status(400).json({ error: 'Invalid or unsupported competition.' })
@@ -696,6 +751,7 @@ export default async function handler(request, response) {
         ...result,
       })
     } catch (error) {
+      response.setHeader('Cache-Control', 'no-store')
       response.status(502).json({
         source: 'football-data.org',
         resource: 'scorers',
@@ -705,6 +761,7 @@ export default async function handler(request, response) {
     }
     return
   }
+
   if (resource === 'standings') {
     if (!ALLOWED_COMPETITIONS.has(requestedCompetition)) {
       response.status(400).json({ error: 'Invalid or unsupported competition.' })
@@ -720,6 +777,7 @@ export default async function handler(request, response) {
         ...result,
       })
     } catch (error) {
+      response.setHeader('Cache-Control', 'no-store')
       response.status(502).json({
         source: 'football-data.org',
         resource: 'standings',
@@ -729,7 +787,8 @@ export default async function handler(request, response) {
     }
     return
   }
-  const window = createDateWindow()
+
+  const dateWindow = createDateWindow()
   const competitions = String(request.query?.competitions || process.env.FOOTBALL_DATA_COMPETITION_CODE || DEFAULT_COMPETITIONS.join(','))
     .split(',')
     .map((item) => item.trim().toUpperCase())
@@ -740,25 +799,35 @@ export default async function handler(request, response) {
   const dateRange = normalizeDateRange(
     request.query?.dateFrom,
     request.query?.dateTo,
-    window.dateFrom,
-    window.dateTo,
+    dateWindow.dateFrom,
+    dateWindow.dateTo,
   )
-  const today = normalizeDate(request.query?.today, window.today)
+  const today = normalizeDate(request.query?.today, dateWindow.today)
+  const maySettle = isAuthorizedSettlementRequest(request)
+  const providerErrors = []
 
+  let worldCupCompetition = null
   try {
-    const competitionCatalog = await fetchCompetitions({ apiKey })
-    const worldCupCompetition = findWorldCupCompetition(competitionCatalog)
+    const competitionCatalog = await fetchCompetitionsCached({ apiKey })
+    worldCupCompetition = findWorldCupCompetition(competitionCatalog)
+  } catch (error) {
+    providerErrors.push(`competition catalog: ${error?.message || 'unavailable'}`)
+  }
 
-    if (worldCupCompetition) {
+  if (worldCupCompetition) {
+    try {
       const worldCupMatches = await fetchCompetitionMatches({
         competitionCode: worldCupCompetition.code,
         apiKey,
       })
 
       if (isWorldCupActive({ competition: worldCupCompetition, matches: worldCupMatches })) {
-        const settlement = await settleFinishedMatches(worldCupMatches)
+        const settlement = maySettle
+          ? await settleFinishedMatches(worldCupMatches)
+          : createSkippedSettlement()
+
         response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
-        response.status(worldCupMatches.length ? 200 : 502).json({
+        response.status(200).json({
           source: 'football-data.org',
           mode: 'world-cup-2026',
           competitions: [worldCupCompetition.code],
@@ -769,17 +838,21 @@ export default async function handler(request, response) {
             endDate: worldCupCompetition.currentSeason?.endDate || null,
           },
           dateWindow: {
-            dateFrom: worldCupCompetition.currentSeason?.startDate || window.dateFrom,
-            dateTo: worldCupCompetition.currentSeason?.endDate || window.dateTo,
+            dateFrom: worldCupCompetition.currentSeason?.startDate || dateWindow.dateFrom,
+            dateTo: worldCupCompetition.currentSeason?.endDate || dateWindow.dateTo,
           },
           matches: selectWorldCupMatches(worldCupMatches, today),
           settlement,
-          errors: [],
+          errors: providerErrors,
         })
         return
       }
+    } catch (error) {
+      providerErrors.push(`world cup: ${error?.message || 'unavailable'}`)
     }
+  }
 
+  try {
     const results = await Promise.allSettled(
       safeCompetitions.map((competitionCode) => fetchCompetitionMatches({
         competitionCode,
@@ -788,14 +861,38 @@ export default async function handler(request, response) {
         dateTo: dateRange.dateTo,
       })),
     )
-    const matches = results.flatMap((item) => item.status === 'fulfilled' ? item.value : [])
-    const errors = results
-      .filter((item) => item.status === 'rejected')
-      .map((item) => item.reason?.message || 'Unknown Football-Data error')
-    const settlement = await settleFinishedMatches(matches)
+
+    const fulfilled = results.filter((item) => item.status === 'fulfilled')
+    const matches = fulfilled.flatMap((item) => item.value)
+    const errors = [
+      ...providerErrors,
+      ...results
+        .filter((item) => item.status === 'rejected')
+        .map((item) => item.reason?.message || 'Unknown Football-Data error'),
+    ]
+
+    if (!fulfilled.length) {
+      response.setHeader('Cache-Control', 'no-store')
+      response.status(502).json({
+        source: 'football-data.org',
+        competitions: safeCompetitions,
+        dateWindow: {
+          dateFrom: dateRange.dateFrom,
+          dateTo: dateRange.dateTo,
+        },
+        matches: [],
+        settlement: createSkippedSettlement('provider-unavailable'),
+        errors,
+      })
+      return
+    }
+
+    const settlement = maySettle
+      ? await settleFinishedMatches(matches)
+      : createSkippedSettlement()
 
     response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
-    response.status(matches.length ? 200 : 502).json({
+    response.status(200).json({
       source: 'football-data.org',
       competitions: safeCompetitions,
       dateWindow: {
@@ -807,7 +904,13 @@ export default async function handler(request, response) {
       errors,
     })
   } catch (error) {
-    response.status(502).json({ error: error.message || 'Football-Data request failed.' })
+    response.setHeader('Cache-Control', 'no-store')
+    response.status(502).json({
+      source: 'football-data.org',
+      matches: [],
+      settlement: createSkippedSettlement('provider-unavailable'),
+      errors: [...providerErrors, error?.message || 'Football-Data request failed.'],
+    })
   }
 }
 
