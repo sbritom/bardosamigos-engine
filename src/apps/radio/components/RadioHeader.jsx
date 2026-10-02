@@ -11,8 +11,8 @@ function RadioHeader({ online, updatedAt }) {
           <Radio size={28} />
         </div>
         <div>
-          <p>Radio oficial</p>
-          <h1>Radio Bar dos Amigos</h1>
+          <p>Rádio oficial</p>
+          <h1>Rádio IMORTAL0800</h1>
         </div>
       </div>
 
