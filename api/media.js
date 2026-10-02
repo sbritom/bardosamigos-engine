@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const bucket = process.env.VITE_SUPABASE_STORAGE_BUCKET || 'media'
   if (!supabaseUrl) return res.status(503).end()
 
-  const target = `${supabaseUrl}/storage/v1/object/public/${encodeURIComponent(bucket)}/barstudio/${encodeURIComponent(filename)}`
+  const target = `${supabaseUrl}/storage/v1/object/public/${encodeURIComponent(bucket)}/imortal0800/${encodeURIComponent(filename)}`
 
   try {
     const upstream = await fetch(target)
