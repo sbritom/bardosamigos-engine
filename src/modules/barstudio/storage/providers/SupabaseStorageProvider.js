@@ -4,11 +4,11 @@ import { createStorageAsset } from '../storageTypes.js'
 import { createStoragePath, mapStorageError, normalizeStorageId } from '../storageUtils.js'
 import StorageProvider from './StorageProvider.js'
 
-const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://radiobardosamigos.com.br').replace(/\/$/, '')
+const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://imortal0800.vercel.app').replace(/\/$/, '')
 
 function createShareUrl(path) {
   const filename = normalizeStorageId(path).split('/').pop()
-  return `${PUBLIC_SITE_URL}/ft/bda/${encodeURIComponent(filename)}`
+  return `${PUBLIC_SITE_URL}/media/imortal/${encodeURIComponent(filename)}`
 }
 
 export default class SupabaseStorageProvider extends StorageProvider {
