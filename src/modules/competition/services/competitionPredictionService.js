@@ -135,12 +135,21 @@ export async function removeCompetitionPrediction(prediction, match) {
 }
 
 export async function listLatestCompetitionRanking(scope = 'general') {
-  const client = getSupabaseClient()
-  if (!client) return { data: null, error: configError() }
+  try {
+    const url = new URL('/api/competition/ranking', window.location.origin)
+    url.searchParams.set('scope', scope)
 
-  const { data: ranking, error } = await client.rpc('imortal_get_latest_prediction_ranking', {
-    p_scope: scope,
-  })
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+    })
+    const payload = await response.json().catch(() => ({}))
 
-  return { data: ranking ? toCamelCase(ranking) : null, error }
+    if (!response.ok || payload?.ok === false) {
+      throw new Error(payload?.error || 'Não foi possível carregar o ranking.')
+    }
+
+    return { data: payload?.data ? toCamelCase(payload.data) : null, error: null }
+  } catch (error) {
+    return { data: null, error }
+  }
 }
