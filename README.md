@@ -6,7 +6,8 @@ Portal de entretenimento 24h com TV, Futebol, Games, Rádio e Comunidade/Xat.
 
 - Nome: **IMORTAL0800**
 - Slogan: **Entretenimento 24h**
-- Domínio oficial planejado: `https://imortal0800.com`
+- Domínio atual: `https://imortal0800.vercel.app`
+- Domínio próprio planejado: `https://imortal0800.com.br`
 - Xat oficial: `https://xat.com/Imortal0800`
 
 ## Áreas principais
