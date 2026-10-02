@@ -4,8 +4,8 @@ import process from 'node:process'
 
 const DIST_DIR = path.resolve('dist')
 const LIMITS = Object.freeze({
-  js: 450 * 1024,
-  css: 260 * 1024,
+  js: 400 * 1024,
+  css: 230 * 1024,
   image: 2_300_000,
 })
 
