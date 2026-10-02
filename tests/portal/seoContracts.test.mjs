@@ -43,7 +43,7 @@ test('sitemap contem exatamente as paginas SEO publicas e usa o dominio atual', 
   ))
 
   assert.deepEqual(locations.sort(), expected.sort())
-  assert.doesNotMatch(sitemap, /imortal0800/i)
+  assert.doesNotMatch(sitemap, /radiobardosamigos|bardosamigos/i)
   assert.doesNotMatch(sitemap, /\/barcoins|\/brincadeiras|\/tools/)
 })
 
@@ -105,7 +105,7 @@ test('html inicial publica metadados da identidade atual', async () => {
   assert.match(html, /<meta name="twitter:card" content="summary_large_image"/)
   assert.match(html, /<meta property="og:image:width" content="1180"/)
   assert.match(html, /<meta property="og:image:height" content="140"/)
-  assert.doesNotMatch(html, /imortal0800/i)
+  assert.doesNotMatch(html, /radiobardosamigos|bardosamigos/i)
 })
 
 test('Vercel envia somente as rotas SEO publicas para entrypoints indexaveis', async () => {
@@ -127,6 +127,6 @@ test('Vercel envia somente as rotas SEO publicas para entrypoints indexaveis', a
 
 test('paginas indexadas nao promovem modulos legados no texto SEO', () => {
   for (const page of publicSeoPages) {
-    assert.doesNotMatch(`${page.title} ${page.description}`, /IMORTAL0800|BarCoins|Brincadeiras/i)
+    assert.doesNotMatch(`${page.title} ${page.description}`, /Bar dos Amigos|BarCoins|Brincadeiras/i)
   }
 })
