@@ -138,7 +138,7 @@ export async function listLatestCompetitionRanking(scope = 'general') {
   const safeScope = ['general', 'competition', 'season'].includes(scope) ? scope : 'general'
 
   try {
-    const response = await fetch(`/api/football/matches?resource=ranking&scope=${encodeURIComponent(safeScope)}`, {
+    const response = await fetch(`/api/competition/ranking?scope=${encodeURIComponent(safeScope)}`, {
       headers: { Accept: 'application/json' },
     })
     const payload = await response.json().catch(() => ({}))
