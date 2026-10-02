@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: portal-quality-${{ github.workflow }}-${{ github.ref }}
@@ -21,61 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: One-time legacy branding cleanup
-        if: github.event_name == 'pull_request' && github.head_ref == 'chore/remove-bar-dos-amigos-legacy'
-        shell: bash
-        run: |
-          python <<'PY'
-          from pathlib import Path
-          import subprocess
-
-          replacements = [
-              ('Rádio Bar dos Amigos', 'Rádio IMORTAL0800'),
-              ('Radio Bar dos Amigos', 'Radio IMORTAL0800'),
-              ('BAR DOS AMIGOS', 'IMORTAL0800'),
-              ('Bar dos Amigos', 'IMORTAL0800'),
-              ('bar dos amigos', 'IMORTAL0800'),
-              ('www.radiobardosamigos.com.br', 'imortal0800.vercel.app'),
-              ('radiobardosamigos.com.br', 'imortal0800.vercel.app'),
-              ('radiobardosamigos', 'imortal0800'),
-              ('RadioBarDosAmigos', 'RadioIMORTAL0800'),
-              ('BarDosAmigos', 'IMORTAL0800'),
-              ('/ft/bda', '/media/imortal'),
-          ]
-
-          files = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
-          changed = []
-          for name in files:
-              if not name or name.startswith('.github/workflows/'):
-                  continue
-              path = Path(name)
-              try:
-                  source = path.read_text(encoding='utf-8')
-              except (UnicodeDecodeError, OSError):
-                  continue
-              updated = source
-              for old, new in replacements:
-                  updated = updated.replace(old, new)
-              if updated != source:
-                  path.write_text(updated, encoding='utf-8')
-                  changed.append(name)
-
-          print(f'Updated {len(changed)} files')
-          for name in changed:
-              print(name)
-          PY
-
-          if ! git diff --quiet; then
-            git config user.name 'Gianlucca'
-            git config user.email '106834389+sbritom@users.noreply.github.com'
-            git add -A
-            git commit -m 'Remove remaining public legacy branding'
-            git push origin HEAD:chore/remove-bar-dos-amigos-legacy
-          fi
 
       - name: Setup Node
         uses: actions/setup-node@v5
