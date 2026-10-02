@@ -45,9 +45,9 @@ test('policies e FKs da TV sao consolidadas para o runtime ativo', async () => {
   assert.match(sql, /tv_recent_channel_id_idx/i)
 })
 
-test('Community conta canais pela coluna moderna enabled', async () => {
+test('Community permanece desacoplada do catalogo interno da TV', async () => {
   const overview = await source(overviewUrl)
 
-  assert.match(overview, /from\('tv_channels'\)[\s\S]*?eq\('enabled', true\)/i)
-  assert.doesNotMatch(overview, /from\('tv_channels'\)[\s\S]*?eq\('ativo', true\)/i)
+  assert.doesNotMatch(overview, /from\('tv_channels'\)/i)
+  assert.doesNotMatch(overview, /eq\('ativo', true\)/i)
 })
