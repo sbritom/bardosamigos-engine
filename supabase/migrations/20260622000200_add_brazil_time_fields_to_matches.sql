@@ -1,4 +1,4 @@
--- Bar dos Amigos Engine - Brazil time fields for synchronized matches.
+-- IMORTAL0800 Engine - Brazil time fields for synchronized matches.
 -- Incremental and safe: no drops, no table recreation, no data deletion.
 
 alter table public.competition_matches add column if not exists utc_date timestamptz;

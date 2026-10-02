@@ -1,5 +1,0 @@
-export * from './BolaoService'
-export * from './PalpiteService'
-export * from './RankingService'
-export * from './PontuacaoService'
-export * from './PremiacaoService'

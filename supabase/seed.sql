@@ -15,7 +15,7 @@ on conflict (key) do nothing;
 
 insert into public.app_settings (key, value, scope, is_public)
 values
-  ('platform.name', '"Bar dos Amigos Engine"'::jsonb, 'global', true),
+  ('platform.name', '"IMORTAL0800 Engine"'::jsonb, 'global', true),
   ('platform.theme', '"dark"'::jsonb, 'global', true),
   ('security.soft_delete', 'true'::jsonb, 'global', false)
 on conflict (key) do nothing;

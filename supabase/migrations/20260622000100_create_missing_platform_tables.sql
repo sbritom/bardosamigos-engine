@@ -1,4 +1,4 @@
--- Bar dos Amigos Engine - complementary missing platform tables.
+-- IMORTAL0800 Engine - complementary missing platform tables.
 -- Safe for a remote database that already has legacy tables such as public.tv_channels.
 -- This migration intentionally does not drop, recreate, or alter existing tables.
 

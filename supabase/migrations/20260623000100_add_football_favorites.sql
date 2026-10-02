@@ -1,4 +1,4 @@
--- Bar dos Amigos Engine - Football favorites.
+-- IMORTAL0800 Engine - Football favorites.
 -- Incremental and safe: no drops, no table recreation, no data deletion.
 
 create table if not exists public.football_favorites (

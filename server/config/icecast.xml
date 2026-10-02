@@ -1,6 +1,6 @@
 <icecast>
-  <location>Bar dos Amigos</location>
-  <admin>admin@bardosamigos.local</admin>
+  <location>IMORTAL0800</location>
+  <admin>admin@imortal0800.local</admin>
   <hostname>localhost</hostname>
 
   <limits>
@@ -29,7 +29,7 @@
   <mount>
     <mount-name>/radio</mount-name>
     <public>1</public>
-    <stream-name>Radio Bar dos Amigos</stream-name>
+    <stream-name>Radio IMORTAL0800</stream-name>
     <stream-description>A trilha sonora da nossa amizade</stream-description>
     <stream-url>http://localhost:8000/radio</stream-url>
     <genre>Community Radio</genre>

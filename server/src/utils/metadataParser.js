@@ -2,7 +2,7 @@ export function parseStreamTitle(streamTitle = "") {
   const normalized = String(streamTitle).trim();
   const [artist, title] = normalized.includes(" - ")
     ? normalized.split(" - ", 2).map((part) => part.trim())
-    : ["Radio Bar dos Amigos", normalized || "Programacao ao vivo"];
+    : ["Radio IMORTAL0800", normalized || "Programacao ao vivo"];
 
   return {
     title,
@@ -19,7 +19,7 @@ export function parseStreamTitle(streamTitle = "") {
 export function normalizeMetadata(metadata = {}) {
   return {
     title: metadata.title || "Programacao ao vivo",
-    artist: metadata.artist || "Radio Bar dos Amigos",
+    artist: metadata.artist || "Radio IMORTAL0800",
     album: metadata.album || "",
     category: metadata.category || metadata.genre || "",
     year: metadata.year || null,

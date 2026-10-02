@@ -1,4 +1,4 @@
-# Auditoria Geral — Projeto Oficial Bar dos Amigos
+# Auditoria Geral — Projeto Oficial IMORTAL0800
 
 Data da auditoria: 27/08/2026
 
@@ -9,8 +9,8 @@ A única fonte oficial do portal é:
 - Repositório: `sbritom/bardosamigos-engine`
 - Branch de produção: `main`
 - Vercel: `radio-bar-dos-amigos`
-- Domínio principal: `https://www.radiobardosamigos.com.br`
-- Backend de dados/autenticação: Supabase `BarDosAmigos`
+- Domínio principal: `https://imortal0800.vercel.app`
+- Backend de dados/autenticação: Supabase `IMORTAL0800`
 
 O antigo repositório `sbritom/bardosamigos` foi descontinuado e reduzido a uma página de migração com redirect permanente para o domínio oficial. Ele não contém mais a aplicação React, admin ou catálogo de TV.
 
@@ -249,7 +249,7 @@ Débito técnico: o Radio Admin ainda contém uma camada própria de login além
 - revisar `admin_recovery_codes`: RLS está ativo e sem policies; confirmar formalmente que o acesso é somente service role;
 - criar CSP compatível com YouTube, HLS, Xat e demais embeds;
 - revisar CORS da engine Node, que atualmente usa `Access-Control-Allow-Origin: *`;
-- atualizar allowlist antiga de origem em APIs para o domínio `radiobardosamigos.com.br`;
+- atualizar allowlist antiga de origem em APIs para o domínio `imortal0800.vercel.app`;
 - endurecer cron para preferir `CRON_SECRET` obrigatório;
 - ativar secret scanning/push protection no GitHub, quando disponível;
 - adicionar auditoria de dependências ao CI.

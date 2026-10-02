@@ -1,4 +1,4 @@
--- Bar dos Amigos Engine - Football data deduplication.
+-- IMORTAL0800 Engine - Football data deduplication.
 -- Safe cleanup: soft delete duplicate synchronized rows and add partial unique indexes.
 
 with ranked_matches as (

@@ -29,7 +29,7 @@ export default class AppErrorBoundary extends React.Component {
           aria-labelledby="portal-error-title"
         >
           <span className="text-xs font-black uppercase tracking-[0.16em] text-[var(--primary)]">
-            Bar dos Amigos
+            IMORTAL0800
           </span>
           <h1 id="portal-error-title" className="mt-2 text-2xl font-black">
             Nao foi possivel carregar esta parte do portal

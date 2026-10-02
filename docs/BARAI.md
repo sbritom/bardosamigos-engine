@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-BarAI e o nucleo de inteligencia do Bar dos Amigos Engine. A Fase 2 cria apenas a arquitetura central, sem integrar TV, Radio, Noticias, Bolao, BarCoins, Admin ou qualquer funcionalidade existente.
+BarAI e o nucleo de inteligencia do IMORTAL0800 Engine. A Fase 2 cria apenas a arquitetura central, sem integrar TV, Radio, Noticias, Bolao, BarCoins, Admin ou qualquer funcionalidade existente.
 
 O modulo segue sem chamadas para APIs externas. O processamento continua usando o provider local baseado em regras criado na fundacao.
 

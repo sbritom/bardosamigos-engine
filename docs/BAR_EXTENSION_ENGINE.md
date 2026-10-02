@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O Bar Extension Engine, ou BEE, e a camada oficial de extensibilidade do Bar dos Amigos Engine. Ele permite que novos modulos sejam adicionados sem alterar o nucleo da aplicacao.
+O Bar Extension Engine, ou BEE, e a camada oficial de extensibilidade do IMORTAL0800 Engine. Ele permite que novos modulos sejam adicionados sem alterar o nucleo da aplicacao.
 
 Nesta fase, o BEE entrega apenas infraestrutura. Nenhum modulo real foi implementado, nenhuma rota existente foi alterada e nenhuma interface foi criada.
 

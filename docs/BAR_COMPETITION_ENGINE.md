@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O Bar Competition Engine Core e o nucleo generico para gerenciar competicoes na plataforma Bar dos Amigos Engine. Ele foi criado para suportar futuramente futebol, basquete, volei, Formula 1, UFC, eSports, reality shows e outros eventos competitivos.
+O Bar Competition Engine Core e o nucleo generico para gerenciar competicoes na plataforma IMORTAL0800 Engine. Ele foi criado para suportar futuramente futebol, basquete, volei, Formula 1, UFC, eSports, reality shows e outros eventos competitivos.
 
 Nesta fase, o modulo nao cria interface, banco, Supabase, SQL, React ou componentes visuais.
 

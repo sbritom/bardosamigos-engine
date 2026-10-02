@@ -1,4 +1,4 @@
--- Bar dos Amigos Engine - premium sports data fields.
+-- IMORTAL0800 Engine - premium sports data fields.
 -- Incremental and safe: no drops, no table recreation, no data deletion.
 
 alter table public.competitions add column if not exists official_name text;
