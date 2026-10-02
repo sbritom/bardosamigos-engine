@@ -14,8 +14,7 @@ Disallow: /meus-palpites/
 Disallow: /palpites
 Disallow: /barcoins
 Disallow: /brincadeiras
-Disallow: /games
 Disallow: /radio/xat
 Disallow: /football-placeholder
 
-Sitemap: https://www.radiobardosamigos.com.br/sitemap.xml
+Sitemap: https://imortal0800.vercel.app/sitemap.xml
