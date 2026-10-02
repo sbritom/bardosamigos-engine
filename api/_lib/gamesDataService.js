@@ -1,6 +1,59 @@
 const RAWG_BASE_URL = 'https://api.rawg.io/api'
 const GAMERPOWER_URL = 'https://www.gamerpower.com/api/giveaways?sort-by=date'
 const PANDASCORE_BASE_URL = 'https://api.pandascore.co'
+const PROVIDER_TIMEOUT_MS = 6500
+const PROVIDER_MAX_ATTEMPTS = 2
+const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function getRetryDelay(response, attempt) {
+  const retryAfter = Number(response?.headers?.get?.('retry-after'))
+  if (Number.isFinite(retryAfter) && retryAfter > 0) {
+    return Math.min(retryAfter * 1000, 2000)
+  }
+  return Math.min(250 * (2 ** attempt), 1000)
+}
+
+async function fetchProvider(url, options = {}) {
+  let lastError = null
+
+  for (let attempt = 0; attempt < PROVIDER_MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS)
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      })
+
+      if (!RETRYABLE_STATUS.has(response.status) || attempt === PROVIDER_MAX_ATTEMPTS - 1) {
+        return response
+      }
+
+      await sleep(getRetryDelay(response, attempt))
+    } catch (error) {
+      lastError = error
+      if (attempt === PROVIDER_MAX_ATTEMPTS - 1) {
+        if (error?.name === 'AbortError') {
+          const timeoutError = new Error('Provedor de Games excedeu o tempo limite.')
+          timeoutError.statusCode = 504
+          throw timeoutError
+        }
+        throw error
+      }
+
+      await sleep(250 * (2 ** attempt))
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  throw lastError || new Error('Provedor de Games indisponível.')
+}
 
 function isoDate(date) {
   return date.toISOString().slice(0, 10)
@@ -82,7 +135,7 @@ async function fetchPandaMatches(path, token, perPage, sort = '') {
   url.searchParams.set('per_page', String(perPage))
   if (sort) url.searchParams.set('sort', sort)
 
-  const result = await fetch(url, {
+  const result = await fetchProvider(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
@@ -127,7 +180,7 @@ export async function listRawgReleases() {
   url.searchParams.set('ordering', 'released')
   url.searchParams.set('page_size', '18')
 
-  const result = await fetch(url, { headers: { Accept: 'application/json' } })
+  const result = await fetchProvider(url, { headers: { Accept: 'application/json' } })
   const payload = await result.json().catch(() => ({}))
 
   if (!result.ok) {
@@ -145,7 +198,7 @@ export async function listRawgReleases() {
 }
 
 export async function listGamerPowerFreeGames() {
-  const result = await fetch(GAMERPOWER_URL, { headers: { Accept: 'application/json' } })
+  const result = await fetchProvider(GAMERPOWER_URL, { headers: { Accept: 'application/json' } })
 
   if (result.status === 201) {
     return {
