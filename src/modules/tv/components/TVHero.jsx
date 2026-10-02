@@ -5,7 +5,7 @@ export function TVHero({ featured, onWatch }) {
   const channel = featured?.channel
   return (
     <section className="tv-hero" aria-labelledby="tv-platform-title">
-      <div className="tv-hero__signal"><Tv size={22} aria-hidden="true" /> TV BAR DOS AMIGOS</div>
+      <div className="tv-hero__signal"><Tv size={22} aria-hidden="true" /> TV IMORTAL0800</div>
       <h1 id="tv-platform-title">{channel?.name || 'Sua janela para o que acontece agora'}</h1>
       <p>
         {channel?.description

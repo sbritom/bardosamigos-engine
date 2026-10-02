@@ -1,6 +1,6 @@
 # Bar Design System
 
-Documentacao interna da biblioteca oficial de UI do Bar dos Amigos Engine.
+Documentacao interna da biblioteca oficial de UI do IMORTAL0800 Engine.
 
 Entrada principal:
 

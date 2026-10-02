@@ -1,4 +1,4 @@
-# Segurança — Bar dos Amigos
+# Segurança — IMORTAL0800
 
 Última revisão: 27/08/2026
 
@@ -9,8 +9,8 @@ Este documento define a linha de base de segurança do projeto oficial `sbritom/
 - Repositório: `sbritom/bardosamigos-engine`
 - Branch de produção: `main`
 - Vercel: `radio-bar-dos-amigos`
-- Domínio: `https://www.radiobardosamigos.com.br`
-- Supabase: projeto `BarDosAmigos`
+- Domínio: `https://imortal0800.vercel.app`
+- Supabase: projeto `IMORTAL0800`
 
 ## Regras obrigatórias
 

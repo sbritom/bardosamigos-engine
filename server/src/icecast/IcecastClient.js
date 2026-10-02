@@ -48,7 +48,7 @@ export class IcecastClient {
       headers: {
         Authorization: `Basic ${auth}`,
         "Content-Type": this.audio.contentType,
-        "Ice-Name": "Radio Bar dos Amigos",
+        "Ice-Name": "Radio IMORTAL0800",
         "Ice-Public": "1",
       },
     };

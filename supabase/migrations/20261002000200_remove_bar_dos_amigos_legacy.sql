@@ -1,4 +1,4 @@
--- Remove legacy Bar dos Amigos / BarCoin / BarAI / Store modules.
+-- Remove legacy IMORTAL0800 / BarCoin / BarAI / Store modules.
 -- These tables were verified empty and are not referenced by active IMORTAL0800 functions.
 
 DROP TABLE IF EXISTS public.barai_feedback;

@@ -22,14 +22,14 @@ const CARD_PRESETS = {
     highlight: '🥇 2.000 xats',
   },
   'bingo-do-bar-dos-amigos': {
-    title: '🎉 Bingo do Bar dos Amigos',
+    title: '🎉 Bingo do IMORTAL0800',
     status: '🟢 ATIVO',
     statusClassName: 'bds-events-status--active',
     primaryInfo: { icon: Clock, label: 'Todos os dias às 20:30' },
     secondaryInfo: { icon: Gift, label: 'Premiações variadas' },
   },
   'bingos-e-brincadeiras-do-bar': {
-    title: '🎉 Bingo do Bar dos Amigos',
+    title: '🎉 Bingo do IMORTAL0800',
     status: '🟢 ATIVO',
     statusClassName: 'bds-events-status--active',
     primaryInfo: { icon: Clock, label: 'Todos os dias às 20:30' },

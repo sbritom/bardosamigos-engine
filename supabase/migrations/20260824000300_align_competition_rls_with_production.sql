@@ -1,4 +1,4 @@
--- Bar dos Amigos - align Competition RLS with the verified production model.
+-- IMORTAL0800 - align Competition RLS with the verified production model.
 -- This migration is intentionally idempotent and reconciles policy names from
 -- older migrations with the canonical policies already validated in production.
 

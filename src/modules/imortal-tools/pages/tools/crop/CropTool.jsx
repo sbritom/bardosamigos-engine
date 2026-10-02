@@ -20,7 +20,7 @@ import { CROP_PREVIEW_SIZE, getCropExportSize, INITIAL_CROP_SETTINGS } from './c
 import './cropTool.css'
 
 const INITIAL_OFFSET = { x: 0, y: 0 }
-const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://radiobardosamigos.com.br').replace(/\/$/, '')
+const PUBLIC_SITE_URL = String(import.meta.env?.VITE_PUBLIC_SITE_URL || 'https://imortal0800.vercel.app').replace(/\/$/, '')
 
 function createInitialSettings() {
   return {
@@ -38,7 +38,7 @@ function createHostedShareUrl(asset) {
   const source = String(asset?.path || asset?.name || asset?.id || '')
   const filename = source.split('/').filter(Boolean).pop()
   if (!filename) return ''
-  return `${PUBLIC_SITE_URL}/ft/bda/${encodeURIComponent(filename)}`
+  return `${PUBLIC_SITE_URL}/media/imortal/${encodeURIComponent(filename)}`
 }
 
 async function copyText(text) {

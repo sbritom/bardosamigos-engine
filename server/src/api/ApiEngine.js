@@ -37,8 +37,8 @@ const MXCAST_REQUEST_TIMEOUT_MS = 8000;
 const ENGINE_BODY_LIMIT_BYTES = 64 * 1024;
 
 const TRUSTED_ENGINE_ORIGINS = new Set([
-  "https://radiobardosamigos.com.br",
-  "https://www.radiobardosamigos.com.br",
+  "https://imortal0800.vercel.app",
+  "https://imortal0800.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);

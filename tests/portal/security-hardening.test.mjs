@@ -45,7 +45,7 @@ test('known insecure radio defaults are not versioned', () => {
     read('server/config/icecast.xml'),
   ].join('\n')
 
-  assert.doesNotMatch(files, /BarDosAmigos2026!/)
+  assert.doesNotMatch(files, /IMORTAL08002026!/)
   assert.doesNotMatch(files, /<source-password>hackme<\/source-password>/)
   assert.doesNotMatch(files, /<admin-password>admin<\/admin-password>/)
 })
@@ -56,7 +56,7 @@ test('API origin allowlist is aligned with IMORTAL0800 and configurable by envir
   assert.match(source, /https:\/\/imortal0800\.com/)
   assert.match(source, /VERCEL_PROJECT_PRODUCTION_URL/)
   assert.match(source, /PUBLIC_SITE_URL/)
-  assert.doesNotMatch(source, /radiobardosamigos/i)
+  assert.doesNotMatch(source, /imortal0800/i)
 })
 
 test('events admin keeps its server-side Supabase client', () => {

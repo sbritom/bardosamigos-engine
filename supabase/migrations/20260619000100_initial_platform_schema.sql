@@ -1,5 +1,5 @@
--- Bar dos Amigos Engine - Incremental Supabase/PostgreSQL schema
--- Safe for remote databases that already contain legacy Bar dos Amigos tables.
+-- IMORTAL0800 Engine - Incremental Supabase/PostgreSQL schema
+-- Safe for remote databases that already contain legacy IMORTAL0800 tables.
 -- This migration must preserve existing data and must not drop or recreate tables.
 
 create extension if not exists "pgcrypto";

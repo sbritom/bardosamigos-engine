@@ -1,4 +1,4 @@
--- Bar dos Amigos - Competition admin hardening.
+-- IMORTAL0800 - Competition admin hardening.
 -- Additive and idempotent: aligns the trusted admin claim with database RLS,
 -- enables RLS on Competition catalog tables and closes direct write access.
 

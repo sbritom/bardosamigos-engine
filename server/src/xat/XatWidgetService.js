@@ -11,7 +11,7 @@ export class XatWidgetService {
     this.updatedAt = new Date().toISOString();
 
     return {
-      radioName: "Radio Bar dos Amigos",
+      radioName: "Radio IMORTAL0800",
       status: this.resolveStatus(state.status),
       track: track
         ? {

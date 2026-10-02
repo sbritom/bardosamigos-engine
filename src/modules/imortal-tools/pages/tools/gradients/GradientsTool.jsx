@@ -66,7 +66,7 @@ function flagImageFor(kind, code) {
 
 export default function GradientsTool() {
   const [mode, setMode] = useState('namecolor')
-  const [text, setText] = useState('BarDosAmigos')
+  const [text, setText] = useState('IMORTAL0800')
   const [copied, setCopied] = useState(false)
   const [nameColor, setNameColor] = useState('FF0000')
   const [glowEnabled, setGlowEnabled] = useState(false)
