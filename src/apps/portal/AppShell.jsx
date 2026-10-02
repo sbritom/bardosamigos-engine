@@ -4,7 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
 import PortalSeo from "./seo/PortalSeo";
-import { AuthProvider } from "../../modules/auth/AuthContext";
+import { AuthProvider, useAuth } from "../../modules/auth/AuthContext";
 import { CommunityPresenceProvider } from "../../modules/community/presence/CommunityPresenceContext";
 
 const AuthDialog = lazy(() => import("../../modules/auth/AuthDialog"));
@@ -54,6 +54,17 @@ function useDeferredPortalBackgrounds(pathname) {
   }, [pathname])
 }
 
+function DeferredAuthDialog() {
+  const { authDialog } = useAuth()
+  if (!authDialog.open) return null
+
+  return (
+    <Suspense fallback={null}>
+      <AuthDialog />
+    </Suspense>
+  )
+}
+
 export default function AppShell() {
   const { pathname } = useLocation()
   useDeferredPortalBackgrounds(pathname)
@@ -77,9 +88,7 @@ export default function AppShell() {
           </div>
 
           <Footer />
-          <Suspense fallback={null}>
-            <AuthDialog />
-          </Suspense>
+          <DeferredAuthDialog />
         </div>
       </CommunityPresenceProvider>
     </AuthProvider>
