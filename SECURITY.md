@@ -1,14 +1,13 @@
 # Segurança — IMORTAL0800
 
-Última revisão: 27/08/2026
+Última revisão: 02/10/2026
 
-Este documento define a linha de base de segurança do projeto oficial `sbritom/bardosamigos-engine`.
+Este documento define a linha de base de segurança do projeto oficial IMORTAL0800.
 
 ## Fonte oficial
 
-- Repositório: `sbritom/bardosamigos-engine`
 - Branch de produção: `main`
-- Vercel: `radio-bar-dos-amigos`
+- Vercel: projeto `imortal0800`
 - Domínio: `https://imortal0800.vercel.app`
 - Supabase: projeto `IMORTAL0800`
 
@@ -54,8 +53,7 @@ Este documento define a linha de base de segurança do projeto oficial `sbritom/
 - RLS habilitado nas tabelas públicas.
 - Funções de autorização baseadas em `app_metadata`.
 - Eventos em rascunho não são públicos.
-- Fluxo administrativo legado de recuperação removido do banco.
-- Edge Functions administrativas legadas desativadas e exigindo JWT.
+- Fluxos administrativos legados removidos do banco.
 - `service_role` restrito ao servidor.
 
 ### Radio Engine
@@ -73,6 +71,7 @@ O workflow `Portal Quality` executa:
 
 - `npm ci`
 - auditoria de dependências de produção
+- lint
 - testes
 - build
 - smoke test
@@ -82,9 +81,9 @@ O workflow `Portal Quality` executa:
 
 Estes itens dependem de configurações de conta/plataforma e não devem ser substituídos por código:
 
-1. **Rotacionar qualquer credencial de Icecast que já tenha aparecido no histórico Git.**
-2. **Supabase Auth:** habilitar proteção contra senhas vazadas, quando disponível no plano.
-3. **GitHub:** proteger a branch `main`, exigir o status do `Portal Quality`, bloquear force-push e exclusão.
+1. Rotacionar qualquer credencial de Icecast que já tenha aparecido no histórico Git.
+2. Supabase Auth: habilitar proteção contra senhas vazadas, quando disponível no plano.
+3. GitHub: proteger a branch `main`, exigir o status do `Portal Quality`, bloquear force-push e exclusão.
 4. Manter `RADIO_ENGINE_ADMIN_TOKEN`, Icecast e demais segredos apenas no ambiente do servidor.
 
 ## Resposta a incidente
@@ -100,4 +99,4 @@ Se um segredo for exposto:
 
 ## Dependências
 
-Vulnerabilidades HIGH/CRITICAL em dependências de produção bloqueiam o CI. Não remover essa barreira para fazer um deploy passar.
+Vulnerabilidades HIGH/CRITICAL em dependências de produção bloqueiam a CI. Não remover essa barreira para fazer um deploy passar.
