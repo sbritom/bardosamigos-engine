@@ -1,0 +1,74 @@
+name: Legacy Brand Cleanup
+
+on:
+  push:
+    branches:
+      - chore/remove-bar-dos-amigos-legacy
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message, '[skip legacy cleanup]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Replace public legacy branding
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          replacements = [
+              ('Rádio Bar dos Amigos', 'Rádio IMORTAL0800'),
+              ('Radio Bar dos Amigos', 'Radio IMORTAL0800'),
+              ('BAR DOS AMIGOS', 'IMORTAL0800'),
+              ('Bar dos Amigos', 'IMORTAL0800'),
+              ('bar dos amigos', 'IMORTAL0800'),
+              ('radiobardosamigos.com.br', 'imortal0800.vercel.app'),
+              ('www.radiobardosamigos.com.br', 'imortal0800.vercel.app'),
+              ('radiobardosamigos', 'imortal0800'),
+              ('RadioBarDosAmigos', 'RadioIMORTAL0800'),
+              ('BarDosAmigos', 'IMORTAL0800'),
+              ('/ft/bda', '/media/imortal'),
+          ]
+
+          files = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          changed = []
+          for name in files:
+              if not name:
+                  continue
+              path = Path(name)
+              try:
+                  source = path.read_text(encoding='utf-8')
+              except (UnicodeDecodeError, OSError):
+                  continue
+              updated = source
+              for old, new in replacements:
+                  updated = updated.replace(old, new)
+              if updated != source:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(name)
+
+          print(f'Updated {len(changed)} files')
+          for name in changed:
+              print(name)
+          PY
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No legacy branding changes required.'
+            exit 0
+          fi
+          git config user.name 'Gianlucca'
+          git config user.email '106834389+sbritom@users.noreply.github.com'
+          git add -A
+          git commit -m 'Remove remaining public legacy branding [skip legacy cleanup]'
+          git push origin HEAD:chore/remove-bar-dos-amigos-legacy
