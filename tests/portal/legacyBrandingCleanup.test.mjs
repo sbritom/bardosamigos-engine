@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readdir, readFile } from 'node:fs/promises'
+import { access, readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 
@@ -13,9 +13,6 @@ const FORBIDDEN = [
   /radio\s+bar\s+dos\s+amigos/i,
   /radiobardosamigos/i,
   /bardosamigos/i,
-  /barstudio/i,
-  /barcoins?/i,
-  /barai/i,
   /\/ft\/bda/i,
   /\/barstudio\/designer/i,
 ]
@@ -37,7 +34,16 @@ async function listTextFiles(directory) {
   return files
 }
 
-test('codigo ativo nao contem identidade ou rotas do Bar dos Amigos', async () => {
+async function pathExists(relativePath) {
+  try {
+    await access(path.join(ROOT, relativePath))
+    return true
+  } catch {
+    return false
+  }
+}
+
+test('codigo ativo nao contem identidade publica do Bar dos Amigos', async () => {
   const files = []
   for (const directory of ACTIVE_DIRS) files.push(...await listTextFiles(path.join(ROOT, directory)))
   for (const filename of ACTIVE_FILES) files.push(path.join(ROOT, filename))
@@ -46,13 +52,27 @@ test('codigo ativo nao contem identidade ou rotas do Bar dos Amigos', async () =
   for (const file of files) {
     const source = await readFile(file, 'utf8')
     for (const pattern of FORBIDDEN) {
-      if (pattern.test(source)) {
-        violations.push(`${path.relative(ROOT, file)} -> ${pattern}`)
-      }
+      if (pattern.test(source)) violations.push(`${path.relative(ROOT, file)} -> ${pattern}`)
     }
   }
 
-  assert.deepEqual(violations, [], `Referências legadas encontradas:\n${violations.join('\n')}`)
+  assert.deepEqual(violations, [], `Referências públicas legadas encontradas:\n${violations.join('\n')}`)
+})
+
+test('modulos funcionais legados removidos nao voltam ao projeto', async () => {
+  const removed = [
+    'src/ai-engine',
+    'src/modules/barcoins',
+    'src/modules/bolao',
+    'src/modules/manual',
+    'src/core/database/dtos/barcoin.dto.js',
+    'src/core/database/repositories/barcoinRepository.js',
+    'src/core/database/services/barcoinPersistenceService.js',
+  ]
+
+  for (const relativePath of removed) {
+    assert.equal(await pathExists(relativePath), false, `${relativePath} não deve existir`)
+  }
 })
 
 test('rotas e namespace públicos usam somente IMORTAL0800', async () => {
