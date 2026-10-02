@@ -1,7 +1,7 @@
 import { getSupabaseClient } from '../../../../core/database'
 
 const TABLE = 'layout_settings'
-const LOCAL_ADMIN_KEY = 'barstudio.designer.localAdmin'
+const LOCAL_ADMIN_KEY = 'imortal.tools.designer.localAdmin'
 
 export function isLocalDesignerEnvironment() {
   if (typeof window === 'undefined') return false
@@ -19,7 +19,7 @@ export function isLocalAdminEnabled() {
 export function setLocalAdminEnabled(enabled) {
   if (typeof window === 'undefined') return false
   window.localStorage.setItem(LOCAL_ADMIN_KEY, enabled ? 'true' : 'false')
-  window.dispatchEvent(new CustomEvent('barstudio:local-admin-updated', { detail: { enabled } }))
+  window.dispatchEvent(new CustomEvent('imortal-tools:local-admin-updated', { detail: { enabled } }))
   return enabled
 }
 
@@ -71,7 +71,6 @@ export async function listLayoutSettings({ page = 'home', device = 'desktop', st
   if (status) query = query.eq('status', status)
 
   const { data, error } = await query
-
   return { data: data || [], error }
 }
 
@@ -96,7 +95,7 @@ export async function saveLayoutSetting({ page = 'home', component, device = 'de
     .single()
 
   if (!error && typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('barstudio:designer-layout-updated', { detail: payload }))
+    window.dispatchEvent(new CustomEvent('imortal-tools:designer-layout-updated', { detail: payload }))
   }
 
   return { data, error }
@@ -119,7 +118,7 @@ export async function resetLayoutSetting({ page = 'home', component, device = 'd
   const { data, error } = await query.select('*')
 
   if (!error && typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('barstudio:designer-layout-updated', { detail: { page, component, device, status } }))
+    window.dispatchEvent(new CustomEvent('imortal-tools:designer-layout-updated', { detail: { page, component, device, status } }))
   }
 
   return { data: data || [], error }
