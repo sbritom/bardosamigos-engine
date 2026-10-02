@@ -38,7 +38,7 @@
     "portal:test": "node --test tests/portal/*.test.mjs",
     "portal:release-smoke": "node scripts/check-release-build.mjs",
     "portal:budget": "node scripts/check-portal-budget.mjs",
-    "quality:portal": "npm run portal:test && npm run build && npm run portal:release-smoke && npm run portal:budget",
+    "quality:portal": "npm run lint && npm run portal:test && npm run build && npm run portal:release-smoke && npm run portal:budget",
     "seed:tv": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs",
     "seed:tv:dry": "node --experimental-specifier-resolution=node scripts/seed-tv-catalog.mjs --dry-run",
     "sync:football": "npm run sync:football-data",
@@ -54,7 +54,7 @@
     "lucide-react": "^1.20.0", "motion": "^12.40.0", "music-metadata": "^11.13.0", "react": "^19.2.6",
     "react-color": "^2.19.3", "react-dom": "^19.2.6", "react-dropzone": "^15.0.0", "react-easy-crop": "^6.0.2",
     "react-hook-form": "^7.79.0", "react-hot-toast": "^2.6.0", "react-icons": "^5.6.0", "react-player": "^3.4.0",
-    "react-resizable-panels": "^4.11.2", "react-router-dom": "^7.18.2", "recharts": "^3.8.1", "sharp": "^0.35.3",
+    "react-resizable-panels": "^4.11.2", "recharts": "^3.8.1", "sharp": "^0.35.3",
     "sonner": "^2.0.7", "swiper": "^12.2.0", "zod": "^4.4.3", "zustand": "^5.0.14"
   },
   "devDependencies": {
