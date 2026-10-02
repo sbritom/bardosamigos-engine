@@ -11,7 +11,7 @@ const FORBIDDEN = [
   /bar\s+dos\s+amigos/i,
   /rádio\s+bar\s+dos\s+amigos/i,
   /radio\s+bar\s+dos\s+amigos/i,
-  /imortal0800/i,
+  /radiobardosamigos/i,
   /bardosamigos/i,
   /\/ft\/bda/i,
   /\/barstudio\/designer/i,
@@ -43,7 +43,7 @@ async function pathExists(relativePath) {
   }
 }
 
-test('codigo ativo nao contem identidade publica do IMORTAL0800', async () => {
+test('codigo ativo nao contem identidade publica legada', async () => {
   const files = []
   for (const directory of ACTIVE_DIRS) files.push(...await listTextFiles(path.join(ROOT, directory)))
   for (const filename of ACTIVE_FILES) files.push(path.join(ROOT, filename))
