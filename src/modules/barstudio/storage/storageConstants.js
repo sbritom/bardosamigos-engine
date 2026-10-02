@@ -1,5 +1,5 @@
 export const STORAGE_BUCKET = import.meta.env?.VITE_SUPABASE_STORAGE_BUCKET || 'media'
-export const STORAGE_PREFIX = 'barstudio'
+export const STORAGE_PREFIX = 'imortal0800'
 export const STORAGE_MAX_FILE_SIZE = 20 * 1024 * 1024
 
 export const STORAGE_IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp,image/avif,image/gif,image/svg+xml'
