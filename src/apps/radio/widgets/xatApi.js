@@ -1,4 +1,4 @@
-import { radioApiConfig } from "../../../modules/radio/config/radioApiConfig";
+import { radioApiConfig } from "../config/radioApiConfig";
 
 const BASE_URL = radioApiConfig.apiBaseUrl?.replace(/\/$/, "") || "";
 

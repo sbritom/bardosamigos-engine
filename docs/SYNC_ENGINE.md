@@ -1,6 +1,6 @@
 # Sync Engine v1
 
-O Sync Engine e a camada oficial para integrar APIs externas ao Bar dos Amigos Engine.
+O Sync Engine e a camada oficial para integrar APIs externas ao IMORTAL0800 Engine.
 
 Fluxo:
 

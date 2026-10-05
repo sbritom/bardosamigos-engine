@@ -2,7 +2,7 @@ import { radioConfig } from "../config/radioConfig.js";
 
 export const radioDataStore = {
   config: {
-    name: "Radio Bar dos Amigos",
+    name: "Radio IMORTAL0800",
     slogan: "A trilha sonora da nossa amizade",
     streamUrl: radioConfig.streamUrl,
     statusUrl: radioConfig.statusUrl,

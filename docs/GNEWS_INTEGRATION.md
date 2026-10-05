@@ -1,6 +1,6 @@
 # GNews Sync v2.0
 
-Sistema economico e persistente de noticias do portal Bar dos Amigos.
+Sistema economico e persistente de noticias do portal IMORTAL0800.
 
 ## Arquitetura
 

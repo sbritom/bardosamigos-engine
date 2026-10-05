@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-A Fase 6 implementa a camada completa de persistencia do Bar dos Amigos Engine em Supabase/PostgreSQL, baseada na arquitetura de banco definida anteriormente.
+A Fase 6 implementa a camada completa de persistencia do IMORTAL0800 Engine em Supabase/PostgreSQL, baseada na arquitetura de banco definida anteriormente.
 
 Esta fase nao altera telas, rotas, layout ou regras de negocio existentes. A camada foi criada para consumo futuro.
 

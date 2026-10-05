@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O Bar Design System e a biblioteca visual oficial do Bar dos Amigos Engine. Ele centraliza tokens, temas, componentes base, regras de iconografia e convencoes para que novas telas sejam construidas com uma identidade unica.
+O Bar Design System e a biblioteca visual oficial do IMORTAL0800 Engine. Ele centraliza tokens, temas, componentes base, regras de iconografia e convencoes para que novas telas sejam construidas com uma identidade unica.
 
 Esta versao cria a fundacao reutilizavel. Ela nao redesenha telas existentes e nao altera funcionalidades.
 

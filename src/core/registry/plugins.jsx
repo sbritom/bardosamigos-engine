@@ -33,7 +33,7 @@ const FootballTeamPage = React.lazy(() => import("../../modules/competition/foot
 const NewsPage = React.lazy(() => import("../../modules/news/pages/NewsPage"));
 const CommunityPage = React.lazy(() => import("../../modules/community/pages/CommunityPage"));
 const CommunityAdminPage = React.lazy(() => import("../../modules/community/admin/CommunityAdminPage"));
-const DesignerPage = React.lazy(() => import("../../modules/barstudio/designer/pages/DesignerPage"));
+const DesignerPage = React.lazy(() => import("../../modules/imortal-tools/designer/pages/DesignerPage"));
 const GamesPage = React.lazy(() => import("../../modules/games/pages/GamesPage"));
 const EventsPage = React.lazy(() => import("../../modules/events/pages/EventsPage"));
 const EventsAdminPage = React.lazy(() => import("../../modules/events/admin/pages/EventsAdminPage"));
@@ -158,9 +158,9 @@ export const plugins = [
   },
 
   {
-    id: "barstudio-designer",
+    id: "imortal-tools-designer",
     title: "Designer Pro",
-    path: "/barstudio/designer",
+    path: "/tools/designer",
     icon: Wrench,
     menu: false,
     element: <LazyPluginPage component={DesignerPage} title="Designer Pro" />,

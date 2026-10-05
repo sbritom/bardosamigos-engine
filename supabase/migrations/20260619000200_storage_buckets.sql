@@ -1,4 +1,4 @@
--- Storage buckets for Bar dos Amigos Engine.
+-- Storage buckets for IMORTAL0800 Engine.
 -- Safe for projects that already have buckets or storage policies.
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

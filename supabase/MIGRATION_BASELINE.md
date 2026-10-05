@@ -1,6 +1,6 @@
 # Supabase migration baseline
 
-Production project: `BarDosAmigos` (`vecslxbrfcdvdefarnbd`).
+Production project: `IMORTAL0800` (`vecslxbrfcdvdefarnbd`).
 
 On 2026-08-25, production already contained the schema represented by the migration files in `supabase/migrations`, but `supabase_migrations.schema_migrations` was empty because historical changes had been applied manually through the Dashboard/SQL Editor.
 

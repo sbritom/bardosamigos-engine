@@ -37,8 +37,8 @@ const MXCAST_REQUEST_TIMEOUT_MS = 8000;
 const ENGINE_BODY_LIMIT_BYTES = 64 * 1024;
 
 const TRUSTED_ENGINE_ORIGINS = new Set([
-  "https://radiobardosamigos.com.br",
-  "https://www.radiobardosamigos.com.br",
+  "https://imortal0800.vercel.app",
+  "https://imortal0800.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);
@@ -129,7 +129,7 @@ function normalizeMxCastJson(data = {}) {
     bitrate: Number(data.bitrate) || 0,
     sampleRate: Number(data.samplerate) || 0,
     contentType: data.encoder || "",
-    serverTitle: data.server_name || "Radio Bar Dos Amigos",
+    serverTitle: data.server_name || "Radio IMORTAL0800",
     streamUrl: MXCAST_AUDIO_STREAM_URL,
     cover: data.cover || "",
     updatedAt: new Date().toISOString(),
@@ -139,7 +139,7 @@ function normalizeMxCastJson(data = {}) {
 async function fetchOfficialMxCastStatus() {
   const response = await fetch(MXCAST_OFFICIAL_STATS_URL, {
     headers: {
-      "User-Agent": "Radio-Bar-dos-Amigos/1.0",
+      "User-Agent": "IMORTAL0800-Radio/1.0",
       Accept: "application/json",
     },
     signal: AbortSignal.timeout(MXCAST_REQUEST_TIMEOUT_MS),
@@ -155,7 +155,7 @@ async function fetchOfficialMxCastStatus() {
 async function fetchLegacyMxCastStatus() {
   const response = await fetch(MXCAST_LEGACY_STATS_URL, {
     headers: {
-      "User-Agent": "Radio-Bar-dos-Amigos/1.0",
+      "User-Agent": "IMORTAL0800-Radio/1.0",
       Accept: "application/xml,text/xml,*/*",
     },
     signal: AbortSignal.timeout(MXCAST_REQUEST_TIMEOUT_MS),
@@ -191,7 +191,7 @@ async function fetchLegacyMxCastStatus() {
   const bitrate = Number(getXmlValue("BITRATE")) || 0;
   const sampleRate = Number(getXmlValue("SAMPLERATE")) || 0;
   const contentType = getXmlValue("CONTENT") || "";
-  const serverTitle = decodeXml(getXmlValue("SERVERTITLE")) || "Radio Bar Dos Amigos";
+  const serverTitle = decodeXml(getXmlValue("SERVERTITLE")) || "Radio IMORTAL0800";
 
   return {
     online: streamStatus,

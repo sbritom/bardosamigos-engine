@@ -34,7 +34,7 @@ export class ConfigEngine {
     const ffmpeg = readJsonConfig("ffmpeg.json", {});
 
     this.config = {
-      radioName: this.env.RADIO_NAME || "Radio Bar dos Amigos",
+      radioName: this.env.RADIO_NAME || "Radio IMORTAL0800",
       radioSlogan: this.env.RADIO_SLOGAN || "A trilha sonora da nossa amizade",
       host: runtime.HOST,
       musicFolder: runtime.LIBRARY_FS_PATH,

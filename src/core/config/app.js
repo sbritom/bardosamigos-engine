@@ -1,25 +1,13 @@
 export default {
-
-  name: "Bar dos Amigos",
-
+  name: "IMORTAL0800",
   version: "1.0.0",
-
-  company: "Bar dos Amigos",
-
+  company: "IMORTAL0800",
   theme: "techpub",
-
   api: {
-
     football: true,
-
     news: true,
-
     radio: true,
-
     tv: true,
-
     games: true,
-
   },
-
 };
