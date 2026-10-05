@@ -126,7 +126,7 @@ function normalizeDateRange(dateFrom, dateTo, fallbackFrom, fallbackTo) {
   const to = normalizeDate(dateTo, fallbackTo)
   const fromTime = new Date(`${from}T00:00:00Z`).getTime()
   const toTime = new Date(`${to}T00:00:00Z`).getTime()
-  const maxRangeMs = 31 * 24 * 60 * 60 * 1000
+  const maxRangeMs = 9 * 24 * 60 * 60 * 1000
 
   if (toTime < fromTime || toTime - fromTime > maxRangeMs) {
     return { dateFrom: fallbackFrom, dateTo: fallbackTo }
@@ -154,7 +154,7 @@ function createDateWindow() {
   const from = new Date(now)
   const to = new Date(now)
   from.setDate(from.getDate() - 2)
-  to.setDate(to.getDate() + 14)
+  to.setDate(to.getDate() + 7)
 
   return {
     today: toMaceioDateOnly(now),
