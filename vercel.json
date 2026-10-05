@@ -51,6 +51,7 @@
   ],
   "rewrites": [
     { "source": "/media/imortal/:filename", "destination": "/api/media?filename=:filename" },
+    { "source": "/api/football/matches", "destination": "/api/football/matches-batch" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/football", "destination": "/football/index.html" },
