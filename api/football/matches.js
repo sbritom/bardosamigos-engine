@@ -3,23 +3,30 @@ import { applyApiCors, getBearerToken, timingSafeEqualText } from '../_lib/secur
 
 const FOOTBALL_DATA_BASE_URL = 'https://api.football-data.org/v4'
 const DEFAULT_COMPETITIONS = ['WC', 'CL', 'BL1', 'DED', 'BSA', 'PD', 'FL1', 'ELC', 'PPL', 'EC', 'SA', 'PL']
+const COMPETITION_IDS = Object.freeze({
+  WC: 2000,
+  CL: 2001,
+  BL1: 2002,
+  DED: 2003,
+  BSA: 2013,
+  PD: 2014,
+  FL1: 2015,
+  ELC: 2016,
+  PPL: 2017,
+  EC: 2018,
+  SA: 2019,
+  PL: 2021,
+})
 const ALLOWED_COMPETITIONS = new Set(DEFAULT_COMPETITIONS)
 const LIVE_STATUSES = new Set(['LIVE', 'IN_PLAY', 'PAUSED'])
 const FINISHED_STATUSES = new Set(['FINISHED'])
 const UPCOMING_STATUSES = new Set(['SCHEDULED', 'TIMED'])
 const DISPLAY_LIMIT = 12
-const WORLD_CUP_YEAR = 2026
 const MAX_COMPETITIONS = 12
 const REQUEST_TIMEOUT_MS = 8000
-const COMPETITION_CATALOG_TTL_MS = 6 * 60 * 60 * 1000
 const COMPETITION_CODE_RE = /^[A-Z0-9]{2,6}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const MATCH_ID_RE = /^\d{1,12}$/
-
-let competitionCatalogCache = {
-  data: null,
-  expiresAt: 0,
-}
 
 function getSupabaseAdmin() {
   const url = String(process.env.SUPABASE_URL || '').trim()
@@ -53,9 +60,7 @@ function createSkippedSettlement(reason = 'cron-only') {
 
 async function settleFinishedMatches(matches = []) {
   const supabase = getSupabaseAdmin()
-  if (!supabase) {
-    return createSkippedSettlement('supabase-admin-unavailable')
-  }
+  if (!supabase) return createSkippedSettlement('supabase-admin-unavailable')
 
   const finished = matches
     .filter((match) => (
@@ -242,10 +247,7 @@ function mapMatch(match = {}) {
     awayShield: awayTeam.tla,
     homeScore,
     awayScore,
-    score: {
-      home: homeScore,
-      away: awayScore,
-    },
+    score: { home: homeScore, away: awayScore },
     startsAt: date.utcDate,
     utcDate: date.utcDate,
     localDate: date.localDate,
@@ -280,55 +282,36 @@ function mapMatch(match = {}) {
   }
 }
 
-async function fetchCompetitionMatches({ competitionCode, apiKey, dateFrom, dateTo }) {
-  const url = new URL(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/matches`)
+function providerError(payload, response, fallbackMessage) {
+  const error = new Error(payload?.message || fallbackMessage || `Football-Data request failed with status ${response.status}`)
+  error.status = response.status
+  error.retryAfter = response.headers.get('retry-after') || ''
+  return error
+}
+
+async function fetchMatchesAcrossCompetitions({ competitionCodes, apiKey, dateFrom, dateTo }) {
+  const competitionIds = competitionCodes
+    .map((code) => COMPETITION_IDS[code])
+    .filter(Boolean)
+
+  if (!competitionIds.length) return []
+
+  const url = new URL(`${FOOTBALL_DATA_BASE_URL}/matches`)
+  url.searchParams.set('competitions', competitionIds.join(','))
   if (dateFrom) url.searchParams.set('dateFrom', dateFrom)
   if (dateTo) url.searchParams.set('dateTo', dateTo)
-  if (!dateFrom && !dateTo) url.searchParams.set('season', String(WORLD_CUP_YEAR))
 
   const providerResponse = await fetch(url, {
-    headers: {
-      'X-Auth-Token': apiKey,
-    },
+    headers: { 'X-Auth-Token': apiKey },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-
   const payload = await providerResponse.json().catch(() => ({}))
+
   if (!providerResponse.ok) {
-    throw new Error(payload.message || `Football-Data request failed with status ${providerResponse.status}`)
+    throw providerError(payload, providerResponse, `Football-Data request failed with status ${providerResponse.status}`)
   }
 
   return (payload.matches || []).map(mapMatch)
-}
-
-async function fetchCompetitions({ apiKey }) {
-  const providerResponse = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions`, {
-    headers: {
-      'X-Auth-Token': apiKey,
-    },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  })
-  const payload = await providerResponse.json().catch(() => ({}))
-
-  if (!providerResponse.ok) {
-    throw new Error(payload.message || `Football-Data competitions request failed with status ${providerResponse.status}`)
-  }
-
-  return payload.competitions || []
-}
-
-async function fetchCompetitionsCached({ apiKey }) {
-  const now = Date.now()
-  if (Array.isArray(competitionCatalogCache.data) && competitionCatalogCache.expiresAt > now) {
-    return competitionCatalogCache.data
-  }
-
-  const data = await fetchCompetitions({ apiKey })
-  competitionCatalogCache = {
-    data,
-    expiresAt: now + COMPETITION_CATALOG_TTL_MS,
-  }
-  return data
 }
 
 function mapStandingRow(row = {}) {
@@ -351,15 +334,13 @@ function mapStandingRow(row = {}) {
 
 async function fetchCompetitionStandings({ competitionCode, apiKey }) {
   const providerResponse = await fetch(`${FOOTBALL_DATA_BASE_URL}/competitions/${competitionCode}/standings`, {
-    headers: {
-      'X-Auth-Token': apiKey,
-    },
+    headers: { 'X-Auth-Token': apiKey },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
   const payload = await providerResponse.json().catch(() => ({}))
 
   if (!providerResponse.ok) {
-    throw new Error(payload.message || `Football-Data standings request failed with status ${providerResponse.status}`)
+    throw providerError(payload, providerResponse, `Football-Data standings request failed with status ${providerResponse.status}`)
   }
 
   const competition = {
@@ -369,14 +350,16 @@ async function fetchCompetitionStandings({ competitionCode, apiKey }) {
     emblem: payload.competition?.emblem || '',
   }
 
-  const standings = (payload.standings || []).map((standing) => ({
-    stage: standing.stage || '',
-    type: standing.type || 'TOTAL',
-    group: standing.group || '',
-    rows: (standing.table || []).map(mapStandingRow),
-  }))
-
-  return { competition, season: payload.season || null, standings }
+  return {
+    competition,
+    season: payload.season || null,
+    standings: (payload.standings || []).map((standing) => ({
+      stage: standing.stage || '',
+      type: standing.type || 'TOTAL',
+      group: standing.group || '',
+      rows: (standing.table || []).map(mapStandingRow),
+    })),
+  }
 }
 
 function mapScorer(item = {}) {
@@ -410,7 +393,7 @@ async function fetchCompetitionScorers({ competitionCode, apiKey }) {
   const payload = await providerResponse.json().catch(() => ({}))
 
   if (!providerResponse.ok) {
-    throw new Error(payload.message || `Football-Data scorers request failed with status ${providerResponse.status}`)
+    throw providerError(payload, providerResponse, `Football-Data scorers request failed with status ${providerResponse.status}`)
   }
 
   return {
@@ -548,24 +531,10 @@ async function fetchMatchDetails({ matchId, apiKey }) {
   const payload = await providerResponse.json().catch(() => ({}))
 
   if (!providerResponse.ok) {
-    throw new Error(payload.message || `Football-Data match request failed with status ${providerResponse.status}`)
+    throw providerError(payload, providerResponse, `Football-Data match request failed with status ${providerResponse.status}`)
   }
 
   return mapDetailedMatch(payload)
-}
-
-function findWorldCupCompetition(competitions = []) {
-  return competitions.find((competition) => {
-    const season = competition.currentSeason || {}
-    const startYear = Number(String(season.startDate || '').slice(0, 4))
-    const endYear = Number(String(season.endDate || '').slice(0, 4))
-    const name = String(competition.name || '').toLowerCase()
-    const area = String(competition.area?.name || '').toLowerCase()
-
-    return name.includes('fifa world cup')
-      && area === 'world'
-      && (startYear === WORLD_CUP_YEAR || endYear === WORLD_CUP_YEAR)
-  }) || null
 }
 
 function getMatchStatus(match = {}) {
@@ -579,10 +548,8 @@ function getMatchTime(match = {}) {
 
 function isMatchDay(match = {}, dateKey) {
   if (match.localDateIso) return match.localDateIso === dateKey
-
   const value = match.startsAt || match.utcDate
   if (!value) return false
-
   return toMaceioDateOnly(new Date(value)) === dateKey
 }
 
@@ -600,7 +567,6 @@ function getMatchPriority(match = {}, today) {
 function compareMatches(left, right, today) {
   const leftPriority = getMatchPriority(left, today)
   const rightPriority = getMatchPriority(right, today)
-
   if (leftPriority !== rightPriority) return leftPriority - rightPriority
   if (leftPriority === 0 || leftPriority === 2) return getMatchTime(right) - getMatchTime(left)
   return getMatchTime(left) - getMatchTime(right)
@@ -616,9 +582,7 @@ function selectRelevantMatches(matches = [], today, limit = DISPLAY_LIMIT) {
   const sortedMatches = uniqueMatches.sort((left, right) => compareMatches(left, right, today))
   const liveMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 0)
   const todayUpcoming = sortedMatches.filter((match) => getMatchPriority(match, today) === 1)
-  const recentFinished = sortedMatches
-    .filter(isFinishedMatch)
-    .sort((left, right) => getMatchTime(right) - getMatchTime(left))
+  const recentFinished = sortedMatches.filter(isFinishedMatch).sort((left, right) => getMatchTime(right) - getMatchTime(left))
   const nextMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 3)
 
   const selected = []
@@ -634,11 +598,9 @@ function selectRelevantMatches(matches = [], today, limit = DISPLAY_LIMIT) {
   }
 
   append(liveMatches)
-
   const availableAfterLive = Math.max(0, limit - selected.length)
   const reservedResults = Math.min(4, recentFinished.length, availableAfterLive)
   const todaySlots = Math.max(0, availableAfterLive - reservedResults)
-
   append(todayUpcoming, todaySlots)
   append(recentFinished, reservedResults)
   append(nextMatches)
@@ -646,36 +608,14 @@ function selectRelevantMatches(matches = [], today, limit = DISPLAY_LIMIT) {
   return selected.slice(0, limit)
 }
 
-function isWorldCupActive({ competition, matches = [], now = new Date() }) {
-  const season = competition?.currentSeason || {}
-  const seasonStart = season.startDate ? new Date(`${season.startDate}T00:00:00-03:00`).getTime() : 0
-  const seasonEnd = season.endDate ? new Date(`${season.endDate}T23:59:59-03:00`).getTime() : 0
-  const nowTime = now.getTime()
-  const latestMatchTime = matches.reduce((latest, match) => Math.max(latest, getMatchTime(match)), 0)
-  const finalGraceMs = 6 * 60 * 60 * 1000
-  const hasPendingWorldCupMatch = matches.some((match) => {
-    const status = getMatchStatus(match)
-    return LIVE_STATUSES.has(status) || UPCOMING_STATUSES.has(status)
+function sendProviderFailure(response, error, payload = {}) {
+  response.setHeader('Cache-Control', 'no-store')
+  if (error?.retryAfter) response.setHeader('Retry-After', error.retryAfter)
+  response.status(error?.status === 429 ? 429 : 502).json({
+    source: 'football-data.org',
+    ...payload,
+    error: error?.message || 'Football-Data request failed.',
   })
-
-  if (seasonStart && seasonEnd && nowTime >= seasonStart && nowTime <= seasonEnd) return true
-  if (hasPendingWorldCupMatch) return true
-  return latestMatchTime > 0 && nowTime <= latestMatchTime + finalGraceMs
-}
-
-function selectWorldCupMatches(matches = [], today, limit = DISPLAY_LIMIT) {
-  const uniqueMatches = Array.from(new Map(matches.map((match) => [match.id, match])).values())
-  const sortedMatches = uniqueMatches.sort((left, right) => compareMatches(left, right, today))
-  const liveMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 0)
-  const todayUpcoming = sortedMatches.filter((match) => getMatchPriority(match, today) === 1)
-  const recentFinished = sortedMatches
-    .filter((match) => FINISHED_STATUSES.has(getMatchStatus(match)) || ['FINALIZADO', 'ENCERRADO'].includes(getMatchStatus(match)))
-    .sort((left, right) => getMatchTime(right) - getMatchTime(left))
-  const nextMatches = sortedMatches.filter((match) => getMatchPriority(match, today) === 3)
-
-  return [...liveMatches, ...todayUpcoming, ...recentFinished, ...nextMatches]
-    .filter((match, index, list) => list.findIndex((item) => item.id === match.id) === index)
-    .slice(0, limit)
 }
 
 export default async function handler(request, response) {
@@ -719,18 +659,11 @@ export default async function handler(request, response) {
     try {
       const match = await fetchMatchDetails({ matchId: requestedMatchId, apiKey })
       response.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
-      response.status(200).json({
-        source: 'football-data.org',
-        resource: 'match',
-        match,
-      })
+      response.status(200).json({ source: 'football-data.org', resource: 'match', match })
     } catch (error) {
-      response.setHeader('Cache-Control', 'no-store')
-      response.status(502).json({
-        source: 'football-data.org',
+      sendProviderFailure(response, error, {
         resource: 'match',
         matchId: requestedMatchId,
-        error: error.message || 'Football-Data match request failed.',
       })
     }
     return
@@ -745,18 +678,11 @@ export default async function handler(request, response) {
     try {
       const result = await fetchCompetitionScorers({ competitionCode: requestedCompetition, apiKey })
       response.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800')
-      response.status(200).json({
-        source: 'football-data.org',
-        resource: 'scorers',
-        ...result,
-      })
+      response.status(200).json({ source: 'football-data.org', resource: 'scorers', ...result })
     } catch (error) {
-      response.setHeader('Cache-Control', 'no-store')
-      response.status(502).json({
-        source: 'football-data.org',
+      sendProviderFailure(response, error, {
         resource: 'scorers',
         competition: requestedCompetition,
-        error: error.message || 'Football-Data scorers request failed.',
       })
     }
     return
@@ -771,20 +697,18 @@ export default async function handler(request, response) {
     try {
       const result = await fetchCompetitionStandings({ competitionCode: requestedCompetition, apiKey })
       response.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800')
-      response.status(200).json({
-        source: 'football-data.org',
-        resource: 'standings',
-        ...result,
-      })
+      response.status(200).json({ source: 'football-data.org', resource: 'standings', ...result })
     } catch (error) {
-      response.setHeader('Cache-Control', 'no-store')
-      response.status(502).json({
-        source: 'football-data.org',
+      sendProviderFailure(response, error, {
         resource: 'standings',
         competition: requestedCompetition,
-        error: error.message || 'Football-Data standings request failed.',
       })
     }
+    return
+  }
+
+  if (resource !== 'matches') {
+    response.status(400).json({ error: 'Invalid football resource.' })
     return
   }
 
@@ -794,7 +718,6 @@ export default async function handler(request, response) {
     .map((item) => item.trim().toUpperCase())
     .filter((item) => COMPETITION_CODE_RE.test(item) && ALLOWED_COMPETITIONS.has(item))
     .slice(0, MAX_COMPETITIONS)
-
   const safeCompetitions = competitions.length ? competitions : DEFAULT_COMPETITIONS
   const dateRange = normalizeDateRange(
     request.query?.dateFrom,
@@ -804,96 +727,23 @@ export default async function handler(request, response) {
   )
   const today = normalizeDate(request.query?.today, dateWindow.today)
   const maySettle = isAuthorizedSettlementRequest(request)
-  const providerErrors = []
-
-  let worldCupCompetition = null
-  try {
-    const competitionCatalog = await fetchCompetitionsCached({ apiKey })
-    worldCupCompetition = findWorldCupCompetition(competitionCatalog)
-  } catch (error) {
-    providerErrors.push(`competition catalog: ${error?.message || 'unavailable'}`)
-  }
-
-  if (worldCupCompetition) {
-    try {
-      const worldCupMatches = await fetchCompetitionMatches({
-        competitionCode: worldCupCompetition.code,
-        apiKey,
-      })
-
-      if (isWorldCupActive({ competition: worldCupCompetition, matches: worldCupMatches })) {
-        const settlement = maySettle
-          ? await settleFinishedMatches(worldCupMatches)
-          : createSkippedSettlement()
-
-        response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
-        response.status(200).json({
-          source: 'football-data.org',
-          mode: 'world-cup-2026',
-          competitions: [worldCupCompetition.code],
-          worldCup: {
-            code: worldCupCompetition.code,
-            name: worldCupCompetition.name,
-            startDate: worldCupCompetition.currentSeason?.startDate || null,
-            endDate: worldCupCompetition.currentSeason?.endDate || null,
-          },
-          dateWindow: {
-            dateFrom: worldCupCompetition.currentSeason?.startDate || dateWindow.dateFrom,
-            dateTo: worldCupCompetition.currentSeason?.endDate || dateWindow.dateTo,
-          },
-          matches: selectWorldCupMatches(worldCupMatches, today),
-          settlement,
-          errors: providerErrors,
-        })
-        return
-      }
-    } catch (error) {
-      providerErrors.push(`world cup: ${error?.message || 'unavailable'}`)
-    }
-  }
 
   try {
-    const results = await Promise.allSettled(
-      safeCompetitions.map((competitionCode) => fetchCompetitionMatches({
-        competitionCode,
-        apiKey,
-        dateFrom: dateRange.dateFrom,
-        dateTo: dateRange.dateTo,
-      })),
-    )
-
-    const fulfilled = results.filter((item) => item.status === 'fulfilled')
-    const matches = fulfilled.flatMap((item) => item.value)
-    const errors = [
-      ...providerErrors,
-      ...results
-        .filter((item) => item.status === 'rejected')
-        .map((item) => item.reason?.message || 'Unknown Football-Data error'),
-    ]
-
-    if (!fulfilled.length) {
-      response.setHeader('Cache-Control', 'no-store')
-      response.status(502).json({
-        source: 'football-data.org',
-        competitions: safeCompetitions,
-        dateWindow: {
-          dateFrom: dateRange.dateFrom,
-          dateTo: dateRange.dateTo,
-        },
-        matches: [],
-        settlement: createSkippedSettlement('provider-unavailable'),
-        errors,
-      })
-      return
-    }
+    const matches = await fetchMatchesAcrossCompetitions({
+      competitionCodes: safeCompetitions,
+      apiKey,
+      dateFrom: dateRange.dateFrom,
+      dateTo: dateRange.dateTo,
+    })
 
     const settlement = maySettle
       ? await settleFinishedMatches(matches)
       : createSkippedSettlement()
 
-    response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120')
+    response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
     response.status(200).json({
       source: 'football-data.org',
+      mode: 'aggregated',
       competitions: safeCompetitions,
       dateWindow: {
         dateFrom: dateRange.dateFrom,
@@ -901,17 +751,22 @@ export default async function handler(request, response) {
       },
       matches: selectRelevantMatches(matches, today),
       settlement,
-      errors,
+      errors: [],
     })
   } catch (error) {
     response.setHeader('Cache-Control', 'no-store')
-    response.status(502).json({
+    if (error?.retryAfter) response.setHeader('Retry-After', error.retryAfter)
+    response.status(error?.status === 429 ? 429 : 502).json({
       source: 'football-data.org',
+      mode: 'aggregated',
+      competitions: safeCompetitions,
+      dateWindow: {
+        dateFrom: dateRange.dateFrom,
+        dateTo: dateRange.dateTo,
+      },
       matches: [],
       settlement: createSkippedSettlement('provider-unavailable'),
-      errors: [...providerErrors, error?.message || 'Football-Data request failed.'],
+      errors: [error?.message || 'Football-Data request failed.'],
     })
   }
 }
-
-// Football env sync
