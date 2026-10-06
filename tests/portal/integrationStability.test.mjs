@@ -77,3 +77,29 @@ test('Radio trata grade vazia como AutoDJ sem inventar locutor ou horario', asyn
   assert.doesNotMatch(code, /Locutor a definir/)
   assert.doesNotMatch(code, /Horário a definir/)
 })
+
+
+test('GNews respeita limite de uma requisicao por segundo e faz retry transitório', async () => {
+  const code = await source('api/_lib/newsCacheService.js')
+  assert.match(code, /GNEWS_MIN_INTERVAL_MS\s*=\s*1100/)
+  assert.match(code, /GNEWS_RETRY_DELAY_MS\s*=\s*1200/)
+  assert.match(code, /if \(index > 0\) await wait\(GNEWS_MIN_INTERVAL_MS\)/)
+  assert.match(code, /isRetryableTopicError/)
+  assert.match(code, /\[429, 500, 503\]/)
+})
+
+test('GNews envia chave por header e so marca sucesso completo sem erros de topico', async () => {
+  const code = await source('api/_lib/newsCacheService.js')
+  assert.match(code, /headers:\s*\{ 'X-Api-Key': apiKey \}/)
+  assert.doesNotMatch(code, /searchParams\.set\('apikey'/)
+  assert.match(code, /ok:\s*saved\.errors\.length === 0 && errors\.length === 0/)
+  assert.match(code, /partial:\s*fetchedRecords\.length > 0/)
+})
+
+
+test('Games identifica quando o radar usa fallback de lançamentos', async () => {
+  const code = await source('src/modules/games/pages/GamesPage.jsx')
+  assert.match(code, /payload\.news\.length \? 'Últimas notícias' : 'Radar de lançamentos'/)
+  assert.match(code, /if \(payload\.news\.length\) return payload\.news/)
+  assert.match(code, /return payload\.releases\.map/)
+})

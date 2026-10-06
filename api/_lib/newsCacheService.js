@@ -5,6 +5,8 @@ const NEWS_LIMIT = 12
 const MAX_NEWS_LIMIT = 30
 const TOPIC_MAX = 5
 const REQUEST_TIMEOUT_MS = 8000
+const GNEWS_MIN_INTERVAL_MS = 1100
+const GNEWS_RETRY_DELAY_MS = 1200
 const WORLD_CUP_YEAR = 2026
 const KEEP_PER_CATEGORY = 50
 
@@ -24,6 +26,14 @@ const WORLD_CUP_TOPIC = Object.freeze({
 })
 
 let runningSync = null
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function isRetryableTopicError(error) {
+  return [429, 500, 503].includes(Number(error?.status))
+}
 
 export function getNewsRuntimeConfig() {
   return {
@@ -175,10 +185,11 @@ async function fetchTopic({ apiKey, topic }) {
   url.searchParams.set('lang', 'pt')
   url.searchParams.set('country', 'br')
   url.searchParams.set('max', String(TOPIC_MAX))
-  url.searchParams.set('apikey', apiKey)
-
   try {
-    const response = await fetch(url, { signal: controller.signal })
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'X-Api-Key': apiKey },
+    })
     const payload = await response.json().catch(() => ({}))
 
     if (!response.ok) {
@@ -377,8 +388,17 @@ export async function syncGNewsToSupabase(options = {}) {
     const topics = getTopics(options.now ? new Date(options.now) : new Date())
     const results = []
 
-    for (const topic of topics) {
-      results.push(await fetchTopic({ apiKey: config.gnewsApiKey, topic }))
+    for (const [index, topic] of topics.entries()) {
+      if (index > 0) await wait(GNEWS_MIN_INTERVAL_MS)
+
+      let result = await fetchTopic({ apiKey: config.gnewsApiKey, topic })
+
+      if (result.error && isRetryableTopicError(result.error)) {
+        await wait(GNEWS_RETRY_DELAY_MS)
+        result = await fetchTopic({ apiKey: config.gnewsApiKey, topic })
+      }
+
+      results.push(result)
     }
 
     const errors = results.map((result) => result.error).filter(Boolean)
@@ -390,7 +410,8 @@ export async function syncGNewsToSupabase(options = {}) {
     const shouldCleanup = saved.inserted + saved.updated > 0
     const cleanup = shouldCleanup ? await cleanupOldNews(client, options.keepPerCategory || KEEP_PER_CATEGORY) : { softDeleted: 0 }
     const payload = {
-      ok: saved.errors.length === 0 && errors.length < topics.length,
+      ok: saved.errors.length === 0 && errors.length === 0,
+      partial: fetchedRecords.length > 0 && (errors.length > 0 || saved.errors.length > 0),
       data: {
         fetched: fetchedRecords.length,
         inserted: saved.inserted,
