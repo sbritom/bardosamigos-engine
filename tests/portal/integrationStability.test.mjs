@@ -59,3 +59,21 @@ test('TV continua validando fontes e disponibilidade regional', async () => {
   assert.match(code, /GLOBAL/)
   assert.match(code, /BR_ONLY/)
 })
+
+
+test('Radio limita ranking publico a atividade recente', async () => {
+  const code = await source('api/radio/requests.js')
+  assert.match(code, /rankingSince/)
+  assert.match(code, /30 \* 24 \* 60 \* 60 \* 1000/)
+  assert.match(code, /\.gte\('created_at', rankingSince\)/)
+  assert.match(code, /rankingPeriodDays:\s*30/)
+})
+
+test('Radio trata grade vazia como AutoDJ sem inventar locutor ou horario', async () => {
+  const code = await source('src/apps/radio/RadioPage.jsx')
+  assert.match(code, /configuredSchedule/)
+  assert.match(code, /AutoDJ no ar 24h/)
+  assert.match(code, /grade com locutores será exibida aqui/)
+  assert.doesNotMatch(code, /Locutor a definir/)
+  assert.doesNotMatch(code, /Horário a definir/)
+})
