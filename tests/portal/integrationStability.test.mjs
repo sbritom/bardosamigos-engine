@@ -95,3 +95,11 @@ test('GNews envia chave por header e so marca sucesso completo sem erros de topi
   assert.match(code, /ok:\s*saved\.errors\.length === 0 && errors\.length === 0/)
   assert.match(code, /partial:\s*fetchedRecords\.length > 0/)
 })
+
+
+test('Games identifica quando o radar usa fallback de lançamentos', async () => {
+  const code = await source('src/modules/games/pages/GamesPage.jsx')
+  assert.match(code, /payload\.news\.length \? 'Últimas notícias' : 'Radar de lançamentos'/)
+  assert.match(code, /if \(payload\.news\.length\) return payload\.news/)
+  assert.match(code, /return payload\.releases\.map/)
+})
