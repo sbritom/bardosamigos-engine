@@ -24,6 +24,10 @@ const initialMetrics = {
   verifiedChannels: 0,
   channelsWithoutLogo: 0,
   channelsWithoutCategory: 0,
+  healthyChannels: 0,
+  degradedChannels: 0,
+  downChannels: 0,
+  uncheckedChannels: 0,
   totalViews: 0,
 }
 
@@ -57,6 +61,10 @@ export function TVDashboard({ navigateTo }) {
     ['Verificados', metrics.verifiedChannels, 'revisados pela equipe', ShieldCheck],
     ['Sem logo', metrics.channelsWithoutLogo, 'precisam de identidade', ImageOff],
     ['Sem categoria', metrics.channelsWithoutCategory, 'precisam de organizacao', RadioTower],
+    ['Saudaveis', metrics.healthyChannels, 'health-check aprovado', CheckCircle2],
+    ['Com alerta', metrics.degradedChannels, 'fonte acessivel com ressalva', ShieldCheck],
+    ['Fora do ar', metrics.downChannels, 'falharam no ultimo teste', RadioTower],
+    ['Sem teste', metrics.uncheckedChannels, 'aguardando monitoramento', TvMinimal],
     ['Visualizacoes', metrics.totalViews.toLocaleString('pt-BR'), 'acumuladas', Eye],
   ]
 

@@ -1,11 +1,18 @@
 const BLOCKED_PROTOCOLS = new Set(['javascript:', 'data:', 'file:', 'vbscript:'])
 const RAW_HTML_PATTERN = /<\s*\/?\s*(script|iframe|object|embed|html)|[<>]/i
 
+const DEFAULT_EMBED_HOSTS = Object.freeze([
+  'embedcanaisdetv.xyz',
+  'www.youtube-nocookie.com',
+])
+
 function configuredHosts() {
-  return String(import.meta.env.VITE_TV_EMBED_ALLOWED_HOSTS || '')
+  const configured = String(import.meta.env.VITE_TV_EMBED_ALLOWED_HOSTS || '')
     .split(',')
     .map((host) => host.trim().toLowerCase())
     .filter(Boolean)
+
+  return configured.length ? configured : DEFAULT_EMBED_HOSTS
 }
 
 function hostAllowed(hostname, allowlist) {
