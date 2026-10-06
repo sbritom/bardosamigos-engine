@@ -371,6 +371,10 @@ export class TVRepository {
       verifiedChannels: 0,
       channelsWithoutLogo: 0,
       channelsWithoutCategory: 0,
+      healthyChannels: 0,
+      degradedChannels: 0,
+      downChannels: 0,
+      uncheckedChannels: 0,
       totalViews: 0,
     })
     const count = async (table, apply = (query) => query) => {
