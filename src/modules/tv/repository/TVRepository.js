@@ -2,6 +2,7 @@ import { getSupabaseClient } from '../../../core/database'
 import { toCamelCase, toSnakeCase } from '../../../core/database/mappers'
 
 const CHANNEL_SELECT = '*, category:tv_categories(*)'
+const ADMIN_CHANNEL_SELECT = '*, category:tv_categories(*), health:tv_channel_health(*)'
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function unavailable(defaultValue) {
@@ -227,6 +228,7 @@ export class TVRepository {
     status,
     featured,
     verified,
+    logo,
     search,
     page = 1,
     pageSize = 20,
@@ -237,13 +239,15 @@ export class TVRepository {
     if (!client) return adminUnavailable([])
     const allowedSorts = new Set(['display_order', 'name', 'updated_at', 'views', 'created_at'])
     const from = (page - 1) * pageSize
-    let query = client.from('tv_channels').select(CHANNEL_SELECT, { count: 'exact' })
+    let query = client.from('tv_channels').select(ADMIN_CHANNEL_SELECT, { count: 'exact' })
     if (categoryId) query = query.eq('category_id', categoryId)
     if (provider) query = query.eq('provider', provider)
     if (status === 'active') query = query.eq('enabled', true)
     if (status === 'inactive') query = query.eq('enabled', false)
     if (featured !== '') query = query.eq('featured', featured === true || featured === 'true')
     if (verified !== '') query = query.eq('verified', verified === true || verified === 'true')
+    if (logo === 'missing') query = query.is('logo', null)
+    if (logo === 'present') query = query.not('logo', 'is', null)
     if (search?.trim()) {
       const term = search.trim().replaceAll(',', ' ')
       query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%,slug.ilike.%${term}%`)
@@ -260,7 +264,7 @@ export class TVRepository {
     if (!client) return adminUnavailable(null)
     const { data, error } = await client
       .from('tv_channels')
-      .select(CHANNEL_SELECT)
+      .select(ADMIN_CHANNEL_SELECT)
       .eq('id', id)
       .maybeSingle()
     return { data: data ? toCamelCase(data) : null, error, source: 'supabase' }
@@ -381,10 +385,15 @@ export class TVRepository {
       count('tv_channels', (query) => query.eq('enabled', false)),
       count('tv_channels', (query) => query.eq('featured', true)),
       count('tv_channels', (query) => query.eq('verified', true)),
-      client.from('tv_channels').select('logo, category_id, views'),
+      client.from('tv_channels').select('id, logo, category_id, views, enabled'),
+      client.from('tv_channel_health').select('channel_id, status, checked_at'),
     ])
     const error = responses.find((response) => response.error)?.error || null
     const channelDetails = responses[7].data || []
+    const healthRows = responses[8].data || []
+    const healthByChannel = new Map(healthRows.map((row) => [row.channel_id, row]))
+    const activeDetails = channelDetails.filter((channel) => channel.enabled)
+    const activeHealth = activeDetails.map((channel) => healthByChannel.get(channel.id)).filter(Boolean)
     const views = channelDetails.reduce((sum, channel) => sum + Number(channel.views || 0), 0)
     return {
       data: {
@@ -397,6 +406,10 @@ export class TVRepository {
         verifiedChannels: responses[6].count || 0,
         channelsWithoutLogo: channelDetails.filter((channel) => !channel.logo).length,
         channelsWithoutCategory: channelDetails.filter((channel) => !channel.category_id).length,
+        healthyChannels: activeHealth.filter((item) => item.status === 'healthy').length,
+        degradedChannels: activeHealth.filter((item) => item.status === 'degraded').length,
+        downChannels: activeHealth.filter((item) => item.status === 'down').length,
+        uncheckedChannels: activeDetails.length - activeHealth.length,
         totalViews: views,
       },
       error,
