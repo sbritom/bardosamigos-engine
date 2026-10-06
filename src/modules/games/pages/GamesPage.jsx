@@ -773,7 +773,7 @@ export default function GamesPage() {
               <div className="games-page__section-title">
                 <div>
                   <span><Newspaper size={15} /> Radar gamer</span>
-                  <h2>Últimas notícias</h2>
+                  <h2>{payload.news.length ? 'Últimas notícias' : 'Radar de lançamentos'}</h2>
                 </div>
               </div>
               <div className="games-page__list">
