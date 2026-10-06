@@ -1,6 +1,8 @@
 export const TV_PROVIDERS = Object.freeze([
   { value: 'embed-canais-tv', label: 'EmbedCanaisTV' },
   { value: 'youtube', label: 'YouTube' },
+  { value: 'youtube-official', label: 'YouTube oficial' },
+  { value: 'hls-official', label: 'HLS oficial' },
   { value: 'pluto-tv', label: 'Pluto TV' },
   { value: 'other', label: 'Outro' },
 ])
