@@ -840,7 +840,7 @@ export default function RadioPage() {
                 </span>
                 <span>
                   <Clock3 size={13} />
-                  {nextRadioSlot.timeLabel || "Horário a definir"}
+                  {nextRadioSlot.timeLabel || "Horário em atualização"}
                 </span>
               </div>
 
