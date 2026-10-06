@@ -57,8 +57,21 @@ const emptyFilters = {
   status: '',
   featured: '',
   verified: '',
+  logo: '',
   sortBy: 'display_order',
   ascending: true,
+}
+
+function getHealth(channel) {
+  return Array.isArray(channel?.health) ? channel.health[0] || null : channel?.health || null
+}
+
+function getHealthBadge(health) {
+  if (!health) return { status: 'PENDENTE', label: 'SEM TESTE' }
+  if (health.status === 'healthy') return { status: 'ATIVO', label: 'SAUDAVEL' }
+  if (health.status === 'degraded') return { status: 'PENDENTE', label: 'ALERTA' }
+  if (health.status === 'down') return { status: 'INATIVO', label: 'FORA DO AR' }
+  return { status: 'PENDENTE', label: 'SEM TESTE' }
 }
 
 export function TVChannelManager({ createRequested, notify }) {
@@ -299,6 +312,7 @@ export function TVChannelManager({ createRequested, notify }) {
         <Select id="tv-filter-status" label="Status" value={filters.status} options={[{ value: '', label: 'Todos' }, { value: 'active', label: 'Ativos' }, { value: 'inactive', label: 'Inativos' }]} onChange={(event) => { setPage(1); setFilters((current) => ({ ...current, status: event.target.value })) }} />
         <Select id="tv-filter-featured" label="Destaque" value={filters.featured} options={[{ value: '', label: 'Todos' }, { value: 'true', label: 'Em destaque' }, { value: 'false', label: 'Sem destaque' }]} onChange={(event) => { setPage(1); setFilters((current) => ({ ...current, featured: event.target.value })) }} />
         <Select id="tv-filter-verified" label="Verificacao" value={filters.verified} options={[{ value: '', label: 'Todos' }, { value: 'true', label: 'Verificados' }, { value: 'false', label: 'Nao verificados' }]} onChange={(event) => { setPage(1); setFilters((current) => ({ ...current, verified: event.target.value })) }} />
+        <Select id="tv-filter-logo" label="Logo" value={filters.logo} options={[{ value: '', label: 'Todos' }, { value: 'missing', label: 'Sem logo' }, { value: 'present', label: 'Com logo' }]} onChange={(event) => { setPage(1); setFilters((current) => ({ ...current, logo: event.target.value })) }} />
         <Select id="tv-filter-sort" label="Ordenar por" value={filters.sortBy} options={[{ value: 'display_order', label: 'Ordem' }, { value: 'name', label: 'Nome' }, { value: 'updated_at', label: 'Atualizacao' }, { value: 'views', label: 'Visualizacoes' }]} onChange={(event) => setFilters((current) => ({ ...current, sortBy: event.target.value }))} />
       </div>
 
@@ -331,7 +345,7 @@ export function TVChannelManager({ createRequested, notify }) {
               <thead>
                 <tr>
                   <th><Checkbox aria-label="Selecionar pagina" checked={allSelected} onChange={(event) => setSelected(event.target.checked ? channels.map((channel) => channel.id) : [])} /></th>
-                  <th>Canal</th><th>Categoria</th><th>Provedor</th><th>Status</th><th>Ordem</th><th>Atualizacao</th><th>Acoes</th>
+                  <th>Canal</th><th>Categoria</th><th>Provedor</th><th>Status</th><th>Saude</th><th>Ordem</th><th>Atualizacao</th><th>Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -347,6 +361,16 @@ export function TVChannelManager({ createRequested, notify }) {
                     <td data-label="Categoria">{channel.category?.name || 'Sem categoria'}</td>
                     <td data-label="Provedor">{TV_PROVIDERS.find((item) => item.value === channel.provider)?.label || channel.provider}</td>
                     <td data-label="Status"><div className="tv-admin-statuses"><StatusBadge status={channel.enabled ? 'ATIVO' : 'INATIVO'}>{channel.enabled ? 'ATIVO' : 'INATIVO'}</StatusBadge>{channel.featured && <Star size={15} aria-label="Destaque" />}{channel.verified && <CheckCircle2 size={15} aria-label="Verificado" />}</div></td>
+                    <td data-label="Saude">{(() => {
+                      const health = getHealth(channel)
+                      const badge = getHealthBadge(health)
+                      return (
+                        <div>
+                          <StatusBadge status={badge.status}>{badge.label}</StatusBadge>
+                          {health?.checkedAt ? <small className="mt-1 block text-xs text-[var(--text-secondary)]">{new Date(health.checkedAt).toLocaleString('pt-BR')}</small> : null}
+                        </div>
+                      )
+                    })()}</td>
                     <td data-label="Ordem">{channel.displayOrder}</td>
                     <td data-label="Atualizacao">{channel.updatedAt ? new Date(channel.updatedAt).toLocaleDateString('pt-BR') : '-'}</td>
                     <td data-label="Acoes"><div className="tv-admin-row-actions">
