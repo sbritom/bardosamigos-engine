@@ -337,6 +337,7 @@ function normalizeSchedule(row = {}) {
 }
 
 async function handlePublicContentGet(response, supabase) {
+  const rankingSince = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)).toISOString()
   const [programResult, scheduleResult, statusResult, requestResult] = await Promise.all([
     supabase
       .from(PROGRAMS_TABLE)
@@ -357,6 +358,7 @@ async function handlePublicContentGet(response, supabase) {
     supabase
       .from(TABLE)
       .select('song_and_artist,created_at')
+      .gte('created_at', rankingSince)
       .order('created_at', { ascending: false })
       .limit(500),
   ])
@@ -387,6 +389,7 @@ async function handlePublicContentGet(response, supabase) {
       programs: (programResult.data || []).map(normalizeProgram),
       schedule: (scheduleResult.data || []).map(normalizeSchedule),
       ranking,
+      rankingPeriodDays: 30,
       locutorStatus: {
         isLive: Boolean(statusResult.data?.is_live),
         locutorName: cleanText(statusResult.data?.locutor_name, 80),

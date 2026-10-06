@@ -181,9 +181,15 @@ export default function RadioPage() {
     const day = scheduleReferenceTime.getDay();
     return day === 0 ? 7 : day;
   }, [scheduleReferenceTime]);
+  const configuredSchedule = useMemo(
+    () => radioSchedule.filter((slot) => Boolean(
+      String(slot?.locutorName || "").trim() || String(slot?.timeLabel || "").trim(),
+    )),
+    [radioSchedule],
+  );
   const nextRadioSlot = useMemo(
-    () => getUpcomingRadioSlot(radioSchedule, scheduleReferenceTime),
-    [radioSchedule, scheduleReferenceTime],
+    () => getUpcomingRadioSlot(configuredSchedule, scheduleReferenceTime),
+    [configuredSchedule, scheduleReferenceTime],
   );
   const nextRadioProgram = useMemo(
     () => getProgramForSlot(radioPrograms, nextRadioSlot),
@@ -648,7 +654,7 @@ export default function RadioPage() {
         </div>
 
         <div className="imortal-radio-schedule__grid">
-          {radioSchedule.map((slot) => {
+          {configuredSchedule.length ? configuredSchedule.map((slot) => {
             const isToday = Number(slot.dayOfWeek) === todayScheduleDay;
             const isNext = Number(slot.dayOfWeek) === Number(nextRadioSlot?.dayOfWeek);
 
@@ -666,14 +672,19 @@ export default function RadioPage() {
                   <strong>{slot.dayLabel}</strong>
                   {isToday ? <em>HOJE</em> : !isToday && isNext ? <em>PRÓXIMO</em> : null}
                 </div>
-                <span>{slot.locutorName || "Locutor a definir"}</span>
+                <span>{slot.locutorName || "IMORTAL0800"}</span>
                 <small>
                   <Clock3 size={13} />
-                  {slot.timeLabel || "Horário a definir"}
+                  {slot.timeLabel || "Horário em atualização"}
                 </small>
               </article>
             );
-          })}
+          }) : (
+            <div className="imortal-radio-empty">
+              <strong>AutoDJ no ar 24h</strong>
+              <small>A grade com locutores será exibida aqui assim que os horários forem cadastrados.</small>
+            </div>
+          )}
         </div>
       </section>
 
@@ -684,7 +695,7 @@ export default function RadioPage() {
           </div>
           <span>MAIS PEDIDAS</span>
           <h2>Ranking musical</h2>
-          <p>As músicas mais pedidas pela comunidade no IMORTAL0800.</p>
+          <p>As músicas mais pedidas pela comunidade nos últimos 30 dias.</p>
 
           {radioRanking.length ? (
             <ol className="imortal-radio-ranking-list">
@@ -698,8 +709,8 @@ export default function RadioPage() {
             </ol>
           ) : (
             <div className="imortal-radio-empty">
-              <strong>Ranking começando</strong>
-              <small>Os pedidos enviados pela página alimentarão este Top 5 automaticamente.</small>
+              <strong>Sem pedidos recentes</strong>
+              <small>Os pedidos feitos nos últimos 30 dias alimentarão este Top 5 automaticamente.</small>
             </div>
           )}
         </article>
@@ -829,7 +840,7 @@ export default function RadioPage() {
                 </span>
                 <span>
                   <Clock3 size={13} />
-                  {nextRadioSlot.timeLabel || "Horário a definir"}
+                  {nextRadioSlot.timeLabel || "Horário em atualização"}
                 </span>
               </div>
 
